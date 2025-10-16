@@ -38,7 +38,6 @@ uvicorn app.main:app --reload
 
 ## Links
 - docs/: project docs
-- .cursor/rules/: internal AI rules (ignored in git)
 
 ## License
 MIT
