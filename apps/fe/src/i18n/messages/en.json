@@ -1,0 +1,18 @@
+{
+    "common": {
+      "app_name": "IBeanThere"
+    },
+    "home": {
+      "title": "IBeanThere ☕️",
+      "description": "Coffee journaling app."
+    },
+    "auth": {
+      "login": "Log In",
+      "signup": "Sign Up",
+      "logout": "Log Out"
+    },
+    "errors": {
+      "network": "Network error. Please try again.",
+      "unknown": "An error occurred. Please try again."
+    }
+  }
