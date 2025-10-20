@@ -6,6 +6,65 @@
       "title": "IBeanThere ☕️",
       "description": "Coffee journaling app."
     },
+    "navigation": {
+      "home": "Home",
+      "hot_beans": "Hot Beans",
+      "new_spot": "New Spot",
+      "my_coffee_logs": "My Coffee Logs",
+      "shop": "Shop",
+      "sign_in": "Sign In",
+      "sign_up": "Sign Up",
+      "profile": "Profile",
+      "get_started": "Get Started"
+    },
+    "landing": {
+      "hero": {
+        "title": "Your Coffee Journey Starts Here",
+        "subtitle": "Discover cafes, record experiences, share your story",
+        "cta_primary": "Start Your Journey",
+        "cta_secondary": "Explore Cafes"
+      },
+      "features": {
+        "title": "Everything You Need",
+        "subtitle": "Powerful tools to enhance your coffee journey",
+        "discover": {
+          "title": "Discover",
+          "description": "Find amazing cafes near you with detailed reviews and ratings"
+        },
+        "record": {
+          "title": "Record",
+          "description": "Capture moments with photos, notes, and ratings for your journal"
+        },
+        "share": {
+          "title": "Share",
+          "description": "Connect with coffee lovers and discover new favorites together"
+        }
+      },
+      "stats": {
+        "title": "Join Our Community",
+        "subtitle": "Thousands of coffee enthusiasts trust us",
+        "users": "Active Users",
+        "cafes": "Cafes Listed",
+        "reviews": "Reviews",
+        "photos": "Photos Shared"
+      },
+      "testimonials": {
+        "title": "Join Thousands of Coffee Enthusiasts",
+        "subtitle": "See what our community is saying about their coffee journey"
+      },
+      "cta": {
+        "title": "Ready to Start Your Coffee Journey?",
+        "subtitle": "Join thousands of coffee lovers and begin documenting your unique coffee experiences today",
+        "button_primary": "Get Started Free",
+        "button_secondary": "Learn More",
+        "disclaimer": "No credit card required • Start exploring immediately"
+      }
+    },
+    "footer": {
+      "privacy_policy": "Privacy Policy",
+      "terms_of_service": "Terms of Service",
+      "contact_us": "Contact Us"
+    },
     "auth": {
       "login": "Log In",
       "signup": "Sign Up",

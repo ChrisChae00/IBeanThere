@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global CSS Variables for Theme System */
 /* CSS variables are set dynamically by ThemeContext */
 

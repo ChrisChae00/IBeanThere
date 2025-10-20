@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { Header } from '@/components/layout';
 import '@/styles/globals.css';
 
 export default async function LocaleLayout({ 
@@ -21,8 +22,11 @@ export default async function LocaleLayout({
       <body>
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-          </NextIntlClientProvider>
+            <Header locale={locale} />
+            <main className="pt-16">
+              {children}
+            </main>
+          </NextIntlClientProvider> 
         </ThemeProvider>
       </body>
     </html>

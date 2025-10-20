@@ -6,6 +6,65 @@
       "title": "IBeanThere ☕️",
       "description": "커피 기록 앱"
     },
+    "navigation": {
+      "home": "홈",
+      "hot_beans": "트렌딩 카페",
+      "new_spot": "새로운 스팟",
+      "my_coffee_logs": "내 커피 일기",
+      "shop": "공식몰",
+      "sign_in": "로그인",
+      "sign_up": "회원가입",
+      "profile": "프로필",
+      "get_started": "시작하기"
+    },
+    "landing": {
+      "hero": {
+        "title": "당신의 커피 여행이 여기서 시작됩니다",
+        "subtitle": "카페를 발견하고, 경험을 기록하며, 이야기를 나누세요",
+        "cta_primary": "여행 시작하기",
+        "cta_secondary": "카페 둘러보기"
+      },
+      "features": {
+        "title": "필요한 모든 것",
+        "subtitle": "커피 여행을 더욱 풍성하게 만드는 강력한 도구들",
+        "discover": {
+          "title": "발견하기",
+          "description": "상세한 리뷰와 평점으로 근처의 멋진 카페를 찾아보세요"
+        },
+        "record": {
+          "title": "기록하기",
+          "description": "사진, 메모, 평점으로 순간을 기록하여 나만의 일기를 만들어보세요"
+        },
+        "share": {
+          "title": "공유하기",
+          "description": "커피 애호가들과 연결되어 함께 새로운 즐겨찾기를 발견하세요"
+        }
+      },
+      "stats": {
+        "title": "우리 커뮤니티에 참여하세요",
+        "subtitle": "수천 명의 커피 애호가들이 신뢰하는 서비스",
+        "users": "활성 사용자",
+        "cafes": "등록된 카페",
+        "reviews": "리뷰",
+        "photos": "공유된 사진"
+      },
+      "testimonials": {
+        "title": "수천 명의 커피 애호가들과 함께하세요",
+        "subtitle": "커뮤니티가 말하는 커피 여행 이야기를 들어보세요"
+      },
+      "cta": {
+        "title": "커피 여행을 시작할 준비가 되셨나요?",
+        "subtitle": "수천 명의 커피 애호가들과 함께 나만의 특별한 커피 경험을 기록해보세요",
+        "button_primary": "무료로 시작하기",
+        "button_secondary": "더 알아보기",
+        "disclaimer": "신용카드 불필요 • 즉시 탐색 시작"
+      }
+    },
+    "footer": {
+      "privacy_policy": "개인정보처리방침",
+      "terms_of_service": "이용약관",
+      "contact_us": "문의하기"
+    },
     "auth": {
       "login": "로그인",
       "signup": "회원가입",
