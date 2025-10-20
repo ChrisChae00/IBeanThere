@@ -195,7 +195,7 @@ async def update_my_profile(
         if user_role not in ["user", "admin"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Permission 'user:update' required for this action"
+                detail="Specific permission is required for this action"
             )
         
         update_data = {}
@@ -208,7 +208,7 @@ async def update_my_profile(
         if profile.bio is not None:
             update_data["bio"] = profile.bio
         
-        # Add updated_at timestamp
+        # Add updated_at timestamp 
         update_data["updated_at"] = "now()"
         
         updated_profile = await supabase.table("users").update(update_data).eq("id", current_user.id).execute()
