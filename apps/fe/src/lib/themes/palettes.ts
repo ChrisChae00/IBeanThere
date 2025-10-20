@@ -6,6 +6,7 @@ export const themes: Record<string, ThemePalette> = {
         displayName: 'Morning Coffee',
         colors: {
           primary: '#6a533b', // Medium brown for main elements
+          primaryText: '#f5f0e8', // Light cream text on primary background
           secondary: '#93795d', // Light brown/taupe for secondary elements
           accent: '#c2ac93', // Medium beige for accents
           background: '#e9d6c0', // Light beige for background
@@ -23,6 +24,7 @@ export const themes: Record<string, ThemePalette> = {
         displayName: 'Night Espresso',
         colors: {
           primary: '#d4c7b8', // Light cream for better contrast on dark surface
+          primaryText: '#1A120B', // Dark background color for text on light primary
           secondary: '#5e432d', // Dark brown
           accent: '#8b7355', // Medium brown accent
           background: '#1A120B', // Very dark brown from image
@@ -40,6 +42,7 @@ export const themes: Record<string, ThemePalette> = {
         displayName: 'Matcha Latte',
         colors: {
           primary: '#5d7025', // Medium olive green 85a035
+          primaryText: '#f0f2e8', // Light cream text on primary background
           secondary: '#85a035', // Dark olive green
           accent: '#a9bc71', // Light olive green
           background: '#f0f2e8', // Very light desaturated green
@@ -57,6 +60,7 @@ export const themes: Record<string, ThemePalette> = {
     displayName: 'Vanilla Latte',
     colors: {
       primary: '#362C1D', // Dark brown like vanilla pods
+      primaryText: '#FFF9F0', // Light vanilla cream text on primary background
       secondary: '#8B7355', // Medium brown
       accent: '#F5E6A3', // Soft yellow like vanilla flower
       background: '#FFF8DC', // Very light cream background

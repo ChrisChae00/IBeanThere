@@ -3,6 +3,7 @@ export interface ThemePalette {
   displayName: string;
   colors: {
     primary: string;
+    primaryText: string;
     secondary: string;
     accent: string;
     background: string;

@@ -1,6 +1,5 @@
 'use client';
 import { useTheme } from '@/contexts/ThemeContext';
-import { ThemeSelector } from '@/components/theme/ThemeSelector';
 
 export default function ThemeDemoPage() {
   const { currentTheme } = useTheme();
@@ -21,8 +20,6 @@ export default function ThemeDemoPage() {
 
   return (
     <div className="theme-demo-container">
-      <ThemeSelector />
-      
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', marginBottom: '1rem' }}>
           Theme Demo - {currentTheme.displayName}

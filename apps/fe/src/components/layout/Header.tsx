@@ -11,7 +11,7 @@ export default async function Header({
   const t = await getTranslations({ locale, namespace: 'navigation' });
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-sm border-b border-[var(--color-border)]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -62,7 +62,7 @@ export default async function Header({
             >
               {t('sign_in')}
             </Link>
-            <button className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px]">
+            <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-2 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px]">
               {t('get_started')}
             </button>
           </div>
