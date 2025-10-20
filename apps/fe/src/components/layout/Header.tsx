@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import MobileMenu from './MobileMenu';
+import ThemeSwitcher from './ThemeSwitcher';
 
 export default async function Header({
   locale
@@ -54,6 +55,7 @@ export default async function Header({
 
           {/* Desktop Navigation - Right Side */}
           <div className="hidden lg:flex items-center space-x-4 ml-auto">
+            <ThemeSwitcher />
             <Link 
               href={`/${locale}/signin`}
               className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] font-medium transition-colors"
