@@ -55,9 +55,8 @@
       "cta": {
         "title": "커피 여행을 시작할 준비가 되셨나요?",
         "subtitle": "수천 명의 커피 애호가들과 함께 나만의 특별한 커피 경험을 기록해보세요",
-        "button_primary": "무료로 시작하기",
-        "button_secondary": "더 알아보기",
-        "disclaimer": "신용카드 불필요 • 즉시 탐색 시작"
+        "button_primary": "시작하기",
+        "disclaimer": "\"한잔의 커피를 만드는 60개의 원두는 나에게 60가지의 좋은 아이디어를 준다.\" - 베토벤"
       }
     },
     "footer": {

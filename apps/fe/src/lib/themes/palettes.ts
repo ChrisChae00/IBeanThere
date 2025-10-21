@@ -12,12 +12,13 @@ export const themes: Record<string, ThemePalette> = {
           background: '#e9d6c0', // Light beige for background
           surface: '#f5f0e8', // Very light warm cream for surfaces f5f0e8
           text: '#442f19', // Dark brown for main text
-          textSecondary: '#6a533b', // Medium brown for secondary text
+          textSecondary: '#93795d', // Light brown for secondary text (hover state, lighter)
           border: '#c2ac93', // Medium beige for borders
           success: '#4CAF50', // Standard green
           warning: '#FFC107', // Standard amber
           error: '#F44336', // Standard red
-        },
+          textHero: '#f5f0e8', // Light beige for hero text
+        },   
       },
     espresso: {
         name: 'espresso',
@@ -35,24 +36,26 @@ export const themes: Record<string, ThemePalette> = {
           success: '#66BB6A', // Lighter green for dark mode
           warning: '#FFA726', // Lighter orange for dark mode
           error: '#EF5350', // Lighter red for dark mode
+          textHero: '#e9ded2', // Light beige for hero text
         },
       },
       matchaLatte: {
         name: 'matchaLatte',
         displayName: 'Matcha Latte',
         colors: {
-          primary: '#5d7025', // Medium olive green 85a035
+          primary: '#85a035', // Medium olive green 85a035
           primaryText: '#f0f2e8', // Light cream text on primary background
-          secondary: '#85a035', // Dark olive green
-          accent: '#a9bc71', // Light olive green
-          background: '#f0f2e8', // Very light desaturated green
-          surface: '#e0e8d0', // Light green surface
+          secondary: '#5d7025', // Dark olive green
+          accent: '#a9bc71', // Light olive green 5d7025
+          background: '#e0e8d0', // Very light desaturated green
+          surface: '#f0f2e8', // Light green surface e0e8d0
           text: '#4a5c2a', // Dark olive for text
           textSecondary: '#85a035', // Medium olive
           border: '#a9bc71', // Light olive border
           success: '#4CAF50', // Standard green
           warning: '#FFC107', // Standard amber
           error: '#F44336', // Standard red
+          textHero: '#f0f2e8', // Light beige for hero text // Medium olive green for cta text
         },
       },
   vanillaLatte: {
@@ -64,13 +67,14 @@ export const themes: Record<string, ThemePalette> = {
       secondary: '#8B7355', // Medium brown
       accent: '#F5E6A3', // Soft yellow like vanilla flower
       background: '#FFF8DC', // Very light cream background
-      surface: '#FFF9F0', // Even whiter vanilla cream surface
+      surface: 'rgba(255, 249, 240, 0.7)', // Even whiter vanilla cream surface
       text: '#362C1D', // Dark brown text for readability
       textSecondary: '#8B7355', // Medium brown secondary text
       border: '#F5E6A3', // Soft yellow border like vanilla flower
       success: '#4CAF50', // Standard green
       warning: '#FFC107', // Standard amber
       error: '#F44336', // Standard red
+      textHero: '#FFF9F0', // Very light cream for hero text
     },
   },
 };

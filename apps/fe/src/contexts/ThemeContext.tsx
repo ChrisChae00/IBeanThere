@@ -12,15 +12,15 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentThemeName, setCurrentThemeName] = useState<string>('morningCoffee');
-  
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentThemeName(savedTheme);
+  const [currentThemeName, setCurrentThemeName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme && themes[savedTheme]) {
+        return savedTheme;
+      }
     }
-  }, []);
+    return 'morningCoffee';
+  });
 
   // Update CSS variables when theme changes
   useEffect(() => {

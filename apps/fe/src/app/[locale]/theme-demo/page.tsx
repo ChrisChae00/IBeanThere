@@ -61,7 +61,7 @@ export default function ThemeDemoPage() {
         <div className="card">
           <h3>Sample Card</h3>
           <p>This is a sample card component showing how text and backgrounds work together in this theme.</p>
-          <p style={{ color: 'var(--color-text-secondary)' }}>
+          <p style={{ color: 'var(--color-textSecondary)' }}>
             Secondary text color for less important information.
           </p>
         </div>
@@ -96,7 +96,7 @@ export default function ThemeDemoPage() {
         <p style={{ color: 'var(--color-text)', margin: '1rem 0' }}>
           This is a paragraph with regular text color. It should be easy to read against the background.
         </p>
-        <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>
+        <p style={{ color: 'var(--color-textSecondary)', margin: '1rem 0' }}>
           This is secondary text color, used for less important information or captions.
         </p>
       </div>

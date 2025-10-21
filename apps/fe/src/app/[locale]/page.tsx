@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { Hero, Features, Stats, Testimonials, CTA } from '@/components/landing';
 
 export default async function HomePage({
   params
@@ -6,12 +6,14 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'home' });
   
   return (
-    <main style={{ padding: 24 }}>
-      <h1>{t('title')}</h1>
-      <p>{t('description')}</p>
+    <main>
+      <Hero locale={locale} />
+      <Features locale={locale} />
+      <Stats locale={locale} />
+      <Testimonials locale={locale} />
+      <CTA locale={locale} />
     </main>
   );
 }

@@ -14,5 +14,6 @@ export interface ThemePalette {
     success: string;
     warning: string;
     error: string;
+    textHero: string;
   };
 }
