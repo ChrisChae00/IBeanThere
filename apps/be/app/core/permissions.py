@@ -27,6 +27,7 @@ class Permission(str, Enum):
     # User permissions
     READ_USER = "user:read"
     READ_MY_USER = "user:read_my"
+    CREATE_USER_PROFILE = "user:create_profile"
     UPDATE_USER = "user:update"
     DELETE_USER = "user:delete"
     REQUEST_ACCOUNT_DELETION = "user:request_deletion"
@@ -44,6 +45,7 @@ ROLE_PERMISSIONS = {
         Permission.DELETE_REVIEW,
         Permission.READ_USER,
         Permission.READ_MY_USER,
+        Permission.CREATE_USER_PROFILE,
         Permission.UPDATE_USER,
         Permission.DELETE_USER,
         Permission.REQUEST_ACCOUNT_DELETION,
@@ -51,6 +53,7 @@ ROLE_PERMISSIONS = {
     UserRole.CAFE_OWNER: [
         Permission.READ_USER,
         Permission.READ_MY_USER,
+        Permission.CREATE_USER_PROFILE,
         Permission.REQUEST_ACCOUNT_DELETION,
         Permission.CREATE_CAFE,
         Permission.READ_CAFE,
@@ -62,27 +65,30 @@ ROLE_PERMISSIONS = {
     UserRole.USER: [
         Permission.READ_USER,
         Permission.READ_MY_USER,
+        Permission.CREATE_USER_PROFILE,
         Permission.UPDATE_USER,
         Permission.REQUEST_ACCOUNT_DELETION,
         Permission.CREATE_REVIEW,
         Permission.READ_REVIEW,
         Permission.UPDATE_REVIEW,
         Permission.DELETE_REVIEW,
-
     ],
     UserRole.GUEST: [
         Permission.READ_USER,
         Permission.READ_CAFE,
         Permission.READ_REVIEW,
+        Permission.CREATE_USER_PROFILE,
     ], 
 }
 
 def require_permission(required_permission: Permission):
     """Decorator to check if the user has the required permission."""
     async def permission_checker(current_user = Depends(get_current_user)):
-        # Check if the user is authenticated (currently set as USER)
-        user_role = getattr(current_user, "role", UserRole.USER)
-
+        user_role = getattr(current_user, "role", None)
+        
+        if user_role is None:
+            user_role = UserRole.USER
+        
         # Check if the user has the required permission
         user_permissions = ROLE_PERMISSIONS.get(user_role, [])
         if required_permission not in user_permissions:

@@ -46,6 +46,7 @@ class UserResponse(BaseModel):
 
 class UserPublicResponse(BaseModel):
     """Public user profile - minimal information only."""   
+    username: str  # Unique identifier for public access
     display_name: str  # if not set, username will be used
     avatar_url: Optional[str] = None
     bio: Optional[str] = None

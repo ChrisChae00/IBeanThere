@@ -7,21 +7,52 @@ from app.core.permissions import require_permission, Permission
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.get("/profile/{display_name}", response_model=UserPublicResponse)
-async def get_user_profile(display_name: str, supabase: Client = Depends(get_supabase_client)
-):
+@router.get("/profile/{display_name}", response_model=List[UserPublicResponse])
+async def get_user_profiles(display_name: str, supabase: Client = Depends(get_supabase_client)):
     """
-    Public endpoint to get user profile by display name. (No authentication required)
+    Public endpoint to get user profiles by display name. (No authentication required)
+    - Returns list of users with same display_name (allows duplicates)
+    - Use username for unique identification when needed
 
     Args:
-        display_name: The display name of the user to get the profile of.
+        display_name: The display name of the users to get profiles of.
+        supabase: The Supabase client.
+
+    Returns:
+        List[UserPublicResponse]: List of user profiles with the same display name.
+    """
+    try:
+        users = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("display_name", display_name).execute()
+        if not users or not users.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No users found with this display name"
+            )
+        return [UserPublicResponse(**user) for user in users.data]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while fetching user profiles"
+        ) from e
+
+@router.get("/profile-by-username/{username}", response_model=UserPublicResponse)
+async def get_user_profile_by_username(username: str, supabase: Client = Depends(get_supabase_client)):
+    """
+    Public endpoint to get user profile by username. (No authentication required)
+    - Username is unique, so returns single user
+    - Use this for unique identification
+
+    Args:
+        username: The username of the user to get the profile of.
         supabase: The Supabase client.
 
     Returns:
         UserPublicResponse: The user profile.
     """
     try:
-        user = await supabase.table("users").select("""display_name, avatar_url, bio, created_at""").eq("display_name", display_name).single().execute()
+        user = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("username", username).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -34,6 +65,60 @@ async def get_user_profile(display_name: str, supabase: Client = Depends(get_sup
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while fetching user profile"
+        ) from e
+
+@router.get("/check-username/{username}")
+async def check_username_availability(
+    username: str,
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Check if username is available during registration
+    
+    Args:
+        username: The username to check for availability
+        supabase: The Supabase client
+        
+    Returns:
+        dict: Availability status and username
+    """
+    try:
+        existing_user = await supabase.table("users").select("username").eq("username", username).execute()
+        return {
+            "available": len(existing_user.data) == 0,
+            "username": username
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to check username availability"
+        ) from e
+
+@router.get("/check-display-name/{display_name}")
+async def check_display_name_availability(
+    display_name: str,
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Check if display_name is available during registration
+    
+    Args:
+        display_name: The display name to check for availability
+        supabase: The Supabase client
+        
+    Returns:
+        dict: Availability status and display_name
+    """
+    try:
+        existing_user = await supabase.table("users").select("display_name").eq("display_name", display_name).execute()
+        return {
+            "available": len(existing_user.data) == 0,
+            "display_name": display_name
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to check display name availability"
         ) from e
 
 @router.get("/search", response_model=List[UserPublicResponse])
@@ -54,7 +139,7 @@ async def search_users(
         List[UserPublicResponse]: The list of users.
     """
     try:
-        users = await supabase.table("users").select("""display_name, avatar_url, bio, created_at""").ilike("display_name", f"%{query}%").limit(limit).execute()
+        users = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").ilike("display_name", f"%{query}%").limit(limit).execute()
         if not users or not users.data:
             return []
         return [UserPublicResponse(**user) for user in users.data]
@@ -115,7 +200,7 @@ async def get_my_profile(
 @router.post("/register", response_model=UserRegistrationResponse)
 async def register_user_profile(
     profile: UserProfileCreate,
-    current_user = Depends(get_current_user),
+    current_user = Depends(require_permission(Permission.CREATE_USER_PROFILE)),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
@@ -140,6 +225,14 @@ async def register_user_profile(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User profile already exists"
+            )
+        
+        # Check username uniqueness
+        existing_username = await supabase.table("users").select("id").eq("username", profile.username).execute()
+        if existing_username.data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
             )
         
         # Use username as default if display_name is not provided
@@ -173,7 +266,7 @@ async def register_user_profile(
 @router.patch("/me", response_model=UserResponse)
 async def update_my_profile(
     profile: UserUpdate,
-    current_user = Depends(get_current_user),
+    current_user = Depends(require_permission(Permission.UPDATE_USER)),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
@@ -190,13 +283,15 @@ async def update_my_profile(
         UserResponse: Updated profile information
     """
     try:
-        # Permission validation
-        user_role = getattr(current_user, "role", "user")
-        if user_role not in ["user", "admin"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Specific permission is required for this action"
-            )
+        
+        # Check username uniqueness if username is being updated
+        if profile.username is not None:
+            existing_username = await supabase.table("users").select("id").eq("username", profile.username).execute()
+            if existing_username.data and existing_username.data[0]["id"] != current_user.id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already taken"
+                )
         
         update_data = {}
         if profile.username is not None:

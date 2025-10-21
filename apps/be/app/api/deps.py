@@ -25,13 +25,24 @@ async def get_current_user(
         if not user or not user.user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials"
+                detail="Invalid or expired token"
             )
+        
+        # Check if user email is verified (optional check - can be disabled for testing)
+        # Uncomment the following lines if email verification is required
+        # if not user.user.email_confirmed_at:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_401_UNAUTHORIZED,
+        #         detail="Email not verified"
+        #     )
+            
         return user.user
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
+            detail="Authentication failed"
         )
 
 async def verify_review_owner(
