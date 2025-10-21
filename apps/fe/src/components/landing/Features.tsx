@@ -53,13 +53,13 @@ export default async function Features({ locale }: FeaturesProps) {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-[var(--color-surface)] rounded-2xl p-8 border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors"
+              className="bg-[var(--color-cardBackground)] rounded-2xl p-8 border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors"
             >
-              <div className="text-[var(--color-primary)] mb-6">{feature.icon}</div>
-              <h3 className="text-2xl font-bold text-[var(--color-text)] mb-3">
+              <div className="text-[var(--color-cardText)] mb-6">{feature.icon}</div>
+              <h3 className="text-2xl font-bold text-[var(--color-cardText)] mb-3">
                 {feature.title}
               </h3>
-              <p className="text-[var(--color-textSecondary)] leading-relaxed">
+              <p className="text-[var(--color-cardText)] leading-relaxed">
                 {feature.description}
               </p>
             </div>

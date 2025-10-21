@@ -15,5 +15,8 @@ export interface ThemePalette {
     warning: string;
     error: string;
     textHero: string;
+    cardBackground: string;
+    cardText: string;
+    cardTextSecondary: string;
   };
 }

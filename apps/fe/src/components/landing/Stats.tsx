@@ -47,13 +47,13 @@ export default async function Stats({ locale }: StatsProps) {
   ];
 
   return (
-    <section className="py-20 bg-[var(--color-surface)]">
+    <section className="py-20 bg-[var(--color-secondary)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-[var(--color-text)] mb-4">
+          <h2 className="text-4xl font-bold text-[var(--color-textHero)] mb-4">
             {t('title')}
           </h2>
-          <p className="text-lg text-[var(--color-textSecondary)]">
+          <p className="text-lg text-[var(--color-textHero)] opacity-90">
             {t('subtitle')}
           </p>
         </div>
@@ -64,11 +64,11 @@ export default async function Stats({ locale }: StatsProps) {
               key={index}
               className="text-center p-6 bg-[var(--color-background)] rounded-xl border border-[var(--color-border)]"
             >
-              <div className="flex justify-center text-[var(--color-primary)] mb-3">{stat.icon}</div>
+              <div className="flex justify-center text-[var(--color-text)] mb-3">{stat.icon}</div>
               <div className="text-3xl font-bold text-[var(--color-text)] mb-2">
                 {stat.value}
               </div>
-              <div className="text-sm text-[var(--color-textSecondary)]">
+              <div className="text-sm text-[var(--color-text)] opacity-80">
                 {stat.label}
               </div>
             </div>

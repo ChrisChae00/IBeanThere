@@ -1,5 +1,6 @@
 'use client';
 import { useTheme } from '@/contexts/ThemeContext';
+import { themes } from '@/lib/themes/palettes';
 
 export default function ThemeDemoPage() {
   const { currentTheme } = useTheme();
@@ -10,9 +11,16 @@ export default function ThemeDemoPage() {
     { name: 'Accent', color: currentTheme.colors.accent },
     { name: 'Background', color: currentTheme.colors.background },
     { name: 'Surface', color: currentTheme.colors.surface },
+    { name: 'Border', color: currentTheme.colors.border },
+    { name: 'Card Background', color: currentTheme.colors.cardBackground },
+
     { name: 'Text', color: currentTheme.colors.text },
     { name: 'Text Secondary', color: currentTheme.colors.textSecondary },
-    { name: 'Border', color: currentTheme.colors.border },
+    { name: 'Primary Text', color: currentTheme.colors.primaryText },
+    { name: 'Text Hero', color: currentTheme.colors.textHero },
+    { name: 'Card Text', color: currentTheme.colors.cardText },
+    { name: 'Card Text Secondary', color: currentTheme.colors.cardTextSecondary },
+    
     { name: 'Success', color: currentTheme.colors.success },
     { name: 'Warning', color: currentTheme.colors.warning },
     { name: 'Error', color: currentTheme.colors.error },
@@ -34,8 +42,10 @@ export default function ThemeDemoPage() {
       <div className="demo-section">
         <h2>Color Palette</h2>
         <p>Current theme color scheme:</p>
+        
+        {/* Row 1: Primary Colors */}
         <div className="color-palette">
-          {colorSwatches.map((swatch) => (
+          {colorSwatches.slice(0, 3).map((swatch) => (
             <div key={swatch.name} className="color-swatch">
               <div 
                 className="color-box"
@@ -43,6 +53,89 @@ export default function ThemeDemoPage() {
               />
               <div className="color-name">{swatch.name}</div>
               <div className="color-code">{swatch.color}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Row 2: Background Colors */}
+        <div className="color-palette">
+          {colorSwatches.slice(3, 7).map((swatch) => (
+            <div key={swatch.name} className="color-swatch">
+              <div 
+                className="color-box"
+                style={{ backgroundColor: swatch.color }}
+              />
+              <div className="color-name">{swatch.name}</div>
+              <div className="color-code">{swatch.color}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Row 3: Text Colors */}
+        <div className="color-palette">
+          {colorSwatches.slice(7, 13).map((swatch) => (
+            <div key={swatch.name} className="color-swatch">
+              <div 
+                className="color-box"
+                style={{ backgroundColor: swatch.color }}
+              />
+              <div className="color-name">{swatch.name}</div>
+              <div className="color-code">{swatch.color}</div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+
+      {/* All Available Palettes Section */}
+      <div className="demo-section">
+        <h2>All Available Palettes</h2>
+        <p>Browse all available coffee-themed color palettes:</p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
+          {Object.values(themes).map((theme) => (
+            <div key={theme.name} className="palette-card">
+              <h3 style={{ color: 'var(--color-text)', marginBottom: '1rem' }}>
+                {theme.displayName}
+              </h3>
+              <div className="palette-preview">
+                <div className="palette-colors">
+                  <div 
+                    className="palette-color-large"
+                    style={{ backgroundColor: theme.colors.primary }}
+                    title={`Primary: ${theme.colors.primary}`}
+                  />
+                  <div className="palette-color-row">
+                    <div 
+                      className="palette-color-small"
+                      style={{ backgroundColor: theme.colors.secondary }}
+                      title={`Secondary: ${theme.colors.secondary}`}
+                    />
+                    <div 
+                      className="palette-color-small"
+                      style={{ backgroundColor: theme.colors.accent }}
+                      title={`Accent: ${theme.colors.accent}`}
+                    />
+                    <div 
+                      className="palette-color-small"
+                      style={{ backgroundColor: theme.colors.background }}
+                      title={`Background: ${theme.colors.background}`}
+                    />
+                    <div 
+                      className="palette-color-small"
+                      style={{ backgroundColor: theme.colors.surface }}
+                      title={`Surface: ${theme.colors.surface}`}
+                    />
+                  </div>
+                </div>
+                <div className="palette-info">
+                  <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
+                    <div><strong>Primary:</strong> {theme.colors.primary}</div>
+                    <div><strong>Background:</strong> {theme.colors.background}</div>
+                    <div><strong>Text:</strong> {theme.colors.text}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
