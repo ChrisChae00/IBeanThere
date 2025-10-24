@@ -18,5 +18,6 @@ export interface ThemePalette {
     cardBackground: string;
     cardText: string;
     cardTextSecondary: string;
+    authText: string;
   };
 }

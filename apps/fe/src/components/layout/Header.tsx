@@ -66,14 +66,17 @@ export default function Header({
             <LanguageSwitcher />
             <Link 
               href={`/${locale}/signin`}
-              className=" border-2 border-[var(--color-text)] text-[var(--color-text)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-textHero)] font-medium transition-colors"
+              className="border-2 border-[var(--color-text)] text-[var(--color-text)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-textHero)] font-medium transition-colors min-h-[44px] flex items-center"
             >
               {t('sign_in')}
             </Link>
             <div className="h-6 w-px bg-[var(--color-border)]" />
-            <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:text-[var(--color-textHero)] transition-colors font-medium min-h-[44px]">
+            <Link 
+              href={`/${locale}/register`}
+              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:text-[var(--color-textHero)] transition-colors font-medium min-h-[44px] flex items-center"
+            >
               {t('get_started')}
-            </button>
+            </Link>
           </div>
         </div>
       </div>

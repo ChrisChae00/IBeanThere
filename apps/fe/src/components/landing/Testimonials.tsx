@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { Avatar } from '@/components/ui';
 
 type TestimonialsProps = {
   locale: string;
@@ -12,31 +13,16 @@ export default async function Testimonials({ locale }: TestimonialsProps) {
       name: 'Sarah Kim',
       role: 'Coffee Enthusiast',
       content: 'IBeanThere has completely transformed how I explore and remember cafes. The journaling feature helps me keep track of every coffee experience!',
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
     },
     {
       name: 'Michael Park',
       role: 'Barista',
       content: 'As a barista, I love discovering new cafes and documenting different brewing methods. This app makes it so easy to share my findings with others.',
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
     },
     {
       name: 'Emma Lee',
       role: 'Travel Blogger',
       content: 'Perfect for my coffee adventures around the world. The photo features and notes help me create amazing content for my blog.',
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
     },
   ];
 
@@ -60,8 +46,8 @@ export default async function Testimonials({ locale }: TestimonialsProps) {
                 className="bg-[var(--color-surface)] rounded-2xl p-8 border border-[var(--color-border)] w-96 flex-shrink-0"
               >
                 <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-primaryText)] mr-4">
-                    {testimonial.icon}
+                  <div className="w-14 h-14 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-primaryText)] mr-4">
+                    <Avatar size="lg" className="text-[var(--color-primaryText)]" />
                   </div>
                   <div>
                     <h4 className="font-bold text-[var(--color-text)]">

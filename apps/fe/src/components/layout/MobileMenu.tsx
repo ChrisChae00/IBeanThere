@@ -130,7 +130,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
           {/* CTA Button */}
           <div className="p-4 border-t border-[var(--color-border)]">
             <Link 
-              href={`/${locale}/signup`}
+              href={`/${locale}/register`}
               onClick={closeMenu}
               className="block w-full bg-[var(--color-primary)] text-white px-6 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center"
             >

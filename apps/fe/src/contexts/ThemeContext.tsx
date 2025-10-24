@@ -12,18 +12,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentThemeName, setCurrentThemeName] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme && themes[savedTheme]) {
-        return savedTheme;
-      }
+  const [currentThemeName, setCurrentThemeName] = useState<string>('morningCoffee');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Handle hydration
+  useEffect(() => {
+    setIsHydrated(true);
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme && themes[savedTheme]) {
+      setCurrentThemeName(savedTheme);
     }
-    return 'morningCoffee';
-  });
+  }, []);
 
   // Update CSS variables when theme changes
   useEffect(() => {
+    if (!isHydrated) return;
+    
     const root = document.documentElement;
     const theme = themes[currentThemeName];
     
@@ -34,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     // Save to localStorage
     localStorage.setItem('theme', currentThemeName);
-  }, [currentThemeName]);
+  }, [currentThemeName, isHydrated]);
 
   const setTheme = (themeName: string) => {
     if (themes[themeName]) {

@@ -11,8 +11,8 @@ export default async function Footer({ locale }: { locale: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Logo */}
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Logo size="lg" className="text-[var(--color-primaryText)]" />
+          <div className="flex items-center justify-center space-x-1 mb-4">
+            <Logo size="md" className="text-[var(--color-primaryText)]" />
             <span className="text-2xl font-bold text-[var(--color-primaryText)]">
               {commonT('app_name')}
             </span>

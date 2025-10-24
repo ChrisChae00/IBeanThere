@@ -21,6 +21,7 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#f5f0e8', // Light beige for hero text
           cardText: '#442f19', // Dark brown for card text
           cardTextSecondary: '#93795d', // Light brown for secondary text (hover state, lighter)
+          authText: '#442f19', // Dark brown text (same as text) for auth pages on secondary background
         },   
       },
     espresso: {
@@ -43,6 +44,7 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#e9ded2', // Light beige for hero text
           cardText: '#1A120B', // Dark background color for text on light primary
           cardTextSecondary: '#5e432d', // Dark brown secondary text
+          authText: '#e9ded2', // Light cream text (same as text) for auth pages on secondary background
         },
       },
       matchaLatte: {
@@ -65,6 +67,7 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#f0f2e8', // Light beige for hero text // Medium olive green for cta text
           cardText: '#4a5c2a', // Dark olive for card text
           cardTextSecondary: '#85a035', // Medium olive secondary text
+          authText: '#e0e8d0', // Very light desaturated green (same as background) for auth pages on secondary background
         },
       },
   vanillaLatte: {
@@ -87,6 +90,7 @@ export const themes: Record<string, ThemePalette> = {
       textHero: '#FFF9F0', // Very light cream for hero text  
       cardText: '#362C1D', // Dark brown for card text
       cardTextSecondary: '#8B7355', // Medium brown secondary text
+      authText: '#362C1D', // Dark brown text (same as text) for auth pages on secondary background
     },
   },
 };
