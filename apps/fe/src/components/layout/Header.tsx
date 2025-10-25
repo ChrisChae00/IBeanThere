@@ -6,6 +6,8 @@ import Logo from '@/components/ui/Logo';
 import MobileMenu from './MobileMenu';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
+import ProfileDropdown from './ProfileDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header({
   locale
@@ -13,6 +15,7 @@ export default function Header({
   locale: string;
 }) {
   const t = useTranslations('navigation');
+  const { user, isLoading } = useAuth();
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
@@ -64,19 +67,29 @@ export default function Header({
           <div className="hidden lg:flex items-center space-x-2 ml-auto">
             <ThemeSwitcher />
             <LanguageSwitcher />
-            <Link 
-              href={`/${locale}/signin`}
-              className="border-2 border-[var(--color-text)] text-[var(--color-text)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-textHero)] font-medium transition-colors min-h-[44px] flex items-center"
-            >
-              {t('sign_in')}
-            </Link>
-            <div className="h-6 w-px bg-[var(--color-border)]" />
-            <Link 
-              href={`/${locale}/register`}
-              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:text-[var(--color-textHero)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('get_started')}
-            </Link>
+            
+            {/* Conditional rendering based on authentication status */}
+            {isLoading ? (
+              <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse"></div>
+            ) : user ? (
+              <ProfileDropdown locale={locale} />
+            ) : (
+              <>
+                <Link 
+                  href={`/${locale}/signin`}
+                  className="border-2 border-[var(--color-text)] text-[var(--color-text)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-textHero)] font-medium transition-colors min-h-[44px] flex items-center"
+                >
+                  {t('sign_in')}
+                </Link>
+                <div className="h-6 w-px bg-[var(--color-border)]" />
+                <Link 
+                  href={`/${locale}/register`}
+                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:text-[var(--color-textHero)] transition-colors font-medium min-h-[44px] flex items-center"
+                >
+                  {t('get_started')}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

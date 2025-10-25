@@ -15,6 +15,7 @@
       "sign_in": "Sign In",
       "sign_up": "Sign Up",
       "profile": "Profile",
+      "settings": "Settings",
       "get_started": "Get Started"
     },
     "landing": {
@@ -85,7 +86,7 @@
       "email_address": "Email Address",
       "username": "Username",
       "username_placeholder": "Choose a unique username",
-      "username_hint": "This will be used for login and mentions",
+      "username_hint": "Username must be between 3 and 20 characters, containing only letters, numbers, underscores (_), and hyphens (-), and must start with a letter",
       "password": "Password",
       "last_name": "Last Name",
       "confirm_password": "Confirm Password",
@@ -122,6 +123,12 @@
       "too_many_requests": "Too many requests. Please try again later",
       "user_not_found": "User not found",
       "invalid_email": "Please enter a valid email address",
-      "signup_password_required": "A valid password is required"
+      "signup_password_required": "A valid password is required",
+      "username_invalid_chars": "Only letters, numbers, underscores (_), and hyphens (-) allowed",
+      "username_length": "Must be 3-20 characters",
+      "username_start_letter": "Must start with a letter",
+      "username_reserved": "This username is reserved",
+      "username_only_numbers": "Cannot be only numbers",
+      "username_too_simple": "Username is too simple"
     }
   }

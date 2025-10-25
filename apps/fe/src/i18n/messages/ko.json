@@ -15,6 +15,7 @@
       "sign_in": "로그인",
       "sign_up": "회원가입",
       "profile": "프로필",
+      "settings": "설정",
       "get_started": "시작하기"
     },
     "landing": {
@@ -85,7 +86,7 @@
       "email_address": "이메일 주소",
       "username": "사용자명",
       "username_placeholder": "고유한 사용자명을 선택하세요",
-      "username_hint": "로그인과 멘션에 사용됩니다",
+      "username_hint": "사용자명은 3~20자의 영문자, 숫자, 밑줄(_), 하이픈(-)만 사용할 수 있으며, 반드시 영문자로 시작해야 합니다",
       "password": "비밀번호",
       "last_name": "성",
       "confirm_password": "비밀번호 확인",
@@ -122,6 +123,12 @@
       "too_many_requests": "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요",
       "user_not_found": "사용자를 찾을 수 없습니다",
       "invalid_email": "올바른 이메일 주소를 입력해주세요",
-      "signup_password_required": "유효한 비밀번호가 필요합니다"
+      "signup_password_required": "유효한 비밀번호가 필요합니다",
+      "username_invalid_chars": "영문자, 숫자, 언더스코어(_), 하이픈(-)만 사용 가능",
+      "username_length": "3-20자 사이여야 함",
+      "username_start_letter": "영문자로 시작해야 함",
+      "username_reserved": "예약된 사용자명",
+      "username_only_numbers": "숫자만으로는 불가능",
+      "username_too_simple": "사용자명이 너무 단순함"
     }
   }

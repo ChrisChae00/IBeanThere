@@ -48,12 +48,58 @@ export default function SignupForm({ locale }: SignupFormProps) {
     return emailRegex.test(email);
   };
 
+  const validateUsername = (username: string): { isValid: boolean; error?: string } => {
+    // 1. Allow only letters, numbers, underscores (_), and hyphens (-)
+    const allowedCharsRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!allowedCharsRegex.test(username)) {
+      return { isValid: false, error: 'username_invalid_chars' };
+    }
+
+    // 2. Length between 3 and 20 characters
+    if (username.length < 3 || username.length > 20) {
+      return { isValid: false, error: 'username_length' };
+    }
+
+    // 3. Start with a letter
+    const startsWithLetterRegex = /^[a-zA-Z]/;
+    if (!startsWithLetterRegex.test(username)) {
+      return { isValid: false, error: 'username_start_letter' };
+    }
+
+    // 4. Prohibit reserved words
+    const reservedWords = ['admin', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined'];
+    if (reservedWords.includes(username.toLowerCase())) {
+      return { isValid: false, error: 'username_reserved' };
+    }
+
+    // 5. Prohibit only numbers
+    const onlyNumbersRegex = /^\d+$/;
+    if (onlyNumbersRegex.test(username)) {
+      return { isValid: false, error: 'username_only_numbers' };
+    }
+
+    // 6. Prohibit overly simple patterns (e.g., aaa, abc, 123, etc.)
+    const simplePatternRegex = /^(.)\1+$|^abc$|^qwe$|^asd$|^zxc$/i;
+    if (simplePatternRegex.test(username)) {
+      return { isValid: false, error: 'username_too_simple' };
+    }
+
+    return { isValid: true };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     // Validation
+    const usernameValidation = validateUsername(formData.username);
+    if (!usernameValidation.isValid) {
+      setError(tErrors(usernameValidation.error!));
+      setIsLoading(false);
+      return;
+    }
+
     if (!validateEmail(formData.email)) {
       setError(tErrors('invalid_email'));
       setIsLoading(false);

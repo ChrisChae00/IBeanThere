@@ -3,10 +3,14 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { Avatar } from '@/components/ui';
 
 export default function MobileMenu({ locale }: { locale: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations('navigation');
+  const tAuth = useTranslations('auth');
+  const { user, isLoading, signOut } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -118,25 +122,84 @@ export default function MobileMenu({ locale }: { locale: string }) {
             
             <div className="h-px bg-[var(--color-border)] my-4 mx-6" />
             
-            <Link 
-              href={`/${locale}/signin`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('sign_in')}
-            </Link>
+            {/* Conditional rendering based on authentication status */}
+            {isLoading ? (
+              <div className="px-6 py-3">
+                <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse"></div>
+              </div>
+            ) : user ? (
+              <>
+                {/* User information */}
+                <div className="px-6 py-3 border-b border-[var(--color-border)]">
+                  <div className="flex items-center space-x-3">
+                    <Avatar 
+                      src={user.user_metadata?.avatar_url} 
+                      alt={user.user_metadata?.username || user.email || 'User'}
+                      size="sm"
+                    />
+                    <div>
+                      <p className="text-[var(--color-text)] font-medium">
+                        {user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
+                      </p>
+                      <p className="text-[var(--color-text-secondary)] text-sm">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Profile menu */}
+                <Link 
+                  href={`/${locale}/profile`}
+                  onClick={closeMenu}
+                  className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
+                >
+                  {t('profile')}
+                </Link>
+                <Link 
+                  href={`/${locale}/settings`}
+                  onClick={closeMenu}
+                  className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
+                >
+                  {t('settings')}
+                </Link>
+                
+                <div className="h-px bg-[var(--color-border)] my-4 mx-6" />
+                
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    closeMenu();
+                    window.location.href = `/${locale}`;
+                  }}
+                  className="block w-full px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] text-left"
+                >
+                  {tAuth('logout')}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  href={`/${locale}/signin`}
+                  onClick={closeMenu}
+                  className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
+                >
+                  {t('sign_in')}
+                </Link>
+                
+                {/* CTA Button */}
+                <div className="p-4 border-t border-[var(--color-border)]">
+                  <Link 
+                    href={`/${locale}/register`}
+                    onClick={closeMenu}
+                    className="block w-full bg-[var(--color-primary)] text-white px-6 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center"
+                  >
+                    {t('sign_up')}
+                  </Link>
+                </div>
+              </>
+            )}
           </nav>
-
-          {/* CTA Button */}
-          <div className="p-4 border-t border-[var(--color-border)]">
-            <Link 
-              href={`/${locale}/register`}
-              onClick={closeMenu}
-              className="block w-full bg-[var(--color-primary)] text-white px-6 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center"
-            >
-              {t('sign_up')}
-            </Link>
-          </div>
         </div>
       </div>
     </>
