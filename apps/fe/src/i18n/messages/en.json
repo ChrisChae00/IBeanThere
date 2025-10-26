@@ -8,7 +8,7 @@
     },
     "navigation": {
       "home": "Home",
-      "hot_beans": "Hot Beans",
+      "trending_cafes": "Trending Cafes",
       "new_spot": "New Spot",
       "my_coffee_logs": "My Coffee Logs",
       "shop": "Shop",
@@ -111,6 +111,42 @@
       "google": "Google",
       "facebook": "Facebook"
     },
+    
+    "trending_cafes": {
+      "title": "Trending Cafes",
+      "subtitle": "Discover the most popular cafes in your area",
+      "all": "All",
+      "nearby": "Nearby",
+      "highest_rated": "Highest Rated",
+      "most_reviewed": "Most Reviewed",
+      "map_title": "Interactive Map",
+      "map_subtitle": "Find cafes near you",
+      "map_placeholder": "Interactive Map View",
+      "top_cafes_title": "Top Trending Cafes",
+      "top_cafes_subtitle": "Most popular cafes this week",
+      "top_cafe_name": "Top Cafe #{number}",
+      "sample_location": "Seoul, South Korea",
+      "operating_hours": "9:00 AM - 4:00 PM",
+      "operating_hours_1": "8:00 AM - 6:00 PM",
+      "operating_hours_2": "7:00 AM - 8:00 PM",
+      "operating_hours_3": "10:00 AM - 5:00 PM",
+      "reviews": "reviews",
+      "trending": "Trending",
+      "visit": "Visit",
+      "load_more": "Load More Cafes"
+    },
+
+    "map": {
+      "loading": "Loading map...",
+      "error": "Failed to load map",
+      "no_cafes_found": "No cafes found nearby",
+      "get_directions": "Get Directions",
+      "current_location": "My Location",
+      "search_this_area": "Search this area",
+      "permission_denied": "Location permission denied",
+      "error_loading": "Error loading map"
+    },
+
     "errors": {
       "network": "Network error. Please try again.",
       "unknown": "An error occurred. Please try again.",

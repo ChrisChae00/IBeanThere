@@ -92,11 +92,11 @@ export default function MobileMenu({ locale }: { locale: string }) {
               {t('home')}
             </Link>
             <Link 
-              href={`/${locale}/hot-beans`}
+              href={`/${locale}/trending-cafes`}
               onClick={closeMenu}
               className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
             >
-              {t('hot_beans')}
+              {t('trending_cafes')}
             </Link>
             <Link 
               href={`/${locale}/new-spot`}

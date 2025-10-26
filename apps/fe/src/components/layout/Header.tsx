@@ -32,10 +32,10 @@ export default function Header({
           {/* Desktop Navigation - Left Side */}
           <nav className="hidden lg:flex items-center space-x-3 ml-12">
             <Link 
-              href={`/${locale}/hot-beans`}
+              href={`/${locale}/trending-cafes`}
               className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors"
             >
-              {t('hot_beans')}
+              {t('trending_cafes')}
             </Link>
             <div className="h-6 w-px bg-[var(--color-border)]" />
             <Link 

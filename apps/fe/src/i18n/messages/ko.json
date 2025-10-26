@@ -8,7 +8,7 @@
     },
     "navigation": {
       "home": "홈",
-      "hot_beans": "트렌딩 카페",
+      "trending_cafes": "트렌딩 카페",
       "new_spot": "새로운 스팟",
       "my_coffee_logs": "내 커피 일기",
       "shop": "공식몰",
@@ -111,6 +111,41 @@
       "google": "구글",
       "facebook": "페이스북"
     },
+    "trending_cafes": {
+      "title": "트렌딩 카페",
+      "subtitle": "지금 가장 인기 있는 카페들을 발견해보세요",
+      "all": "전체",
+      "nearby": "근처",
+      "highest_rated": "높은 평점",
+      "most_reviewed": "많은 리뷰",
+      "map_title": "인터랙티브 지도",
+      "map_subtitle": "근처의 카페 찾기",
+      "map_placeholder": "인터랙티브 지도 보기",
+      "top_cafes_title": "인기 트렌딩 카페",
+      "top_cafes_subtitle": "이번 주 가장 인기 있는 카페",
+      "top_cafe_name": "인기 카페 #{number}",
+      "sample_location": "서울, 대한민국",
+      "operating_hours": "오전 9:00 - 오후 4:00",
+      "operating_hours_1": "오전 8:00 - 오후 6:00",
+      "operating_hours_2": "오전 7:00 - 오후 8:00",
+      "operating_hours_3": "오전 10:00 - 오후 5:00",
+      "reviews": "리뷰",
+      "trending": "트렌딩",
+      "visit": "방문하기",
+      "load_more": "더 많은 카페 보기"
+    },
+
+    "map": {
+      "loading": "지도 로딩 중...",
+      "error": "지도를 불러오는데 실패했습니다",
+      "no_cafes_found": "근처에 카페를 찾을 수 없습니다",
+      "get_directions": "길 찾기",
+      "current_location": "내 위치",
+      "search_this_area": "이 지역 검색",
+      "permission_denied": "위치 권한이 거부되었습니다",
+      "error_loading": "지도 로딩 오류"
+    },
+    
     "errors": {
       "network": "네트워크 오류가 발생했습니다. 다시 시도해주세요.",
       "unknown": "오류가 발생했습니다. 다시 시도해주세요.",

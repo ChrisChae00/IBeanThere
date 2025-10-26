@@ -51,7 +51,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         <Avatar 
           src={user.user_metadata?.avatar_url} 
           alt={displayName}
-          size="md"
+          size="sm"
         />
         <span className="hidden md:block text-[var(--color-text)] font-medium">
           {displayName}
@@ -68,7 +68,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         </svg>
       </button>
 
-      {/* Dropdown menu */}
+          {/* Dropdown menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg shadow-lg z-50">
           <div className="py-1">

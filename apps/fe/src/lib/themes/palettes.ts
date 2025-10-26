@@ -22,6 +22,9 @@ export const themes: Record<string, ThemePalette> = {
           cardText: '#442f19', // Dark brown for card text
           cardTextSecondary: '#93795d', // Light brown for secondary text (hover state, lighter)
           authText: '#442f19', // Dark brown text (same as text) for auth pages on secondary background
+          starFilled: '#FFA500', // Vibrant orange for filled stars
+          starEmpty: '#D3D3D3', // Light gray with better contrast
+          cardShadow: '#8C5A3A', // Same as primary for morning coffee
         },   
       },
     espresso: {
@@ -45,6 +48,9 @@ export const themes: Record<string, ThemePalette> = {
           cardText: '#1A120B', // Dark background color for text on light primary
           cardTextSecondary: '#5e432d', // Dark brown secondary text
           authText: '#e9ded2', // Light cream text (same as text) for auth pages on secondary background
+          starFilled: '#FFB347', // Warm orange for dark mode
+          starEmpty: '#808080', // Medium gray for better contrast in dark mode
+          cardShadow: '#d4c7b8', // Same as primary for espresso
         },
       },
       matchaLatte: {
@@ -68,6 +74,9 @@ export const themes: Record<string, ThemePalette> = {
           cardText: '#4a5c2a', // Dark olive for card text
           cardTextSecondary: '#85a035', // Medium olive secondary text
           authText: '#e0e8d0', // Very light desaturated green (same as background) for auth pages on secondary background
+          starFilled: '#FF8C00', // Dark orange for matcha theme
+          starEmpty: '#A0A0A0', // Medium gray for better contrast
+          cardShadow: '#85a035', // Same as primary for matcha latte
         },
       },
   vanillaLatte: {
@@ -91,6 +100,9 @@ export const themes: Record<string, ThemePalette> = {
       cardText: '#362C1D', // Dark brown for card text
       cardTextSecondary: '#8B7355', // Medium brown secondary text
       authText: '#362C1D', // Dark brown text (same as text) for auth pages on secondary background
+      starFilled: '#FF7F50', // Coral orange for vanilla theme
+      starEmpty: '#B8860B', // Dark goldenrod for better contrast
+      cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
     },
   },
 };

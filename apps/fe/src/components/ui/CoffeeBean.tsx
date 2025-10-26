@@ -21,6 +21,7 @@ export default function CoffeeBean({
       className={`${sizeClasses[size]} ${className}`}
       fill="currentColor"
       style={{fillRule: 'evenodd', clipRule: 'evenodd', strokeLinejoin: 'round', strokeMiterlimit: 2}}
+      xmlns="http://www.w3.org/2000/svg"
     >
       <g transform="matrix(1,0,0,1,-1152,-256)">
         <g id="coffee-bean-filled" transform="matrix(0.866025,0.5,-0.5,0.866025,717.879,-387.292)">
