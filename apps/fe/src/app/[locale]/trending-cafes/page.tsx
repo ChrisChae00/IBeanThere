@@ -47,34 +47,36 @@ export default async function TrendingCafesPage({
               </div>
               <div className="grid grid-cols-2 gap-4 flex-1">
                 {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 hover:shadow-inset-primary transition-shadow">
-                    <div className="w-12 h-12 bg-[var(--color-primary)] rounded-lg flex items-center justify-center mb-3">
-                      <div className="text-white text-lg">☕️</div>
+                  <div key={index} className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 hover:shadow-inset-primary transition-shadow flex flex-col justify-between">
+                    <div className="w-16 h-16 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
+                      <div className="text-white text-2xl">☕️</div>
                     </div>
-                    <h3 className="font-semibold text-[var(--color-text)] mb-1">
-                      {t('top_cafe_name', { number: index + 1 })}
-                    </h3>
-                    <p className="text-sm text-[var(--color-text-secondary)] mb-2">
-                      {t(`operating_hours${index === 0 ? '' : `_${index}`}`)}
-                    </p>
-                    <div className="flex items-center mb-2">
-                      <StarRating 
-                        rating={4.5 + (index * 0.1)} 
-                        size="sm" 
-                        showNumber={false}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-[var(--color-text-secondary)]">
-                        {(4.5 + (index * 0.1)).toFixed(1)} ({150 + index * 20})
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                        🔥 {t('trending')}
-                      </span>
-                      <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1 rounded-lg text-sm font-medium hover:bg-[var(--color-secondary)] transition-colors">
-                        {t('visit')}
-                      </button>
+                    <div className="flex flex-col">
+                      <h3 className="font-semibold text-[var(--color-text)] mb-0.5">
+                        {t('top_cafe_name', { number: index + 1 })}
+                      </h3>
+                      <p className="text-sm text-[var(--color-text-secondary)] mb-1">
+                        {t(`operating_hours${index === 0 ? '' : `_${index}`}`)}
+                      </p>
+                      <div className="flex items-center mb-1">
+                        <StarRating 
+                          rating={4.5 + (index * 0.1)} 
+                          size="sm" 
+                          showNumber={false}
+                          className="mr-1.5"
+                        />
+                        <span className="text-xs text-[var(--color-text-secondary)]">
+                          {(4.5 + (index * 0.1)).toFixed(1)} ({150 + index * 20})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-[var(--color-accent)]/10 text-[var(--color-textSecondary)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                          🔥 {t('trending')}
+                        </span>
+                        <button className="ml-auto bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1 rounded-lg text-sm font-medium hover:bg-[var(--color-secondary)] transition-colors">
+                          {t('visit')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -132,7 +134,7 @@ export default async function TrendingCafesPage({
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                    <span className="bg-[var(--color-accent)]/10 text-[var(--color-textSecondary)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
                       🔥 {t('trending')}
                     </span>
                     <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1 rounded-lg text-xs font-medium hover:bg-[var(--color-secondary)] transition-colors">
