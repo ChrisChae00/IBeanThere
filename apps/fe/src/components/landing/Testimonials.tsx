@@ -47,7 +47,7 @@ export default async function Testimonials({ locale }: TestimonialsProps) {
               >
                 <div className="flex items-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-primaryText)] mr-4">
-                    <Avatar size="lg" className="text-[var(--color-primaryText)]" />
+                    <Avatar size="xl" alt={testimonial.name} className="text-[var(--color-primaryText)]" />
                   </div>
                   <div>
                     <h4 className="font-bold text-[var(--color-text)]">

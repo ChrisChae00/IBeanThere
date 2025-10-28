@@ -31,12 +31,17 @@ export default async function Hero({ locale }: { locale: string }) {
             {t('subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-          <button className="border-2 border-[var(--color-textHero)] bg-black/30 text-[var(--color-textHero)] px-6 py-3 rounded-full text-base font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-all min-h-[48px]">
-              {t('cta_secondary')}
-          </button>
-          <button className="border-2 border-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] px-8 py-4 rounded-full text-lg font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-all transform hover:scale-105 shadow-lg min-h-[56px]">
+          <a
+            href={`/${locale}/trending-cafes`}
+            className="border-2 border-[var(--color-textHero)] bg-black/30 text-[var(--color-textHero)] px-6 py-3 rounded-full text-base font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-all min-h-[48px] flex items-center justify-center text-center"
+          >
+            {t('cta_secondary')}
+          </a>
+          <a
+            href={`/${locale}/register`} 
+            className="border-2 border-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] px-8 py-4 rounded-full text-lg font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-all transform hover:scale-105 shadow-lg min-h-[56px] flex items-center justify-center text-center">
               {t('cta_primary')}
-          </button>
+          </a>
           </div>
         </div>
       </div>

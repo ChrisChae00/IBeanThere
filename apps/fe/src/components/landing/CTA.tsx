@@ -17,15 +17,18 @@ export default async function CTA({ locale }: CTAProps) {
           {t('subtitle')}
         </p>
 
-        <button
-          className="px-8 py-4 text-lg font-medium rounded-full transition-all hover:scale-105 min-h-[56px] mb-8"
+        <a
+          href={`/${locale}/register`}
+          className="inline-block px-8 py-4 text-lg font-medium rounded-full transition-all hover:scale-105 min-h-[56px] mb-8"
           style={{
             backgroundColor: 'var(--color-primary)',
             color: 'var(--color-primaryText)',
+            textAlign: 'center',
+            textDecoration: 'none',
           }}
         >
           {t('button_primary')}
-        </button>
+        </a>
 
         <p className="text-m text-[var(--color-textSecondary)] italic break-keep max-w-2xl mx-auto">
           {t('disclaimer')}

@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface AvatarProps {
   src?: string;
   alt: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -14,6 +14,7 @@ const sizeClasses = {
   sm: 'w-8 h-8',
   md: 'w-10 h-10',
   lg: 'w-12 h-12',
+  xl: 'w-14 h-14',
 };
 
 export function Avatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
@@ -34,8 +35,8 @@ export function Avatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
         />
       ) : (
         <svg 
-          width={size === 'xs' ? 20 : size === 'sm' ? 24 : size === 'md' ? 28 : 36}
-          height={size === 'xs' ? 20 : size === 'sm' ? 24 : size === 'md' ? 28 : 36}
+          width={size === 'xs' ? 20 : size === 'sm' ? 24 : size === 'md' ? 28 : size === 'lg' ? 32 : size === 'xl' ? 36 : 36}
+          height={size === 'xs' ? 20 : size === 'sm' ? 24 : size === 'md' ? 28 : size === 'lg' ? 32 : size === 'xl' ? 36 : 36}
           viewBox="0 0 1024 1024" 
           fill="currentColor"
           className="text-[var(--color-primaryText)]"
