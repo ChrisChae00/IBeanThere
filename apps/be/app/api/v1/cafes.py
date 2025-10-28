@@ -5,7 +5,7 @@ from app.services.google_places_service import GooglePlacesService
 from app.services.cafe_cache_service import CafeCacheService
 from app.services.cafe_sync_service import CafeSyncService
 from app.database.supabase import get_supabase_client
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -72,7 +72,7 @@ async def search_cafes(
                     "google_review_count": int(cafe.get("google_review_count", 0)),
                     "google_types": cafe.get("google_types", []),
                     "opening_hours": cafe.get("opening_hours"),
-                    "created_at": cafe.get("created_at", datetime.utcnow().isoformat()),
+                    "created_at": cafe.get("created_at", datetime.now(timezone.utc).isoformat()),
                     "updated_at": cafe.get("updated_at")
                 })
             
@@ -105,7 +105,7 @@ async def search_cafes(
                 cafe_data = google_service.parse_cafe_data(details)
                 
                 # Add sync timestamp
-                cafe_data["last_synced_at"] = datetime.utcnow().isoformat()
+                cafe_data["last_synced_at"] = datetime.now(timezone.utc).isoformat()
                 
                 cafes_data.append(cafe_data)
             except Exception as e:
@@ -136,7 +136,7 @@ async def search_cafes(
                 "google_review_count": int(cafe.get("google_review_count", 0)),
                 "google_types": cafe.get("google_types", []),
                 "opening_hours": cafe.get("opening_hours"),
-                "created_at": cafe.get("last_synced_at", datetime.utcnow().isoformat()),
+                "created_at": cafe.get("last_synced_at", datetime.now(timezone.utc).isoformat()),
                 "updated_at": None
             })
         

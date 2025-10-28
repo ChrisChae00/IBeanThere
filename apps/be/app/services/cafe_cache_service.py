@@ -1,15 +1,15 @@
 from typing import List, Optional, Dict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from supabase import Client
-# Import will be resolved at runtime
 from app.models.cafe import Cafe
+from app.config import settings
 
 class CafeCacheService:
     """Service for managing cafe data caching."""
     
     def __init__(self):
-        self.cache_ttl = 7 * 24 * 60 * 60  # 7 days in seconds
+        self.cache_ttl = settings.google_places_cache_ttl
     
     def get_cached_cafes(self, lat: float, lng: float, radius: int = 2000) -> Optional[List[Dict]]:
         """
@@ -38,7 +38,7 @@ class CafeCacheService:
                 return None
             
             cached_cafes = result.data
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             
             # Filter by cache validity and return first valid result
             valid_cafes = []
@@ -112,7 +112,7 @@ class CafeCacheService:
         
         try:
             last_synced = datetime.fromisoformat(last_synced_at.replace('Z', '+00:00'))
-            age_seconds = (datetime.utcnow() - last_synced).total_seconds()
+            age_seconds = (datetime.now(timezone.utc) - last_synced).total_seconds()
             return age_seconds < self.cache_ttl
         except Exception:
             return False
@@ -128,7 +128,7 @@ class CafeCacheService:
         supabase = get_supabase_client()
         
         try:
-            cutoff_date = datetime.utcnow() - timedelta(seconds=self.cache_ttl)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(seconds=self.cache_ttl)
             
             result = supabase.table("cafes").delete().lt(
                 "last_synced_at", 
@@ -157,7 +157,7 @@ class CafeCacheService:
             total_cafes = total_result.count or 0
             
             # Get stale cafes
-            cutoff_date = datetime.utcnow() - timedelta(seconds=self.cache_ttl)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(seconds=self.cache_ttl)
             stale_result = supabase.table("cafes").select("id").lt(
                 "last_synced_at",
                 cutoff_date.isoformat()

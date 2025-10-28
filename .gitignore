@@ -58,3 +58,12 @@ coverage/
 # Misc
 .ipynb_checkpoints/
 Thumbs.db
+
+# Project-specific
+map-feature-implementation.plan.md
+VISITS_AND_TRENDING.md
+
+# Temporary/Development files
+*.tmp
+*.temp
+.DS_Store

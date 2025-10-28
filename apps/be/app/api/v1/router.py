@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from .auth import router as auth_router
 from .users import router as users_router
 from .cafes import router as cafes_router
+from .visits import router as visits_router
 
 # Main API v1 router
 router = APIRouter(prefix="/api/v1")
@@ -10,3 +11,4 @@ router = APIRouter(prefix="/api/v1")
 router.include_router(auth_router, prefix="/auth", tags=["authentication"])
 router.include_router(users_router, tags=["users"])
 router.include_router(cafes_router, prefix="/cafes", tags=["cafes"])
+router.include_router(visits_router, tags=["visits"])

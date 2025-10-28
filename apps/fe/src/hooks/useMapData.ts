@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CafeMapData, MapSearchParams } from '@/types/map';
+import { useCafeCache } from './useCafeCache';
 
 interface MapDataState {
   cafes: CafeMapData[];
@@ -9,7 +10,7 @@ interface MapDataState {
   error: string | null;
 }
 
-// Memory cache for recent searches
+// Memory cache for recent searches (Tier 1)
 const memoryCache = new Map<string, CacheEntry>();
 
 interface CacheEntry {
@@ -17,7 +18,7 @@ interface CacheEntry {
   timestamp: number;
 }
 
-const CACHE_TTL = 3600000; // 1 hour in milliseconds
+const MEMORY_CACHE_TTL = 3600000; // 1 hour in milliseconds
 
 export function useMapData() {
   const [state, setState] = useState<MapDataState>({
@@ -26,14 +27,36 @@ export function useMapData() {
     error: null
   });
 
+  const { getCachedData, setCachedData, clearStaleCache } = useCafeCache();
+
+  useEffect(() => {
+    clearStaleCache();
+  }, [clearStaleCache]);
+
   const searchCafes = useCallback(async (params: MapSearchParams) => {
     const cacheKey = `${params.lat.toFixed(4)},${params.lng.toFixed(4)},${params.radius}`;
     
-    // Check memory cache
-    const cached = memoryCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    // Tier 1: Check memory cache (fastest)
+    const memoryCached = memoryCache.get(cacheKey);
+    if (memoryCached && Date.now() - memoryCached.timestamp < MEMORY_CACHE_TTL) {
       setState({
-        cafes: cached.data,
+        cafes: memoryCached.data,
+        isLoading: false,
+        error: null
+      });
+      return;
+    }
+
+    // Tier 2: Check IndexedDB cache
+    const indexedDBCached = await getCachedData(params.lat, params.lng, params.radius);
+    if (indexedDBCached && indexedDBCached.length > 0) {
+      memoryCache.set(cacheKey, {
+        data: indexedDBCached,
+        timestamp: Date.now()
+      });
+
+      setState({
+        cafes: indexedDBCached,
         isLoading: false,
         error: null
       });
@@ -43,18 +66,18 @@ export function useMapData() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/cafes/search?lat=${params.lat}&lng=${params.lng}&radius=${params.radius}`
-      );
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const url = `${apiUrl}/api/v1/cafes/search?lat=${params.lat}&lng=${params.lng}&radius=${params.radius}`;
+      
+      const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch cafes');
+        throw new Error(`Failed to fetch cafes: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
       const rawCafes = result.cafes || [];
       
-      // Transform backend response to frontend format
       const cafes: CafeMapData[] = rawCafes.map((cafe: any) => ({
         id: cafe.id || cafe.google_place_id || '',
         name: cafe.name || '',
@@ -67,11 +90,14 @@ export function useMapData() {
         website: cafe.website
       }));
 
-      // Store in memory cache
+      // Store in memory cache (Tier 1)
       memoryCache.set(cacheKey, {
         data: cafes,
         timestamp: Date.now()
       });
+
+      // Store in IndexedDB cache (Tier 2)
+      await setCachedData(params.lat, params.lng, params.radius, cafes);
 
       setState({
         cafes,
@@ -79,13 +105,15 @@ export function useMapData() {
         error: null
       });
     } catch (error) {
+      console.error('Error fetching cafes:', error);
+      
       setState({
         cafes: [],
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch cafes'
+        error: null
       });
     }
-  }, []);
+  }, [getCachedData, setCachedData]);
 
   const clearCache = useCallback(() => {
     memoryCache.clear();
