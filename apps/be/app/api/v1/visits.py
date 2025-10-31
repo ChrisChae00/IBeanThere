@@ -23,6 +23,7 @@ async def record_cafe_view(
 ):
     """
     Record a cafe view (when user clicks on cafe marker or views details).
+    Accepts both UUID and Google Place ID.
     
     - Anonymous users supported
     - Tracks IP and user agent for spam prevention
@@ -30,8 +31,25 @@ async def record_cafe_view(
     try:
         supabase = get_supabase_client()
         
+        # Check if cafe_id is Google Place ID or UUID
+        # Google Place IDs start with "ChIJ"
+        actual_cafe_id = cafe_id
+        
+        if cafe_id.startswith("ChIJ"):
+            # It's a Google Place ID, look up the actual UUID
+            cafe_result = supabase.table("cafes").select("id").eq("google_place_id", cafe_id).execute()
+            
+            if not cafe_result.data or len(cafe_result.data) == 0:
+                # Cafe not in database yet, skip view recording
+                return {
+                    "message": "Cafe not yet in database, view not recorded",
+                    "cafe_id": cafe_id
+                }
+            
+            actual_cafe_id = cafe_result.data[0]["id"]
+        
         view_data = {
-            "cafe_id": cafe_id,
+            "cafe_id": actual_cafe_id,
             "user_id": user_id,
             "ip_address": request.client.host if request.client else None,
             "user_agent": request.headers.get("user-agent"),
@@ -48,7 +66,7 @@ async def record_cafe_view(
         
         return {
             "message": "View recorded successfully",
-            "cafe_id": cafe_id
+            "cafe_id": actual_cafe_id
         }
         
     except Exception as e:
@@ -66,6 +84,7 @@ async def record_cafe_visit(
 ):
     """
     Record a cafe visit (physical presence).
+    Accepts both UUID and Google Place ID.
     
     - Requires authentication
     - Can be auto-detected or manual check-in
@@ -74,8 +93,23 @@ async def record_cafe_visit(
     try:
         supabase = get_supabase_client()
         
+        # Check if cafe_id is Google Place ID or UUID
+        actual_cafe_id = cafe_id
+        
+        if cafe_id.startswith("ChIJ"):
+            # It's a Google Place ID, look up the actual UUID
+            cafe_lookup = supabase.table("cafes").select("id").eq("google_place_id", cafe_id).execute()
+            
+            if not cafe_lookup.data or len(cafe_lookup.data) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cafe not found in database"
+                )
+            
+            actual_cafe_id = cafe_lookup.data[0]["id"]
+        
         # Get cafe location for distance validation
-        cafe_result = supabase.table("cafes").select("latitude, longitude").eq("id", cafe_id).single().execute()
+        cafe_result = supabase.table("cafes").select("latitude, longitude").eq("id", actual_cafe_id).single().execute()
         
         if not cafe_result.data:
             raise HTTPException(
@@ -111,7 +145,7 @@ async def record_cafe_visit(
         
         # Create visit record
         visit_record = {
-            "cafe_id": cafe_id,
+            "cafe_id": actual_cafe_id,
             "user_id": user_id,
             "visited_at": datetime.now(timezone.utc).isoformat(),
             "check_in_lat": str(visit_data.check_in_lat) if visit_data.check_in_lat else None,

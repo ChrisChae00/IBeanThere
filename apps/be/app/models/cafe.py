@@ -3,75 +3,85 @@ from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
 
+# UGC Verification System Models
+
 class CafeBase(BaseModel):
-    """Base cafe model with common fields."""
-    google_place_id: str = Field(..., description="Google Places API place_id")
+    """Base cafe model with UGC verification fields."""
     name: str
-    address: str
-    phone_number: Optional[str] = None
-    website: Optional[str] = None
-    google_maps_url: Optional[str] = None
+    address: Optional[str] = None
     latitude: Decimal
     longitude: Decimal
-    google_rating: Optional[Decimal] = None
-    google_review_count: Optional[int] = Field(default=0, ge=0)
-    google_types: Optional[List[str]] = None
-    opening_hours: Optional[dict] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+
+class CafeRegistrationRequest(BaseModel):
+    """Request model for cafe registration (UGC)."""
+    name: str
+    latitude: Decimal = Field(..., ge=-90, le=90)
+    longitude: Decimal = Field(..., ge=-180, le=180)
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+    
+    # Location verification
+    user_location: Optional[dict] = None  # {lat, lng} for verification
+    
+    # Source tracking
+    source_type: Optional[str] = None  # 'google_url' | 'map_click' | 'manual'
+    source_url: Optional[str] = None
 
 class CafeCreate(CafeBase):
-    """Model for creating a new cafe entry."""
-    pass
+    """Model for creating a new cafe entry (internal)."""
+    navigator_id: Optional[str] = None  # User ID who first registered
+    source_type: Optional[str] = None
+    source_url: Optional[str] = None
+    normalized_name: Optional[str] = None
+    normalized_address: Optional[str] = None
 
 class CafeUpdate(BaseModel):
     """Model for updating cafe information."""
     name: Optional[str] = None
     address: Optional[str] = None
-    phone_number: Optional[str] = None
+    phone: Optional[str] = None
     website: Optional[str] = None
-    google_maps_url: Optional[str] = None
-    google_rating: Optional[Decimal] = None
-    google_review_count: Optional[int] = Field(None, ge=0)
-    google_types: Optional[List[str]] = None
-    opening_hours: Optional[dict] = None
-    last_synced_at: Optional[datetime] = None
+    description: Optional[str] = None
 
-class Cafe(CafeBase):
-    """Complete cafe model with all fields."""
+class CafeResponse(BaseModel):
+    """Cafe model for API responses with verification info."""
     id: str
+    name: str
+    address: Optional[str] = None
+    latitude: Decimal
+    longitude: Decimal
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+    
+    # Verification fields
+    status: str  # 'pending' | 'verified'
+    verification_count: int
+    verified_at: Optional[datetime] = None
+    
+    # Founding Crew
+    navigator_id: Optional[str] = None
+    vanguard_ids: Optional[list] = None
+    
     created_at: datetime
     updated_at: Optional[datetime] = None
-    last_synced_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
-
-class CafeResponse(BaseModel):
-    """Cafe model for API responses."""
-    id: str
-    google_place_id: str
-    name: str
-    address: str
-    phone_number: Optional[str] = None
-    website: Optional[str] = None
-    google_maps_url: Optional[str] = None
-    latitude: Decimal
-    longitude: Decimal
-    google_rating: Optional[Decimal] = None
-    google_review_count: Optional[int] = 0
-    google_types: Optional[List[str]] = None
-    opening_hours: Optional[dict] = None
-    created_at: datetime
-    updated_at: Optional[datetime] = None
 
 class CafeSearchParams(BaseModel):
     """Parameters for cafe search."""
     lat: float = Field(..., ge=-90, le=90, description="Latitude")
     lng: float = Field(..., ge=-180, le=180, description="Longitude")
     radius: int = Field(default=2000, ge=100, le=5000, description="Search radius in meters")
+    status: Optional[str] = Field(None, description="Filter by status: 'pending' | 'verified'")
 
 class CafeSearchResponse(BaseModel):
     """Response model for cafe search."""
     cafes: List[CafeResponse]
-    cache_hit: bool = Field(default=True, description="Whether this was served from cache")
     total_count: int
-
