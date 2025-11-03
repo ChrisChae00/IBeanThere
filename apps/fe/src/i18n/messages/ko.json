@@ -1,6 +1,7 @@
 {
     "common": {
-      "app_name": "IBeanThere"
+      "app_name": "IBeanThere",
+      "unknown": "알 수 없음"
     },
     "home": {
       "title": "IBeanThere ☕️",
@@ -118,8 +119,8 @@
       "nearby": "근처",
       "highest_rated": "높은 평점",
       "most_reviewed": "많은 리뷰",
-      "map_title": "인터랙티브 지도",
-      "map_subtitle": "근처의 카페 찾기",
+      "map_title": "카페 지도",
+      "map_subtitle": "근처 카페 둘러보기",
       "map_placeholder": "인터랙티브 지도 보기",
       "top_cafes_title": "인기 트렌딩 카페",
       "top_cafes_subtitle": "이번 주 가장 인기 있는 카페",
@@ -143,7 +144,22 @@
       "current_location": "내 위치",
       "search_this_area": "이 지역 검색",
       "permission_denied": "위치 권한이 거부되었습니다",
-      "error_loading": "지도 로딩 오류"
+      "error_loading": "지도 로딩 오류",
+      "filter_cafes": "카페 필터",
+      "filter_options": "필터 옵션",
+      "show_all": "전체 보기",
+      "local_only": "로컬 카페만",
+      "preferred_only": "선호 카페만",
+      "showing": "표시 중",
+      "cafes": "카페",
+      "verified": "검증됨",
+      "navigator": "개척자",
+      "unknown": "알 수 없음",
+      "check_in": "체크인",
+      "check_ins": "체크인",
+      "location_button": "위치",
+      "track_button": "추적",
+      "tracking_button": "추적 중"
     },
     
     "errors": {

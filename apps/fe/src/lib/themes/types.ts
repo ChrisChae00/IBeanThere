@@ -22,5 +22,7 @@ export interface ThemePalette {
     starFilled: string;
     starEmpty: string;
     cardShadow: string;
+    pending: string;
+    white: string;
 };
 }

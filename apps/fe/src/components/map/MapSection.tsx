@@ -59,20 +59,16 @@ export default function MapSection({ locale, mapTitle, mapSubtitle }: MapSection
   }
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[600px]">
-      <div className="h-full flex flex-col">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
-            {mapTitle}
-          </h2>
-          <p className="text-[var(--color-text-secondary)]">
-            {mapSubtitle}
-          </p>
-        </div>
-        <div className="flex-1 min-h-[450px] border border-[var(--color-border)] rounded-xl overflow-hidden">
-          <MapWithFilters locale={locale} />
-        </div>
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[600px] flex flex-col">
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-1">
+          {mapTitle}
+        </h2>
+        <p className="text-[var(--color-text-secondary)] text-sm">
+          {mapSubtitle}
+        </p>
       </div>
+      <MapWithFilters locale={locale} />
     </div>
   );
 }

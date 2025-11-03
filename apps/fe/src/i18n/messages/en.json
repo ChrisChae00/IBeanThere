@@ -1,6 +1,7 @@
 {
     "common": {
-      "app_name": "IBeanThere"
+      "app_name": "IBeanThere",
+      "unknown": "Unknown"
     },
     "home": {
       "title": "IBeanThere ☕️",
@@ -119,8 +120,8 @@
       "nearby": "Nearby",
       "highest_rated": "Highest Rated",
       "most_reviewed": "Most Reviewed",
-      "map_title": "Interactive Map",
-      "map_subtitle": "Find cafes near you",
+      "map_title": "Cafe Map",
+      "map_subtitle": "Discover cafes nearby",
       "map_placeholder": "Interactive Map View",
       "top_cafes_title": "Top Trending Cafes",
       "top_cafes_subtitle": "Most popular cafes this week",
@@ -144,7 +145,22 @@
       "current_location": "My Location",
       "search_this_area": "Search this area",
       "permission_denied": "Location permission denied",
-      "error_loading": "Error loading map"
+      "error_loading": "Error loading map",
+      "filter_cafes": "Filter Cafes",
+      "filter_options": "Filter Options",
+      "show_all": "Show All",
+      "local_only": "Local Cafes Only",
+      "preferred_only": "Preferred Only",
+      "showing": "Showing",
+      "cafes": "cafes",
+      "verified": "Verified",
+      "navigator": "Navigator",
+      "unknown": "Unknown",
+      "check_in": "check-in",
+      "check_ins": "check-ins",
+      "location_button": "Location",
+      "track_button": "Track",
+      "tracking_button": "Tracking"
     },
 
     "errors": {

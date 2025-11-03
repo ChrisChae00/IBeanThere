@@ -1,198 +1,376 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { CafeMapData, GoogleMapProps } from '@/types/map';
-import CoffeeBean from '@/components/ui/CoffeeBean';
+import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
+import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
+import { createCustomMarkerIcon, createUserLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
 
-export default function InteractiveMap({ 
-  cafes, 
-  center, 
-  zoom, 
-  onMarkerClick 
-}: GoogleMapProps) {
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const [markers, setMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
-  const markerClustererRef = useRef<MarkerClusterer | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+function getCSSVariable(name: string, fallback: string = ''): string {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim() || fallback;
+  }
+  return fallback;
+}
 
-  const containerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setContainer(node);
-    }
-  }, []);
+// Fix for default marker icon in React Leaflet
+// _getIconUrl is a private property in Leaflet types but exists at runtime
+// We need to delete it to prevent SSR/hydration issues with default icons
+if ('_getIconUrl' in L.Icon.Default.prototype) {
+  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+}
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+function BoundsUpdater({ 
+  onBoundsChanged 
+}: { 
+  onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
+}) {
+  const map = useMap();
+  const lastBoundsRef = useRef<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!container || mapRef.current) {
-      return;
-    }
-
-    const initMap = async () => {
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const updateBounds = () => {
+      const bounds = map.getBounds();
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
       
-      if (!apiKey) {
-        console.error('Missing Google Maps API key');
-        setError('Google Maps API key is not configured. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file');
-        setIsLoading(false);
+      const boundsKey = `${ne.lat.toFixed(4)}_${ne.lng.toFixed(4)}_${sw.lat.toFixed(4)}_${sw.lng.toFixed(4)}`;
+      
+      if (boundsKey === lastBoundsRef.current) {
         return;
       }
-
-      try {
-        setIsLoading(true);
-        
-        const loader = new Loader({
-          apiKey,
-          version: 'weekly',
-          libraries: ['places', 'marker']
-        });
-
-        const { Map } = await loader.importLibrary('maps');
-        
-        const mapInstance = new Map(container, {
-          center,
-          zoom,
-          mapTypeControl: false,
-          fullscreenControl: false,
-          streetViewControl: false,
-          zoomControl: true,
-          mapId: 'IBEANTHERE_MAP'
-        });
-        
-        mapRef.current = mapInstance;
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Map initialization error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load map');
-        setIsLoading(false);
+      
+      lastBoundsRef.current = boundsKey;
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
+      
+      timeoutRef.current = setTimeout(() => {
+        if (onBoundsChanged) {
+          onBoundsChanged({
+            ne: { lat: ne.lat, lng: ne.lng },
+            sw: { lat: sw.lat, lng: sw.lng }
+          });
+        }
+      }, 500);
     };
 
-    initMap();
-  }, [container, center, zoom]);
+    map.on('moveend', updateBounds);
+    map.on('zoomend', updateBounds);
 
-  // Update map center when center prop changes
+    return () => {
+      map.off('moveend', updateBounds);
+      map.off('zoomend', updateBounds);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [map, onBoundsChanged]);
+
+  return null;
+}
+
+function ClusterLayer({
+  cafes,
+  onMarkerClick,
+  map
+}: {
+  cafes: CafeMapData[];
+  onMarkerClick?: (cafe: CafeMapData) => void;
+  map: L.Map;
+}) {
+  const clusterGroupRef = useRef<any>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const t = useTranslations('map');
+  const tCommon = useTranslations('common');
+
   useEffect(() => {
-    if (mapRef.current && center) {
-      mapRef.current.setCenter(center);
-      mapRef.current.setZoom(zoom);
+    if (!map) return;
+
+    if (!(L as any).MarkerClusterGroup) {
+      console.error('MarkerClusterGroup not available. Make sure leaflet.markercluster is loaded.');
+      return;
     }
-  }, [center, zoom]);
+    
+    const clusterGroup = new (L as any).MarkerClusterGroup({
+      chunkedLoading: true,
+      animate: true,
+      animateAddingMarkers: true,
+      spiderfyOnMaxZoom: true,
+      zoomToBoundsOnClick: true,
+      maxClusterRadius: (zoom: number) => {
+        if (zoom <= 10) return 80;
+        if (zoom <= 15) return 65;
+        return 50;
+      },
+      iconCreateFunction: (cluster: any) => {
+        const markers = cluster.getAllChildMarkers();
+        const count = markers.length;
+        
+        const cafes = markers.map((marker: L.Marker) => 
+          (marker.options as any).cafeData as CafeMapData
+        ).filter(Boolean);
+        
+        const hasVerified = cafes.some((cafe: CafeMapData) => cafe.status === 'verified');
+        const state: ClusterState = hasVerified ? 'verified' : 'pending';
+        
+        return createClusterIcon(count, state);
+      },
+      onClusterClick: (event: any) => {
+        const cluster = event.layer;
+        const markers = cluster.getAllChildMarkers();
+        
+        if (markers.length === 1) {
+          const cafe = (markers[0].options as any).cafeData as CafeMapData;
+          if (cafe && onMarkerClick) {
+            onMarkerClick(cafe);
+          }
+        }
+      }
+    });
+
+    clusterGroupRef.current = clusterGroup;
+    map.addLayer(clusterGroup);
+
+    return () => {
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current = null;
+      }
+      markersRef.current.forEach(marker => {
+        if (clusterGroupRef.current) {
+          clusterGroupRef.current.removeLayer(marker);
+        }
+      });
+      markersRef.current = [];
+    };
+  }, [map, onMarkerClick]);
 
   useEffect(() => {
-    if (!mapRef.current || !cafes.length) {
+    if (!clusterGroupRef.current) return;
+
+    markersRef.current.forEach(marker => {
+      clusterGroupRef.current!.removeLayer(marker);
+    });
+    markersRef.current = [];
+
+    if (cafes.length < 10) {
       return;
     }
 
-    const createMarkers = async () => {
-      // Clear existing clusterer
-      if (markerClustererRef.current) {
-        markerClustererRef.current.clearMarkers();
-      }
+    cafes.forEach((cafe) => {
+      const markerState = getMarkerState(cafe);
+      const marker = L.marker([cafe.latitude, cafe.longitude], {
+        icon: createCustomMarkerIcon(markerState),
+        cafeData: cafe
+      } as any);
 
-      // Clear existing markers
-      markers.forEach(marker => {
-        marker.map = null;
+      marker.on('click', () => {
+        onMarkerClick?.(cafe);
       });
 
-      try {
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
-        const newMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+      const verifiedText = t('verified');
+      const navigatorText = t('navigator');
+      const unknownText = tCommon('unknown');
+      const checkInText = cafe.verification_count && cafe.verification_count > 1 ? t('check_ins') : t('check_in');
+      
+      const textSecondaryColor = getCSSVariable('--color-text-secondary', '#666');
+      const borderColor = getCSSVariable('--color-border', '#e5e7eb');
+      const primaryColor = getCSSVariable('--color-primary', '#3b82f6');
+      
+      const popupContent = `
+        <div style="padding: 8px; min-width: 200px;">
+          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
+          <p style="font-size: 14px; color: ${textSecondaryColor}; margin-bottom: 4px;">${cafe.address}</p>
+          ${cafe.rating ? `<p style="font-size: 14px; margin-bottom: 4px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
+          ${cafe.status === 'verified' ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <p style="font-size: 12px; font-weight: 600; color: ${primaryColor};">${verifiedText}</p>
+              ${cafe.foundingCrew?.navigator ? `<p style="font-size: 12px; color: ${textSecondaryColor};">${navigatorText}: ${cafe.foundingCrew.navigator.username || unknownText}</p>` : ''}
+            </div>
+          ` : ''}
+          ${cafe.status === 'pending' && cafe.verification_count ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
+            </div>
+          ` : ''}
+        </div>
+      `;
 
-        // Create markers for each cafe
-        cafes.forEach(cafe => {
-          const pin = new PinElement({
-            background: '#8B4513',
-            borderColor: '#5D2E0F',
-            glyphColor: '#FFFFFF',
-            scale: 1.2
-          });
-
-          const marker = new AdvancedMarkerElement({
-            map: mapRef.current!,
-            position: { lat: cafe.latitude, lng: cafe.longitude },
-            title: cafe.name,
-            content: pin.element
-          });
-
-          const escapeHtml = (text: string) => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-          };
-
-          const infoWindow = new google.maps.InfoWindow({
-            content: `
-              <div style="padding: 8px; min-width: 200px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${escapeHtml(cafe.name)}</h3>
-                <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${escapeHtml(cafe.address)}</p>
-                ${cafe.rating ? `<p style="margin: 0; font-size: 14px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
-              </div>
-            `
-          });
-
-          marker.addListener('click', () => {
-            infoWindow.open(mapRef.current!, marker);
-            onMarkerClick?.(cafe);
-          });
-
-          newMarkers.push(marker);
-        });
-
-        setMarkers(newMarkers);
-
-        // Create or update marker clusterer (only if we have many cafes)
-        if (newMarkers.length > 10 && mapRef.current) {
-          if (!markerClustererRef.current) {
-            markerClustererRef.current = new MarkerClusterer({
-              map: mapRef.current,
-              markers: newMarkers,
-            });
-          } else {
-            markerClustererRef.current.clearMarkers();
-            markerClustererRef.current.addMarkers(newMarkers);
-          }
-        }
-
-        // Fit bounds only on initial load, not on every marker click
-        // This prevents zooming out when clicking on markers
-      } catch (err) {
-        console.error('Error creating markers:', err);
-      }
-    };
-
-    createMarkers();
+      marker.bindPopup(popupContent);
+      clusterGroupRef.current.addLayer(marker);
+      markersRef.current.push(marker);
+    });
   }, [cafes, onMarkerClick]);
+
+  return null;
+}
+
+function MapContent({
+  cafes,
+  userLocation,
+  onMarkerClick,
+  onBoundsChanged
+}: {
+  cafes: CafeMapData[];
+  userLocation?: { lat: number; lng: number };
+  onMarkerClick?: (cafe: CafeMapData) => void;
+  onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
+}) {
+  const map = useMap();
+  
+  return (
+    <>
+      {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
+      <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
+      {userLocation && (
+        <Marker
+          position={[userLocation.lat, userLocation.lng]}
+          icon={createUserLocationIcon()}
+        >
+          <Popup>{useTranslations('map')('current_location')}</Popup>
+        </Marker>
+      )}
+    </>
+  );
+}
+
+export default function InteractiveMap({
+  cafes,
+  center,
+  zoom,
+  userLocation,
+  onMarkerClick,
+  onBoundsChanged
+}: MapProps) {
+  const t = useTranslations('map');
+  const tCommon = useTranslations('common');
+  const centerLatLng: [number, number] = [center.lat, center.lng];
+
+  const shouldUseClustering = cafes.length >= 10;
+  const displayCafes = shouldUseClustering ? [] : cafes;
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
-      {/* Map Container - Always rendered so ref can be set */}
-      <div 
-        ref={containerRef}
-        className="absolute inset-0 w-full h-full rounded-xl overflow-hidden" 
-      />
-      
-      {/* Loading/Error Overlay */}
-      {(isLoading || error) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-surface)] rounded-xl z-10">
-          {error ? (
-            <div className="text-center px-4">
-              <div className="text-4xl mb-4">⚠️</div>
-              <p className="text-[var(--color-text)] font-semibold mb-2">Map Error</p>
-              <p className="text-[var(--color-text-secondary)] text-sm">{error}</p>
-            </div>
-          ) : (
-            <div className="text-center">
-              <div className="animate-spin mb-2 flex justify-center">
-                <CoffeeBean size="lg" />
-              </div>
-              <p className="text-[var(--color-text-secondary)]">Loading map...</p>
-            </div>
-          )}
-        </div>
-      )}
+      <MapContainer
+        center={centerLatLng}
+        zoom={zoom}
+        className="h-full w-full rounded-xl"
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          maxZoom={19}
+        />
+
+        <MapContent 
+          cafes={cafes} 
+          userLocation={userLocation} 
+          onMarkerClick={onMarkerClick}
+          onBoundsChanged={onBoundsChanged}
+        />
+
+        {displayCafes.map((cafe) => {
+          const markerState = getMarkerState(cafe);
+          return (
+            <Marker
+              key={cafe.id}
+              position={[cafe.latitude, cafe.longitude]}
+              icon={createCustomMarkerIcon(markerState)}
+              eventHandlers={{
+                click: () => {
+                  onMarkerClick?.(cafe);
+                }
+              }}
+            >
+              <Popup>
+                <div 
+                  style={{
+                    padding: '8px',
+                    minWidth: '200px'
+                  }}
+                >
+                  <h3 style={{ fontWeight: 600, fontSize: '16px', marginBottom: '4px' }}>{cafe.name}</h3>
+                  <p 
+                    style={{ 
+                      fontSize: '14px', 
+                      color: getCSSVariable('--color-text-secondary', '#666'),
+                      marginBottom: '4px'
+                    }}
+                  >
+                    {cafe.address}
+                  </p>
+                  {cafe.rating && (
+                    <p style={{ fontSize: '14px', marginBottom: '4px' }}>⭐ {cafe.rating.toFixed(1)}</p>
+                  )}
+                  {cafe.status === 'verified' && (
+                    <div 
+                      style={{
+                        marginTop: '8px',
+                        paddingTop: '8px',
+                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
+                      }}
+                    >
+                      <p 
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: getCSSVariable('--color-primary', '#3b82f6')
+                        }}
+                      >
+                        {t('verified')}
+                      </p>
+                      {cafe.foundingCrew?.navigator && (
+                        <p 
+                          style={{
+                            fontSize: '12px',
+                            color: getCSSVariable('--color-text-secondary', '#666')
+                          }}
+                        >
+                          {t('navigator')}: {cafe.foundingCrew.navigator.username || tCommon('unknown')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {cafe.status === 'pending' && cafe.verification_count && (
+                    <div 
+                      style={{
+                        marginTop: '8px',
+                        paddingTop: '8px',
+                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
+                      }}
+                    >
+                      <p 
+                        style={{
+                          fontSize: '12px',
+                          color: getCSSVariable('--color-text-secondary', '#666')
+                        }}
+                      >
+                        {cafe.verification_count} {cafe.verification_count > 1 ? t('check_ins') : t('check_in')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
     </div>
   );
 }

@@ -8,11 +8,6 @@ interface LocationState {
   isLoading: boolean;
 }
 
-const DEFAULT_LOCATION = {
-  lat: parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LAT || '43.4723'),
-  lng: parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LNG || '-80.5449')
-};
-
 export function useLocation() {
   const [location, setLocation] = useState<LocationState>({
     coords: null,
@@ -69,14 +64,9 @@ export function useLocation() {
     );
   }, []);
 
-  const getDefaultLocation = useCallback(() => {
-    return DEFAULT_LOCATION;
-  }, []);
-
   return { 
     ...location, 
-    getCurrentLocation,
-    getDefaultLocation
+    getCurrentLocation
   };
 }
 

@@ -25,6 +25,8 @@ export const themes: Record<string, ThemePalette> = {
           starFilled: '#FFA500', // Vibrant orange for filled stars
           starEmpty: '#D3D3D3', // Light gray with better contrast
           cardShadow: '#8C5A3A', // Same as primary for morning coffee
+          pending: '#9CA3AF', // Gray for pending markers
+          white: '#FFFFFF', // White for contrast
         },   
       },
     espresso: {
@@ -51,6 +53,8 @@ export const themes: Record<string, ThemePalette> = {
           starFilled: '#FFB347', // Warm orange for dark mode
           starEmpty: '#808080', // Medium gray for better contrast in dark mode
           cardShadow: '#d4c7b8', // Same as primary for espresso
+          pending: '#9CA3AF', // Gray for pending markers
+          white: '#FFFFFF', // White for contrast
         },
       },
       matchaLatte: {
@@ -77,6 +81,8 @@ export const themes: Record<string, ThemePalette> = {
           starFilled: '#FF8C00', // Dark orange for matcha theme
           starEmpty: '#A0A0A0', // Medium gray for better contrast
           cardShadow: '#85a035', // Same as primary for matcha latte
+          pending: '#9CA3AF', // Gray for pending markers
+          white: '#FFFFFF', // White for contrast
         },
       },
   vanillaLatte: {
@@ -103,6 +109,8 @@ export const themes: Record<string, ThemePalette> = {
       starFilled: '#FF7F50', // Coral orange for vanilla theme
       starEmpty: '#B8860B', // Dark goldenrod for better contrast
       cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
+      pending: '#9CA3AF', // Gray for pending markers
+      white: '#FFFFFF', // White for contrast
     },
   },
 };
