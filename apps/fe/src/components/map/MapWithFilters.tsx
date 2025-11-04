@@ -23,6 +23,7 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   const tVisit = useTranslations('visit');
   const { coords, getCurrentLocation, error: locationError } = useLocation();
   const { cafes: allCafes, isLoading, error, searchCafes } = useMapData();
+  const { user, isLoading: authLoading } = useAuth();
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
   const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
@@ -196,7 +197,10 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   };
 
   const handleCheckIn = async (cafe: NearbyCafe) => {
-    const userId = 'temp-user-id';
+    if (!user) {
+      alert(tVisit('login_required'));
+      return;
+    }
     
     if (!coords) {
       alert(tVisit('location_permission_required'));
@@ -208,7 +212,7 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
         cafe,
         coords.latitude,
         coords.longitude,
-        userId
+        user.id
       );
       
       if (result.success) {
