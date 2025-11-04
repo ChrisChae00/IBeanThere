@@ -1,5 +1,10 @@
 {
-    "common": {
+  "metadata": {
+    "title": "IBeanThere",
+    "description": "Discover local cafes, log your coffee visits, and share your experiences"
+  },
+  
+  "common": {
       "app_name": "IBeanThere",
       "unknown": "Unknown"
     },
@@ -135,12 +140,22 @@
       "reviews": "reviews",
       "trending": "Trending",
       "visit": "Visit",
-      "load_more": "Load More Cafes"
+      "load_more": "Load More Cafes",
+      "location_permission_title": "Discover Local Cafes Nearby",
+      "location_permission_reason": "Location sharing is needed to see trending cafes near you",
+      "location_permission_denied_title": "Location Permission Required",
+      "location_permission_denied_hint": "Please allow location permission in browser settings. Settings > Privacy > Location Services",
+      "sample_cafe_name": "Sample Cafe #{number}",
+      "no_cafes_available": "No cafes registered nearby",
+      "be_the_navigator": "Be the first to discover and share cafes in your area!",
+      "share_location": "Share Location",
+      "location_permission_retry": "Try Again"
     },
 
     "map": {
       "loading": "Loading map...",
       "error": "Failed to load map",
+      "location_error": "Failed to get your location. Please try again.",
       "no_cafes_found": "No cafes found nearby",
       "get_directions": "Get Directions",
       "current_location": "My Location",
@@ -161,7 +176,9 @@
       "check_ins": "check-ins",
       "location_button": "Location",
       "location_sharing": "Location Sharing",
-      "location_sharing_on": "Location Sharing On"
+      "location_sharing_on": "Location Sharing On",
+      "browser_settings_guide": "You can change location permission in browser settings",
+      "loading_location": "Loading your location..."
     },
 
     "visit": {

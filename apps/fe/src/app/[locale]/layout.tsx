@@ -1,10 +1,29 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { Header } from '@/components/layout';
 import { Footer } from '@/components/landing';
 import '@/styles/globals.css';
+import type { Metadata } from 'next';
+
+// Dynamic metadata generation with i18n support
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    icons: {
+      icon: '/icons/coffee-logo.svg',
+    }
+  };
+}
 
 export default async function LocaleLayout({ 
   children, 

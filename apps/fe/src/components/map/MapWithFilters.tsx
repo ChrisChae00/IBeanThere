@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import InteractiveMap from './InteractiveMap';
+import LocationPermissionOverlay from './LocationPermissionOverlay';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -28,12 +29,14 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
   const { cafes: allCafes, isLoading, error, searchCafes } = useMapData();
   const { user, isLoading: authLoading } = useAuth();
   const { showToast } = useToast();
+  
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
   const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
   const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
+  const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
     blockedFranchises: [],
@@ -102,16 +105,32 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
     }, 500); // 500ms debounce for faster response
   }, [searchCafes]);
 
-  const handleLocationClick = () => {
-    getCurrentLocation();
-    setForceCenterUpdate(true);
-    setTimeout(() => setForceCenterUpdate(false), 100);
-  };
-
+  // Check permission state on mount and auto-start tracking if granted
   useEffect(() => {
-    getCurrentLocation();
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((result) => {
+        const state = result.state as 'prompt' | 'granted' | 'denied';
+        setLocationPermission(state);
+        
+        // Auto-start location tracking if permission already granted
+        if (state === 'granted') {
+          setTrackingEnabled(true);
+          getCurrentLocation().catch((error) => {
+            console.warn('Failed to get initial location:', error.message);
+            // Silently handle timeout errors during auto-load
+          });
+        }
+        
+        result.onchange = () => {
+          setLocationPermission(result.state as 'prompt' | 'granted' | 'denied');
+        };
+      }).catch(() => {
+        setLocationPermission('prompt');
+      });
+    }
   }, [getCurrentLocation]);
 
+  // Update center when location is available
   useEffect(() => {
     if (coords) {
       const newCenter = { lat: coords.latitude, lng: coords.longitude };
@@ -119,6 +138,24 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
       lastSearchRef.current = newCenter;
     }
   }, [coords]);
+
+  const handleLocationClick = () => {
+    getCurrentLocation().catch((error) => {
+      console.warn('Failed to get location:', error.message);
+      showToast(t('location_error'), 'error');
+    });
+    setForceCenterUpdate(true);
+    setTimeout(() => setForceCenterUpdate(false), 100);
+  };
+
+  const handleRequestPermission = async () => {
+    try {
+      await getCurrentLocation();
+      setLocationPermission('granted');
+    } catch (error) {
+      setLocationPermission('denied');
+    }
+  };
 
   // Filter cafes based on franchise filter
   const { filteredCafes, localCafes, franchiseCafes } = useMemo(() => {
@@ -240,13 +277,23 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
     setNearbyCafes([]);
   };
 
-  const toggleTracking = () => {
+  const toggleTracking = async () => {
     if (trackingEnabled) {
       stopTracking();
       setTrackingEnabled(false);
     } else {
-      startTracking();
-      setTrackingEnabled(true);
+      try {
+        if (locationPermission !== 'granted') {
+          await handleRequestPermission();
+        }
+        if (coords || locationPermission === 'granted') {
+          startTracking();
+          setTrackingEnabled(true);
+        }
+      } catch (error) {
+        console.warn('Failed to start tracking:', error);
+        showToast(t('location_error'), 'error');
+      }
     }
   };
 
@@ -297,26 +344,31 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
       </div>
 
       {/* Map */}
-      <div className="flex-1 min-h-[450px] border border-[var(--color-border)] rounded-xl overflow-hidden">
-        {center ? (
-          <InteractiveMap
-            cafes={filteredCafes}
-            center={center}
-            zoom={14}
-            userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
-            userMarkerPalette={userMarkerPalette}
-            onMarkerClick={handleCafeClick}
-            onBoundsChanged={handleBoundsChanged}
-            forceCenterUpdate={forceCenterUpdate}
+      <div className="flex-1 min-h-[450px]">
+        {locationPermission !== 'granted' ? (
+          <LocationPermissionOverlay
+            onRequestPermission={handleRequestPermission}
+            permissionState={locationPermission}
           />
-        ) : (
-          <div className="flex items-center justify-center h-full bg-[var(--color-surface)]">
+        ) : !center ? (
+          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full flex items-center justify-center bg-[var(--color-surface)]">
             <div className="text-center">
-              <div className="animate-spin mb-2 flex justify-center">
-                <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full"></div>
-              </div>
-              <p className="text-[var(--color-text-secondary)]">Getting your location...</p>
+              <LoadingSpinner size="lg" />
+              <p className="text-[var(--color-text-secondary)] mt-4">{t('loading_location')}</p>
             </div>
+          </div>
+        ) : (
+          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full">
+            <InteractiveMap
+              cafes={filteredCafes}
+              center={center}
+              zoom={14}
+              userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
+              userMarkerPalette={userMarkerPalette}
+              onMarkerClick={handleCafeClick}
+              onBoundsChanged={handleBoundsChanged}
+              forceCenterUpdate={forceCenterUpdate}
+            />
           </div>
         )}
       </div>

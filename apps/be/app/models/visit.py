@@ -50,13 +50,10 @@ class CafeVisitResponse(BaseModel):
 class TrendingCafeResponse(BaseModel):
     """Response model for trending cafe"""
     id: str
-    google_place_id: str
     name: str
     address: str
     latitude: Decimal
     longitude: Decimal
-    google_rating: Optional[Decimal] = None
-    google_review_count: Optional[int] = None
     view_count_14d: int = 0
     visit_count_14d: int = 0
     trending_score: Decimal = Decimal('0.0')

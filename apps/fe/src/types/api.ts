@@ -25,3 +25,15 @@ export interface CafeSearchResponse {
   cache_hit?: boolean;
 }
 
+export interface TrendingCafeResponse {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  view_count_14d: number;
+  visit_count_14d: number;
+  trending_score: number;
+  trending_rank?: number;
+}
+
