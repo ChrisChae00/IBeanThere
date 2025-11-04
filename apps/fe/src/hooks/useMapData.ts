@@ -18,8 +18,6 @@ export function useMapData() {
   });
 
   const searchCafes = useCallback(async (params: MapSearchParams) => {
-    console.log(`Searching cafes for lat=${params.lat.toFixed(6)}, lng=${params.lng.toFixed(6)}, radius=${params.radius}m`);
-
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
@@ -34,8 +32,6 @@ export function useMapData() {
 
       const result: CafeSearchResponse = await response.json();
       const rawCafes = result.cafes || [];
-      
-      console.log(`Received ${rawCafes.length} cafes from API (cache_hit=${result.cache_hit})`);
       
       const cafes: CafeMapData[] = rawCafes.map((cafe) => ({
         id: cafe.id || '',
