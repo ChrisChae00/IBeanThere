@@ -168,6 +168,7 @@
       "check_in_button": "체크인",
       "check_in_success": "체크인 완료!",
       "check_in_failed": "체크인 실패",
+      "login_required": "체크인하려면 로그인이 필요합니다",
       "location_too_far": "체크인하려면 카페에서 50m 이내에 있어야 합니다",
       "already_checked_in_today": "오늘 이미 체크인하셨습니다",
       "location_permission_required": "체크인을 위해 위치 권한이 필요합니다",

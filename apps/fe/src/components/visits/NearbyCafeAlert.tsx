@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { NearbyCafe } from '@/types/map';
 import { calculateDistance } from '@/lib/utils/checkIn';
+import LoadingSpinner from '../ui/LoadingSpinner';
 
 interface NearbyCafeAlertProps {
   cafes: NearbyCafe[];
@@ -11,6 +12,7 @@ interface NearbyCafeAlertProps {
   onCheckIn: (cafe: NearbyCafe) => void;
   onDismiss: () => void;
   autoHideAfter?: number;
+  isCheckingIn?: boolean;
 }
 
 export default function NearbyCafeAlert({
@@ -18,7 +20,8 @@ export default function NearbyCafeAlert({
   userLocation,
   onCheckIn,
   onDismiss,
-  autoHideAfter = 120000
+  autoHideAfter = 120000,
+  isCheckingIn = false
 }: NearbyCafeAlertProps) {
   const t = useTranslations('visit');
   const [isVisible, setIsVisible] = useState(true);
@@ -154,7 +157,7 @@ export default function NearbyCafeAlert({
                     
                     <button
                       onClick={() => handleCheckIn(cafe)}
-                      disabled={selectedCafe !== null}
+                      disabled={selectedCafe !== null || isCheckingIn}
                       className="
                         w-full min-h-[44px] px-4 py-2.5
                         bg-[var(--color-primary)] text-white
@@ -163,9 +166,14 @@ export default function NearbyCafeAlert({
                         disabled:opacity-50 disabled:cursor-not-allowed
                         transition-all duration-200
                         focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2
+                        flex items-center justify-center gap-2
                       "
                     >
-                      {selectedCafe?.id === cafe.id ? '✓ ' : ''}
+                      {isCheckingIn && selectedCafe?.id === cafe.id ? (
+                        <LoadingSpinner size="sm" className="text-white" />
+                      ) : selectedCafe?.id === cafe.id ? (
+                        '✓ '
+                      ) : null}
                       {t('check_in_button')}
                     </button>
                   </div>

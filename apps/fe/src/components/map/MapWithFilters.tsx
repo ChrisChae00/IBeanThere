@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl';
 import InteractiveMap from './InteractiveMap';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/contexts/ToastContext';
 import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
 import { checkIn } from '@/lib/api/visits';
@@ -24,10 +26,12 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   const { coords, getCurrentLocation, error: locationError } = useLocation();
   const { cafes: allCafes, isLoading, error, searchCafes } = useMapData();
   const { user, isLoading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
   const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
   const [trackingEnabled, setTrackingEnabled] = useState(false);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
     blockedFranchises: [],
@@ -197,16 +201,19 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   };
 
   const handleCheckIn = async (cafe: NearbyCafe) => {
+    if (isCheckingIn) return;
+    
     if (!user) {
-      alert(tVisit('login_required'));
+      showToast(tVisit('login_required'), 'warning');
       return;
     }
     
     if (!coords) {
-      alert(tVisit('location_permission_required'));
+      showToast(tVisit('location_permission_required'), 'warning');
       return;
     }
     
+    setIsCheckingIn(true);
     try {
       const result = await checkIn(
         cafe,
@@ -216,14 +223,16 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
       );
       
       if (result.success) {
-        alert(tVisit('check_in_success'));
+        showToast(tVisit('check_in_success'), 'success');
         setNearbyCafes([]);
       } else {
-        alert(result.error || tVisit('check_in_failed'));
+        showToast(result.error || tVisit('check_in_failed'), 'error');
       }
     } catch (error) {
       console.error('Failed to check in:', error);
-      alert(tVisit('check_in_failed'));
+      showToast(tVisit('check_in_failed'), 'error');
+    } finally {
+      setIsCheckingIn(false);
     }
   };
 
@@ -317,6 +326,7 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
           userLocation={{ lat: coords.latitude, lng: coords.longitude }}
           onCheckIn={handleCheckIn}
           onDismiss={handleDismissAlert}
+          isCheckingIn={isCheckingIn}
         />
       )}
     </div>

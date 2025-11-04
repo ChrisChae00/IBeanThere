@@ -169,6 +169,7 @@
       "check_in_button": "Check In",
       "check_in_success": "Check-in successful!",
       "check_in_failed": "Check-in failed",
+      "login_required": "Please sign in to check in",
       "location_too_far": "You must be within 50m of the cafe to check in",
       "already_checked_in_today": "You have already checked in today",
       "location_permission_required": "Location permission is required for check-in",
