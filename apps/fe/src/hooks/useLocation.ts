@@ -41,24 +41,28 @@ export function useLocation() {
         },
         (error) => {
           let errorMessage = 'Location error';
+          let shouldClearCoords = false;
           
           switch (error.code) {
             case error.PERMISSION_DENIED:
               errorMessage = 'Location permission denied';
+              shouldClearCoords = true; // User explicitly denied permission
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = 'Location information unavailable';
+              // Keep previous coords - temporary GPS issue
               break;
             case error.TIMEOUT:
               errorMessage = 'Location request timeout';
+              // Keep previous coords - just a timeout, not a permanent failure
               break;
           }
           
-          setLocation({
-            coords: null,
+          setLocation(prev => ({
+            coords: shouldClearCoords ? null : prev.coords,
             error: errorMessage,
             isLoading: false
-          });
+          }));
           reject(new Error(errorMessage));
         },
         {

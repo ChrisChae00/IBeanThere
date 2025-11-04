@@ -116,8 +116,10 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
         if (state === 'granted') {
           setTrackingEnabled(true);
           getCurrentLocation().catch((error) => {
-            console.warn('Failed to get initial location:', error.message);
             // Silently handle timeout errors during auto-load
+            if (process.env.NODE_ENV === 'development') {
+              console.debug('Location auto-load timeout (expected):', error.message);
+            }
           });
         }
         
@@ -141,7 +143,10 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
 
   const handleLocationClick = () => {
     getCurrentLocation().catch((error) => {
-      console.warn('Failed to get location:', error.message);
+      // User-initiated action - show toast notification
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Location request failed:', error.message);
+      }
       showToast(t('location_error'), 'error');
     });
     setForceCenterUpdate(true);
@@ -291,7 +296,9 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
           setTrackingEnabled(true);
         }
       } catch (error) {
-        console.warn('Failed to start tracking:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Failed to start tracking:', error);
+        }
         showToast(t('location_error'), 'error');
       }
     }
