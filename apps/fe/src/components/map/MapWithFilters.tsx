@@ -18,9 +18,10 @@ import { calculateDistance } from '@/lib/utils/checkIn';
 
 interface MapWithFiltersProps {
   locale: string;
+  userMarkerPalette?: string;
 }
 
-export default function MapWithFilters({ locale }: MapWithFiltersProps) {
+export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFiltersProps) {
   const t = useTranslations('map');
   const tVisit = useTranslations('visit');
   const { coords, getCurrentLocation, error: locationError } = useLocation();
@@ -32,6 +33,7 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
   const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
     blockedFranchises: [],
@@ -102,6 +104,8 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
 
   const handleLocationClick = () => {
     getCurrentLocation();
+    setForceCenterUpdate(true);
+    setTimeout(() => setForceCenterUpdate(false), 100);
   };
 
   useEffect(() => {
@@ -111,14 +115,10 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   useEffect(() => {
     if (coords) {
       const newCenter = { lat: coords.latitude, lng: coords.longitude };
-      if (!center || 
-          Math.abs(center.lat - newCenter.lat) > 0.0001 || 
-          Math.abs(center.lng - newCenter.lng) > 0.0001) {
-        setCenter(newCenter);
-        lastSearchRef.current = newCenter;
-      }
+      setCenter(newCenter);
+      lastSearchRef.current = newCenter;
     }
-  }, [coords, center]);
+  }, [coords]);
 
   // Filter cafes based on franchise filter
   const { filteredCafes, localCafes, franchiseCafes } = useMemo(() => {
@@ -304,8 +304,10 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
             center={center}
             zoom={14}
             userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
+            userMarkerPalette={userMarkerPalette}
             onMarkerClick={handleCafeClick}
             onBoundsChanged={handleBoundsChanged}
+            forceCenterUpdate={forceCenterUpdate}
           />
         ) : (
           <div className="flex items-center justify-center h-full bg-[var(--color-surface)]">

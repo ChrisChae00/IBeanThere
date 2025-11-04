@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import { CafeMarkerState } from '@/types/map';
+import { themes } from '@/lib/themes/palettes';
 
 function getCSSVariable(name: string): string {
   if (typeof window !== 'undefined') {
@@ -70,26 +71,61 @@ export function createCustomMarkerIcon(state: CafeMarkerState): L.DivIcon {
   });
 }
 
-export function createUserLocationIcon(): L.DivIcon {
-  const primaryColor = getCSSVariable('--color-primary') || '#8C5A3A';
+export function createUserLocationIcon(paletteNameOrColor?: string, size: number = 48): L.DivIcon {
+  let markerColor: string;
+  
+  if (paletteNameOrColor) {
+    if (themes[paletteNameOrColor]) {
+      markerColor = themes[paletteNameOrColor].colors.userMarkerMap;
+    } else if (paletteNameOrColor.startsWith('#')) {
+      markerColor = paletteNameOrColor;
+    } else {
+      markerColor = getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A';
+    }
+  } else {
+    markerColor = getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A';
+  }
+  
+  const svgIcon = `
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: ${size}px; height: ${size}px;">
+      <g>
+        <path 
+          d="M17 10C17 11.7279 15.0424 14.9907 13.577 17.3543C12.8967 18.4514 12.5566 19 12 19C11.4434 19 11.1033 18.4514 10.423 17.3543C8.95763 14.9907 7 11.7279 7 10C7 7.23858 9.23858 5 12 5C14.7614 5 17 7.23858 17 10Z" 
+          fill="#FFFFFF"
+          stroke="${markerColor}" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+        />
+        <path 
+          d="M14.5 10C14.5 11.3807 13.3807 12.5 12 12.5C10.6193 12.5 9.5 11.3807 9.5 10C9.5 8.61929 10.6193 7.5 12 7.5C13.3807 7.5 14.5 8.61929 14.5 10Z" 
+          fill="#FFFFFF"
+          stroke="${markerColor}" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  `;
+  
   const iconHtml = `
     <div style="
-      width: 24px;
-      height: 24px;
-      background-color: ${primaryColor};
-      border: 3px solid ${primaryColor};
-      filter: brightness(0.8);
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    "></div>
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    ">
+      ${svgIcon}
+    </div>
   `;
 
   return L.divIcon({
     html: iconHtml,
     className: 'user-location-marker',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -size]
   });
 }
 

@@ -247,7 +247,13 @@ body {
 
 .leaflet-popup,
 .leaflet-control {
-  z-index: 40 !important;
+  z-index: 1000 !important;
+  position: relative;
+}
+
+.leaflet-control-zoom {
+  z-index: 1000 !important;
+  position: relative;
 }
 
 .leaflet-pane {
@@ -256,7 +262,7 @@ body {
 
 .leaflet-top,
 .leaflet-bottom {
-  z-index: 40 !important;
+  z-index: 1000 !important;
 }
 
 .leaflet-popup-pane {

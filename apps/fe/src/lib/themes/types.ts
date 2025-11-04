@@ -24,5 +24,6 @@ export interface ThemePalette {
     cardShadow: string;
     pending: string;
     white: string;
+    userMarkerMap: string;
 };
 }

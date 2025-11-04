@@ -2,6 +2,7 @@ export { default as Logo } from './Logo';
 export { default as CoffeeBean } from './CoffeeBean';
 export { Avatar } from './Avatar';
 export { default as LocationIcon } from './LocationIcon';
+export { default as UserLocationIcon } from './UserLocationIcon';
 export { default as CameraIcon } from './CameraIcon';
 export { default as UsersIcon } from './UsersIcon';
 export { default as CheckIcon } from './CheckIcon';

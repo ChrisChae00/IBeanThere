@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,6 +10,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
 import { createCustomMarkerIcon, createUserLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
+import { useTheme } from '@/contexts/ThemeContext';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
@@ -111,17 +112,29 @@ function MapClickHandler({
 
 function MapCenterController({
   center,
-  zoom
+  zoom,
+  forceUpdate
 }: {
   center: { lat: number; lng: number };
   zoom: number;
+  forceUpdate?: boolean;
 }) {
   const map = useMap();
   const lastCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
-    const currentCenter = map.getCenter();
     const newCenter = { lat: center.lat, lng: center.lng };
+    
+    if (forceUpdate) {
+      map.setView([newCenter.lat, newCenter.lng], zoom, {
+        animate: true,
+        duration: 0.5
+      });
+      lastCenterRef.current = newCenter;
+      return;
+    }
+    
+    const currentCenter = map.getCenter();
     
     const isSamePosition = lastCenterRef.current &&
       Math.abs(lastCenterRef.current.lat - newCenter.lat) < 0.0001 &&
@@ -143,7 +156,7 @@ function MapCenterController({
       });
       lastCenterRef.current = newCenter;
     }
-  }, [center, zoom, map]);
+  }, [center, zoom, map, forceUpdate]);
 
   return null;
 }
@@ -287,34 +300,46 @@ function ClusterLayer({
 function MapContent({
   cafes,
   userLocation,
+  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
   center,
-  zoom
+  zoom,
+  forceCenterUpdate
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
+  userMarkerPalette?: string;
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;
   center: { lat: number; lng: number };
   zoom: number;
+  forceCenterUpdate?: boolean;
 }) {
   const map = useMap();
+  const { currentTheme } = useTheme();
+  const [markerKey, setMarkerKey] = useState(0);
+  const t = useTranslations('map');
+  
+  useEffect(() => {
+    setMarkerKey(prev => prev + 1);
+  }, [currentTheme.name]);
   
   return (
     <>
-      <MapCenterController center={center} zoom={zoom} />
+      <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
       <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
       {userLocation && (
         <Marker
+          key={markerKey}
           position={[userLocation.lat, userLocation.lng]}
-          icon={createUserLocationIcon()}
+          icon={createUserLocationIcon(userMarkerPalette)}
         >
-          <Popup>{useTranslations('map')('current_location')}</Popup>
+          <Popup>{t('current_location')}</Popup>
         </Marker>
       )}
     </>
@@ -326,10 +351,12 @@ export default function InteractiveMap({
   center,
   zoom,
   userLocation,
+  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
-  onMapClick
-}: MapProps) {
+  onMapClick,
+  forceCenterUpdate
+}: MapProps & { forceCenterUpdate?: boolean }) {
   const t = useTranslations('map');
   const tCommon = useTranslations('common');
   const centerLatLng: [number, number] = [center.lat, center.lng];
@@ -344,6 +371,7 @@ export default function InteractiveMap({
         zoom={zoom}
         className="h-full w-full rounded-xl"
         scrollWheelZoom={true}
+        zoomControl={true}
         style={{ zIndex: 0 }}
       >
         <TileLayer
@@ -354,12 +382,14 @@ export default function InteractiveMap({
 
         <MapContent 
           cafes={cafes} 
-          userLocation={userLocation} 
+          userLocation={userLocation}
+          userMarkerPalette={userMarkerPalette}
           onMarkerClick={onMarkerClick}
           onBoundsChanged={onBoundsChanged}
           onMapClick={onMapClick}
           center={center}
           zoom={zoom}
+          forceCenterUpdate={forceCenterUpdate}
         />
 
         {displayCafes.map((cafe) => {

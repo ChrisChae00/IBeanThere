@@ -22,9 +22,10 @@ interface MapSectionProps {
   locale: string;
   mapTitle: string;
   mapSubtitle: string;
+  userMarkerPalette?: string;
 }
 
-export default function MapSection({ locale, mapTitle, mapSubtitle }: MapSectionProps) {
+export default function MapSection({ locale, mapTitle, mapSubtitle, userMarkerPalette }: MapSectionProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function MapSection({ locale, mapTitle, mapSubtitle }: MapSection
           {mapSubtitle}
         </p>
       </div>
-      <MapWithFilters locale={locale} />
+      <MapWithFilters locale={locale} userMarkerPalette={userMarkerPalette} />
     </div>
   );
 }

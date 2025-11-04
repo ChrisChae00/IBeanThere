@@ -27,6 +27,7 @@ export const themes: Record<string, ThemePalette> = {
           cardShadow: '#8C5A3A', // Same as primary for morning coffee
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
+          userMarkerMap: '#D24C28', // Secondary color for user marker
         },   
       },
     espresso: {
@@ -55,6 +56,7 @@ export const themes: Record<string, ThemePalette> = {
           cardShadow: '#d4c7b8', // Same as primary for espresso
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
+          userMarkerMap: '#D24C28', // Secondary color for user marker
         },
       },
       matchaLatte: {
@@ -83,6 +85,7 @@ export const themes: Record<string, ThemePalette> = {
           cardShadow: '#85a035', // Same as primary for matcha latte
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
+          userMarkerMap: '#E78E17', // Secondary color for user marker
         },
       },
   vanillaLatte: {
@@ -111,6 +114,7 @@ export const themes: Record<string, ThemePalette> = {
       cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
       pending: '#9CA3AF', // Gray for pending markers
       white: '#FFFFFF', // White for contrast
+      userMarkerMap: '#E78E17', // Secondary color for user marker
     },
   },
 };
