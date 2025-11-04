@@ -17,7 +17,8 @@ from app.models.cafe import (
 )
 from app.services.osm_service import OSMService
 from app.database.supabase import get_supabase_client
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_admin_role
+from app.core.permissions import Permission, require_permission
 from supabase import Client
 from datetime import datetime, timezone
 
@@ -180,6 +181,7 @@ async def search_cafes(
                 "status": cafe.get("status", "pending"),
                 "verification_count": cafe.get("verification_count", 1),
                 "verified_at": cafe.get("verified_at"),
+                "admin_verified": cafe.get("admin_verified", False),
                 "navigator_id": cafe.get("navigator_id"),
                 "vanguard_ids": cafe.get("vanguard_ids", []),
                 "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
@@ -233,6 +235,7 @@ async def get_cafe_details(cafe_id: str):
             "status": cafe.get("status", "pending"),
             "verification_count": cafe.get("verification_count", 1),
             "verified_at": cafe.get("verified_at"),
+            "admin_verified": cafe.get("admin_verified", False),
             "navigator_id": cafe.get("navigator_id"),
             "vanguard_ids": cafe.get("vanguard_ids", []),
             "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
@@ -442,4 +445,180 @@ async def register_cafe(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to register cafe: {str(e)}"
+        )
+
+@router.get("/admin/pending", response_model=CafeSearchResponse)
+async def get_pending_cafes(
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get all pending cafes (Admin only).
+    
+    Returns:
+        List of pending cafes with verification info
+    """
+    try:
+        result = supabase.table("cafes").select("*").eq("status", "pending").order("created_at", desc=True).execute()
+        
+        if not result.data:
+            return CafeSearchResponse(cafes=[], total_count=0)
+        
+        cafes = []
+        for cafe in result.data:
+            cafes.append(CafeResponse(
+                id=str(cafe.get("id")),
+                name=cafe.get("name"),
+                address=cafe.get("address"),
+                latitude=cafe.get("latitude"),
+                longitude=cafe.get("longitude"),
+                phone=cafe.get("phone"),
+                website=cafe.get("website"),
+                description=cafe.get("description"),
+                status=cafe.get("status", "pending"),
+                verification_count=cafe.get("verification_count", 1),
+                verified_at=cafe.get("verified_at"),
+                admin_verified=cafe.get("admin_verified", False),
+                navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
+                vanguard_ids=cafe.get("vanguard_ids", []),
+                created_at=cafe.get("created_at"),
+                updated_at=cafe.get("updated_at")
+            ))
+        
+        return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
+        
+    except Exception as e:
+        print(f"Error getting pending cafes: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get pending cafes: {str(e)}"
+        )
+
+@router.post("/admin/{cafe_id}/verify")
+async def admin_verify_cafe(
+    cafe_id: str,
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Admin verify a cafe (Admin only).
+    Sets status to 'verified' and admin_verified to True.
+    Founding Crew information is preserved (1 or 2 users).
+    
+    Args:
+        cafe_id: ID of the cafe to verify
+        
+    Returns:
+        Updated cafe information
+    """
+    try:
+        # Get cafe
+        cafe_result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        
+        if not cafe_result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        cafe = cafe_result.data
+        
+        # Update cafe: set status to verified, admin_verified to True
+        update_data = {
+            "status": "verified",
+            "admin_verified": True,
+            "verified_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Verify count remains as is (1 or 2)
+        # Founding Crew info is preserved
+        
+        result = supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
+        
+        if not result.data or len(result.data) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to verify cafe"
+            )
+        
+        updated_cafe = result.data[0]
+        
+        return {
+            "message": "Cafe verified by admin",
+            "cafe": CafeResponse(
+                id=str(updated_cafe.get("id")),
+                name=updated_cafe.get("name"),
+                address=updated_cafe.get("address"),
+                latitude=updated_cafe.get("latitude"),
+                longitude=updated_cafe.get("longitude"),
+                phone=updated_cafe.get("phone"),
+                website=updated_cafe.get("website"),
+                description=updated_cafe.get("description"),
+                status=updated_cafe.get("status"),
+                verification_count=updated_cafe.get("verification_count"),
+                verified_at=updated_cafe.get("verified_at"),
+                admin_verified=updated_cafe.get("admin_verified", False),
+                navigator_id=str(updated_cafe.get("navigator_id")) if updated_cafe.get("navigator_id") else None,
+                vanguard_ids=updated_cafe.get("vanguard_ids", []),
+                created_at=updated_cafe.get("created_at"),
+                updated_at=updated_cafe.get("updated_at")
+            )
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error verifying cafe: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify cafe: {str(e)}"
+        )
+
+@router.delete("/admin/{cafe_id}")
+async def admin_delete_cafe(
+    cafe_id: str,
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Delete a cafe (Admin only).
+    Hard delete - removes cafe and related data (cascade).
+    
+    Args:
+        cafe_id: ID of the cafe to delete
+        
+    Returns:
+        Success message
+    """
+    try:
+        # Check if cafe exists
+        cafe_result = supabase.table("cafes").select("id").eq("id", cafe_id).single().execute()
+        
+        if not cafe_result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        # Delete cafe (cascade deletes checkins and visits)
+        result = supabase.table("cafes").delete().eq("id", cafe_id).execute()
+        
+        return {
+            "message": "Cafe deleted successfully",
+            "cafe_id": cafe_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error deleting cafe: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete cafe: {str(e)}"
         )

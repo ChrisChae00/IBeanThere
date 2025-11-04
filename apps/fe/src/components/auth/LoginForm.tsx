@@ -60,7 +60,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
           localStorage.removeItem('rememberMe');
         }
         
-        // Redirect to home page or dashboard
+        // Redirect to home page
         window.location.href = `/${locale}`;
       }
     } catch (err) {

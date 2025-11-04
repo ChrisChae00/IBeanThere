@@ -84,6 +84,70 @@ function BoundsUpdater({
   return null;
 }
 
+function MapClickHandler({
+  onMapClick
+}: {
+  onMapClick?: (coordinates: { lat: number; lng: number }) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!onMapClick) return;
+
+    const handleMapClick = (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      onMapClick({ lat, lng });
+    };
+
+    map.on('click', handleMapClick);
+
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [map, onMapClick]);
+
+  return null;
+}
+
+function MapCenterController({
+  center,
+  zoom
+}: {
+  center: { lat: number; lng: number };
+  zoom: number;
+}) {
+  const map = useMap();
+  const lastCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    const currentCenter = map.getCenter();
+    const newCenter = { lat: center.lat, lng: center.lng };
+    
+    const isSamePosition = lastCenterRef.current &&
+      Math.abs(lastCenterRef.current.lat - newCenter.lat) < 0.0001 &&
+      Math.abs(lastCenterRef.current.lng - newCenter.lng) < 0.0001;
+    
+    if (isSamePosition) {
+      return;
+    }
+
+    const isCurrentPosition = 
+      Math.abs(currentCenter.lat - newCenter.lat) < 0.0001 &&
+      Math.abs(currentCenter.lng - newCenter.lng) < 0.0001 &&
+      Math.abs(map.getZoom() - zoom) < 0.1;
+
+    if (!isCurrentPosition) {
+      map.setView([newCenter.lat, newCenter.lng], zoom, {
+        animate: true,
+        duration: 0.5
+      });
+      lastCenterRef.current = newCenter;
+    }
+  }, [center, zoom, map]);
+
+  return null;
+}
+
 function ClusterLayer({
   cafes,
   onMarkerClick,
@@ -224,18 +288,26 @@ function MapContent({
   cafes,
   userLocation,
   onMarkerClick,
-  onBoundsChanged
+  onBoundsChanged,
+  onMapClick,
+  center,
+  zoom
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
+  onMapClick?: (coordinates: { lat: number; lng: number }) => void;
+  center: { lat: number; lng: number };
+  zoom: number;
 }) {
   const map = useMap();
   
   return (
     <>
+      <MapCenterController center={center} zoom={zoom} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
+      {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
       <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
       {userLocation && (
         <Marker
@@ -255,7 +327,8 @@ export default function InteractiveMap({
   zoom,
   userLocation,
   onMarkerClick,
-  onBoundsChanged
+  onBoundsChanged,
+  onMapClick
 }: MapProps) {
   const t = useTranslations('map');
   const tCommon = useTranslations('common');
@@ -265,12 +338,13 @@ export default function InteractiveMap({
   const displayCafes = shouldUseClustering ? [] : cafes;
 
   return (
-    <div className="relative w-full h-full min-h-[500px]">
+    <div className="relative w-full h-full min-h-[500px] z-0">
       <MapContainer
         center={centerLatLng}
         zoom={zoom}
         className="h-full w-full rounded-xl"
         scrollWheelZoom={true}
+        style={{ zIndex: 0 }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -283,6 +357,9 @@ export default function InteractiveMap({
           userLocation={userLocation} 
           onMarkerClick={onMarkerClick}
           onBoundsChanged={onBoundsChanged}
+          onMapClick={onMapClick}
+          center={center}
+          zoom={zoom}
         />
 
         {displayCafes.map((cafe) => {

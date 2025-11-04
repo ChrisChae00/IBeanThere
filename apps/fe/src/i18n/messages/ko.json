@@ -17,7 +17,8 @@
       "sign_up": "회원가입",
       "profile": "프로필",
       "settings": "설정",
-      "get_started": "시작하기"
+      "get_started": "시작하기",
+      "admin_dashboard": "관리자 대시보드"
     },
     "landing": {
       "hero": {
@@ -158,8 +159,23 @@
       "check_in": "체크인",
       "check_ins": "체크인",
       "location_button": "위치",
-      "track_button": "추적",
-      "tracking_button": "추적 중"
+      "location_sharing": "위치공유",
+      "location_sharing_on": "위치공유 중"
+    },
+
+    "visit": {
+      "nearby_cafes_found": "근처 카페 발견",
+      "check_in_button": "체크인",
+      "check_in_success": "체크인 완료!",
+      "check_in_failed": "체크인 실패",
+      "location_too_far": "체크인하려면 카페에서 50m 이내에 있어야 합니다",
+      "already_checked_in_today": "오늘 이미 체크인하셨습니다",
+      "location_permission_required": "체크인을 위해 위치 권한이 필요합니다",
+      "location_accuracy_low": "위치 정확도가 너무 낮습니다. 다시 시도해주세요",
+      "distance": "거리",
+      "meters": "m",
+      "dismiss": "닫기",
+      "multiple_cafes": "여러 카페가 근처에 있습니다"
     },
     
     "errors": {
@@ -181,5 +197,42 @@
       "username_reserved": "예약된 사용자명",
       "username_only_numbers": "숫자만으로는 불가능",
       "username_too_simple": "사용자명이 너무 단순함"
+    },
+    
+    "admin": {
+      "dashboard_title": "관리자 대시보드",
+      "dashboard_subtitle": "대기 중인 카페를 관리하고 커뮤니티 제출물을 검증하세요",
+      "pending_cafes_title": "대기 중인 카페",
+      "pending_cafes_description": "승인 대기 중인 카페를 검토하고 검증하세요",
+      "pending": "대기 중",
+      "verify": "검증",
+      "delete": "삭제",
+      "verifying": "검증 중...",
+      "deleting": "삭제 중...",
+      "loading": "로딩 중...",
+      "retry": "다시 시도",
+      "no_pending_cafes": "대기 중인 카페가 없습니다",
+      "error_fetching": "대기 중인 카페를 가져오는데 실패했습니다",
+      "error_verifying": "카페 검증에 실패했습니다",
+      "error_deleting": "카페 삭제에 실패했습니다",
+      "error_admin_required": "관리자 권한이 필요합니다",
+      "error_not_authenticated": "인증이 필요합니다",
+      "error_cafe_not_found": "카페를 찾을 수 없습니다",
+      "error_unknown": "예상치 못한 오류가 발생했습니다",
+      "confirm_verify_title": "카페 검증",
+      "confirm_verify_message": "이 카페를 검증하시겠습니까? 검증되면 Founding Crew 정보가 보존됩니다.",
+      "confirm_delete_title": "카페 삭제",
+      "confirm_delete_message": "이 카페를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "confirm": "확인",
+      "confirm_delete": "삭제",
+      "cancel": "취소",
+      "verification_count": "검증 횟수",
+      "created_at": "생성일",
+      "phone": "전화번호",
+      "website": "웹사이트",
+      "description": "설명",
+      "founding_crew": "Founding Crew",
+      "navigator": "개척자",
+      "vanguards": "선봉대"
     }
   }

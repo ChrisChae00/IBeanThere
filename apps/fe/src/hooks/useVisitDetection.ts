@@ -28,14 +28,14 @@ interface VisitDetectionConfig {
 const DEFAULT_CONFIG: VisitDetectionConfig = {
   enabled: false,
   checkInterval: 30000, // Check every 30 seconds
-  proximityRadius: 100, // 100 meters
-  minStayDuration: 300000, // 5 minutes
+  proximityRadius: 50, // 50 meters
+  minStayDuration: 0, // Immediate detection
   maxStayDuration: 600000, // 10 minutes
 };
 
 export function useVisitDetection(
   cafes: CafeMapData[],
-  onVisitDetected?: (cafe: CafeMapData, duration: number) => void,
+  onVisitDetected?: (cafes: CafeMapData[]) => void,
   config: Partial<VisitDetectionConfig> = {}
 ) {
   const fullConfig = { ...DEFAULT_CONFIG, ...config };
@@ -46,7 +46,6 @@ export function useVisitDetection(
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   
   const watchIdRef = useRef<number | null>(null);
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const staysRef = useRef<Map<string, CafeStay>>(new Map());
 
   // Calculate distance between two points (Haversine formula)
@@ -70,9 +69,15 @@ export function useVisitDetection(
   }, []);
 
   // Check proximity to cafes and update stays
-  const checkProximityToCafes = useCallback((location: LocationPoint) => {
+  const checkProximityToCafes = useCallback((location: LocationPoint, accuracy?: number) => {
+    // Ignore locations with low accuracy (> 50m)
+    if (accuracy && accuracy > 50) {
+      return;
+    }
+
     const now = Date.now();
     const updatedStays = new Map(staysRef.current);
+    const nearbyCafes: CafeMapData[] = [];
     
     cafes.forEach(cafe => {
       const distance = calculateDistance(
@@ -86,6 +91,8 @@ export function useVisitDetection(
       const existingStay = updatedStays.get(cafe.id);
       
       if (isNearby) {
+        nearbyCafes.push(cafe);
+        
         if (existingStay) {
           // Update existing stay
           const duration = now - existingStay.enteredAt;
@@ -94,33 +101,14 @@ export function useVisitDetection(
             lastSeenAt: now,
             duration
           });
-          
-          // Check if we should trigger visit detection
-          if (
-            !existingStay.notificationShown &&
-            duration >= fullConfig.minStayDuration &&
-            duration <= fullConfig.maxStayDuration
-          ) {
-            updatedStays.set(cafe.id, {
-              ...existingStay,
-              notificationShown: true,
-              duration
-            });
-            
-            // Trigger callback
-            if (onVisitDetected) {
-              const durationMinutes = Math.floor(duration / 60000);
-              onVisitDetected(cafe, durationMinutes);
-            }
-          }
         } else {
-          // New stay detected
+          // New stay detected - immediate notification
           updatedStays.set(cafe.id, {
             cafe,
             enteredAt: now,
             lastSeenAt: now,
             duration: 0,
-            notificationShown: false
+            notificationShown: true
           });
         }
       } else if (existingStay) {
@@ -131,6 +119,18 @@ export function useVisitDetection(
         }
       }
     });
+    
+    // Trigger callback with all nearby cafes (immediate detection)
+    if (nearbyCafes.length > 0 && onVisitDetected) {
+      const hasNewCafes = nearbyCafes.some(cafe => {
+        const stay = staysRef.current.get(cafe.id);
+        return !stay || !stay.notificationShown;
+      });
+      
+      if (hasNewCafes) {
+        onVisitDetected(nearbyCafes);
+      }
+    }
     
     staysRef.current = updatedStays;
     setNearbyStays(new Map(updatedStays));
@@ -190,7 +190,7 @@ export function useVisitDetection(
       return;
     }
 
-    // Start watching position
+    // Start watching position (foreground only)
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const location: LocationPoint = {
@@ -200,7 +200,7 @@ export function useVisitDetection(
         };
         
         setCurrentLocation(location);
-        checkProximityToCafes(location);
+        checkProximityToCafes(location, position.coords.accuracy);
       },
       (error) => {
         // Only log non-timeout errors to avoid console spam
@@ -209,32 +209,20 @@ export function useVisitDetection(
         }
       },
       {
-        enableHighAccuracy: false,  // Reduced accuracy for better performance
-        maximumAge: 30000,  // Accept cached location up to 30 seconds
-        timeout: 15000  // Increased timeout to 15 seconds
+        enableHighAccuracy: true,  // High accuracy for check-in
+        maximumAge: 10000,  // Accept cached location up to 10 seconds
+        timeout: 15000  // Timeout to 15 seconds
       }
     );
 
-    // Set up periodic checks
-    checkIntervalRef.current = setInterval(() => {
-      if (currentLocation) {
-        checkProximityToCafes(currentLocation);
-      }
-    }, fullConfig.checkInterval);
-
     setIsTracking(true);
-  }, [isTracking, requestPermission, checkProximityToCafes, fullConfig.checkInterval, currentLocation]);
+  }, [isTracking, requestPermission, checkProximityToCafes]);
 
   // Stop tracking
   const stopTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
-    }
-
-    if (checkIntervalRef.current) {
-      clearInterval(checkIntervalRef.current);
-      checkIntervalRef.current = null;
     }
 
     staysRef.current.clear();

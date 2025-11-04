@@ -41,6 +41,7 @@ class UserResponse(BaseModel):
     display_name: str  # if not set, username will be used
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
+    role: Optional[str] = None  # User role from public.users table ('user', 'admin', etc.)
     created_at: datetime
     updated_at: Optional[datetime] = None
 

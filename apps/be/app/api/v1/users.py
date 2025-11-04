@@ -22,7 +22,7 @@ async def get_user_profiles(display_name: str, supabase: Client = Depends(get_su
         List[UserPublicResponse]: List of user profiles with the same display name.
     """
     try:
-        users = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("display_name", display_name).execute()
+        users = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("display_name", display_name).execute()
         if not users or not users.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -52,7 +52,7 @@ async def get_user_profile_by_username(username: str, supabase: Client = Depends
         UserPublicResponse: The user profile.
     """
     try:
-        user = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("username", username).single().execute()
+        user = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("username", username).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -83,7 +83,7 @@ async def check_username_availability(
         dict: Availability status and username
     """
     try:
-        existing_user = await supabase.table("users").select("username").eq("username", username).execute()
+        existing_user = supabase.table("users").select("username").eq("username", username).execute()
         return {
             "available": len(existing_user.data) == 0,
             "username": username
@@ -110,7 +110,7 @@ async def check_display_name_availability(
         dict: Availability status and display_name
     """
     try:
-        existing_user = await supabase.table("users").select("display_name").eq("display_name", display_name).execute()
+        existing_user = supabase.table("users").select("display_name").eq("display_name", display_name).execute()
         return {
             "available": len(existing_user.data) == 0,
             "display_name": display_name
@@ -139,7 +139,7 @@ async def search_users(
         List[UserPublicResponse]: The list of users.
     """
     try:
-        users = await supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").ilike("display_name", f"%{query}%").limit(limit).execute()
+        users = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").ilike("display_name", f"%{query}%").limit(limit).execute()
         if not users or not users.data:
             return []
         return [UserPublicResponse(**user) for user in users.data]
@@ -169,7 +169,7 @@ async def get_my_profile(
         UserResponse: The user profile.
     """
     try: 
-        user = await supabase.table("users").select("*").eq("id", current_user.id).single().execute()
+        user = supabase.table("users").select("*").eq("id", current_user.id).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -186,6 +186,7 @@ async def get_my_profile(
             display_name=display_name,
             bio=user_data.get('bio'),
             avatar_url=user_data.get('avatar_url'),
+            role=user_data.get('role', 'user'),  # Get role from public.users table
             created_at=user_data['created_at'],
             updated_at=user_data.get('updated_at')
         )
@@ -219,36 +220,67 @@ async def register_user_profile(
     """
     try:
         # Check if profile already exists
-        existing_profile = await supabase.table("users").select("id").eq("id", current_user.id).execute()
+        existing_profile = supabase.table("users").select("*").eq("id", current_user.id).execute()
         
-        if existing_profile.data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User profile already exists"
-            )
-        
-        # Check username uniqueness
-        existing_username = await supabase.table("users").select("id").eq("username", profile.username).execute()
+        # Check username uniqueness (exclude current user if updating)
+        existing_username = supabase.table("users").select("id").eq("username", profile.username).execute()
         if existing_username.data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already taken"
-            )
+            # If username exists and belongs to different user, raise error
+            for user in existing_username.data:
+                if user.get("id") != current_user.id:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Username already taken"
+                    )
         
         # Use username as default if display_name is not provided
         display_name = profile.display_name or profile.username
         
-        # Create new profile
-        new_profile = await supabase.table("users").insert({
-            "id": current_user.id,
-            "email": current_user.email,  # Extracted from JWT
-            "username": profile.username,
-            "display_name": display_name,
-            "avatar_url": profile.avatar_url,
-            "bio": profile.bio
-        }).execute()
-        
-        profile_data = new_profile.data[0]
+        # If profile already exists (created by trigger), update it
+        if existing_profile.data and len(existing_profile.data) > 0:
+            # Update existing profile
+            from datetime import datetime, timezone
+            
+            update_data = {
+                "username": profile.username,
+                "display_name": display_name,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Only update fields that are provided
+            if profile.avatar_url is not None:
+                update_data["avatar_url"] = profile.avatar_url
+            if profile.bio is not None:
+                update_data["bio"] = profile.bio
+            
+            updated_profile = supabase.table("users").update(update_data).eq("id", current_user.id).execute()
+            
+            if not updated_profile.data or len(updated_profile.data) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update user profile"
+                )
+            
+            profile_data = updated_profile.data[0]
+        else:
+            # Create new profile (shouldn't happen if trigger works, but keep as fallback)
+            new_profile = supabase.table("users").insert({
+                "id": current_user.id,
+                "email": current_user.email,  # Extracted from JWT
+                "username": profile.username,
+                "display_name": display_name,
+                "avatar_url": profile.avatar_url,
+                "bio": profile.bio,
+                "role": "user"  # Default role for new users
+            }).execute()
+            
+            if not new_profile.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create user profile"
+                )
+            
+            profile_data = new_profile.data[0]
         return UserRegistrationResponse(
             id=profile_data["id"],
             username=profile_data["username"],
@@ -258,9 +290,13 @@ async def register_user_profile(
     except HTTPException:
         raise
     except Exception as e:
+        # Log the actual error for debugging
+        import traceback
+        print(f"Error registering user profile: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to register user profile"
+            detail=f"Failed to register user profile: {str(e)}"
         ) from e
 
 @router.patch("/me", response_model=UserResponse)
@@ -286,7 +322,7 @@ async def update_my_profile(
         
         # Check username uniqueness if username is being updated
         if profile.username is not None:
-            existing_username = await supabase.table("users").select("id").eq("username", profile.username).execute()
+            existing_username = supabase.table("users").select("id").eq("username", profile.username).execute()
             if existing_username.data and existing_username.data[0]["id"] != current_user.id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -303,10 +339,11 @@ async def update_my_profile(
         if profile.bio is not None:
             update_data["bio"] = profile.bio
         
-        # Add updated_at timestamp 
-        update_data["updated_at"] = "now()"
+        # Add updated_at timestamp
+        from datetime import datetime, timezone
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
         
-        updated_profile = await supabase.table("users").update(update_data).eq("id", current_user.id).execute()
+        updated_profile = supabase.table("users").update(update_data).eq("id", current_user.id).execute()
         
         if not updated_profile.data:
             raise HTTPException(

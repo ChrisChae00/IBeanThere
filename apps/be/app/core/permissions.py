@@ -1,6 +1,5 @@
 from enum import Enum
 from fastapi import HTTPException, status, Depends
-from app.api.deps import get_current_user
 
 class UserRole(str, Enum):
     """User roles for the API."""
@@ -31,6 +30,11 @@ class Permission(str, Enum):
     UPDATE_USER = "user:update"
     DELETE_USER = "user:delete"
     REQUEST_ACCOUNT_DELETION = "user:request_deletion"
+    
+    # Admin permissions
+    ADMIN_VERIFY_CAFE = "admin:verify_cafe"
+    ADMIN_DELETE_CAFE = "admin:delete_cafe"
+    ADMIN_VIEW_PENDING = "admin:view_pending"
 
 # Permission by role
 ROLE_PERMISSIONS = {
@@ -49,6 +53,9 @@ ROLE_PERMISSIONS = {
         Permission.UPDATE_USER,
         Permission.DELETE_USER,
         Permission.REQUEST_ACCOUNT_DELETION,
+        Permission.ADMIN_VERIFY_CAFE,
+        Permission.ADMIN_DELETE_CAFE,
+        Permission.ADMIN_VIEW_PENDING,
     ],
     UserRole.CAFE_OWNER: [
         Permission.READ_USER,
@@ -83,6 +90,8 @@ ROLE_PERMISSIONS = {
 
 def require_permission(required_permission: Permission):
     """Decorator to check if the user has the required permission."""
+    from app.api.deps import get_current_user
+    
     async def permission_checker(current_user = Depends(get_current_user)):
         user_role = getattr(current_user, "role", None)
         

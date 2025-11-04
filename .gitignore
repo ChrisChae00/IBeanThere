@@ -63,6 +63,7 @@ Thumbs.db
 map-feature-implementation.plan.md
 VISITS_AND_TRENDING.md
 apps/be/scripts/
+/docs/
 
 # Temporary/Development files
 *.tmp

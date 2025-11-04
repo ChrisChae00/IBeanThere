@@ -17,7 +17,8 @@
       "sign_up": "Sign Up",
       "profile": "Profile",
       "settings": "Settings",
-      "get_started": "Get Started"
+      "get_started": "Get Started",
+      "admin_dashboard": "Admin Dashboard"
     },
     "landing": {
       "hero": {
@@ -159,8 +160,23 @@
       "check_in": "check-in",
       "check_ins": "check-ins",
       "location_button": "Location",
-      "track_button": "Track",
-      "tracking_button": "Tracking"
+      "location_sharing": "Location Sharing",
+      "location_sharing_on": "Location Sharing On"
+    },
+
+    "visit": {
+      "nearby_cafes_found": "Nearby cafes found",
+      "check_in_button": "Check In",
+      "check_in_success": "Check-in successful!",
+      "check_in_failed": "Check-in failed",
+      "location_too_far": "You must be within 50m of the cafe to check in",
+      "already_checked_in_today": "You have already checked in today",
+      "location_permission_required": "Location permission is required for check-in",
+      "location_accuracy_low": "Location accuracy is too low. Please try again",
+      "distance": "Distance",
+      "meters": "m",
+      "dismiss": "Dismiss",
+      "multiple_cafes": "Multiple cafes nearby"
     },
 
     "errors": {
@@ -182,5 +198,42 @@
       "username_reserved": "This username is reserved",
       "username_only_numbers": "Cannot be only numbers",
       "username_too_simple": "Username is too simple"
+    },
+    
+    "admin": {
+      "dashboard_title": "Admin Dashboard",
+      "dashboard_subtitle": "Manage pending cafes and verify community submissions",
+      "pending_cafes_title": "Pending Cafes",
+      "pending_cafes_description": "Review and verify cafes waiting for approval",
+      "pending": "Pending",
+      "verify": "Verify",
+      "delete": "Delete",
+      "verifying": "Verifying...",
+      "deleting": "Deleting...",
+      "loading": "Loading...",
+      "retry": "Retry",
+      "no_pending_cafes": "No pending cafes",
+      "error_fetching": "Failed to fetch pending cafes",
+      "error_verifying": "Failed to verify cafe",
+      "error_deleting": "Failed to delete cafe",
+      "error_admin_required": "Admin access required",
+      "error_not_authenticated": "Authentication required",
+      "error_cafe_not_found": "Cafe not found",
+      "error_unknown": "An unexpected error occurred",
+      "confirm_verify_title": "Verify Cafe",
+      "confirm_verify_message": "Are you sure you want to verify this cafe? This will mark it as verified and preserve the Founding Crew information.",
+      "confirm_delete_title": "Delete Cafe",
+      "confirm_delete_message": "Are you sure you want to delete this cafe? This action cannot be undone.",
+      "confirm": "Confirm",
+      "confirm_delete": "Delete",
+      "cancel": "Cancel",
+      "verification_count": "Verification Count",
+      "created_at": "Created At",
+      "phone": "Phone",
+      "website": "Website",
+      "description": "Description",
+      "founding_crew": "Founding Crew",
+      "navigator": "Navigator",
+      "vanguards": "Vanguards"
     }
   }

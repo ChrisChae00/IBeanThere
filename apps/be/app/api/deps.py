@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from supabase import Client
 from app.database.supabase import get_supabase_client
+from app.core.permissions import UserRole
 
 # Security scheme for JWT tokens
 security = HTTPBearer()
@@ -11,18 +12,18 @@ async def get_current_user(
     supabase: Client = Depends(get_supabase_client)
 ):
     """
-    Validates Supabase JWT token and returns current user.
+    Validates Supabase JWT token and returns current user with role.
     
     - Requires: Authorization: Bearer <token>
-    - Returns: User object
+    - Returns: User object with role attribute
     - Raises: 401 if token is invalid or missing
     """
     token = credentials.credentials
     
     try:
         # Validate token with Supabase
-        user = supabase.auth.get_user(token)
-        if not user or not user.user:
+        auth_user = supabase.auth.get_user(token)
+        if not auth_user or not auth_user.user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired token"
@@ -30,13 +31,25 @@ async def get_current_user(
         
         # Check if user email is verified (optional check - can be disabled for testing)
         # Uncomment the following lines if email verification is required
-        # if not user.user.email_confirmed_at:
+        # if not auth_user.user.email_confirmed_at:
         #     raise HTTPException(
         #         status_code=status.HTTP_401_UNAUTHORIZED,
         #         detail="Email not verified"
         #     )
+        
+        # Get user role from public.users table
+        user_id = auth_user.user.id
+        try:
+            user_profile = supabase.table("users").select("role").eq("id", user_id).single().execute()
+            role = user_profile.data.get("role", "user") if user_profile.data else "user"
+        except Exception:
+            # If users table doesn't exist or user not found, default to 'user'
+            role = "user"
+        
+        # Add role to user object
+        auth_user.user.role = role
             
-        return user.user
+        return auth_user.user
     except HTTPException:
         raise
     except Exception as e:
@@ -86,3 +99,28 @@ async def verify_review_owner(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"
         ) from e
+
+async def require_admin_role(
+    current_user = Depends(get_current_user)
+):
+    """
+    Dependency to verify that the current user has admin role.
+    
+    Args:
+        current_user: Current authenticated user
+        
+    Returns:
+        current_user: Current user if admin
+        
+    Raises:
+        HTTPException(403) if user is not admin
+    """
+    user_role = getattr(current_user, "role", None)
+    
+    if user_role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required for this action"
+        )
+    
+    return current_user

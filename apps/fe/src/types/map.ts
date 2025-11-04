@@ -67,7 +67,19 @@ export interface MapProps {
   userLocation?: { lat: number; lng: number };
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
+  onMapClick?: (coordinates: { lat: number; lng: number }) => void;
 }
 
 export type GoogleMapProps = MapProps;
+
+export interface NearbyCafe extends CafeMapData {
+  distance: number;
+}
+
+export interface CheckInResult {
+  success: boolean;
+  visitId?: string;
+  message?: string;
+  error?: string;
+}
 

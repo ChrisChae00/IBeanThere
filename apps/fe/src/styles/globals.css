@@ -238,3 +238,27 @@ body {
 .palette-info strong {
   color: var(--color-text);
 }
+
+/* Leaflet Map z-index fixes */
+.leaflet-container {
+  z-index: 0 !important;
+  position: relative;
+}
+
+.leaflet-popup,
+.leaflet-control {
+  z-index: 40 !important;
+}
+
+.leaflet-pane {
+  z-index: 400 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 40 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 40 !important;
+}

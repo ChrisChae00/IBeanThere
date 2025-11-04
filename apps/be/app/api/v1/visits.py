@@ -9,6 +9,7 @@ from app.models.visit import (
     TrendingCafeResponse,
     CafeStatsResponse
 )
+from app.models.error import ErrorCode, ErrorDetail, create_error_response
 from app.database.supabase import get_supabase_client
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -114,7 +115,15 @@ async def record_cafe_visit(
         if not cafe_result.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Cafe not found"
+                detail=create_error_response(
+                    error_code=ErrorCode.CAFE_NOT_FOUND,
+                    message="Cafe not found",
+                    details=[ErrorDetail(
+                        field="cafe_id",
+                        message=f"Cafe with ID {actual_cafe_id} does not exist",
+                        value=actual_cafe_id
+                    )]
+                )
             )
         
         cafe_lat = float(cafe_result.data["latitude"])
@@ -136,11 +145,19 @@ async def record_cafe_visit(
             c = 2 * asin(sqrt(a))
             distance_meters = int(c * 6371000)  # Radius of earth in meters
             
-            # Validate distance (should be within 200 meters)
-            if distance_meters > 200:
+            # Validate distance (should be within 50 meters)
+            if distance_meters > 50:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Check-in location too far from cafe ({distance_meters}m). Must be within 200m."
+                    detail=create_error_response(
+                        error_code=ErrorCode.DISTANCE_TOO_FAR,
+                        message=f"Check-in location too far from cafe",
+                        details=[ErrorDetail(
+                            field="distance",
+                            message=f"Distance is {distance_meters}m, must be within 50m",
+                            value=distance_meters
+                        )]
+                    )
                 )
         
         # Create visit record
@@ -200,13 +217,29 @@ async def confirm_visit(
         if not visit_check.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Visit not found"
+                detail=create_error_response(
+                    error_code=ErrorCode.VISIT_NOT_FOUND,
+                    message="Visit not found",
+                    details=[ErrorDetail(
+                        field="visit_id",
+                        message=f"Visit with ID {visit_id} does not exist",
+                        value=visit_id
+                    )]
+                )
             )
         
         if visit_check.data["user_id"] != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to update this visit"
+                detail=create_error_response(
+                    error_code=ErrorCode.NOT_RESOURCE_OWNER,
+                    message="Not authorized to update this visit",
+                    details=[ErrorDetail(
+                        field="user_id",
+                        message="You do not own this visit",
+                        value=user_id
+                    )]
+                )
             )
         
         # Update visit
@@ -302,6 +335,86 @@ async def get_cafe_stats(cafe_id: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get cafe stats: {str(e)}"
+        )
+
+@router.get("/cafes/{cafe_id}/visits", response_model=List[CafeVisitResponse])
+async def get_cafe_visits(
+    cafe_id: str,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0)
+):
+    """
+    Get all visits for a specific cafe.
+    
+    - Returns paginated list of visits
+    - Ordered by visited_at (most recent first)
+    - Used for duplicate check-in detection
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        result = supabase.table("cafe_visits").select("*").eq(
+            "cafe_id", cafe_id
+        ).order(
+            "visited_at", desc=True
+        ).range(offset, offset + limit - 1).execute()
+        
+        if not result.data:
+            return []
+        
+        return result.data
+        
+    except Exception as e:
+        print(f"Error getting cafe visits: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get cafe visits: {str(e)}"
+        )
+
+@router.get("/cafes/{cafe_id}/visits/check-duplicate")
+async def check_duplicate_visit(
+    cafe_id: str,
+    user_id: str = Query(..., description="User ID to check")
+):
+    """
+    Check if user has already checked in to this cafe today.
+    
+    - Returns duplicate status and visit info if exists
+    - Used by frontend to prevent duplicate check-ins
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        from datetime import datetime, timezone, timedelta
+        
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        result = supabase.table("cafe_visits").select("*").eq(
+            "cafe_id", cafe_id
+        ).eq(
+            "user_id", user_id
+        ).gte(
+            "visited_at", today_start.isoformat()
+        ).execute()
+        
+        if result.data and len(result.data) > 0:
+            return {
+                "is_duplicate": True,
+                "visit": result.data[0],
+                "message": "You have already checked in to this cafe today"
+            }
+        else:
+            return {
+                "is_duplicate": False,
+                "visit": None,
+                "message": "No duplicate visit found"
+            }
+        
+    except Exception as e:
+        print(f"Error checking duplicate visit: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check duplicate visit: {str(e)}"
         )
 
 @router.post("/admin/update-trending-scores")

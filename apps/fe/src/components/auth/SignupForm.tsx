@@ -119,7 +119,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -129,12 +129,67 @@ export default function SignupForm({ locale }: SignupFormProps) {
         },
       });
 
-      if (error) {
-        setError(translateError(error.message));
-      } else {
-        // Redirect to home page or show success message
-        window.location.href = `/${locale}`;
+      if (authError) {
+        setError(translateError(authError.message));
+        setIsLoading(false);
+        return;
       }
+
+      // After successful Supabase Auth signup, register user profile in backend
+      // Note: Trigger automatically creates basic profile in public.users
+      // This API call is just for updating username/display_name
+      if (authData.user && authData.session?.access_token) {
+        const accessToken = authData.session.access_token;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        
+        // Use fetch with keepalive for reliable delivery even during page unload
+        // This ensures the request completes even if user navigates away
+        try {
+          const payload = JSON.stringify({
+            username: formData.username,
+            display_name: formData.username,
+          });
+          
+          // Use fetch with keepalive to ensure request completes during redirect
+          fetch(`${apiUrl}/api/v1/users/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            body: payload,
+            keepalive: true, // Critical: allows request to complete even during page unload
+          }).then(response => {
+            if (response.ok) {
+              if (process.env.NODE_ENV === 'development') {
+                console.info('Profile API call succeeded - username and display_name updated');
+              }
+            } else {
+              if (process.env.NODE_ENV === 'development') {
+                response.json().then(errorData => {
+                  console.warn('Profile API call failed (non-critical):', errorData.detail || 'Unknown error');
+                }).catch(() => {
+                  console.warn('Profile API call failed (non-critical):', response.status, response.statusText);
+                });
+              }
+            }
+          }).catch(error => {
+            // Network errors are expected if page unloads - silently ignore
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Profile API call error (non-critical - may be due to page navigation):', error.message || error);
+            }
+          });
+        } catch (error) {
+          // Silently ignore - trigger handles basic profile
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Profile API call setup error (non-critical):', error);
+          }
+        }
+      }
+
+      // Redirect immediately after auth signup succeeds
+      // keepalive: true ensures the API call completes even during redirect
+      window.location.href = `/${locale}`;
     } catch (err) {
       setError(tErrors('unknown'));
     } finally {

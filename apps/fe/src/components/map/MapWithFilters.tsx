@@ -3,13 +3,16 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import InteractiveMap from './InteractiveMap';
-import VisitConfirmation from '../visits/VisitConfirmation';
+import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
-import { CafeMapData, FranchiseFilter } from '@/types/map';
+import { useAuth } from '@/hooks/useAuth';
+import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
+import { checkIn } from '@/lib/api/visits';
+import { calculateDistance } from '@/lib/utils/checkIn';
 
 interface MapWithFiltersProps {
   locale: string;
@@ -17,11 +20,12 @@ interface MapWithFiltersProps {
 
 export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   const t = useTranslations('map');
+  const tVisit = useTranslations('visit');
   const { coords, getCurrentLocation, error: locationError } = useLocation();
   const { cafes: allCafes, isLoading, error, searchCafes } = useMapData();
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
-  const [pendingVisit, setPendingVisit] = useState<{ cafe: CafeMapData; duration: number } | null>(null);
+  const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
   const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
@@ -91,19 +95,25 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
     }, 500); // 500ms debounce for faster response
   }, [searchCafes]);
 
-  // Request user location on mount
+  const handleLocationClick = () => {
+    getCurrentLocation();
+  };
+
   useEffect(() => {
     getCurrentLocation();
   }, [getCurrentLocation]);
 
-  // Update center when user location is obtained (don't search yet, wait for map bounds)
   useEffect(() => {
-    if (coords && !center) {
+    if (coords) {
       const newCenter = { lat: coords.latitude, lng: coords.longitude };
-      setCenter(newCenter);
-      lastSearchRef.current = newCenter;
+      if (!center || 
+          Math.abs(center.lat - newCenter.lat) > 0.0001 || 
+          Math.abs(center.lng - newCenter.lng) > 0.0001) {
+        setCenter(newCenter);
+        lastSearchRef.current = newCenter;
+      }
     }
-  }, [coords]);
+  }, [coords, center]);
 
   // Filter cafes based on franchise filter
   const { filteredCafes, localCafes, franchiseCafes } = useMemo(() => {
@@ -146,19 +156,28 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
   // Visit detection hook
   const { isTracking, nearbyStays, startTracking, stopTracking, permissionGranted } = useVisitDetection(
     filteredCafes,
-    (cafe, duration) => {
-      setPendingVisit({ cafe, duration });
+    (cafes) => {
+      if (!coords) return;
+      
+      const cafesWithDistance: NearbyCafe[] = cafes.map(cafe => ({
+        ...cafe,
+        distance: calculateDistance(
+          coords.latitude,
+          coords.longitude,
+          cafe.latitude,
+          cafe.longitude
+        )
+      }));
+      
+      setNearbyCafes(cafesWithDistance);
     },
     {
       enabled: trackingEnabled,
-      minStayDuration: 300000,
-      maxStayDuration: 600000
+      minStayDuration: 0,
+      maxStayDuration: 600000,
+      proximityRadius: 50
     }
   );
-
-  const handleLocationClick = async () => {
-    await getCurrentLocation();
-  };
 
   const handleCafeClick = async (cafe: CafeMapData) => {
     setSelectedCafe(cafe);
@@ -176,39 +195,36 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
     }
   };
 
-  const handleVisitConfirm = async (cafe: CafeMapData, duration: number) => {
+  const handleCheckIn = async (cafe: NearbyCafe) => {
     const userId = 'temp-user-id';
     
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      
-      if (coords) {
-        await fetch(`${apiUrl}/api/v1/cafes/${cafe.id}/visit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            cafe_id: cafe.id,
-            check_in_lat: coords.latitude,
-            check_in_lng: coords.longitude,
-            duration_minutes: duration,
-            auto_detected: true,
-            confirmed: true
-          })
-        });
-        
-        console.log(`✅ Visit confirmed for ${cafe.name}`);
-      }
-    } catch (error) {
-      console.error('Failed to record visit:', error);
+    if (!coords) {
+      alert(tVisit('location_permission_required'));
+      return;
     }
     
-    setPendingVisit(null);
+    try {
+      const result = await checkIn(
+        cafe,
+        coords.latitude,
+        coords.longitude,
+        userId
+      );
+      
+      if (result.success) {
+        alert(tVisit('check_in_success'));
+        setNearbyCafes([]);
+      } else {
+        alert(result.error || tVisit('check_in_failed'));
+      }
+    } catch (error) {
+      console.error('Failed to check in:', error);
+      alert(tVisit('check_in_failed'));
+    }
   };
 
-  const handleVisitDismiss = () => {
-    setPendingVisit(null);
+  const handleDismissAlert = () => {
+    setNearbyCafes([]);
   };
 
   const toggleTracking = () => {
@@ -252,7 +268,7 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
               }
             `}
           >
-            <span>{isTracking ? t('tracking_button') : t('track_button')}</span>
+            <span>{isTracking ? t('location_sharing_on') : t('location_sharing')}</span>
           </button>
         </div>
       </div>
@@ -290,13 +306,13 @@ export default function MapWithFilters({ locale }: MapWithFiltersProps) {
         )}
       </div>
 
-      {/* Visit Confirmation */}
-      {pendingVisit && (
-        <VisitConfirmation
-          cafe={pendingVisit.cafe}
-          duration={pendingVisit.duration}
-          onConfirm={handleVisitConfirm}
-          onDismiss={handleVisitDismiss}
+      {/* Nearby Cafes Alert */}
+      {nearbyCafes.length > 0 && coords && (
+        <NearbyCafeAlert
+          cafes={nearbyCafes}
+          userLocation={{ lat: coords.latitude, lng: coords.longitude }}
+          onCheckIn={handleCheckIn}
+          onDismiss={handleDismissAlert}
         />
       )}
     </div>

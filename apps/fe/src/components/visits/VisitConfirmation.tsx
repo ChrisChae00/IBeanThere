@@ -16,7 +16,7 @@ export default function VisitConfirmation({
   duration,
   onConfirm,
   onDismiss,
-  autoHideAfter = 30000
+  autoHideAfter = 120000
 }: VisitConfirmationProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);

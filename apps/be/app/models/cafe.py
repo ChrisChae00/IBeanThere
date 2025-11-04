@@ -63,6 +63,7 @@ class CafeResponse(BaseModel):
     status: str  # 'pending' | 'verified'
     verification_count: int
     verified_at: Optional[datetime] = None
+    admin_verified: bool = False
     
     # Founding Crew
     navigator_id: Optional[str] = None
