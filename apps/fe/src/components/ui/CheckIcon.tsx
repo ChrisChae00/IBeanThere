@@ -1,4 +1,4 @@
-export default function CheckIcon({ 
+export function CheckIcon({ 
   className = "", 
   size = 24 
 }: { 
@@ -24,3 +24,5 @@ export default function CheckIcon({
     </svg>
   );
 }
+
+export default CheckIcon;

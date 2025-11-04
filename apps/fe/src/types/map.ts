@@ -8,8 +8,6 @@ export interface CafeMapData {
   isOpen?: boolean;
   phoneNumber?: string;
   website?: string;
-  googleTypes?: string[];
-  googleReviewCount?: number;
   status?: 'pending' | 'verified' | 'disputed';
   verification_count?: number;
   foundingCrew?: {
@@ -70,8 +68,6 @@ export interface MapProps {
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;
 }
-
-export type GoogleMapProps = MapProps;
 
 export interface NearbyCafe extends CafeMapData {
   distance: number;
