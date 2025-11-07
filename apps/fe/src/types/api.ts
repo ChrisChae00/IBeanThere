@@ -6,10 +6,17 @@ export interface CafeSearchResponse {
     longitude: number;
     rating?: number;
     address: string;
-    phone_number?: string;
+    phone?: string;
     website?: string;
-    status?: 'pending' | 'verified' | 'disputed';
-    verification_count?: number;
+    description?: string;
+    status: 'pending' | 'verified' | 'disputed';
+    verification_count: number;
+    verified_at?: string;
+    admin_verified?: boolean;
+    navigator_id?: string;
+    vanguard_ids?: string[];
+    created_at: string;
+    updated_at?: string;
     founding_crew?: {
       navigator?: {
         user_id: string;
@@ -22,6 +29,7 @@ export interface CafeSearchResponse {
       }>;
     };
   }>;
+  total_count: number;
   cache_hit?: boolean;
 }
 

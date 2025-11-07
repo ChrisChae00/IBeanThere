@@ -7,6 +7,7 @@ import MobileMenu from './MobileMenu';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
 import ProfileDropdown from './ProfileDropdown';
+import DiscoverDropdown from './DiscoverDropdown';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Header({
@@ -31,19 +32,7 @@ export default function Header({
 
           {/* Desktop Navigation - Left Side */}
           <nav className="hidden lg:flex items-center space-x-3 ml-12">
-            <Link 
-              href={`/${locale}/trending-cafes`}
-              className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors"
-            >
-              {t('trending_cafes')}
-            </Link>
-            <div className="h-6 w-px bg-[var(--color-border)]" />
-            <Link 
-              href={`/${locale}/new-spot`}
-              className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors"
-            >
-              {t('new_spot')}
-            </Link>
+            <DiscoverDropdown locale={locale} />
             <div className="h-6 w-px bg-[var(--color-border)]" />
             <Link 
               href={`/${locale}/my-coffee-logs`}

@@ -25,10 +25,10 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
   }, [duration, onClose]);
 
   const bgColor = {
-    success: 'bg-success',
-    error: 'bg-error',
-    warning: 'bg-warning',
-    info: 'bg-primary'
+    success: 'bg-[var(--color-success)]',
+    error: 'bg-[var(--color-error)]',
+    warning: 'bg-[var(--color-warning)]',
+    info: 'bg-[var(--color-primary)]'
   }[type];
 
   const icon = {

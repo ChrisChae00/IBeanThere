@@ -12,8 +12,7 @@ export default function LocationPermissionOverlay({
   onRequestPermission,
   permissionState
 }: LocationPermissionOverlayProps) {
-  const t = useTranslations('trending_cafes');
-  const tMap = useTranslations('map');
+  const t = useTranslations('map');
 
   return (
     <div className="relative w-full h-full min-h-[450px] bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-background)] rounded-xl overflow-hidden border border-[var(--color-border)]">
@@ -61,7 +60,7 @@ export default function LocationPermissionOverlay({
           {permissionState === 'prompt' && (
             <div className="mb-6 p-4 bg-[var(--color-accent)]/5 border border-[var(--color-accent)]/20 rounded-lg">
               <p className="text-sm text-[var(--color-text-secondary)]">
-                {tMap('browser_settings_guide')}
+                {t('browser_settings_guide')}
               </p>
             </div>
           )}

@@ -8,12 +8,17 @@ import { Avatar } from '@/components/ui';
 
 export default function MobileMenu({ locale }: { locale: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDiscoverExpanded, setIsDiscoverExpanded] = useState(false);
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
   const { user, isLoading, signOut } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setIsDiscoverExpanded(false);
+  };
+  const toggleDiscover = () => setIsDiscoverExpanded(!isDiscoverExpanded);
 
   return (
     <>
@@ -91,20 +96,44 @@ export default function MobileMenu({ locale }: { locale: string }) {
             >
               {t('home')}
             </Link>
-            <Link 
-              href={`/${locale}/trending-cafes`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('trending_cafes')}
-            </Link>
-            <Link 
-              href={`/${locale}/new-spot`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('new_spot')}
-            </Link>
+
+            {/* Discover Section - Expandable */}
+            <div>
+              <button
+                onClick={toggleDiscover}
+                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px]"
+              >
+                <span>{t('discover')}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isDiscoverExpanded && (
+                <div className="bg-[var(--color-background)]/50">
+                  <Link 
+                    href={`/${locale}/discover/explore-map`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('explore_map')}
+                  </Link>
+                  <Link 
+                    href={`/${locale}/discover/pending-spots`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('pending_spots')}
+                  </Link>
+                </div>
+              )}
+            </div>
+
             <Link 
               href={`/${locale}/my-coffee-logs`}
               onClick={closeMenu}

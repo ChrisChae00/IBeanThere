@@ -7,6 +7,7 @@ import LocationPermissionOverlay from './LocationPermissionOverlay';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import { ToggleButton } from '@/components/ui';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
@@ -20,9 +21,11 @@ import { calculateDistance } from '@/lib/utils/checkIn';
 interface MapWithFiltersProps {
   locale: string;
   userMarkerPalette?: string;
+  mapTitle?: string;
+  mapSubtitle?: string;
 }
 
-export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFiltersProps) {
+export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, mapSubtitle }: MapWithFiltersProps) {
   const t = useTranslations('map');
   const tVisit = useTranslations('visit');
   const { coords, getCurrentLocation, error: locationError } = useLocation();
@@ -37,6 +40,7 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
+  const [userManuallyDisabled, setUserManuallyDisabled] = useState(false);
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
     blockedFranchises: [],
@@ -112,25 +116,49 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
         const state = result.state as 'prompt' | 'granted' | 'denied';
         setLocationPermission(state);
         
-        // Auto-start location tracking if permission already granted
-        if (state === 'granted') {
-          setTrackingEnabled(true);
-          getCurrentLocation().catch((error) => {
-            // Silently handle timeout errors during auto-load
-            if (process.env.NODE_ENV === 'development') {
-              console.debug('Location auto-load timeout (expected):', error.message);
-            }
-          });
+        // Auto-start location tracking if permission already granted (only if user hasn't manually disabled)
+        if (state === 'granted' && !userManuallyDisabled) {
+          getCurrentLocation()
+            .then(() => {
+              setTrackingEnabled(true);
+            })
+            .catch((error) => {
+              // Silently handle timeout errors during auto-load
+              if (process.env.NODE_ENV === 'development') {
+                console.debug('Location auto-load timeout (expected):', error.message);
+              }
+              // Still enable tracking even if initial location fetch fails
+              setTrackingEnabled(true);
+            });
         }
         
         result.onchange = () => {
-          setLocationPermission(result.state as 'prompt' | 'granted' | 'denied');
+          const newState = result.state as 'prompt' | 'granted' | 'denied';
+          setLocationPermission(newState);
+          
+          // Auto-start tracking when permission changes to granted (only if user hasn't manually disabled)
+          if (newState === 'granted' && !trackingEnabled && !userManuallyDisabled) {
+            getCurrentLocation()
+              .then(() => {
+                setTrackingEnabled(true);
+              })
+              .catch((error) => {
+                if (process.env.NODE_ENV === 'development') {
+                  console.debug('Location auto-load timeout (expected):', error.message);
+                }
+                setTrackingEnabled(true);
+              });
+          } else if (newState !== 'granted' && trackingEnabled) {
+            // Stop tracking if permission is revoked
+            setTrackingEnabled(false);
+            setUserManuallyDisabled(false);
+          }
         };
       }).catch(() => {
         setLocationPermission('prompt');
       });
     }
-  }, [getCurrentLocation]);
+  }, [getCurrentLocation, trackingEnabled, userManuallyDisabled]);
 
   // Update center when location is available
   useEffect(() => {
@@ -142,23 +170,59 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
   }, [coords]);
 
   const handleLocationClick = () => {
-    getCurrentLocation().catch((error) => {
-      // User-initiated action - show toast notification
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('Location request failed:', error.message);
-      }
-      showToast(t('location_error'), 'error');
-    });
-    setForceCenterUpdate(true);
-    setTimeout(() => setForceCenterUpdate(false), 100);
+    // If coords already exist, update center immediately
+    if (coords) {
+      const newCenter = { lat: coords.latitude, lng: coords.longitude };
+      setCenter(newCenter);
+      setForceCenterUpdate(true);
+      setTimeout(() => setForceCenterUpdate(false), 100);
+    }
+    
+    // Try to get fresh location
+    getCurrentLocation()
+      .then(() => {
+        // Location successfully retrieved - center will be updated by useEffect
+        setForceCenterUpdate(true);
+        setTimeout(() => setForceCenterUpdate(false), 100);
+      })
+      .catch((error) => {
+        // Only show error for critical failures, not timeouts
+        // Timeout errors keep previous coords, so location is still available
+        if (error.message === 'Location request timeout') {
+          // Use cached/previous location - center already updated above if coords exist
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Location request timeout, using cached location');
+          }
+          // If coords exist, center was already updated above
+          if (coords) {
+            setForceCenterUpdate(true);
+            setTimeout(() => setForceCenterUpdate(false), 100);
+          }
+        } else if (error.message === 'Location permission denied') {
+          // Permission denied - don't show error as it's handled elsewhere
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Location permission denied');
+          }
+        } else {
+          // Other errors - show notification
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Location request failed:', error.message);
+          }
+          showToast(t('location_error'), 'error');
+        }
+      });
   };
 
-  const handleRequestPermission = async () => {
+  const handleRequestPermission = async (): Promise<boolean> => {
     try {
       await getCurrentLocation();
       setLocationPermission('granted');
+      // Auto-start tracking when permission is granted
+      setTrackingEnabled(true);
+      return true;
     } catch (error) {
       setLocationPermission('denied');
+      return false;
     }
   };
 
@@ -286,72 +350,99 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
     if (trackingEnabled) {
       stopTracking();
       setTrackingEnabled(false);
+      setUserManuallyDisabled(true);
     } else {
+      setUserManuallyDisabled(false);
       try {
         if (locationPermission !== 'granted') {
-          await handleRequestPermission();
+          const permissionGranted = await handleRequestPermission();
+          // If permission request failed, handleRequestPermission already set permission to 'denied'
+          // Don't show error message here as it's handled internally
+          if (!permissionGranted) {
+            return;
+          }
         }
         if (coords || locationPermission === 'granted') {
           startTracking();
           setTrackingEnabled(true);
         }
       } catch (error) {
+        // Only show error for unexpected errors, not permission-related ones
         if (process.env.NODE_ENV === 'development') {
           console.debug('Failed to start tracking:', error);
         }
-        showToast(t('location_error'), 'error');
+        // Only show error if it's not a permission denial (which is already handled)
+        if (error instanceof Error && error.message !== 'Location permission denied') {
+          showToast(t('location_error'), 'error');
+        }
       }
     }
   };
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <FranchiseFilterComponent
-          filter={franchiseFilter}
-          onFilterChange={setFranchiseFilter}
-          totalCafes={allCafes.length}
-          localCafes={localCafes}
-          franchiseCafes={franchiseCafes}
-        />
-        
-        <div className="flex gap-2">
-          <button
-            onClick={handleLocationClick}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-4 py-2 rounded-lg hover:bg-[var(--color-surface-2)] transition-colors flex items-center gap-2 text-sm font-medium min-h-[44px]"
-          >
-            <span>📍</span>
-            <span>{t('location_button')}</span>
-          </button>
-          
-          <button
-            onClick={toggleTracking}
-            className={`
-              px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium min-h-[44px]
-              ${isTracking 
-                ? 'bg-[var(--color-primary)] text-white' 
-                : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'
-              }
-            `}
-          >
-            <span>{isTracking ? t('location_sharing_on') : t('location_sharing')}</span>
-          </button>
+      {/* Header: Title/Subtitle on left, Controls on right - Same line */}
+      <div className="flex items-start justify-between gap-4 mb-2">
+        {/* Left side: Title and Subtitle with Results Info */}
+        <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {mapTitle && (
+              <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
+                {mapTitle}
+              </h2>
+            )}
+            {mapSubtitle && (
+              <p className="text-[var(--color-text-secondary)]">
+                {mapSubtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {/* Right side: Controls and Results Info - No left margin, right-aligned */}
+        <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-auto">
+          <div className="flex items-center gap-2">
+            <FranchiseFilterComponent
+              filter={franchiseFilter}
+              onFilterChange={setFranchiseFilter}
+              totalCafes={allCafes.length}
+              localCafes={localCafes}
+              franchiseCafes={franchiseCafes}
+            />
+            
+            <ToggleButton
+              checked={isTracking}
+              onChange={(checked) => {
+                if (checked) {
+                  setUserManuallyDisabled(false);
+                  toggleTracking();
+                } else {
+                  stopTracking();
+                  setTrackingEnabled(false);
+                  setUserManuallyDisabled(true);
+                }
+              }}
+              onLabel={t('location_sharing_on_short')}
+              offLabel={t('location_sharing')}
+              disabled={locationPermission === 'denied'}
+              className="min-w-[80px]"
+            />
+          </div>
+          {/* Results Info - Compact */}
+          <div className="text-xs text-[var(--color-text-secondary)] text-right mt-2">
+            {filteredCafes.length} of {allCafes.length} cafes
+            {isTracking && nearbyStays.length > 0 && (
+              <span className="ml-2 text-[var(--color-primary)]">
+                · {nearbyStays.length} nearby
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Results Info */}
-      <div className="text-sm text-[var(--color-text-secondary)] mb-3">
-        {filteredCafes.length} of {allCafes.length} cafes
-        {isTracking && nearbyStays.length > 0 && (
-          <span className="ml-2 text-[var(--color-primary)]">
-            · {nearbyStays.length} nearby
-          </span>
-        )}
-      </div>
+
 
       {/* Map */}
-      <div className="flex-1 min-h-[450px]">
+      <div className="flex-1 min-h-[400px]">
         {locationPermission !== 'granted' ? (
           <LocationPermissionOverlay
             onRequestPermission={handleRequestPermission}
@@ -361,7 +452,7 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
           <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full flex items-center justify-center bg-[var(--color-surface)]">
             <div className="text-center">
               <LoadingSpinner size="lg" />
-              <p className="text-[var(--color-text-secondary)] mt-4">{t('loading_location')}</p>
+              <p className="text-[var(--color-text-secondary)] mt-4 text-sm">{t('loading_location')}</p>
             </div>
           </div>
         ) : (
@@ -375,6 +466,7 @@ export default function MapWithFilters({ locale, userMarkerPalette }: MapWithFil
               onMarkerClick={handleCafeClick}
               onBoundsChanged={handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
+              onLocationClick={handleLocationClick}
             />
           </div>
         )}

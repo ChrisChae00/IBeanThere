@@ -32,7 +32,7 @@ export default async function Hero({ locale }: { locale: string }) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
           <a
-            href={`/${locale}/trending-cafes`}
+            href={`/${locale}/discover/explore-map`}
             className="border-2 border-[var(--color-textHero)] bg-black/30 text-[var(--color-textHero)] px-6 py-3 rounded-full text-base font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-all min-h-[48px] flex items-center justify-center text-center"
           >
             {t('cta_secondary')}

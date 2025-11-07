@@ -67,7 +67,7 @@ export function useLocation() {
         },
         {
           enableHighAccuracy: true,
-          timeout: 20000, // Increased to 20 seconds to prevent timeout errors
+          timeout: 8000, // 8 seconds timeout
           maximumAge: 300000 // 5 minutes - use cached location
         }
       );

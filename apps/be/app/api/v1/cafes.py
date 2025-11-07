@@ -447,6 +447,54 @@ async def register_cafe(
             detail=f"Failed to register cafe: {str(e)}"
         )
 
+@router.get("/pending", response_model=CafeSearchResponse)
+async def get_pending_cafes_public(
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get all pending cafes (Public endpoint).
+    
+    Returns:
+        List of pending cafes ordered by creation date
+    """
+    try:
+        result = supabase.table("cafes").select("*").eq("status", "pending").order("created_at", desc=True).execute()
+        
+        if not result.data:
+            return CafeSearchResponse(cafes=[], total_count=0)
+        
+        cafes = []
+        for cafe in result.data:
+            cafes.append(CafeResponse(
+                id=str(cafe.get("id")),
+                name=cafe.get("name"),
+                address=cafe.get("address"),
+                latitude=cafe.get("latitude"),
+                longitude=cafe.get("longitude"),
+                phone=cafe.get("phone"),
+                website=cafe.get("website"),
+                description=cafe.get("description"),
+                status=cafe.get("status", "pending"),
+                verification_count=cafe.get("verification_count", 1),
+                verified_at=cafe.get("verified_at"),
+                admin_verified=cafe.get("admin_verified", False),
+                navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
+                vanguard_ids=cafe.get("vanguard_ids", []),
+                created_at=cafe.get("created_at"),
+                updated_at=cafe.get("updated_at")
+            ))
+        
+        return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
+        
+    except Exception as e:
+        print(f"Error getting pending cafes: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get pending cafes: {str(e)}"
+        )
+
 @router.get("/admin/pending", response_model=CafeSearchResponse)
 async def get_pending_cafes(
     current_user = Depends(require_admin_role),

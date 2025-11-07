@@ -14,8 +14,9 @@
     },
     "navigation": {
       "home": "홈",
-      "trending_cafes": "트렌딩 카페",
-      "new_spot": "새로운 스팟",
+      "discover": "발견하기",
+      "explore_map": "지도 탐색",
+      "pending_spots": "대기 중인 카페",
       "my_coffee_logs": "내 커피 일기",
       "shop": "공식몰",
       "sign_in": "로그인",
@@ -118,44 +119,11 @@
       "google": "구글",
       "facebook": "페이스북"
     },
-    "trending_cafes": {
-      "title": "트렌딩 카페",
-      "subtitle": "지금 가장 인기 있는 카페들을 발견해보세요",
-      "all": "전체",
-      "nearby": "근처",
-      "highest_rated": "높은 평점",
-      "most_reviewed": "많은 리뷰",
-      "map_title": "카페 지도",
-      "map_subtitle": "근처 카페 둘러보기",
-      "map_placeholder": "인터랙티브 지도 보기",
-      "top_cafes_title": "인기 트렌딩 카페",
-      "top_cafes_subtitle": "이번 주 가장 인기 있는 카페",
-      "top_cafe_name": "인기 카페 #{number}",
-      "sample_location": "서울, 대한민국",
-      "operating_hours": "오전 9:00 - 오후 4:00",
-      "operating_hours_1": "오전 8:00 - 오후 6:00",
-      "operating_hours_2": "오전 7:00 - 오후 8:00",
-      "operating_hours_3": "오전 10:00 - 오후 5:00",
-      "reviews": "리뷰",
-      "trending": "트렌딩",
-      "visit": "방문하기",
-      "load_more": "더 많은 카페 보기",
-      "location_permission_title": "주변 로컬 카페를 찾아보세요",
-      "location_permission_reason": "내 주변의 트렌딩 카페를 보려면 위치 공유가 필요해요",
-      "location_permission_denied_title": "위치 권한이 필요합니다",
-      "location_permission_denied_hint": "브라우저 설정에서 위치 권한을 허용해주세요. 설정 > 개인정보 보호 > 위치 서비스",
-      "sample_cafe_name": "샘플 카페 #{number}",
-      "no_cafes_available": "주변에 등록된 카페가 없습니다",
-      "be_the_navigator": "지역의 첫 개척자가 되어 카페를 등록해보세요!",
-      "share_location": "위치 공유하기",
-      "location_permission_retry": "다시 시도"
-    },
-
     "map": {
       "loading": "지도 로딩 중...",
       "error": "지도를 불러오는데 실패했습니다",
       "location_error": "위치를 가져오는데 실패했습니다. 다시 시도해주세요.",
-      "no_cafes_found": "근처에 카페를 찾을 수 없습니다",
+      "no_cafes_found": "주변에 등록된 카페가 없습니다",
       "get_directions": "길 찾기",
       "current_location": "내 위치",
       "search_this_area": "이 지역 검색",
@@ -174,10 +142,25 @@
       "check_in": "체크인",
       "check_ins": "체크인",
       "location_button": "위치",
-      "location_sharing": "위치공유",
+      "location_sharing": "위치 공유",
       "location_sharing_on": "위치공유 중",
+      "location_sharing_on_short": "켬",
       "browser_settings_guide": "브라우저 설정에서 위치 권한을 변경할 수 있습니다",
-      "loading_location": "위치를 불러오는 중..."
+      "loading_location": "위치를 불러오는 중...",
+      "map_title": "카페 지도",
+      "map_subtitle": "근처 카페 둘러보기",
+      "top_cafes_subtitle": "이번 주 가장 인기 있는 카페",
+      "trending": "트렌딩",
+      "visit": "방문하기",
+      "load_more": "더 많은 카페 보기",
+      "location_permission_title": "주변 로컬 카페를 찾아보세요",
+      "location_permission_reason": "내 주변의 트렌딩 카페를 보려면 위치 공유가 필요해요",
+      "location_permission_denied_title": "위치 권한이 필요합니다",
+      "location_permission_denied_hint": "브라우저 설정에서 위치 권한을 허용해주세요. 설정 > 개인정보 보호 > 위치 서비스",
+      "no_cafes_available": "주변에 등록된 카페가 없습니다",
+      "be_the_navigator": "지역의 첫 개척자가 되어 카페를 등록해보세요!",
+      "share_location": "위치 공유하기",
+      "location_permission_retry": "다시 시도"
     },
 
     "visit": {
@@ -252,5 +235,31 @@
       "founding_crew": "Founding Crew",
       "navigator": "개척자",
       "vanguards": "선봉대"
+    },
+
+    "discover": {
+      "explore_map": {
+        "title": "우리 동네 카페 찾기",
+        "subtitle": "근처의 멋진 카페를 찾아보세요",
+        "be_navigator": "개척자 되기",
+        "filter_all": "전체",
+        "filter_closest": "가까운 순",
+        "filter_top_rated": "높은 평점",
+        "filter_most_popular": "인기 순",
+        "trending_this_week": "이번 주 트렌딩",
+        "cafes_found": "개의 카페",
+        "no_location": "이 필터는 위치 정보가 필요합니다"
+      },
+      "pending_spots": {
+        "title": "대기 중인 카페",
+        "subtitle": "검증 대기 중인 새로운 카페들",
+        "register_new": "새 카페 등록",
+        "no_pending": "대기 중인 카페가 없습니다",
+        "view_on_map": "지도에서 보기",
+        "registered_by": "등록자",
+        "registered_on": "등록일",
+        "verification_count": "검증",
+        "loading": "대기 중인 카페 로딩 중..."
+      }
     }
   }

@@ -2,17 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import CoffeeBean from '@/components/ui/CoffeeBean';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const MapWithFilters = dynamic(() => import('./MapWithFilters'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-full min-h-[500px] bg-[var(--color-surface)] rounded-xl">
       <div className="text-center">
-        <div className="animate-spin mb-2 flex justify-center">
-          <CoffeeBean size="lg" />
-        </div>
-        <p className="text-[var(--color-text-secondary)]">Loading map...</p>
+        <LoadingSpinner size="lg" />
+        <p className="text-[var(--color-text-secondary)] mt-4">Loading map...</p>
       </div>
     </div>
   )
@@ -47,10 +45,8 @@ export default function MapSection({ locale, mapTitle, mapSubtitle, userMarkerPa
           <div className="flex-1 min-h-[450px] rounded-xl overflow-hidden">
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="animate-spin mb-2 flex justify-center">
-                  <CoffeeBean size="lg" />
-                </div>
-                <p className="text-[var(--color-text-secondary)]">Initializing map...</p>
+                <LoadingSpinner size="lg" />
+                <p className="text-[var(--color-text-secondary)] mt-4">Initializing map...</p>
               </div>
             </div>
           </div>
@@ -60,16 +56,13 @@ export default function MapSection({ locale, mapTitle, mapSubtitle, userMarkerPa
   }
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[600px] flex flex-col">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-1">
-          {mapTitle}
-        </h2>
-        <p className="text-[var(--color-text-secondary)] text-sm">
-          {mapSubtitle}
-        </p>
-      </div>
-      <MapWithFilters locale={locale} userMarkerPalette={userMarkerPalette} />
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[500px] flex flex-col">
+      <MapWithFilters 
+        locale={locale} 
+        userMarkerPalette={userMarkerPalette}
+        mapTitle={mapTitle}
+        mapSubtitle={mapSubtitle}
+      />
     </div>
   );
 }

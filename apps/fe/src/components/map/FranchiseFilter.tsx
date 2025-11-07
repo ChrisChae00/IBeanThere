@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { FranchiseFilter } from '@/types/map';
 
@@ -21,6 +21,24 @@ export default function FranchiseFilterComponent({
 }: FranchiseFilterProps) {
   const t = useTranslations('map');
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleModeChange = (mode: 'all' | 'local' | 'preferred') => {
     onFilterChange({
@@ -31,14 +49,14 @@ export default function FranchiseFilterComponent({
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-4 py-2 rounded-lg hover:bg-[var(--color-surface-2)] transition-colors flex items-center gap-2 text-sm font-medium min-h-[44px]"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-3 py-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors flex items-center gap-1.5 text-xs font-medium h-8 min-w-[80px]"
       >
-        <span>🔍</span>
-        <span>{t('filter_cafes')}</span>
-        <span className="ml-1 text-xs bg-[var(--color-primary)] text-white rounded-full px-2 py-0.5">
+        <span className="text-sm">🔍</span>
+        <span className="hidden sm:inline">{t('filter_cafes')}</span>
+        <span className="text-xs bg-[var(--color-primary)] text-white rounded-full px-2 py-0.5">
           {filter.filterMode === 'all' ? totalCafes : filter.filterMode === 'local' ? localCafes : 0}
         </span>
       </button>

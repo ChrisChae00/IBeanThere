@@ -14,8 +14,9 @@
     },
     "navigation": {
       "home": "Home",
-      "trending_cafes": "Trending Cafes",
-      "new_spot": "New Spot",
+      "discover": "Discover",
+      "explore_map": "Explore Map",
+      "pending_spots": "Pending Spots",
       "my_coffee_logs": "My Coffee Logs",
       "shop": "Shop",
       "sign_in": "Sign In",
@@ -119,39 +120,6 @@
       "facebook": "Facebook"
     },
     
-    "trending_cafes": {
-      "title": "Trending Cafes",
-      "subtitle": "Discover the most popular cafes in your area",
-      "all": "All",
-      "nearby": "Nearby",
-      "highest_rated": "Highest Rated",
-      "most_reviewed": "Most Reviewed",
-      "map_title": "Cafe Map",
-      "map_subtitle": "Discover cafes nearby",
-      "map_placeholder": "Interactive Map View",
-      "top_cafes_title": "Top Trending Cafes",
-      "top_cafes_subtitle": "Most popular cafes this week",
-      "top_cafe_name": "Top Cafe #{number}",
-      "sample_location": "Seoul, South Korea",
-      "operating_hours": "9:00 AM - 4:00 PM",
-      "operating_hours_1": "8:00 AM - 6:00 PM",
-      "operating_hours_2": "7:00 AM - 8:00 PM",
-      "operating_hours_3": "10:00 AM - 5:00 PM",
-      "reviews": "reviews",
-      "trending": "Trending",
-      "visit": "Visit",
-      "load_more": "Load More Cafes",
-      "location_permission_title": "Discover Local Cafes Nearby",
-      "location_permission_reason": "Location sharing is needed to see trending cafes near you",
-      "location_permission_denied_title": "Location Permission Required",
-      "location_permission_denied_hint": "Please allow location permission in browser settings. Settings > Privacy > Location Services",
-      "sample_cafe_name": "Sample Cafe #{number}",
-      "no_cafes_available": "No cafes registered nearby",
-      "be_the_navigator": "Be the first to discover and share cafes in your area!",
-      "share_location": "Share Location",
-      "location_permission_retry": "Try Again"
-    },
-
     "map": {
       "loading": "Loading map...",
       "error": "Failed to load map",
@@ -177,8 +145,23 @@
       "location_button": "Location",
       "location_sharing": "Location Sharing",
       "location_sharing_on": "Location Sharing On",
+      "location_sharing_on_short": "ON",
       "browser_settings_guide": "You can change location permission in browser settings",
-      "loading_location": "Loading your location..."
+      "loading_location": "Loading your location...",
+      "map_title": "Cafe Map",
+      "map_subtitle": "Discover cafes nearby",
+      "top_cafes_subtitle": "Most popular cafes this week",
+      "trending": "Trending",
+      "visit": "Visit",
+      "load_more": "Load More Cafes",
+      "location_permission_title": "Discover Local Cafes Nearby",
+      "location_permission_reason": "Location sharing is needed to see trending cafes near you",
+      "location_permission_denied_title": "Location Permission Required",
+      "location_permission_denied_hint": "Please allow location permission in browser settings. Settings > Privacy > Location Services",
+      "no_cafes_available": "No cafes registered nearby",
+      "be_the_navigator": "Be the first to discover and share cafes in your area!",
+      "share_location": "Share Location",
+      "location_permission_retry": "Try Again"
     },
 
     "visit": {
@@ -253,5 +236,31 @@
       "founding_crew": "Founding Crew",
       "navigator": "Navigator",
       "vanguards": "Vanguards"
+    },
+
+    "discover": {
+      "explore_map": {
+        "title": "Discover Your Coffee Neighborhood",
+        "subtitle": "Find amazing cafes near you",
+        "be_navigator": "Be a Navigator",
+        "filter_all": "All",
+        "filter_closest": "Closest",
+        "filter_top_rated": "Top Rated",
+        "filter_most_popular": "Most Popular",
+        "trending_this_week": "Trending This Week",
+        "cafes_found": "cafes found",
+        "no_location": "Location needed for this filter"
+      },
+      "pending_spots": {
+        "title": "Pending Spots",
+        "subtitle": "New cafes waiting for verification",
+        "register_new": "Register New Cafe",
+        "no_pending": "No pending cafes",
+        "view_on_map": "View on Map",
+        "registered_by": "Registered by",
+        "registered_on": "Registered on",
+        "verification_count": "verifications",
+        "loading": "Loading pending cafes..."
+      }
     }
   }

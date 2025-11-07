@@ -355,8 +355,12 @@ export default function InteractiveMap({
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
-  forceCenterUpdate
-}: MapProps & { forceCenterUpdate?: boolean }) {
+  forceCenterUpdate,
+  onLocationClick
+}: MapProps & { 
+  forceCenterUpdate?: boolean;
+  onLocationClick?: () => void;
+}) {
   const t = useTranslations('map');
   const tCommon = useTranslations('common');
   const centerLatLng: [number, number] = [center.lat, center.lng];
@@ -366,6 +370,17 @@ export default function InteractiveMap({
 
   return (
     <div className="relative w-full h-full min-h-[500px] z-0">
+      {/* Location button overlay on map */}
+      {onLocationClick && (
+        <button
+          onClick={onLocationClick}
+          className="absolute top-4 right-4 z-[1000] bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center text-3xl"
+          title={t('location_button')}
+        >
+          📍
+        </button>
+      )}
+      
       <MapContainer
         center={centerLatLng}
         zoom={zoom}
