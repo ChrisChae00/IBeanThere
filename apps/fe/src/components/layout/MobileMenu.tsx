@@ -5,10 +5,14 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui';
+import ThemeSwitcher from './ThemeSwitcher';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function MobileMenu({ locale }: { locale: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDiscoverExpanded, setIsDiscoverExpanded] = useState(false);
+  const [isCoffeeLogsExpanded, setIsCoffeeLogsExpanded] = useState(false);
+  const [isShopExpanded, setIsShopExpanded] = useState(false);
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
   const { user, isLoading, signOut } = useAuth();
@@ -17,8 +21,12 @@ export default function MobileMenu({ locale }: { locale: string }) {
   const closeMenu = () => {
     setIsOpen(false);
     setIsDiscoverExpanded(false);
+    setIsCoffeeLogsExpanded(false);
+    setIsShopExpanded(false);
   };
   const toggleDiscover = () => setIsDiscoverExpanded(!isDiscoverExpanded);
+  const toggleCoffeeLogs = () => setIsCoffeeLogsExpanded(!isCoffeeLogsExpanded);
+  const toggleShop = () => setIsShopExpanded(!isShopExpanded);
 
   return (
     <>
@@ -88,7 +96,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 overflow-y-auto py-4">
+          <nav className="flex-1 overflow-y-auto py-4 flex flex-col">
             <Link 
               href={`/${locale}`}
               onClick={closeMenu}
@@ -134,20 +142,79 @@ export default function MobileMenu({ locale }: { locale: string }) {
               )}
             </div>
 
-            <Link 
-              href={`/${locale}/my-coffee-logs`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('my_coffee_logs')}
-            </Link>
-            <Link 
-              href={`/${locale}/shop`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-            >
-              {t('shop')}
-            </Link>
+            {/* My Coffee Logs Section - Expandable */}
+            <div>
+              <button
+                onClick={toggleCoffeeLogs}
+                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px]"
+              >
+                <span>{t('my_coffee_logs')}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isCoffeeLogsExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isCoffeeLogsExpanded && (
+                <div className="bg-[var(--color-background)]/50">
+                  <Link 
+                    href={`/${locale}/my-coffee-logs/diary`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('coffee_logs_item_1')}
+                  </Link>
+                  <Link 
+                    href={`/${locale}/my-coffee-logs/stats`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('coffee_logs_item_2')}
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Shop Section - Expandable */}
+            <div>
+              <button
+                onClick={toggleShop}
+                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px]"
+              >
+                <span>{t('shop')}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isShopExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isShopExpanded && (
+                <div className="bg-[var(--color-background)]/50">
+                  <Link 
+                    href={`/${locale}/shop/products`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('shop_item_1')}
+                  </Link>
+                  <Link 
+                    href={`/${locale}/shop/gift`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
+                  >
+                    {t('shop_item_2')}
+                  </Link>
+                </div>
+              )}
+            </div>
             
             <div className="h-px bg-[var(--color-border)] my-4 mx-6" />
             
@@ -195,40 +262,47 @@ export default function MobileMenu({ locale }: { locale: string }) {
                 
                 <div className="h-px bg-[var(--color-border)] my-4 mx-6" />
                 
+                {/* Logout Button */}
                 <button
                   onClick={async () => {
                     await signOut();
                     closeMenu();
                     window.location.href = `/${locale}`;
                   }}
-                  className="block w-full px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] text-left"
+                  className="block w-full px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] text-center border border-[var(--color-border)] rounded-lg mx-6"
                 >
                   {tAuth('logout')}
                 </button>
               </>
             ) : (
-              <>
-                <Link 
-                  href={`/${locale}/signin`}
-                  onClick={closeMenu}
-                  className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center"
-                >
-                  {t('sign_in')}
-                </Link>
-                
-                {/* CTA Button */}
-                <div className="p-4 border-t border-[var(--color-border)]">
+              <div className="px-6 pb-4">
+                <div className="flex gap-2">
+                  <Link 
+                    href={`/${locale}/signin`}
+                    onClick={closeMenu}
+                    className="flex-1 px-4 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px] flex items-center justify-center border border-[var(--color-border)] rounded-full"
+                  >
+                    {t('sign_in')}
+                  </Link>
                   <Link 
                     href={`/${locale}/register`}
                     onClick={closeMenu}
-                    className="block w-full bg-[var(--color-primary)] text-white px-6 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center"
+                    className="flex-1 bg-[var(--color-primary)] text-white px-4 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center flex items-center justify-center"
                   >
                     {t('sign_up')}
                   </Link>
                 </div>
-              </>
+              </div>
             )}
           </nav>
+          
+          {/* Switchers - Fixed at bottom */}
+          <div className="px-6 py-4 border-t border-[var(--color-border)] mt-auto">
+            <div className="flex items-center justify-center gap-3">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
+          </div>
         </div>
       </div>
     </>
