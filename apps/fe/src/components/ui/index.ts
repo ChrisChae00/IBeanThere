@@ -15,3 +15,4 @@ export { default as FacebookIcon } from './FacebookIcon';
 export { default as ErrorAlert } from './ErrorAlert';
 export { default as StarRating } from './StarRating';
 export { default as ToggleButton } from './ToggleButton';
+export { default as PlusIcon } from './PlusIcon';

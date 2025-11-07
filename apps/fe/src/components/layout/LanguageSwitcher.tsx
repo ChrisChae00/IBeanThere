@@ -1,12 +1,11 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { locales } from '@/i18n/request';
 import { useEffect, useRef } from 'react';
 
 export default function LanguageSwitcher() {
   const pathname = usePathname();
-  const router = useRouter();
   const selectRef = useRef<HTMLSelectElement>(null);
   
   const currentLocale = pathname.split('/')[1] || 'en';
@@ -15,7 +14,7 @@ export default function LanguageSwitcher() {
     const segments = pathname.split('/');
     segments[1] = newLocale;
     const newPathname = segments.join('/');
-    router.push(newPathname);
+    window.location.href = newPathname;
   };
 
   const languageNames: Record<string, string> = {

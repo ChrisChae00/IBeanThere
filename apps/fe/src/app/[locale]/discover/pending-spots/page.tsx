@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getPendingCafes } from '@/lib/api/cafes';
 import { CafeSearchResponse} from '@/types/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { PlusIcon } from '@/components/ui';
 
 export default function PendingSpotsPage({
   params
@@ -61,7 +62,7 @@ export default function PendingSpotsPage({
             <button
               className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
-              <span className="text-xl">➕</span>
+              <PlusIcon size={20} className="text-[var(--color-primaryText)]" />
               {t('register_new')}
             </button>
           </div>
