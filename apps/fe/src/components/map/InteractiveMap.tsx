@@ -9,8 +9,9 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
-import { createCustomMarkerIcon, createUserLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
+import { createCustomMarkerIcon, createUserLocationIcon, createSelectedLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
 import { useTheme } from '@/contexts/ThemeContext';
+import UserLocationIcon from '@/components/ui/UserLocationIcon';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
@@ -285,6 +286,14 @@ function ClusterLayer({
               <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
             </div>
           ` : ''}
+          ${cafe.source_url ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <a href="${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: ${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                <span>📍</span>
+                <span style="text-decoration: underline;">View on Google Maps</span>
+              </a>
+            </div>
+          ` : ''}
         </div>
       `;
 
@@ -300,6 +309,7 @@ function ClusterLayer({
 function MapContent({
   cafes,
   userLocation,
+  selectedLocation,
   userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
@@ -310,6 +320,7 @@ function MapContent({
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
+  selectedLocation?: { lat: number; lng: number };
   userMarkerPalette?: string;
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
@@ -327,6 +338,8 @@ function MapContent({
     setMarkerKey(prev => prev + 1);
   }, [currentTheme.name]);
   
+  const selectedMarkerIcon = createSelectedLocationIcon(36);
+  
   return (
     <>
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
@@ -335,11 +348,20 @@ function MapContent({
       <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
       {userLocation && (
         <Marker
-          key={markerKey}
+          key={`user-${markerKey}`}
           position={[userLocation.lat, userLocation.lng]}
           icon={createUserLocationIcon(userMarkerPalette)}
         >
           <Popup>{t('current_location')}</Popup>
+        </Marker>
+      )}
+      {selectedLocation && (
+        <Marker
+          key={`selected-${markerKey}`}
+          position={[selectedLocation.lat, selectedLocation.lng]}
+          icon={selectedMarkerIcon}
+        >
+          <Popup>{t('selected_location')}</Popup>
         </Marker>
       )}
     </>
@@ -351,6 +373,7 @@ export default function InteractiveMap({
   center,
   zoom,
   userLocation,
+  selectedLocation,
   userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
@@ -374,10 +397,10 @@ export default function InteractiveMap({
       {onLocationClick && (
         <button
           onClick={onLocationClick}
-          className="absolute top-4 right-4 z-[1000] bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center text-3xl"
+          className="absolute top-4 right-4 z-[1000] bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
           title={t('location_button')}
         >
-          📍
+          <UserLocationIcon size={32} color="var(--color-text)" />
         </button>
       )}
       
@@ -398,6 +421,7 @@ export default function InteractiveMap({
         <MapContent 
           cafes={cafes} 
           userLocation={userLocation}
+          selectedLocation={selectedLocation}
           userMarkerPalette={userMarkerPalette}
           onMarkerClick={onMarkerClick}
           onBoundsChanged={onBoundsChanged}
@@ -485,6 +509,32 @@ export default function InteractiveMap({
                       >
                         {cafe.verification_count} {cafe.verification_count > 1 ? t('check_ins') : t('check_in')}
                       </p>
+                    </div>
+                  )}
+                  {cafe.source_url && (
+                    <div 
+                      style={{
+                        marginTop: '8px',
+                        paddingTop: '8px',
+                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
+                      }}
+                    >
+                      <a 
+                        href={cafe.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '12px',
+                          color: getCSSVariable('--color-primary', '#3b82f6'),
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <span>📍</span>
+                        <span style={{ textDecoration: 'underline' }}>View on Google Maps</span>
+                      </a>
                     </div>
                   )}
                 </div>

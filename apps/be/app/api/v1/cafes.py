@@ -33,6 +33,101 @@ def get_osm_service() -> OSMService:
         _osm_service = OSMService()
     return _osm_service
 
+def get_country_code_from_name(country_name: str) -> Optional[str]:
+    """
+    Convert country name to ISO 3166-1 alpha-2 country code.
+    
+    Args:
+        country_name: Country name from OSM
+        
+    Returns:
+        ISO 3166-1 alpha-2 country code or None
+    """
+    country_map = {
+        'Canada': 'ca',
+        'United States': 'us',
+        'United States of America': 'us',
+        'United Kingdom': 'gb',
+        'Australia': 'au',
+        'Germany': 'de',
+        'France': 'fr',
+        'South Korea': 'kr',
+        'Korea, Republic of': 'kr',
+        'Japan': 'jp',
+        'China': 'cn',
+        'India': 'in',
+        'Brazil': 'br',
+        'Mexico': 'mx',
+        'Spain': 'es',
+        'Italy': 'it',
+        'Netherlands': 'nl',
+        'Belgium': 'be',
+        'Switzerland': 'ch',
+        'Austria': 'at',
+        'Sweden': 'se',
+        'Norway': 'no',
+        'Denmark': 'dk',
+        'Finland': 'fi',
+        'Poland': 'pl',
+        'Portugal': 'pt',
+        'Greece': 'gr',
+        'Ireland': 'ie',
+        'New Zealand': 'nz',
+        'Singapore': 'sg',
+        'Malaysia': 'my',
+        'Thailand': 'th',
+        'Indonesia': 'id',
+        'Philippines': 'ph',
+        'Vietnam': 'vn',
+        'Taiwan': 'tw',
+        'Hong Kong': 'hk'
+    }
+    
+    return country_map.get(country_name)
+
+def detect_country_from_postcode(postcode: str) -> Optional[str]:
+    """
+    Detect country code from postcode format.
+    
+    Args:
+        postcode: Postcode string
+        
+    Returns:
+        ISO 3166-1 alpha-2 country code or None
+    """
+    import re
+    
+    # Remove spaces and convert to uppercase
+    clean_postcode = postcode.replace(' ', '').upper()
+    
+    # Canadian postcode: A1A 1A1 format (e.g., N2H 4B4)
+    if re.match(r'^[A-Z]\d[A-Z]\d[A-Z]\d$', clean_postcode):
+        return 'ca'
+    
+    # US ZIP code: 5 digits or 5+4 format (e.g., 12345 or 12345-6789)
+    if re.match(r'^\d{5}(-\d{4})?$', postcode):
+        return 'us'
+    
+    # UK postcode: Various formats (e.g., SW1A 1AA, M1 1AA)
+    if re.match(r'^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$', postcode.upper()):
+        return 'gb'
+    
+    # Australian postcode: 4 digits (e.g., 2000)
+    if re.match(r'^\d{4}$', postcode):
+        return 'au'
+    
+    # German postcode: 5 digits (e.g., 10115)
+    if re.match(r'^\d{5}$', postcode):
+        return 'de'
+    
+    # French postcode: 5 digits (e.g., 75001)
+    if re.match(r'^\d{5}$', postcode):
+        # Could be France or Germany, but France is more common
+        # This is a heuristic - may need refinement
+        pass
+    
+    return None
+
 def calculate_earth_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """
     Calculate distance between two coordinates using Haversine formula.
@@ -266,6 +361,8 @@ async def register_cafe(
     """
     try:
         # 1. Location verification (50m limit)
+        max_distance = 50
+        
         if request.user_location:
             user_lat = request.user_location.get("lat")
             user_lng = request.user_location.get("lng")
@@ -277,10 +374,10 @@ async def register_cafe(
                     float(request.longitude)
                 )
                 
-                if distance > 50:
+                if distance > max_distance:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"You must be within 50m of the cafe to register. Current distance: {distance:.0f}m"
+                        detail=f"You must be within {max_distance}m of the cafe to register. Current distance: {distance:.0f}m"
                     )
         
         # 2. OSM Cross Check - verify location exists
@@ -445,6 +542,250 @@ async def register_cafe(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to register cafe: {str(e)}"
+        )
+
+@router.get("/osm/search")
+async def search_osm_location(
+    q: str = Query(..., description="Postcode or address to search"),
+    lat: Optional[float] = Query(None, description="User's latitude for location-based filtering"),
+    lng: Optional[float] = Query(None, description="User's longitude for location-based filtering"),
+    countrycode: Optional[str] = Query(None, description="ISO 3166-1 alpha-2 country code (e.g., 'ca', 'us')"),
+    osm_service: OSMService = Depends(get_osm_service)
+):
+    """
+    Search for location by postcode or address using OSM Nominatim.
+    Returns coordinates for postcode lookup.
+    If user location is provided, prioritizes results near the user.
+    If countrycode is provided or detected from postcode, filters by country.
+    """
+    try:
+        # Try to detect country from postcode format if not provided
+        detected_country = None
+        if not countrycode:
+            detected_country = detect_country_from_postcode(q)
+        
+        countrycodes = countrycode or detected_country
+        
+        # Normalize postcode (remove spaces for better search)
+        normalized_query = q.replace(' ', '').upper()
+        
+        # Enhance query with country name if countrycode is provided
+        search_query = q
+        if countrycodes:
+            # Map country code to country name for better search results
+            country_names = {
+                'ca': 'Canada',
+                'us': 'United States',
+                'gb': 'United Kingdom',
+                'au': 'Australia',
+                'kr': 'South Korea',
+                'jp': 'Japan',
+                'de': 'Germany',
+                'fr': 'France',
+                'es': 'Spain',
+                'it': 'Italy',
+                'nl': 'Netherlands',
+                'be': 'Belgium',
+                'ch': 'Switzerland',
+                'at': 'Austria',
+                'se': 'Sweden',
+                'no': 'Norway',
+                'dk': 'Denmark',
+                'fi': 'Finland',
+                'pl': 'Poland',
+                'pt': 'Portugal',
+                'ie': 'Ireland',
+                'nz': 'New Zealand',
+                'sg': 'Singapore',
+                'my': 'Malaysia',
+                'th': 'Thailand',
+                'id': 'Indonesia',
+                'ph': 'Philippines',
+                'vn': 'Vietnam',
+                'tw': 'Taiwan',
+                'hk': 'Hong Kong',
+                'cn': 'China',
+                'in': 'India',
+                'br': 'Brazil',
+                'mx': 'Mexico'
+            }
+            country_name = country_names.get(countrycodes.lower())
+            if country_name:
+                # Try multiple query formats for better results
+                # Format 1: Original with country
+                # Format 2: Normalized (no spaces) with country
+                # Format 3: Original postcode only (fallback)
+                search_queries = [
+                    f"{q}, {country_name}",
+                    f"{normalized_query}, {country_name}",
+                    q
+                ]
+            else:
+                search_queries = [q, normalized_query]
+        else:
+            search_queries = [q, normalized_query]
+        
+        # If user location is provided, use viewbox to prioritize nearby results
+        viewbox = None
+        if lat is not None and lng is not None:
+            # Create a viewbox around user location (±5 degrees = ~500km radius)
+            viewbox = {
+                'west': lng - 5.0,
+                'south': lat - 5.0,
+                'east': lng + 5.0,
+                'north': lat + 5.0
+            }
+        
+        # Try multiple query formats
+        results = []
+        for query in search_queries:
+            # Try search with country filter first
+            temp_results = await osm_service.search(query, limit=10, countrycodes=countrycodes, viewbox=viewbox)
+            
+            if temp_results and len(temp_results) > 0:
+                results = temp_results
+                break
+            
+            # If no results with country filter, try without country filter
+            if countrycodes:
+                temp_results = await osm_service.search(query, limit=10, countrycodes=None, viewbox=viewbox)
+                if temp_results and len(temp_results) > 0:
+                    results = temp_results
+                    break
+        
+        if not results or len(results) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Location not found"
+            )
+        
+        # Filter results by country if countrycode is provided
+        if countrycodes:
+            filtered_results = []
+            country_names_map = {
+                'ca': ['canada'],
+                'us': ['united states', 'united states of america'],
+                'gb': ['united kingdom', 'great britain'],
+                'au': ['australia'],
+                'kr': ['south korea', 'korea, republic of', 'korea'],
+                'jp': ['japan'],
+                'de': ['germany'],
+                'fr': ['france'],
+                'es': ['spain'],
+                'it': ['italy'],
+                'nl': ['netherlands'],
+                'be': ['belgium'],
+                'ch': ['switzerland'],
+                'at': ['austria'],
+                'se': ['sweden'],
+                'no': ['norway'],
+                'dk': ['denmark'],
+                'fi': ['finland'],
+                'pl': ['poland'],
+                'pt': ['portugal'],
+                'ie': ['ireland'],
+                'nz': ['new zealand'],
+                'sg': ['singapore'],
+                'my': ['malaysia'],
+                'th': ['thailand'],
+                'id': ['indonesia'],
+                'ph': ['philippines'],
+                'vn': ['vietnam'],
+                'tw': ['taiwan'],
+                'hk': ['hong kong'],
+                'cn': ['china'],
+                'in': ['india'],
+                'br': ['brazil'],
+                'mx': ['mexico']
+            }
+            valid_country_names = country_names_map.get(countrycodes.lower(), [])
+            
+            for result in results:
+                result_address = result.get("address", {})
+                result_country = result_address.get("country", "").lower()
+                if valid_country_names and any(name in result_country for name in valid_country_names):
+                    filtered_results.append(result)
+            
+            if filtered_results:
+                results = filtered_results
+        
+        # If user location is provided, find the closest result
+        if lat is not None and lng is not None:
+            best_result = results[0]
+            min_distance = float('inf')
+            
+            for result in results:
+                result_lat = float(result.get("lat", 0))
+                result_lng = float(result.get("lon", 0))
+                distance = calculate_earth_distance(lat, lng, result_lat, result_lng)
+                
+                if distance < min_distance:
+                    min_distance = distance
+                    best_result = result
+            
+            first_result = best_result
+        else:
+            first_result = results[0]
+        
+        return {
+            "lat": float(first_result.get("lat", 0)),
+            "lng": float(first_result.get("lon", 0)),
+            "display_name": first_result.get("display_name", "")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error searching location: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to search location: {str(e)}"
+        )
+
+@router.get("/osm/reverse")
+async def reverse_geocode_location(
+    lat: float = Query(..., description="Latitude"),
+    lng: float = Query(..., description="Longitude"),
+    osm_service: OSMService = Depends(get_osm_service)
+):
+    """
+    Reverse geocode coordinates to address using OSM Nominatim.
+    Returns address information for given coordinates.
+    """
+    try:
+        osm_data = await osm_service.reverse_geocode(lat, lng)
+        
+        if not osm_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Address not found for this location"
+            )
+        
+        # Map country name to ISO 3166-1 alpha-2 code
+        country_name = osm_data.get("country", "")
+        country_code = get_country_code_from_name(country_name) if country_name else None
+        
+        return {
+            "display_name": osm_data.get("display_name", ""),
+            "road": osm_data.get("road"),
+            "city": osm_data.get("city"),
+            "province": osm_data.get("province"),
+            "country": country_name,
+            "country_code": country_code,
+            "postcode": osm_data.get("postcode")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error reverse geocoding location: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to reverse geocode location: {str(e)}"
         )
 
 @router.get("/pending", response_model=CafeSearchResponse)

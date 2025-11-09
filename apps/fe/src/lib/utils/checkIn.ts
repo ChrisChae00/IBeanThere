@@ -25,15 +25,16 @@ export function validateInitialDistance(
   userLat: number,
   userLng: number,
   cafeLat: number,
-  cafeLng: number
+  cafeLng: number,
+  maxDistance: number = MAX_CHECK_IN_DISTANCE
 ): { valid: boolean; distance: number; message?: string } {
   const distance = calculateDistance(userLat, userLng, cafeLat, cafeLng);
   
-  if (distance > MAX_CHECK_IN_DISTANCE) {
+  if (distance > maxDistance) {
     return {
       valid: false,
       distance,
-      message: `You must be within ${MAX_CHECK_IN_DISTANCE}m of the cafe to check in. Current distance: ${Math.round(distance)}m`
+      message: `You must be within ${maxDistance}m of the cafe to check in. Current distance: ${Math.round(distance)}m`
     };
   }
   

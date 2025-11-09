@@ -71,13 +71,15 @@ class OSMService:
             print(f"OSM reverse geocode error: {e}")
             return None
     
-    async def search(self, query: str, limit: int = 5) -> List[Dict]:
+    async def search(self, query: str, limit: int = 5, countrycodes: Optional[str] = None, viewbox: Optional[Dict[str, float]] = None) -> List[Dict]:
         """
         Search for places by name (forward geocoding).
         
         Args:
             query: Search query
             limit: Maximum number of results
+            countrycodes: ISO 3166-1alpha2 country codes (comma-separated, e.g., "ca,us")
+            viewbox: Bounding box to prioritize results (west, south, east, north)
             
         Returns:
             List of matching places
@@ -85,14 +87,24 @@ class OSMService:
         try:
             await asyncio.sleep(self.RATE_LIMIT)
             
+            params = {
+                'q': query,
+                'format': 'json',
+                'limit': limit,
+                'addressdetails': 1
+            }
+            
+            if countrycodes:
+                params['countrycodes'] = countrycodes
+            
+            if viewbox:
+                params['viewbox'] = f"{viewbox['west']},{viewbox['south']},{viewbox['east']},{viewbox['north']}"
+                params['bounded'] = 0  # Don't restrict to viewbox, just prioritize
+            
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
                     f"{self.BASE_URL}/search",
-                    params={
-                        'q': query,
-                        'format': 'json',
-                        'limit': limit
-                    },
+                    params=params,
                     headers=self.HEADERS
                 )
                 

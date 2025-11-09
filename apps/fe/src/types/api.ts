@@ -45,3 +45,49 @@ export interface TrendingCafeResponse {
   trending_rank?: number;
 }
 
+export interface CafeRegistrationRequest {
+  name: string;
+  latitude: number;
+  longitude: number;
+  address?: string;
+  phone?: string;
+  website?: string;
+  description?: string;
+  postcode?: string;
+  source_url?: string;
+  user_location?: {
+    lat: number;
+    lng: number;
+  };
+  source_type?: 'google_url' | 'map_click' | 'manual' | 'postcode';
+}
+
+export interface CafeRegistrationResponse {
+  success: boolean;
+  cafe?: {
+    id: string;
+    name: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+    status: string;
+    verification_count: number;
+  };
+  check_in?: {
+    cafe_id: string;
+    user_id: string;
+    checkin_order: number;
+    founding_role: string;
+    triggered_verification: boolean;
+  };
+  message?: string;
+  error?: string;
+  existingCafe?: any;
+}
+
+export interface LocationSearchResult {
+  lat: number;
+  lng: number;
+  display_name: string;
+}
+

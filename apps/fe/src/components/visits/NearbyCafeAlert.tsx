@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { NearbyCafe } from '@/types/map';
 import { calculateDistance } from '@/lib/utils/checkIn';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import UserLocationIcon from '../ui/UserLocationIcon';
 
 interface NearbyCafeAlertProps {
   cafes: NearbyCafe[];
@@ -87,7 +88,7 @@ export default function NearbyCafeAlert({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">📍</span>
+                  <UserLocationIcon size={24} color="white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white/90">

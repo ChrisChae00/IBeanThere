@@ -131,6 +131,47 @@ export function createUserLocationIcon(paletteNameOrColor?: string, size: number
 
 export type ClusterState = 'verified' | 'pending';
 
+export function createSelectedLocationIcon(size: number = 36): L.DivIcon {
+  const primaryColor = '#442f19';
+  const primaryTextColor = '#442f19';
+  
+  const svgIcon = `
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: ${size}px; height: ${size}px;">
+      <g>
+        <path 
+          d="M16.577 8.52566L6.65811 5.21937C6.3578 5.11927 6.20764 5.06921 6.10382 5.14405C6 5.21888 6 5.37716 6 5.69371V13L16.577 9.47434C17.1653 9.27824 17.4594 9.18019 17.4594 9C17.4594 8.81981 17.1653 8.72176 16.577 8.52566Z" 
+          fill="${primaryColor}"
+        />
+        <path 
+          d="M6 13V5.69371C6 5.37716 6 5.21888 6.10382 5.14405C6.20764 5.06921 6.3578 5.11927 6.65811 5.21937L16.577 8.52566C17.1653 8.72176 17.4594 8.81981 17.4594 9C17.4594 9.18019 17.1653 9.27824 16.577 9.47434L6 13ZM6 13V18V19" 
+          stroke="${primaryTextColor}"
+          stroke-width="0.5"
+          stroke-linecap="round"
+        />
+      </g>
+    </svg>
+  `;
+  
+  const iconHtml = `
+    <div style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    ">
+      ${svgIcon}
+    </div>
+  `;
+
+  return L.divIcon({
+    html: iconHtml,
+    className: 'selected-location-marker',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -size]
+  });
+}
+
 export function createClusterIcon(
   count: number,
   state: ClusterState

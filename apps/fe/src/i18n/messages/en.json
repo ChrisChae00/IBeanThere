@@ -173,7 +173,11 @@
       "no_cafes_available": "No cafes registered nearby",
       "be_the_navigator": "Be the first to discover and share cafes in your area!",
       "share_location": "Share Location",
-      "location_permission_retry": "Try Again"
+      "location_permission_retry": "Try Again",
+      "register_new_cafe": "Register Cafe",
+      "login_required_to_register": "Please sign in to register a cafe",
+      "cafe_registered_successfully": "Cafe registered successfully!",
+      "selected_location": "Selected Location"
     },
 
     "visit": {
@@ -273,6 +277,59 @@
         "registered_on": "Registered on",
         "verification_count": "verifications",
         "loading": "Loading pending cafes..."
+      }
+    },
+    
+    "cafe": {
+      "register": {
+        "title": "Register New Cafe",
+        "location_select": "Select Location",
+        "use_current_location": "Use Current Location",
+        "select_on_map": "Select on Map",
+        "postcode_label": "Postcode/ZIP Code (Optional)",
+        "postcode_placeholder": "Enter postcode to search",
+        "country_select": "Country",
+        "search_postcode": "Search",
+        "postcode_required": "Please enter a postcode",
+        "postcode_not_found": "Location not found for this postcode",
+        "postcode_search_failed": "Failed to search postcode",
+        "distance": "Distance",
+        "within_range": "Within range",
+        "out_of_range": "Too far (must be within 50m)",
+        "out_of_range_dynamic": "Too far (must be within {maxDistance}m)",
+        "coordinates": "Coordinates",
+        "name_label": "Cafe Name",
+        "name_placeholder": "Enter cafe name",
+        "name_required": "Cafe name is required",
+        "address_label": "Address (Optional)",
+        "address_placeholder": "Will be auto-filled from location",
+        "phone_label": "Phone (Optional)",
+        "phone_placeholder": "Enter phone number",
+        "website_label": "Website (Optional)",
+        "website_placeholder": "https://example.com",
+        "google_maps_url_label": "Google Maps URL (Optional)",
+        "google_maps_url_placeholder": "Paste Google Maps link for reference",
+        "google_maps_url_hint": "This link will be saved for reference only",
+        "description_label": "Description (Optional)",
+        "description_placeholder": "Tell us about this cafe",
+        "submit": "Register Cafe",
+        "cancel": "Cancel",
+        "location_required": "Please set the cafe location",
+        "location_permission_required": "Location permission is required to register a cafe",
+        "distance_too_far": "You must be within 50m of the cafe to register it",
+        "distance_too_far_dynamic": "You must be within {maxDistance}m of the cafe to register it",
+        "duplicate_detected": "A cafe already exists at this location",
+        "check_in_instead": "Check in to existing cafe instead",
+        "registration_failed": "Failed to register cafe. Please try again.",
+        "success": "Cafe registered successfully!",
+        "postcode_100m_allowed": "Postcode search allows up to 100m distance",
+        "use_current_location_success": "Current location set",
+        "postcode_search_success": "Location found",
+        "select_on_map_hint": "Click on the map to select cafe location",
+        "return_to_current_location": "Return to Current Location"
+      },
+      "detail": {
+        "view_on_google_maps": "View on Google Maps"
       }
     }
   }

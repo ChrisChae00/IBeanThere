@@ -58,6 +58,7 @@ class CafeResponse(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    source_url: Optional[str] = None
     
     # Verification fields
     status: str  # 'pending' | 'verified'

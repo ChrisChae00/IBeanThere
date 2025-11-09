@@ -172,7 +172,11 @@
       "no_cafes_available": "주변에 등록된 카페가 없습니다",
       "be_the_navigator": "지역의 첫 개척자가 되어 카페를 등록해보세요!",
       "share_location": "위치 공유하기",
-      "location_permission_retry": "다시 시도"
+      "location_permission_retry": "다시 시도",
+      "register_new_cafe": "카페 등록",
+      "login_required_to_register": "카페 등록을 위해 로그인해주세요",
+      "cafe_registered_successfully": "카페가 성공적으로 등록되었습니다!",
+      "selected_location": "선택한 위치"
     },
 
     "visit": {
@@ -272,6 +276,59 @@
         "registered_on": "등록일",
         "verification_count": "검증",
         "loading": "대기 중인 카페 로딩 중..."
+      }
+    },
+    
+    "cafe": {
+      "register": {
+        "title": "새 카페 등록",
+        "location_select": "위치 선택",
+        "use_current_location": "현재 위치 사용",
+        "select_on_map": "지도에서 선택",
+        "postcode_label": "우편번호 (선택)",
+        "postcode_placeholder": "우편번호를 입력하세요",
+        "country_select": "국가",
+        "search_postcode": "검색",
+        "postcode_required": "우편번호를 입력해주세요",
+        "postcode_not_found": "해당 우편번호의 위치를 찾을 수 없습니다",
+        "postcode_search_failed": "우편번호 검색에 실패했습니다",
+        "distance": "거리",
+        "within_range": "범위 내",
+        "out_of_range": "너무 멉니다 (50m 이내여야 함)",
+        "out_of_range_dynamic": "너무 멉니다 ({maxDistance}m 이내여야 함)",
+        "coordinates": "좌표",
+        "name_label": "카페 이름",
+        "name_placeholder": "카페 이름을 입력하세요",
+        "name_required": "카페 이름은 필수입니다",
+        "address_label": "주소 (선택)",
+        "address_placeholder": "위치에서 자동으로 입력됩니다",
+        "phone_label": "전화번호 (선택)",
+        "phone_placeholder": "전화번호를 입력하세요",
+        "website_label": "웹사이트 (선택)",
+        "website_placeholder": "https://example.com",
+        "google_maps_url_label": "Google Maps URL (선택)",
+        "google_maps_url_placeholder": "참고용 Google Maps 링크를 붙여넣으세요",
+        "google_maps_url_hint": "이 링크는 참고용으로만 저장됩니다",
+        "description_label": "설명 (선택)",
+        "description_placeholder": "이 카페에 대해 알려주세요",
+        "submit": "카페 등록",
+        "cancel": "취소",
+        "location_required": "카페 위치를 설정해주세요",
+        "location_permission_required": "카페 등록을 위해서는 위치 권한이 필요합니다",
+        "distance_too_far": "카페 등록을 위해서는 카페에서 50m 이내여야 합니다",
+        "distance_too_far_dynamic": "카페 등록을 위해서는 카페에서 {maxDistance}m 이내여야 합니다",
+        "duplicate_detected": "이 위치에 이미 카페가 등록되어 있습니다",
+        "check_in_instead": "대신 기존 카페에 체크인하기",
+        "registration_failed": "카페 등록에 실패했습니다. 다시 시도해주세요.",
+        "success": "카페가 성공적으로 등록되었습니다!",
+        "postcode_100m_allowed": "우편번호 검색은 최대 100m 거리까지 허용됩니다",
+        "use_current_location_success": "현재 위치 설정됨",
+        "postcode_search_success": "위치를 찾았습니다",
+        "select_on_map_hint": "지도에서 카페 위치를 클릭하세요",
+        "return_to_current_location": "현재 위치로 돌아가기"
+      },
+      "detail": {
+        "view_on_google_maps": "Google Maps에서 보기"
       }
     }
   }

@@ -8,6 +8,7 @@ import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { ToggleButton } from '@/components/ui';
+import UserLocationIcon from '../ui/UserLocationIcon';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
@@ -17,6 +18,15 @@ import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
 import { checkIn } from '@/lib/api/visits';
 import { calculateDistance } from '@/lib/utils/checkIn';
+
+function getCSSVariable(name: string, fallback: string = ''): string {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim() || fallback;
+  }
+  return fallback;
+}
 
 interface MapWithFiltersProps {
   locale: string;
@@ -378,6 +388,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       }
     }
   };
+  
 
   return (
     <div className="flex-1 flex flex-col">
@@ -428,13 +439,26 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
             />
           </div>
           {/* Results Info - Compact */}
-          <div className="text-xs text-[var(--color-text-secondary)] text-right mt-2">
-            {filteredCafes.length} of {allCafes.length} cafes
-            {isTracking && nearbyStays.length > 0 && (
-              <span className="ml-2 text-[var(--color-primary)]">
-                · {nearbyStays.length} nearby
-              </span>
-            )}
+          <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] text-right mt-2">
+            <span>
+              {filteredCafes.length} of {allCafes.length} cafes
+              {isTracking && nearbyStays.length > 0 && (
+                <span className="ml-2 text-[var(--color-primary)]">
+                  · {nearbyStays.length} nearby
+                </span>
+              )}
+            </span>
+            <button
+              onClick={handleLocationClick}
+              className="flex items-center justify-center hover:opacity-80 transition-opacity"
+              title={t('location_button')}
+              disabled={!coords}
+            >
+              <UserLocationIcon 
+                size={32} 
+                color={getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A'} 
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -466,7 +490,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               onMarkerClick={handleCafeClick}
               onBoundsChanged={handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
-              onLocationClick={handleLocationClick}
             />
           </div>
         )}

@@ -59,12 +59,13 @@ export default function PendingSpotsPage({
                 {t('subtitle')}
               </p>
             </div>
-            <button
+            <Link
+              href={`/${locale}/discover/register-cafe`}
               className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
               <PlusIcon size={20} className="text-[var(--color-primaryText)]" />
               {t('register_new')}
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -97,12 +98,13 @@ export default function PendingSpotsPage({
               <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
                 Be the first to discover and register a new cafe in your neighborhood!
               </p>
-              <button
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
+              <Link
+                href={`/${locale}/discover/register-cafe`}
+                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] inline-flex items-center justify-center"
               >
                 <span className="text-xl mr-2">🧭</span>
                 {t('register_new')}
-              </button>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
