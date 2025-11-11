@@ -138,17 +138,24 @@ export default function PendingCafesList() {
           <ErrorAlert message={actionError} />
         </div>
       )}
-      <div className="space-y-4">
-        {cafes.map((cafe) => (
-          <PendingCafeCard
-            key={cafe.id}
-            cafe={cafe}
-            onVerify={handleVerify}
-            onDelete={handleDelete}
-            isVerifying={verifyingId === cafe.id}
-            isDeleting={deletingId === cafe.id}
-          />
-        ))}
+      <div 
+        className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]"
+        style={{
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+        }}
+      >
+        <div className="space-y-4">
+          {cafes.map((cafe) => (
+            <PendingCafeCard
+              key={cafe.id}
+              cafe={cafe}
+              onVerify={handleVerify}
+              onDelete={handleDelete}
+              isVerifying={verifyingId === cafe.id}
+              isDeleting={deletingId === cafe.id}
+            />
+          ))}
+        </div>
       </div>
 
       {showVerifyModal && (

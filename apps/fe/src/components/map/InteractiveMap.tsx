@@ -25,14 +25,16 @@ function getCSSVariable(name: string, fallback: string = ''): string {
 // Fix for default marker icon in React Leaflet
 // _getIconUrl is a private property in Leaflet types but exists at runtime
 // We need to delete it to prevent SSR/hydration issues with default icons
-if ('_getIconUrl' in L.Icon.Default.prototype) {
-  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+if (typeof window !== 'undefined') {
+  if ('_getIconUrl' in L.Icon.Default.prototype) {
+    delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+  }
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  });
 }
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
 
 function BoundsUpdater({ 
   onBoundsChanged 

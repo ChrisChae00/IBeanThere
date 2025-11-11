@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
@@ -20,12 +20,9 @@ function getCSSVariable(name: string, fallback: string = ''): string {
   return fallback;
 }
 
-export default function RegisterCafePage({
-  params
-}: {
-  params: { locale: string };
-}) {
-  const { locale } = params;
+export default function RegisterCafePage() {
+  const params = useParams();
+  const locale = params.locale as string;
   const router = useRouter();
   const t = useTranslations('cafe.register');
   const tMap = useTranslations('map');
@@ -35,14 +32,6 @@ export default function RegisterCafePage({
   
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [hasRefreshed, setHasRefreshed] = useState(false);
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !hasRefreshed) {
-      setHasRefreshed(true);
-      router.refresh();
-    }
-  }, [hasRefreshed, router]);
   
   useEffect(() => {
     if (!authLoading && !user) {

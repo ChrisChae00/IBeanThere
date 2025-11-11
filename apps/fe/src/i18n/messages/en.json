@@ -326,7 +326,12 @@
         "use_current_location_success": "Current location set",
         "postcode_search_success": "Location found",
         "select_on_map_hint": "Click on the map to select cafe location",
-        "return_to_current_location": "Return to Current Location"
+        "return_to_current_location": "Return to Current Location",
+        "location_accuracy": "GPS Accuracy",
+        "location_accuracy_meters": "{accuracy}m",
+        "location_accuracy_low_warning": "GPS accuracy is low. The address may be approximate. Please verify and edit if needed.",
+        "address_auto_filled": "Address auto-filled from location. You can edit it if needed.",
+        "address_edit_hint": "You can edit this address if it's not accurate"
       },
       "detail": {
         "view_on_google_maps": "View on Google Maps"

@@ -184,6 +184,8 @@ export async function getPendingCafes(): Promise<CafeSearchResponse> {
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch pending cafes: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Failed to fetch pending cafes: ${response.status} ${response.statusText}`);
     }
     
@@ -191,7 +193,7 @@ export async function getPendingCafes(): Promise<CafeSearchResponse> {
     return data;
   } catch (error) {
     console.error('Error fetching pending cafes:', error);
-    return { cafes: [], total_count: 0 };
+    throw error;
   }
 }
 

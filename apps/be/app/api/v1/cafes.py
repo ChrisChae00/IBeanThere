@@ -21,6 +21,10 @@ from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
 from supabase import Client
 from datetime import datetime, timezone
+from dateutil import parser as date_parser
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -295,6 +299,96 @@ async def search_cafes(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to search cafes: {str(e)}"
+        )
+
+@router.get("/pending", response_model=CafeSearchResponse)
+async def get_pending_cafes_public(
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get all pending cafes (Public endpoint).
+    
+    Returns:
+        List of pending cafes ordered by creation date
+    """
+    try:
+        logger.info("======== FETCHING PENDING CAFES ========")
+        result = supabase.table("cafes").select("*").eq("status", "pending").execute()
+        logger.info(f"Query result count: {len(result.data) if result.data else 0}")
+        
+        if not result.data:
+            logger.info("No pending cafes found")
+            return CafeSearchResponse(cafes=[], total_count=0)
+        
+        logger.info(f"Found {len(result.data)} pending cafes")
+        logger.info(f"First cafe raw data: {result.data[0] if result.data else 'None'}")
+        
+        # Sort by created_at descending (most recent first)
+        # Handle None values by using a default date
+        sorted_data = sorted(
+            result.data, 
+            key=lambda x: x.get("created_at") or "1970-01-01T00:00:00Z", 
+            reverse=True
+        )
+        
+        cafes = []
+        for i, cafe in enumerate(sorted_data):
+            try:
+                logger.info(f"Processing cafe {i+1}/{len(sorted_data)}: {cafe.get('name')}")
+                
+                # Parse datetime fields
+                created_at_str = cafe.get("created_at")
+                logger.info(f"  created_at_str: {created_at_str}, type: {type(created_at_str)}")
+                created_at = date_parser.parse(created_at_str) if created_at_str else datetime.now(timezone.utc)
+                
+                updated_at_str = cafe.get("updated_at")
+                updated_at = date_parser.parse(updated_at_str) if updated_at_str else None
+                
+                verified_at_str = cafe.get("verified_at")
+                verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
+                
+                logger.info(f"  Creating CafeResponse object...")
+                logger.info(f"  latitude: {cafe.get('latitude')}, type: {type(cafe.get('latitude'))}")
+                logger.info(f"  longitude: {cafe.get('longitude')}, type: {type(cafe.get('longitude'))}")
+                
+                cafe_response = CafeResponse(
+                    id=str(cafe.get("id")),
+                    name=cafe.get("name"),
+                    address=cafe.get("address"),
+                    latitude=Decimal(str(cafe.get("latitude"))),
+                    longitude=Decimal(str(cafe.get("longitude"))),
+                    phone=cafe.get("phone"),
+                    website=cafe.get("website"),
+                    description=cafe.get("description"),
+                    status=cafe.get("status", "pending"),
+                    verification_count=cafe.get("verification_count", 1),
+                    verified_at=verified_at,
+                    admin_verified=cafe.get("admin_verified", False),
+                    navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
+                    vanguard_ids=cafe.get("vanguard_ids", []),
+                    created_at=created_at,
+                    updated_at=updated_at
+                )
+                cafes.append(cafe_response)
+                logger.info(f"  Successfully processed cafe: {cafe.get('name')}")
+            except Exception as e:
+                logger.error(f"Error processing cafe {cafe.get('name')}: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                raise
+        
+        logger.info(f"Returning {len(cafes)} cafes")
+        return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
+        
+    except Exception as e:
+        logger.error(f"======== ERROR GETTING PENDING CAFES ========")
+        logger.error(f"Error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        error_detail = f"Failed to get pending cafes: {str(e)}"
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_detail
         )
 
 @router.get("/{cafe_id}", response_model=CafeResponse)
@@ -788,54 +882,6 @@ async def reverse_geocode_location(
             detail=f"Failed to reverse geocode location: {str(e)}"
         )
 
-@router.get("/pending", response_model=CafeSearchResponse)
-async def get_pending_cafes_public(
-    supabase: Client = Depends(get_supabase_client)
-):
-    """
-    Get all pending cafes (Public endpoint).
-    
-    Returns:
-        List of pending cafes ordered by creation date
-    """
-    try:
-        result = supabase.table("cafes").select("*").eq("status", "pending").order("created_at", desc=True).execute()
-        
-        if not result.data:
-            return CafeSearchResponse(cafes=[], total_count=0)
-        
-        cafes = []
-        for cafe in result.data:
-            cafes.append(CafeResponse(
-                id=str(cafe.get("id")),
-                name=cafe.get("name"),
-                address=cafe.get("address"),
-                latitude=cafe.get("latitude"),
-                longitude=cafe.get("longitude"),
-                phone=cafe.get("phone"),
-                website=cafe.get("website"),
-                description=cafe.get("description"),
-                status=cafe.get("status", "pending"),
-                verification_count=cafe.get("verification_count", 1),
-                verified_at=cafe.get("verified_at"),
-                admin_verified=cafe.get("admin_verified", False),
-                navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                vanguard_ids=cafe.get("vanguard_ids", []),
-                created_at=cafe.get("created_at"),
-                updated_at=cafe.get("updated_at")
-            ))
-        
-        return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
-        
-    except Exception as e:
-        print(f"Error getting pending cafes: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get pending cafes: {str(e)}"
-        )
-
 @router.get("/admin/pending", response_model=CafeSearchResponse)
 async def get_pending_cafes(
     current_user = Depends(require_admin_role),
@@ -848,30 +894,48 @@ async def get_pending_cafes(
         List of pending cafes with verification info
     """
     try:
-        result = supabase.table("cafes").select("*").eq("status", "pending").order("created_at", desc=True).execute()
+        result = supabase.table("cafes").select("*").eq("status", "pending").execute()
         
         if not result.data:
             return CafeSearchResponse(cafes=[], total_count=0)
         
+        # Sort by created_at descending (most recent first)
+        # Handle None values by using a default date
+        sorted_data = sorted(
+            result.data, 
+            key=lambda x: x.get("created_at") or "1970-01-01T00:00:00Z", 
+            reverse=True
+        )
+        
         cafes = []
-        for cafe in result.data:
+        for cafe in sorted_data:
+            # Parse datetime fields
+            created_at_str = cafe.get("created_at")
+            created_at = date_parser.parse(created_at_str) if created_at_str else datetime.now(timezone.utc)
+            
+            updated_at_str = cafe.get("updated_at")
+            updated_at = date_parser.parse(updated_at_str) if updated_at_str else None
+            
+            verified_at_str = cafe.get("verified_at")
+            verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
+            
             cafes.append(CafeResponse(
                 id=str(cafe.get("id")),
                 name=cafe.get("name"),
                 address=cafe.get("address"),
-                latitude=cafe.get("latitude"),
-                longitude=cafe.get("longitude"),
+                latitude=Decimal(str(cafe.get("latitude"))),
+                longitude=Decimal(str(cafe.get("longitude"))),
                 phone=cafe.get("phone"),
                 website=cafe.get("website"),
                 description=cafe.get("description"),
                 status=cafe.get("status", "pending"),
                 verification_count=cafe.get("verification_count", 1),
-                verified_at=cafe.get("verified_at"),
+                verified_at=verified_at,
                 admin_verified=cafe.get("admin_verified", False),
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
                 vanguard_ids=cafe.get("vanguard_ids", []),
-                created_at=cafe.get("created_at"),
-                updated_at=cafe.get("updated_at")
+                created_at=created_at,
+                updated_at=updated_at
             ))
         
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))

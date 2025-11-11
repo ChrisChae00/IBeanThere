@@ -409,6 +409,26 @@ export default function RegisterCafeForm({
               </div>
             )}
             
+            {/* GPS Accuracy Indicator */}
+            {locationMode === 'current' && coords && coords.accuracy && (
+              <div className={`mt-3 px-4 py-2 rounded-lg ${
+                coords.accuracy > 50
+                  ? 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+                  : coords.accuracy > 20
+                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                  : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+              }`}>
+                <p className="text-sm font-medium">
+                  {t('location_accuracy')}: {t('location_accuracy_meters', { accuracy: Math.round(coords.accuracy) })}
+                </p>
+                {coords.accuracy > 50 && (
+                  <p className="text-xs mt-1 opacity-90">
+                    {t('location_accuracy_low_warning')}
+                  </p>
+                )}
+              </div>
+            )}
+            
           </div>
           
           {/* Cafe Name */}
@@ -440,6 +460,16 @@ export default function RegisterCafeForm({
               className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
               placeholder={t('address_placeholder')}
             />
+            {addressFetched && formData.address && (
+              <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
+                {t('address_auto_filled')}
+              </p>
+            )}
+            {!addressFetched && formData.address && (
+              <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
+                {t('address_edit_hint')}
+              </p>
+            )}
           </div>
           
           {/* Phone */}

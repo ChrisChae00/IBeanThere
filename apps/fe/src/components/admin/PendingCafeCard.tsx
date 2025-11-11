@@ -21,7 +21,12 @@ export default function PendingCafeCard({
   const t = useTranslations('admin');
 
   return (
-    <div className="bg-[var(--color-surface)] rounded-lg shadow-md p-6 border border-[var(--color-border)]">
+    <div 
+      className="bg-[var(--color-surface)] rounded-lg p-6 border border-[var(--color-border)]"
+      style={{
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+      }}
+    >
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">

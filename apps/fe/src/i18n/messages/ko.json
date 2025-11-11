@@ -325,7 +325,12 @@
         "use_current_location_success": "현재 위치 설정됨",
         "postcode_search_success": "위치를 찾았습니다",
         "select_on_map_hint": "지도에서 카페 위치를 클릭하세요",
-        "return_to_current_location": "현재 위치로 돌아가기"
+        "return_to_current_location": "현재 위치로 돌아가기",
+        "location_accuracy": "GPS 정확도",
+        "location_accuracy_meters": "{accuracy}m",
+        "location_accuracy_low_warning": "GPS 정확도가 낮습니다. 주소가 대략적일 수 있습니다. 확인 후 필요시 수정해주세요.",
+        "address_auto_filled": "위치에서 주소가 자동으로 입력되었습니다. 필요시 수정할 수 있습니다.",
+        "address_edit_hint": "주소가 정확하지 않으면 수정할 수 있습니다"
       },
       "detail": {
         "view_on_google_maps": "Google Maps에서 보기"

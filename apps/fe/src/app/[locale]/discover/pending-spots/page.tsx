@@ -1,39 +1,54 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getPendingCafes } from '@/lib/api/cafes';
 import { CafeSearchResponse} from '@/types/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { PlusIcon } from '@/components/ui';
 
-export default function PendingSpotsPage({
-  params
-}: {
-  params: { locale: string };
-}) {
-  const { locale } = params;
+export default function PendingSpotsPage() {
+  const params = useParams();
+  const pathname = usePathname();
+  const locale = params.locale as string;
   const t = useTranslations('discover.pending_spots');
   const [pendingCafes, setPendingCafes] = useState<CafeSearchResponse['cafes']>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadPendingCafes() {
-      try {
-        setIsLoading(true);
-        const response = await getPendingCafes();
-        setPendingCafes(response.cafes);
-      } catch (err) {
-        console.error('Failed to load pending cafes:', err);
-        setError('Failed to load pending cafes');
-      } finally {
-        setIsLoading(false);
-      }
+  const loadPendingCafes = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await getPendingCafes();
+      setPendingCafes(response.cafes || []);
+    } catch (err) {
+      console.error('Failed to load pending cafes:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load pending cafes';
+      setError(errorMessage);
+      setPendingCafes([]);
+    } finally {
+      setIsLoading(false);
     }
-    loadPendingCafes();
   }, []);
+
+  useEffect(() => {
+    loadPendingCafes();
+  }, [loadPendingCafes, pathname]);
+  
+  useEffect(() => {
+    const handleFocus = () => {
+      loadPendingCafes();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [loadPendingCafes]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -73,46 +88,52 @@ export default function PendingSpotsPage({
       {/* Pending Cafes Grid Section */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <div className="text-lg font-medium text-[var(--color-error)] mb-4">
-                {error}
+          <div 
+            className="bg-[var(--color-surface)] rounded-xl p-8 border border-[var(--color-border)]"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+            }}
+          >
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <LoadingSpinner size="lg" />
               </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors"
-              >
-                Retry
-              </button>
-            </div>
-          ) : pendingCafes.length === 0 ? (
-            <div className="text-center py-16 space-y-6">
-              <div className="text-6xl">☕️</div>
-              <div className="text-2xl font-bold text-[var(--color-text)]">
-                {t('no_pending')}
-              </div>
-              <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
-                Be the first to discover and register a new cafe in your neighborhood!
-              </p>
-              <Link
-                href={`/${locale}/discover/register-cafe`}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] inline-flex items-center justify-center"
-              >
-                <span className="text-xl mr-2">🧭</span>
-                {t('register_new')}
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pendingCafes.map((cafe) => (
-                <div
-                  key={cafe.id}
-                  className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 hover:shadow-lg transition-shadow"
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-lg font-medium text-[var(--color-error)] mb-4">
+                  {error}
+                </div>
+                <button
+                  onClick={loadPendingCafes}
+                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors"
                 >
+                  Retry
+                </button>
+              </div>
+            ) : pendingCafes.length === 0 ? (
+              <div className="text-center py-16 space-y-6">
+                <div className="text-6xl">☕️</div>
+                <div className="text-2xl font-bold text-[var(--color-text)]">
+                  {t('no_pending')}
+                </div>
+                <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
+                  Be the first to discover and register a new cafe in your neighborhood!
+                </p>
+                <Link
+                  href={`/${locale}/discover/register-cafe`}
+                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] inline-flex items-center justify-center"
+                >
+                  <span className="text-xl mr-2">🧭</span>
+                  {t('register_new')}
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pendingCafes.map((cafe) => (
+                  <div
+                    key={cafe.id}
+                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer"
+                  >
                   {/* Cafe Icon */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 bg-[var(--color-primary)]/10 rounded-lg flex items-center justify-center">
@@ -178,6 +199,7 @@ export default function PendingSpotsPage({
               ))}
             </div>
           )}
+          </div>
         </div>
       </section>
     </main>

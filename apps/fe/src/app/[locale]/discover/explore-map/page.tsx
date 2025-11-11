@@ -148,13 +148,15 @@ export default function ExploreMapPage({
                     </div>
                   ))
                 ) : trendingCafes.length === 0 ? (
-                  <div className="col-span-2 text-center py-12 space-y-4">
-                    <div className="text-lg font-medium text-[var(--color-text-secondary)]">
-                      {tMap('no_cafes_available')}
-                    </div>
-                    <div className="text-[var(--color-text-secondary)] font-semibold flex items-center justify-center gap-2">
-                      <span className="text-2xl">🧭</span>
-                      <span>{tMap('be_the_navigator')}</span>
+                  <div className="col-span-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 hover:shadow-inset-primary transition-shadow">
+                    <div className="text-center py-12 space-y-4">
+                      <div className="text-lg font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors">
+                        {tMap('no_cafes_available')}
+                      </div>
+                      <div className="text-[var(--color-text-secondary)] font-semibold flex items-center justify-center gap-2 hover:text-[var(--color-text)] transition-colors">
+                        <span className="text-2xl">🧭</span>
+                        <span>{tMap('be_the_navigator')}</span>
+                      </div>
                     </div>
                   </div>
                 ) : (
