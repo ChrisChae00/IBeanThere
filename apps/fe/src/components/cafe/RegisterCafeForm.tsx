@@ -6,8 +6,10 @@ import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation } from '
 import { useLocation } from '@/hooks/useLocation';
 import { validateInitialDistance } from '@/lib/utils/checkIn';
 import { CafeRegistrationRequest } from '@/types/api';
+import { BusinessHours } from '@/types/map';
 import { ErrorAlert, LoadingSpinner } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
+import OpeningHoursInput from './OpeningHoursInput';
 
 interface RegisterCafeFormProps {
   initialLocation?: { lat: number; lng: number };
@@ -38,6 +40,8 @@ export default function RegisterCafeForm({
     postcode: '',
     source_url: ''
   });
+  
+  const [businessHours, setBusinessHours] = useState<BusinessHours | undefined>(undefined);
   
   const [cafeLocation, setCafeLocation] = useState<{ lat: number; lng: number } | null>(
     initialLocation || null
@@ -223,6 +227,7 @@ export default function RegisterCafeForm({
         phone: formData.phone || undefined,
         website: formData.website || undefined,
         source_url: formData.source_url || undefined,
+        business_hours: businessHours,
         user_location: userLocation,
         source_type: locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode'
       };
@@ -519,6 +524,12 @@ export default function RegisterCafeForm({
               {t('google_maps_url_hint')}
             </p>
           </div>
+          
+          {/* Opening Hours */}
+          <OpeningHoursInput
+            value={businessHours}
+            onChange={setBusinessHours}
+          />
           
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">

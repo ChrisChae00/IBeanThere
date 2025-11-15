@@ -12,25 +12,25 @@ function getCSSVariable(name: string): string {
 }
 
 export function createCustomMarkerIcon(state: CafeMarkerState): L.DivIcon {
-  const primaryColor = getCSSVariable('--color-primary') || '#8C5A3A';
+  const cafeMarkerColor = getCSSVariable('--color-cafeMarker') || getCSSVariable('--color-primary') || '#8C5A3A';
   const pendingColor = getCSSVariable('--color-pending') || '#9CA3AF';
   const whiteColor = getCSSVariable('--color-white') || '#FFFFFF';
   
   const config = {
     'pending-1': {
       bg: pendingColor,
-      border: primaryColor,
+      border: cafeMarkerColor,
       dash: true,
       badge: null
     },
     'pending-2': {
       bg: pendingColor,
-      border: primaryColor,
+      border: cafeMarkerColor,
       dash: true,
       badge: '2'
     },
     'verified': {
-      bg: primaryColor,
+      bg: cafeMarkerColor,
       border: whiteColor,
       dash: false,
       badge: null
@@ -176,7 +176,7 @@ export function createClusterIcon(
   count: number,
   state: ClusterState
 ): L.DivIcon {
-  const primaryColor = getCSSVariable('--color-primary') || '#8C5A3A';
+  const cafeMarkerColor = getCSSVariable('--color-cafeMarker') || getCSSVariable('--color-primary') || '#8C5A3A';
   const pendingColor = getCSSVariable('--color-pending') || '#9CA3AF';
   const whiteColor = getCSSVariable('--color-white') || '#FFFFFF';
   
@@ -193,13 +193,13 @@ export function createClusterIcon(
   
   const config = {
     verified: {
-      bg: primaryColor,
+      bg: cafeMarkerColor,
       border: whiteColor,
       borderStyle: 'solid'
     },
     pending: {
       bg: pendingColor,
-      border: primaryColor,
+      border: cafeMarkerColor,
       borderStyle: 'dashed'
     }
   };

@@ -1,3 +1,11 @@
+export interface BusinessHoursData {
+  [key: string]: {
+    open: string;
+    close: string;
+    closed: boolean;
+  };
+}
+
 export interface CafeSearchResponse {
   cafes: Array<{
     id: string;
@@ -9,6 +17,8 @@ export interface CafeSearchResponse {
     phone?: string;
     website?: string;
     description?: string;
+    source_url?: string;
+    business_hours?: BusinessHoursData;
     status: 'pending' | 'verified' | 'disputed';
     verification_count: number;
     verified_at?: string;
@@ -55,6 +65,7 @@ export interface CafeRegistrationRequest {
   description?: string;
   postcode?: string;
   source_url?: string;
+  business_hours?: BusinessHoursData;
   user_location?: {
     lat: number;
     lng: number;

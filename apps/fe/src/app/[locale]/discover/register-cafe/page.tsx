@@ -63,7 +63,10 @@ export default function RegisterCafePage() {
   
   const handleRegistrationSuccess = () => {
     showToast(t('success'), 'success');
-    router.push(`/${locale}/discover/pending-spots`);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cafe_cache_needs_refresh', 'true');
+    }
+    router.push(`/${locale}/discover/explore-map`);
   };
   
   const handleCancel = () => {

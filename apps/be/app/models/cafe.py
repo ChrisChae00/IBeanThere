@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from decimal import Decimal
 
@@ -14,6 +14,7 @@ class CafeBase(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    business_hours: Optional[Dict[str, Any]] = None
 
 class CafeRegistrationRequest(BaseModel):
     """Request model for cafe registration (UGC)."""
@@ -24,6 +25,7 @@ class CafeRegistrationRequest(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    business_hours: Optional[Dict[str, Any]] = None
     
     # Location verification
     user_location: Optional[dict] = None  # {lat, lng} for verification
@@ -59,6 +61,7 @@ class CafeResponse(BaseModel):
     website: Optional[str] = None
     description: Optional[str] = None
     source_url: Optional[str] = None
+    business_hours: Optional[Dict[str, Any]] = None
     
     # Verification fields
     status: str  # 'pending' | 'verified'

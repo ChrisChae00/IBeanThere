@@ -25,5 +25,6 @@ export interface ThemePalette {
     pending: string;
     white: string;
     userMarkerMap: string;
+    cafeMarker: string;
 };
 }

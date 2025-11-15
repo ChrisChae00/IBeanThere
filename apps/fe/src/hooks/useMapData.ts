@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { CafeMapData, MapSearchParams } from '@/types/map';
 import { CafeSearchResponse } from '@/types/api';
+import { useSpatialCafeCache } from './useSpatialCafeCache';
 
 interface MapDataState {
   cafes: CafeMapData[];
@@ -17,10 +18,26 @@ export function useMapData() {
     error: null
   });
 
-  const searchCafes = useCallback(async (params: MapSearchParams) => {
+  const { getCafes, addCafes, isCached, clearCache, filterCafesByDistance } = useSpatialCafeCache();
+
+  const searchCafes = useCallback(async (params: MapSearchParams, forceReload = false) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
+      if (!forceReload) {
+        const cachedCafes = getCafes();
+        const nearbyCached = filterCafesByDistance(cachedCafes, params.lat, params.lng, params.radius);
+        
+        if (isCached(params.lat, params.lng, params.radius) && nearbyCached.length > 0) {
+          setState({
+            cafes: nearbyCached,
+            isLoading: false,
+            error: null
+          });
+          return;
+        }
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const url = `${apiUrl}/api/v1/cafes/search?lat=${params.lat}&lng=${params.lng}&radius=${params.radius}`;
       
@@ -40,8 +57,10 @@ export function useMapData() {
         longitude: typeof cafe.longitude === 'string' ? parseFloat(cafe.longitude) : cafe.longitude || 0,
         rating: cafe.rating ? (typeof cafe.rating === 'string' ? parseFloat(cafe.rating) : cafe.rating) : undefined,
         address: cafe.address || '',
-        phoneNumber: cafe.phone_number,
+        phoneNumber: cafe.phone,
         website: cafe.website,
+        source_url: cafe.source_url,
+        businessHours: cafe.business_hours,
         status: cafe.status || 'pending',
         verification_count: cafe.verification_count || 1,
         foundingCrew: cafe.founding_crew ? {
@@ -49,6 +68,8 @@ export function useMapData() {
           vanguard: cafe.founding_crew.vanguard || []
         } : undefined
       }));
+
+      addCafes(cafes, { lat: params.lat, lng: params.lng }, params.radius);
 
       setState({
         cafes,
@@ -66,11 +87,12 @@ export function useMapData() {
         error: errorMessage
       });
     }
-  }, []);
+  }, [getCafes, addCafes, isCached, filterCafesByDistance]);
 
   return {
     ...state,
-    searchCafes
+    searchCafes,
+    clearCache
   };
 }
 

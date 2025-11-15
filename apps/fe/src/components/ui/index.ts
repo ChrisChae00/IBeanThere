@@ -17,3 +17,4 @@ export { default as StarRating } from './StarRating';
 export { default as ToggleButton } from './ToggleButton';
 export { default as PlusIcon } from './PlusIcon';
 export { default as LoadingSpinner } from './LoadingSpinner';
+export { default as RefreshIcon } from './RefreshIcon';

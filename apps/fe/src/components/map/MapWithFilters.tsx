@@ -6,8 +6,9 @@ import InteractiveMap from './InteractiveMap';
 import LocationPermissionOverlay from './LocationPermissionOverlay';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
+import CafeInfoModal from './CafeInfoModal';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { ToggleButton } from '@/components/ui';
+import { ToggleButton, RefreshIcon } from '@/components/ui';
 import UserLocationIcon from '../ui/UserLocationIcon';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
@@ -39,7 +40,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   const t = useTranslations('map');
   const tVisit = useTranslations('visit');
   const { coords, getCurrentLocation, error: locationError } = useLocation();
-  const { cafes: allCafes, isLoading, error, searchCafes } = useMapData();
+  const { cafes: allCafes, isLoading, error, searchCafes, clearCache } = useMapData();
   const { user, isLoading: authLoading } = useAuth();
   const { showToast } = useToast();
   
@@ -69,7 +70,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       clearTimeout(debounceTimeoutRef.current);
     }
     
-    // Debounce the search
+    // Debounce the search - increased to 1500ms for less frequent requests
     debounceTimeoutRef.current = setTimeout(() => {
       try {
         // Calculate center of visible bounds
@@ -82,8 +83,8 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           return;
         }
         
-        // Only search if location changed significantly (at least 200m)
-        const SEARCH_THRESHOLD = 200; // meters
+        // Only search if location changed significantly (at least 1km)
+        const SEARCH_THRESHOLD = 1000; // meters
         if (lastSearchRef.current) {
           const R = 6371000;
           const latDiff = centerLat - lastSearchRef.current.lat;
@@ -106,17 +107,17 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         const lngDiff = bounds.ne.lng - bounds.sw.lng;
         const latDist = R * Math.abs(latDiff) * (Math.PI / 180);
         const lngDist = R * Math.abs(lngDiff) * Math.cos(bounds.ne.lat * Math.PI / 180) * (Math.PI / 180);
-        const radius = Math.max(latDist, lngDist) * 2.0; // Increased from 1.2 to 2.0 for wider search
+        const radius = Math.max(latDist, lngDist) * 2.0;
         
         searchCafes({
           lat: centerLat,
           lng: centerLng,
-          radius: Math.floor(Math.min(radius, 5000)) // Increased from 2500 to 5000m for wider coverage
+          radius: Math.floor(Math.min(radius, 20000)) // Increased to 20km max
         });
       } catch (error) {
         console.error('Error in handleBoundsChanged:', error);
       }
-    }, 500); // 500ms debounce for faster response
+    }, 1500); // 1500ms debounce for less frequent requests
   }, [searchCafes]);
 
   // Check permission state on mount and auto-start tracking if granted
@@ -170,14 +171,41 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     }
   }, [getCurrentLocation, trackingEnabled, userManuallyDisabled]);
 
-  // Update center when location is available
+  // Update center when location is available and trigger initial search
   useEffect(() => {
     if (coords) {
       const newCenter = { lat: coords.latitude, lng: coords.longitude };
       setCenter(newCenter);
-      lastSearchRef.current = newCenter;
+      
+      let forceReload = false;
+      
+      // Check if cache needs refresh after cafe registration
+      if (typeof window !== 'undefined') {
+        const needsRefresh = localStorage.getItem('cafe_cache_needs_refresh');
+        if (needsRefresh === 'true') {
+          clearCache();
+          lastSearchRef.current = null;
+          forceReload = true;
+          localStorage.removeItem('cafe_cache_needs_refresh');
+        }
+      }
+      
+      // Only search if this is a new location or forced reload
+      if (forceReload || !lastSearchRef.current || 
+          Math.abs(lastSearchRef.current.lat - newCenter.lat) > 0.001 ||
+          Math.abs(lastSearchRef.current.lng - newCenter.lng) > 0.001) {
+        
+        lastSearchRef.current = newCenter;
+        
+        // Aggressive initial load: 20km radius
+        searchCafes({
+          lat: newCenter.lat,
+          lng: newCenter.lng,
+          radius: 20000
+        }, forceReload);
+      }
     }
-  }, [coords]);
+  }, [coords, searchCafes, clearCache]);
 
   const handleLocationClick = () => {
     // If coords already exist, update center immediately
@@ -388,6 +416,19 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       }
     }
   };
+
+  const handleRefreshCafes = async () => {
+    clearCache();
+    lastSearchRef.current = null;
+    if (center) {
+      await searchCafes({
+        lat: center.lat,
+        lng: center.lng,
+        radius: 20000
+      }, true);
+      showToast(t('cafes_refreshed'), 'success');
+    }
+  };
   
 
   return (
@@ -412,6 +453,16 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         {/* Right side: Controls and Results Info - No left margin, right-aligned */}
         <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-auto">
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefreshCafes}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+              title={t('refresh_cafes')}
+              disabled={isLoading}
+            >
+              <RefreshIcon className="w-5 h-5" />
+              <span className="text-sm">{t('refresh')}</span>
+            </button>
+
             <FranchiseFilterComponent
               filter={franchiseFilter}
               onFilterChange={setFranchiseFilter}
@@ -480,7 +531,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
             </div>
           </div>
         ) : (
-          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full">
+          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full relative">
             <InteractiveMap
               cafes={filteredCafes}
               center={center}
@@ -491,6 +542,14 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               onBoundsChanged={handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
             />
+            {isLoading && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg">
+                <div className="flex items-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  <span className="text-[var(--color-text)]">{t('loading_cafes')}</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -503,6 +562,14 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           onCheckIn={handleCheckIn}
           onDismiss={handleDismissAlert}
           isCheckingIn={isCheckingIn}
+        />
+      )}
+
+      {/* Cafe Info Modal */}
+      {selectedCafe && (
+        <CafeInfoModal
+          cafe={selectedCafe}
+          onClose={() => setSelectedCafe(null)}
         />
       )}
     </div>

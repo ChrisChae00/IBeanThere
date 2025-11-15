@@ -218,7 +218,7 @@ async def check_nearby_cafes(
 async def search_cafes(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
     lng: float = Query(..., ge=-180, le=180, description="Longitude"),
-    radius: int = Query(default=2000, ge=100, le=5000, description="Search radius in meters"),
+    radius: int = Query(default=2000, ge=100, le=20000, description="Search radius in meters"),
     status_filter: Optional[str] = Query(None, description="Filter by status: 'pending' | 'verified'")
 ):
     """
@@ -231,19 +231,47 @@ async def search_cafes(
     try:
         supabase = get_supabase_client()
         
+        print(f"\n========== CAFE SEARCH REQUEST ==========")
+        print(f"Location: ({lat}, {lng}), Radius: {radius}m, Status filter: {status_filter}")
+        
         # Calculate bounding box for optimization
+        # 1 degree latitude = ~111km everywhere
         lat_offset = radius / 111000
-        lng_offset = radius / (111000 * abs(lat)) if lat != 0 else radius / 111000
+        
+        # 1 degree longitude = ~111km * cos(latitude)
+        # At latitude 43°, 1 degree longitude ≈ 81km
+        import math
+        lng_offset = radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
+        
+        lat_min = lat - lat_offset
+        lat_max = lat + lat_offset
+        lng_min = lng - lng_offset
+        lng_max = lng + lng_offset
+        
+        print(f"Bounding box:")
+        print(f"  Latitude: {lat_min} to {lat_max}")
+        print(f"  Longitude: {lng_min} to {lng_max}")
+        
+        # First, let's check ALL cafes in the database
+        all_cafes_result = supabase.table("cafes").select("id, name, latitude, longitude, status").execute()
+        print(f"\nTotal cafes in database: {len(all_cafes_result.data) if all_cafes_result.data else 0}")
+        if all_cafes_result.data:
+            for cafe in all_cafes_result.data:
+                cafe_lat = float(cafe.get("latitude", 0))
+                cafe_lng = float(cafe.get("longitude", 0))
+                in_box = (lat_min <= cafe_lat <= lat_max and lng_min <= cafe_lng <= lng_max)
+                distance = calculate_earth_distance(lat, lng, cafe_lat, cafe_lng)
+                print(f"  - {cafe.get('name')}: ({cafe_lat}, {cafe_lng}), status={cafe.get('status')}, in_box={in_box}, distance={distance:.0f}m")
         
         # Query with bounding box (optimization)
         query = supabase.table("cafes").select("*").gte(
-            "latitude", lat - lat_offset
+            "latitude", lat_min
         ).lte(
-            "latitude", lat + lat_offset
+            "latitude", lat_max
         ).gte(
-            "longitude", lng - lng_offset
+            "longitude", lng_min
         ).lte(
-            "longitude", lng + lng_offset
+            "longitude", lng_max
         )
         
         if status_filter:
@@ -251,7 +279,13 @@ async def search_cafes(
         
         result = query.execute()
         
+        print(f"DB Query returned: {len(result.data) if result.data else 0} cafes")
+        if result.data:
+            for cafe in result.data[:3]:
+                print(f"  - {cafe.get('name')} at ({cafe.get('latitude')}, {cafe.get('longitude')}), status: {cafe.get('status')}")
+        
         if not result.data:
+            print("No cafes found in database")
             return CafeSearchResponse(cafes=[], total_count=0)
         
         # Filter by exact distance
@@ -265,6 +299,8 @@ async def search_cafes(
             if distance <= radius:
                 valid_cafes.append(cafe)
         
+        print(f"After distance filtering: {len(valid_cafes)} cafes within {radius}m")
+        
         # Format response
         formatted_cafes = []
         for cafe in valid_cafes:
@@ -277,6 +313,8 @@ async def search_cafes(
                 "phone": cafe.get("phone"),
                 "website": cafe.get("website"),
                 "description": cafe.get("description"),
+                "source_url": cafe.get("source_url"),
+                "business_hours": cafe.get("business_hours"),
                 "status": cafe.get("status", "pending"),
                 "verification_count": cafe.get("verification_count", 1),
                 "verified_at": cafe.get("verified_at"),
@@ -286,6 +324,9 @@ async def search_cafes(
                 "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
                 "updated_at": cafe.get("updated_at")
             })
+        
+        print(f"Returning {len(formatted_cafes)} cafes to frontend")
+        print(f"==========================================\n")
         
         return CafeSearchResponse(
             cafes=formatted_cafes,
@@ -360,6 +401,8 @@ async def get_pending_cafes_public(
                     phone=cafe.get("phone"),
                     website=cafe.get("website"),
                     description=cafe.get("description"),
+                    source_url=cafe.get("source_url"),
+                    business_hours=cafe.get("business_hours"),
                     status=cafe.get("status", "pending"),
                     verification_count=cafe.get("verification_count", 1),
                     verified_at=verified_at,
@@ -421,6 +464,8 @@ async def get_cafe_details(cafe_id: str):
             "phone": cafe.get("phone"),
             "website": cafe.get("website"),
             "description": cafe.get("description"),
+            "source_url": cafe.get("source_url"),
+            "business_hours": cafe.get("business_hours"),
             "status": cafe.get("status", "pending"),
             "verification_count": cafe.get("verification_count", 1),
             "verified_at": cafe.get("verified_at"),
@@ -587,6 +632,7 @@ async def register_cafe(
                 "phone": request.phone,
                 "website": request.website,
                 "description": request.description,
+                "business_hours": request.business_hours,
                 "status": "pending",
                 "verification_count": 1,
                 "navigator_id": current_user.id,

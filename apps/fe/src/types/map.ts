@@ -1,3 +1,11 @@
+export interface BusinessHours {
+  [key: string]: {
+    open: string;
+    close: string;
+    closed: boolean;
+  };
+}
+
 export interface CafeMapData {
   id: string;
   name: string;
@@ -9,6 +17,7 @@ export interface CafeMapData {
   phoneNumber?: string;
   website?: string;
   source_url?: string;
+  businessHours?: BusinessHours;
   status?: 'pending' | 'verified' | 'disputed';
   verification_count?: number;
   foundingCrew?: {

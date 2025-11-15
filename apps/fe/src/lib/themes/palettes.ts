@@ -28,6 +28,7 @@ export const themes: Record<string, ThemePalette> = {
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#D24C28', // Secondary color for user marker
+          cafeMarker: '#8C5A3A', // Same as primary for visibility on map
         },   
       },
     espresso: {
@@ -57,6 +58,7 @@ export const themes: Record<string, ThemePalette> = {
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#D24C28', // Secondary color for user marker
+          cafeMarker: '#1A120B', // Dark color for visibility on map (same as primaryText)
         },
       },
       matchaLatte: {
@@ -86,6 +88,7 @@ export const themes: Record<string, ThemePalette> = {
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#E78E17', // Secondary color for user marker
+          cafeMarker: '#85a035', // Same as primary for visibility on map
         },
       },
   vanillaLatte: {
@@ -115,6 +118,7 @@ export const themes: Record<string, ThemePalette> = {
       pending: '#9CA3AF', // Gray for pending markers
       white: '#FFFFFF', // White for contrast
       userMarkerMap: '#E78E17', // Secondary color for user marker
+      cafeMarker: '#362C1D', // Same as primary for visibility on map
     },
   },
 };

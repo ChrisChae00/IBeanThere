@@ -248,10 +248,6 @@ function ClusterLayer({
     });
     markersRef.current = [];
 
-    if (cafes.length < 10) {
-      return;
-    }
-
     cafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
       const marker = L.marker([cafe.latitude, cafe.longitude], {
