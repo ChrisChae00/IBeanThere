@@ -307,6 +307,7 @@ async def search_cafes(
             formatted_cafes.append({
                 "id": cafe.get("id", ""),
                 "name": cafe.get("name", ""),
+                "slug": cafe.get("slug"),
                 "address": cafe.get("address"),
                 "latitude": Decimal(str(cafe.get("latitude", 0))),
                 "longitude": Decimal(str(cafe.get("longitude", 0))),
@@ -395,6 +396,7 @@ async def get_pending_cafes_public(
                 cafe_response = CafeResponse(
                     id=str(cafe.get("id")),
                     name=cafe.get("name"),
+                    slug=cafe.get("slug"),
                     address=cafe.get("address"),
                     latitude=Decimal(str(cafe.get("latitude"))),
                     longitude=Decimal(str(cafe.get("longitude"))),
@@ -434,18 +436,25 @@ async def get_pending_cafes_public(
             detail=error_detail
         )
 
-@router.get("/{cafe_id}", response_model=CafeResponse)
-async def get_cafe_details(cafe_id: str):
+@router.get("/{cafe_identifier}", response_model=CafeResponse)
+async def get_cafe_details(cafe_identifier: str):
     """
     Get detailed information about a specific cafe.
     
+    - Can be accessed by ID (UUID) or slug (e.g., 'midnight-run-cafe')
     - Includes verification status
     - Includes Founding Crew info
+    - Includes average rating and log count (computed from public logs)
     """
     try:
         supabase = get_supabase_client()
         
-        result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        # Try to find by slug first, then by ID
+        result = supabase.table("cafes").select("*").eq("slug", cafe_identifier).single().execute()
+        
+        if not result.data:
+            # If not found by slug, try by ID
+            result = supabase.table("cafes").select("*").eq("id", cafe_identifier).single().execute()
         
         if not result.data:
             raise HTTPException(
@@ -454,10 +463,61 @@ async def get_cafe_details(cafe_id: str):
             )
         
         cafe = result.data
+        cafe_id = cafe.get("id")
         
-        return {
+        # Get total count and calculate average rating from all public logs
+        all_logs_result = supabase.table("cafe_visits").select(
+            "id, rating, visited_at, user_id, anonymous, comment, photo_urls, coffee_type"
+        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
+            "visited_at", desc=True
+        ).execute()
+        
+        average_rating = None
+        log_count = 0
+        recent_logs = []
+        
+        if all_logs_result.data:
+            # Calculate average rating from all logs
+            ratings = [log["rating"] for log in all_logs_result.data if log.get("rating")]
+            if ratings:
+                average_rating = sum(ratings) / len(ratings)
+            
+            log_count = len(all_logs_result.data)
+            
+            # Get recent logs (first 3)
+            recent_logs_data = all_logs_result.data[:3]
+            
+            # Format recent logs
+            for log in recent_logs_data:
+                author_display_name = None
+                if not log.get("anonymous"):
+                    try:
+                        user_result = supabase.table("users").select("username").eq("id", log["user_id"]).single().execute()
+                        if user_result.data:
+                            author_display_name = user_result.data.get("username") or "User"
+                    except Exception:
+                        author_display_name = "User"
+                else:
+                    author_display_name = "Anonymous"
+                
+                recent_logs.append({
+                    "id": log.get("id"),
+                    "cafe_id": cafe_id,
+                    "user_id": log.get("user_id"),
+                    "visited_at": log.get("visited_at"),
+                    "rating": log.get("rating"),
+                    "comment": log.get("comment"),
+                    "photo_urls": log.get("photo_urls", []),
+                    "coffee_type": log.get("coffee_type"),
+                    "is_public": True,
+                    "anonymous": log.get("anonymous", False),
+                    "author_display_name": author_display_name
+                })
+        
+        response = {
             "id": cafe.get("id", ""),
             "name": cafe.get("name", ""),
+            "slug": cafe.get("slug"),
             "address": cafe.get("address"),
             "latitude": Decimal(str(cafe.get("latitude", 0))),
             "longitude": Decimal(str(cafe.get("longitude", 0))),
@@ -473,12 +533,19 @@ async def get_cafe_details(cafe_id: str):
             "navigator_id": cafe.get("navigator_id"),
             "vanguard_ids": cafe.get("vanguard_ids", []),
             "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
-            "updated_at": cafe.get("updated_at")
+            "updated_at": cafe.get("updated_at"),
+            "average_rating": float(average_rating) if average_rating else None,
+            "log_count": log_count,
+            "recent_logs": recent_logs
         }
+        
+        return response
         
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get cafe details: {str(e)}"

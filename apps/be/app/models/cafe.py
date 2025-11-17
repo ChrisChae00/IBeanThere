@@ -54,6 +54,7 @@ class CafeResponse(BaseModel):
     """Cafe model for API responses with verification info."""
     id: str
     name: str
+    slug: Optional[str] = None
     address: Optional[str] = None
     latitude: Decimal
     longitude: Decimal
@@ -75,6 +76,11 @@ class CafeResponse(BaseModel):
     
     created_at: datetime
     updated_at: Optional[datetime] = None
+    
+    # Coffee log statistics (computed)
+    average_rating: Optional[float] = None
+    log_count: int = 0
+    recent_logs: Optional[List[Dict[str, Any]]] = None
     
     class Config:
         from_attributes = True

@@ -7,10 +7,14 @@ from app.models.visit import (
     CafeVisitUpdate,
     CafeVisitResponse,
     TrendingCafeResponse,
-    CafeStatsResponse
+    CafeStatsResponse,
+    CafeLogPublicResponse,
+    CafeLogsResponse
 )
+from app.api.deps import get_current_user
 from app.models.error import ErrorCode, ErrorDetail, create_error_response
 from app.database.supabase import get_supabase_client
+from supabase import Client
 from datetime import datetime, timezone
 from decimal import Decimal
 
@@ -63,7 +67,7 @@ async def record_cafe_view(
 async def record_cafe_visit(
     cafe_id: str,
     visit_data: CafeVisitCreate,
-    user_id: str  # TODO: Replace with Depends(get_current_user) when auth is ready
+    current_user = Depends(get_current_user)
 ):
     """
     Record a cafe visit (physical presence).
@@ -129,7 +133,7 @@ async def record_cafe_visit(
         # Create visit record
         visit_record = {
             "cafe_id": cafe_id,
-            "user_id": user_id,
+            "user_id": current_user.id,
             "visited_at": datetime.now(timezone.utc).isoformat(),
             "check_in_lat": str(visit_data.check_in_lat) if visit_data.check_in_lat else None,
             "check_in_lng": str(visit_data.check_in_lng) if visit_data.check_in_lng else None,
@@ -137,8 +141,14 @@ async def record_cafe_visit(
             "duration_minutes": visit_data.duration_minutes,
             "auto_detected": visit_data.auto_detected,
             "confirmed": visit_data.confirmed,
-            "has_review": False,
-            "has_photos": False
+            "has_review": visit_data.rating is not None,
+            "has_photos": visit_data.photo_urls is not None and len(visit_data.photo_urls) > 0,
+            "rating": visit_data.rating,
+            "comment": visit_data.comment,
+            "photo_urls": visit_data.photo_urls if visit_data.photo_urls else [],
+            "is_public": visit_data.is_public,
+            "anonymous": visit_data.anonymous,
+            "coffee_type": visit_data.coffee_type
         }
         
         result = supabase.table("cafe_visits").insert(visit_record).execute()
@@ -149,7 +159,32 @@ async def record_cafe_visit(
                 detail="Failed to record cafe visit"
             )
         
-        return result.data[0]
+        visit = result.data[0]
+        
+        # Format response with all fields
+        response_data = {
+            "id": visit.get("id"),
+            "cafe_id": visit.get("cafe_id"),
+            "user_id": visit.get("user_id"),
+            "visited_at": visit.get("visited_at"),
+            "check_in_lat": visit.get("check_in_lat"),
+            "check_in_lng": visit.get("check_in_lng"),
+            "distance_meters": visit.get("distance_meters"),
+            "duration_minutes": visit.get("duration_minutes"),
+            "auto_detected": visit.get("auto_detected", False),
+            "confirmed": visit.get("confirmed", True),
+            "has_review": visit.get("has_review", False),
+            "has_photos": visit.get("has_photos", False),
+            "rating": visit.get("rating"),
+            "comment": visit.get("comment"),
+            "photo_urls": visit.get("photo_urls", []),
+            "is_public": visit.get("is_public", True),
+            "anonymous": visit.get("anonymous", False),
+            "coffee_type": visit.get("coffee_type"),
+            "updated_at": visit.get("updated_at")
+        }
+        
+        return response_data
         
     except HTTPException:
         raise
@@ -163,10 +198,10 @@ async def record_cafe_visit(
         )
 
 @router.patch("/visits/{visit_id}", response_model=CafeVisitResponse)
-async def confirm_visit(
+async def update_visit(
     visit_id: str,
     update_data: CafeVisitUpdate,
-    user_id: str  # TODO: Replace with Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Confirm or update an auto-detected visit.
@@ -194,7 +229,7 @@ async def confirm_visit(
                 )
             )
         
-        if visit_check.data["user_id"] != user_id:
+        if visit_check.data["user_id"] != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=create_error_response(
@@ -203,18 +238,40 @@ async def confirm_visit(
                     details=[ErrorDetail(
                         field="user_id",
                         message="You do not own this visit",
-                        value=user_id
+                        value=current_user.id
                     )]
                 )
             )
         
         # Update visit
-        update_payload = {
-            "confirmed": update_data.confirmed,
-        }
+        update_payload = {}
+        
+        if update_data.confirmed is not None:
+            update_payload["confirmed"] = update_data.confirmed
         
         if update_data.duration_minutes is not None:
             update_payload["duration_minutes"] = update_data.duration_minutes
+        
+        # Coffee log fields
+        if update_data.rating is not None:
+            update_payload["rating"] = update_data.rating
+            update_payload["has_review"] = True
+        
+        if update_data.comment is not None:
+            update_payload["comment"] = update_data.comment
+        
+        if update_data.photo_urls is not None:
+            update_payload["photo_urls"] = update_data.photo_urls
+            update_payload["has_photos"] = len(update_data.photo_urls) > 0
+        
+        if update_data.is_public is not None:
+            update_payload["is_public"] = update_data.is_public
+        
+        if update_data.anonymous is not None:
+            update_payload["anonymous"] = update_data.anonymous
+        
+        if update_data.coffee_type is not None:
+            update_payload["coffee_type"] = update_data.coffee_type
         
         result = supabase.table("cafe_visits").update(update_payload).eq("id", visit_id).execute()
         
@@ -224,7 +281,32 @@ async def confirm_visit(
                 detail="Failed to update visit"
             )
         
-        return result.data[0]
+        visit = result.data[0]
+        
+        # Ensure all fields are present
+        response_data = {
+            "id": visit.get("id"),
+            "cafe_id": visit.get("cafe_id"),
+            "user_id": visit.get("user_id"),
+            "visited_at": visit.get("visited_at"),
+            "check_in_lat": visit.get("check_in_lat"),
+            "check_in_lng": visit.get("check_in_lng"),
+            "distance_meters": visit.get("distance_meters"),
+            "duration_minutes": visit.get("duration_minutes"),
+            "auto_detected": visit.get("auto_detected", False),
+            "confirmed": visit.get("confirmed", True),
+            "has_review": visit.get("has_review", False),
+            "has_photos": visit.get("has_photos", False),
+            "rating": visit.get("rating"),
+            "comment": visit.get("comment"),
+            "photo_urls": visit.get("photo_urls", []),
+            "is_public": visit.get("is_public", True),
+            "anonymous": visit.get("anonymous", False),
+            "coffee_type": visit.get("coffee_type"),
+            "updated_at": visit.get("updated_at")
+        }
+        
+        return response_data
         
     except HTTPException:
         raise
@@ -424,5 +506,192 @@ async def update_trending_scores():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update trending scores: {str(e)}"
+        )
+
+@router.get("/cafes/{cafe_id}/logs", response_model=CafeLogsResponse)
+async def get_cafe_logs(
+    cafe_id: str,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get public coffee logs for a cafe.
+    
+    - No authentication required
+    - Returns only public logs with ratings
+    - Paginated results
+    - Anonymous users show as "Anonymous" if anonymous flag is set
+    """
+    try:
+        offset = (page - 1) * page_size
+        
+        # Get public logs with ratings
+        result = supabase.table("cafe_visits").select(
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, anonymous, updated_at, user_id"
+        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
+            "visited_at", desc=True
+        ).range(offset, offset + page_size - 1).execute()
+        
+        if not result.data:
+            return CafeLogsResponse(
+                logs=[],
+                total_count=0,
+                page=page,
+                page_size=page_size,
+                has_more=False
+            )
+        
+        # Get total count
+        count_result = supabase.table("cafe_visits").select(
+            "id", count="exact"
+        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").execute()
+        
+        total_count = count_result.count if count_result.count else 0
+        
+        # Format logs with author display names
+        logs = []
+        for log in result.data:
+            author_display_name = None
+            if not log.get("anonymous"):
+                # Get username from users table
+                try:
+                    user_result = supabase.table("users").select("username").eq("id", log["user_id"]).single().execute()
+                    if user_result.data:
+                        author_display_name = user_result.data.get("username") or "User"
+                except Exception:
+                    author_display_name = "User"
+            else:
+                author_display_name = "Anonymous"
+            
+            logs.append(CafeLogPublicResponse(
+                id=log["id"],
+                cafe_id=log["cafe_id"],
+                visited_at=datetime.fromisoformat(log["visited_at"].replace("Z", "+00:00")),
+                rating=log.get("rating"),
+                comment=log.get("comment"),
+                photo_urls=log.get("photo_urls", []),
+                coffee_type=log.get("coffee_type"),
+                author_display_name=author_display_name,
+                updated_at=datetime.fromisoformat(log["updated_at"].replace("Z", "+00:00")) if log.get("updated_at") else None
+            ))
+        
+        return CafeLogsResponse(
+            logs=logs,
+            total_count=total_count,
+            page=page,
+            page_size=page_size,
+            has_more=offset + page_size < total_count
+        )
+        
+    except Exception as e:
+        print(f"Error getting cafe logs: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get cafe logs: {str(e)}"
+        )
+
+@router.get("/users/me/logs", response_model=List[CafeVisitResponse])
+async def get_my_logs(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get all logs for the current user (public and private).
+    
+    - Requires authentication
+    - Returns all logs regardless of is_public flag
+    - Ordered by visited_at (most recent first)
+    """
+    try:
+        result = supabase.table("cafe_visits").select("*").eq(
+            "user_id", current_user.id
+        ).not_.is_("rating", "null").order(
+            "visited_at", desc=True
+        ).execute()
+        
+        if not result.data:
+            return []
+        
+        # Format response with all fields
+        formatted_logs = []
+        for visit in result.data:
+            formatted_logs.append({
+                "id": visit.get("id"),
+                "cafe_id": visit.get("cafe_id"),
+                "user_id": visit.get("user_id"),
+                "visited_at": visit.get("visited_at"),
+                "check_in_lat": visit.get("check_in_lat"),
+                "check_in_lng": visit.get("check_in_lng"),
+                "distance_meters": visit.get("distance_meters"),
+                "duration_minutes": visit.get("duration_minutes"),
+                "auto_detected": visit.get("auto_detected", False),
+                "confirmed": visit.get("confirmed", True),
+                "has_review": visit.get("has_review", False),
+                "has_photos": visit.get("has_photos", False),
+                "rating": visit.get("rating"),
+                "comment": visit.get("comment"),
+                "photo_urls": visit.get("photo_urls", []),
+                "is_public": visit.get("is_public", True),
+                "anonymous": visit.get("anonymous", False),
+                "coffee_type": visit.get("coffee_type"),
+                "updated_at": visit.get("updated_at")
+            })
+        
+        return formatted_logs
+        
+    except Exception as e:
+        print(f"Error getting my logs: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get my logs: {str(e)}"
+        )
+
+@router.delete("/visits/{visit_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_visit(
+    visit_id: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Delete a visit/log.
+    
+    - Requires authentication
+    - Only owner or admin can delete
+    """
+    try:
+        # Check if visit exists and get owner
+        visit_check = supabase.table("cafe_visits").select("user_id").eq("id", visit_id).single().execute()
+        
+        if not visit_check.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Visit not found"
+            )
+        
+        # Check if user is owner or admin
+        is_owner = visit_check.data["user_id"] == current_user.id
+        is_admin = getattr(current_user, "role", None) == "admin"
+        
+        if not is_owner and not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to delete this visit"
+            )
+        
+        # Delete visit
+        supabase.table("cafe_visits").delete().eq("id", visit_id).execute()
+        
+        return None
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error deleting visit: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete visit: {str(e)}"
         )
 
