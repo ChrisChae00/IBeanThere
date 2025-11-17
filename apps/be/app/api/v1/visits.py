@@ -344,6 +344,7 @@ async def get_trending_cafes(
         for cafe in result.data:
             formatted_cafes.append({
                 "id": cafe.get("id"),
+                "slug": cafe.get("slug"),
                 "name": cafe.get("name"),
                 "address": cafe.get("address"),
                 "latitude": cafe.get("latitude"),

@@ -74,6 +74,7 @@ class CafeVisitResponse(BaseModel):
 class TrendingCafeResponse(BaseModel):
     """Response model for trending cafe"""
     id: str
+    slug: Optional[str] = None
     name: str
     address: str
     latitude: Decimal

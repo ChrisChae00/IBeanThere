@@ -9,6 +9,7 @@ Cafe API endpoints for UGC verification system.
 from fastapi import APIRouter, Query, HTTPException, status, Depends, Body
 from typing import Optional, List
 from decimal import Decimal
+import re
 from app.models.cafe import (
     CafeSearchParams,
     CafeSearchResponse,
@@ -27,6 +28,33 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+def slugify(name: str) -> str:
+    slug = name.lower().strip()
+    slug = re.sub(r'[^a-z0-9]+', '-', slug)
+    slug = re.sub(r'-{2,}', '-', slug).strip('-')
+    return slug or 'cafe'
+
+
+def generate_unique_slug(name: str, supabase: Client, exclude_id: Optional[str] = None) -> str:
+    base_slug = slugify(name)
+    slug_candidate = base_slug
+    counter = 1
+
+    while True:
+        existing = supabase.table("cafes").select("id").eq("slug", slug_candidate).limit(1).execute()
+        rows = existing.data or []
+
+        if not rows:
+            return slug_candidate
+
+        existing_id = rows[0].get("id")
+        if exclude_id and existing_id == exclude_id:
+            return slug_candidate
+
+        slug_candidate = f"{base_slug}-{counter}"
+        counter += 1
+
 
 # Initialize services
 _osm_service = None
@@ -449,21 +477,37 @@ async def get_cafe_details(cafe_identifier: str):
     try:
         supabase = get_supabase_client()
         
-        # Try to find by slug first, then by ID
-        result = supabase.table("cafes").select("*").eq("slug", cafe_identifier).single().execute()
+        slug_query = supabase.table("cafes").select("*").eq("slug", cafe_identifier).limit(1).execute()
+        slug_rows = slug_query.data or []
+
+        if slug_rows:
+            cafe = slug_rows[0]
+        else:
+            id_query = supabase.table("cafes").select("*").eq("id", cafe_identifier).limit(1).execute()
+            id_rows = id_query.data or []
+            if not id_rows:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cafe not found"
+                )
+            cafe = id_rows[0]
         
-        if not result.data:
-            # If not found by slug, try by ID
-            result = supabase.table("cafes").select("*").eq("id", cafe_identifier).single().execute()
-        
-        if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Cafe not found"
-            )
-        
-        cafe = result.data
         cafe_id = cafe.get("id")
+        
+        if not cafe.get("slug") and cafe.get("name"):
+            new_slug = generate_unique_slug(cafe.get("name", "cafe"), supabase, cafe_id)
+            supabase.table("cafes").update({"slug": new_slug}).eq("id", cafe_id).execute()
+            cafe["slug"] = new_slug
+        
+        # Parse datetime fields
+        created_at_str = cafe.get("created_at")
+        created_at = date_parser.parse(created_at_str) if created_at_str else datetime.now(timezone.utc)
+        
+        updated_at_str = cafe.get("updated_at")
+        updated_at = date_parser.parse(updated_at_str) if updated_at_str else None
+        
+        verified_at_str = cafe.get("verified_at")
+        verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
         
         # Get total count and calculate average rating from all public logs
         all_logs_result = supabase.table("cafe_visits").select(
@@ -528,12 +572,12 @@ async def get_cafe_details(cafe_identifier: str):
             "business_hours": cafe.get("business_hours"),
             "status": cafe.get("status", "pending"),
             "verification_count": cafe.get("verification_count", 1),
-            "verified_at": cafe.get("verified_at"),
+            "verified_at": verified_at,
             "admin_verified": cafe.get("admin_verified", False),
             "navigator_id": cafe.get("navigator_id"),
             "vanguard_ids": cafe.get("vanguard_ids", []),
-            "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
-            "updated_at": cafe.get("updated_at"),
+            "created_at": created_at,
+            "updated_at": updated_at,
             "average_rating": float(average_rating) if average_rating else None,
             "log_count": log_count,
             "recent_logs": recent_logs
@@ -690,6 +734,7 @@ async def register_cafe(
             # New cafe - create it
             normalized_name = request.name.lower().strip()
             normalized_address = request.address.lower().strip() if request.address else ""
+            slug = generate_unique_slug(request.name, supabase)
             
             cafe_data = {
                 "name": request.name,
@@ -707,7 +752,8 @@ async def register_cafe(
                 "source_type": request.source_type,
                 "source_url": request.source_url,
                 "normalized_name": normalized_name,
-                "normalized_address": normalized_address
+                "normalized_address": normalized_address,
+                "slug": slug
             }
             
             # Insert cafe
