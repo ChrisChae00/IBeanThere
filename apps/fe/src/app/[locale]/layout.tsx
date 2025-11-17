@@ -36,13 +36,13 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
   
   return (
-    <html lang={locale}>
-      <body>
+    <html lang={locale} className="h-full">
+      <body className="h-full flex flex-col">
         <ThemeProvider>
           <ToastProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <Header locale={locale} />
-              <main className="pt-16">
+              <main className="pt-16 flex-1">
                 {children}
               </main>
               <Footer locale={locale} />

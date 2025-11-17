@@ -162,7 +162,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
               {isCoffeeLogsExpanded && (
                 <div className="bg-[var(--color-background)]/50">
                   <Link 
-                    href={`/${locale}/my-coffee-logs/diary`}
+                    href={`/${locale}/my-logs`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors min-h-[44px] flex items-center"
                   >

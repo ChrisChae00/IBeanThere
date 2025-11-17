@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
 
 interface CafeInfoModalProps {
@@ -11,6 +13,8 @@ interface CafeInfoModalProps {
 
 export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   const t = useTranslations('cafe.modal');
+  const params = useParams();
+  const locale = params.locale as string;
   const [showAllHours, setShowAllHours] = useState(false);
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -216,20 +220,29 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             </div>
           )}
 
-          {/* Google Maps Link */}
-          {cafe.source_url && (
-            <a
-              href={cafe.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
+          {/* Actions */}
+          <div className="space-y-2">
+            <Link
+              href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}
               className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 transition-opacity min-h-[44px]"
+              onClick={onClose}
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-              </svg>
-              {t('google_maps')}
-            </a>
-          )}
+              {t('view_details')}
+            </Link>
+            {cafe.source_url && (
+              <a
+                href={cafe.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 border border-[var(--color-border)] text-[var(--color-cardText)] rounded-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                {t('google_maps')}
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>

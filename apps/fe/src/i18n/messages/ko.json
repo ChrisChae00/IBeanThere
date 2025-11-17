@@ -254,7 +254,8 @@
       "description": "설명",
       "founding_crew": "Founding Crew",
       "navigator": "개척자",
-      "vanguards": "선봉대"
+      "vanguards": "선봉대",
+      "first_discoverer": "이 카페의 첫 발견자"
     },
 
     "discover": {
@@ -353,9 +354,6 @@
         "apply_to_all_days": "모든 요일에 적용",
         "clear_all_hours": "모두 지우기"
       },
-      "detail": {
-        "view_on_google_maps": "Google Maps에서 보기"
-      },
       "modal": {
         "title": "카페 정보",
         "name": "이름",
@@ -384,7 +382,66 @@
         "day_thursday": "목요일",
         "day_friday": "금요일",
         "day_saturday": "토요일",
-        "day_sunday": "일요일"
+        "day_sunday": "일요일",
+        "view_details": "상세 보기"
+      },
+      "detail": {
+        "average_rating": "평균 평점",
+        "total_logs": "전체 로그",
+        "logs": "개",
+        "coffee_logs": "커피 로그",
+        "write_log": "로그 작성",
+        "from": "에서"
+      },
+      "log": {
+        "write_log_for": "로그 작성",
+        "write_log_description": "이 카페에서의 커피 경험을 공유하세요",
+        "my_logs": "내 커피 로그",
+        "my_logs_description": "모든 커피 로그를 관리하세요",
+        "rating": "평점",
+        "rating_required": "평점은 필수입니다",
+        "coffee_type": "커피 종류",
+        "optional": "선택",
+        "select_coffee_type": "커피 종류 선택",
+        "comment": "코멘트",
+        "comment_placeholder": "경험을 공유하세요...",
+        "comment_too_long": "코멘트는 1000자 이하여야 합니다",
+        "photos": "사진",
+        "photo": "사진",
+        "drag_drop_photos": "사진을 여기에 드래그하거나",
+        "or": "또는",
+        "click_to_upload": "클릭하여 업로드",
+        "max_photos": "최대 {max}장",
+        "max_size": "최대 크기",
+        "photo_too_large": "사진이 너무 큽니다. 최대 크기는 {maxSize}MB입니다",
+        "invalid_file_type": "잘못된 파일 형식입니다. 이미지를 업로드해주세요",
+        "public": "공개",
+        "public_description": "다른 사용자들이 이 로그를 볼 수 있습니다",
+        "anonymous": "익명",
+        "anonymous_description": "이 로그를 공유할 때 이름을 숨깁니다",
+        "cancel": "취소",
+        "submit": "제출",
+        "submitting": "제출 중...",
+        "edit": "수정",
+        "delete": "삭제",
+        "edit_log": "로그 수정",
+        "confirm_delete": "이 로그를 삭제하시겠습니까?",
+        "today": "오늘",
+        "yesterday": "어제",
+        "days_ago": "{count}일 전",
+        "no_logs_yet": "아직 로그가 없습니다. 첫 경험을 공유해보세요!",
+        "no_logs_found": "로그를 찾을 수 없습니다",
+        "load_more": "더 보기",
+        "loading": "로딩 중...",
+        "all": "전체",
+        "filter_public": "공개",
+        "filter_private": "비공개",
+        "error_loading_logs": "로그를 불러오는데 실패했습니다",
+        "error_loading_cafe": "카페를 불러오는데 실패했습니다",
+        "error_creating_log": "로그 생성에 실패했습니다",
+        "error_updating_log": "로그 수정에 실패했습니다",
+        "error_deleting_log": "로그 삭제에 실패했습니다",
+        "cafe_not_found": "카페를 찾을 수 없습니다"
       }
     }
   }

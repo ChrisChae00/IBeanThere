@@ -9,6 +9,7 @@ export interface BusinessHours {
 export interface CafeMapData {
   id: string;
   name: string;
+  slug?: string;
   latitude: number;
   longitude: number;
   rating?: number;

@@ -53,6 +53,7 @@ export function useMapData() {
       const cafes: CafeMapData[] = rawCafes.map((cafe) => ({
         id: cafe.id || '',
         name: cafe.name || '',
+        slug: cafe.slug,
         latitude: typeof cafe.latitude === 'string' ? parseFloat(cafe.latitude) : cafe.latitude || 0,
         longitude: typeof cafe.longitude === 'string' ? parseFloat(cafe.longitude) : cafe.longitude || 0,
         rating: cafe.rating ? (typeof cafe.rating === 'string' ? parseFloat(cafe.rating) : cafe.rating) : undefined,

@@ -1,4 +1,4 @@
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse } from '@/types/api';
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   const { createClient } = await import('@/lib/supabase/client');
@@ -193,6 +193,33 @@ export async function getPendingCafes(): Promise<CafeSearchResponse> {
     return data;
   } catch (error) {
     console.error('Error fetching pending cafes:', error);
+    throw error;
+  }
+}
+
+export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const url = `${apiUrl}/api/v1/cafes/${cafeId}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Cafe not found');
+      }
+      throw new Error(`Failed to fetch cafe detail: ${response.status} ${response.statusText}`);
+    }
+    
+    const data: CafeDetailResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching cafe detail:', error);
     throw error;
   }
 }

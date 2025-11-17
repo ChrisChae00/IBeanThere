@@ -83,7 +83,7 @@ export default function Header({
       items: [
         {
           labelKey: 'coffee_logs_item_1',
-          href: `/${locale}/my-coffee-logs/diary`,
+          href: `/${locale}/my-logs`,
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -279,7 +279,7 @@ export default function Header({
       {activeCategory && (
         <div 
           ref={megaMenuRef}
-          className="fixed top-16 left-0 right-0 z-40 bg-[var(--color-background)] border-b border-[var(--color-border)] shadow-xl"
+          className="fixed top-16 left-0 right-0 z-40 bg-[var(--color-primary)] border-b border-[var(--color-border)] shadow-xl"
           onMouseEnter={() => setActiveCategory(activeCategory)}
           onMouseLeave={() => setActiveCategory(null)}
         >
@@ -310,7 +310,7 @@ export default function Header({
                         <Link
                           key={index}
                           href={item.href}
-                          className="block px-2 py-2 text-base text-[var(--color-text)] hover:underline transition-colors"
+                          className="block px-2 py-2 text-base text-[var(--color-primaryText)] hover:underline transition-colors"
                           onClick={() => setActiveCategory(null)}
                         >
                           <span className="font-medium">{t(item.labelKey)}</span>

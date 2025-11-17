@@ -10,11 +10,67 @@ import { TrendingCafeResponse } from '@/types/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useLocation } from '@/hooks/useLocation';
 import { calculateDistance } from '@/lib/utils/checkIn';
+import { getCafePath } from '@/lib/utils/slug';
 
 type FilterType = 'all' | 'closest' | 'top_rated' | 'most_popular';
 
 interface CafeWithDistance extends TrendingCafeResponse {
   distance?: number;
+}
+
+function CafeCardImage({ 
+  imageUrl, 
+  alt, 
+  size = 'large' 
+}: { 
+  imageUrl?: string; 
+  alt: string;
+  size?: 'small' | 'large';
+}) {
+  const [imageError, setImageError] = useState(false);
+  const showImage = imageUrl && !imageError;
+  
+  if (size === 'small') {
+    return (
+      <div className="w-full flex-1 min-h-[120px] bg-[var(--color-primary)] rounded-lg flex items-center justify-center overflow-hidden mb-3">
+        {showImage ? (
+          <img 
+            src={imageUrl} 
+            alt={alt}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <img 
+            src="/icons/coffee-logo.svg" 
+            alt="Cafe logo"
+            className="w-12 h-12 md:w-16 md:h-16"
+          />
+        )}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="w-full aspect-[4/3] min-h-[176px] bg-[var(--color-surface)]/50 flex items-center justify-center overflow-hidden relative">
+      {showImage ? (
+        <img 
+          src={imageUrl} 
+          alt={alt}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="flex items-center justify-center w-full h-full">
+          <img 
+            src="/icons/coffee-logo.svg" 
+            alt="Cafe logo"
+            className="w-16 h-16 md:w-20 md:h-20 opacity-60"
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ExploreMapPage({
@@ -25,6 +81,7 @@ export default function ExploreMapPage({
   const { locale } = params;
   const t = useTranslations('discover.explore_map');
   const tMap = useTranslations('map');
+  const tVisit = useTranslations('visit');
   const { coords } = useLocation();
   const [trendingCafes, setTrendingCafes] = useState<CafeWithDistance[]>([]);
   const [filteredCafes, setFilteredCafes] = useState<CafeWithDistance[]>([]);
@@ -160,29 +217,41 @@ export default function ExploreMapPage({
                     </div>
                   </div>
                 ) : (
-                  trendingCafes.slice(0, 4).map((cafe, index) => (
-                    <div key={cafe.id} className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 hover:shadow-inset-primary transition-shadow flex flex-col justify-between">
-                      <div className="w-16 h-16 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-                        <div className="text-white text-2xl">☕️</div>
-                      </div>
-                      <div className="flex flex-col">
-                        <h3 className="font-semibold text-[var(--color-text)] mb-0.5 truncate" title={cafe.name}>
-                          {cafe.name}
-                        </h3>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-3 truncate" title={cafe.address}>
-                          {cafe.address}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-[var(--color-accent)]/10 text-[var(--color-textSecondary)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                            🔥 {tMap('trending')}
-                          </span>
-                          <button className="ml-auto bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1 rounded-lg text-sm font-medium hover:bg-[var(--color-secondary)] transition-colors">
-                            {tMap('visit')}
-                          </button>
+                  trendingCafes.slice(0, 4).map((cafe, index) => {
+                    const cafeImage = cafe.main_image || cafe.image;
+                    const cafePath = getCafePath(cafe, locale);
+                    return (
+                      <Link 
+                        key={cafe.id} 
+                        href={cafePath}
+                        className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 hover:shadow-inset-primary transition-shadow flex flex-col h-full cursor-pointer"
+                      >
+                        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" />
+                        <div className="flex flex-col mt-auto">
+                          <h3 className="font-semibold text-[var(--color-text)] mb-0.5 truncate" title={cafe.name}>
+                            {cafe.name}
+                          </h3>
+                          <p className="text-sm text-[var(--color-text-secondary)] mb-3 truncate" title={cafe.address}>
+                            {cafe.address}
+                          </p>
+                          <div className="flex items-center justify-between gap-2 mt-2">
+                            <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                              🔥 {tMap('trending')}
+                            </span>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[var(--color-secondary)] transition-colors whitespace-nowrap"
+                            >
+                              {tVisit('check_in_button')}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))
+                      </Link>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -265,29 +334,41 @@ export default function ExploreMapPage({
                 </div>
               </div>
             ) : (
-              filteredCafes.map((cafe, index) => (
-                <div key={cafe.id} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden hover:shadow-inset-primary transition-shadow">
-                  <div className="h-44 bg-[var(--color-surface)]/50 flex items-center justify-center">
-                    <div className="text-4xl text-[var(--color-text-secondary)]">☕️</div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-[var(--color-text)] mb-1.5 text-sm truncate" title={cafe.name}>
-                      {cafe.name}
-                    </h3>
-                    <p className="text-xs text-[var(--color-text-secondary)] mb-3 truncate" title={cafe.address}>
-                      {cafe.address}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="bg-[var(--color-accent)]/10 text-[var(--color-textSecondary)] px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                        🔥 {tMap('trending')}
-                      </span>
-                      <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1 rounded-lg text-xs font-medium hover:bg-[var(--color-secondary)] transition-colors">
-                        {tMap('visit')}
-                      </button>
+              filteredCafes.map((cafe, index) => {
+                const cafeImage = cafe.main_image || cafe.image;
+                const cafePath = getCafePath(cafe, locale);
+                return (
+                  <Link 
+                    key={cafe.id} 
+                    href={cafePath}
+                    className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden hover:shadow-inset-primary transition-shadow cursor-pointer flex flex-col"
+                  >
+                    <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-[var(--color-text)] mb-1.5 text-sm truncate" title={cafe.name}>
+                        {cafe.name}
+                      </h3>
+                      <p className="text-xs text-[var(--color-text-secondary)] mb-3 truncate" title={cafe.address}>
+                        {cafe.address}
+                      </p>
+                      <div className="flex items-center justify-between gap-2 mt-2">
+                        <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          🔥 {tMap('trending')}
+                        </span>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[var(--color-secondary)] transition-colors whitespace-nowrap"
+                        >
+                          {tVisit('check_in_button')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))
+                  </Link>
+                );
+              })
             )}
           </div>
         </div>

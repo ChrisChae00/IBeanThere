@@ -1,5 +1,7 @@
 'use client';
 
+import { useId } from 'react';
+
 interface ToggleButtonProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -17,18 +19,21 @@ export default function ToggleButton({
   disabled = false,
   className = ''
 }: ToggleButtonProps) {
+  const id = useId();
+  const toggleId = `toggle-${id}`;
+  
   return (
     <div className={`relative inline-block ${className}`}>
       <input
         type="checkbox"
-        id="location-toggle"
+        id={toggleId}
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
         className="sr-only"
       />
       <label
-        htmlFor="location-toggle"
+        htmlFor={toggleId}
         className={`
           relative block cursor-pointer select-none
           h-8 rounded-full

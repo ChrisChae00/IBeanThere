@@ -10,6 +10,7 @@ export interface CafeSearchResponse {
   cafes: Array<{
     id: string;
     name: string;
+    slug?: string;
     latitude: number;
     longitude: number;
     rating?: number;
@@ -53,6 +54,8 @@ export interface TrendingCafeResponse {
   visit_count_14d: number;
   trending_score: number;
   trending_rank?: number;
+  image?: string;
+  main_image?: string;
 }
 
 export interface CafeRegistrationRequest {
@@ -100,5 +103,74 @@ export interface LocationSearchResult {
   lat: number;
   lng: number;
   display_name: string;
+}
+
+export interface CoffeeLog {
+  id: string;
+  cafe_id: string;
+  user_id: string;
+  visited_at: string;
+  rating?: number;
+  comment?: string;
+  photo_urls?: string[];
+  is_public: boolean;
+  anonymous: boolean;
+  coffee_type?: string;
+  author_display_name?: string;
+  updated_at?: string;
+}
+
+export interface CafeDetailResponse {
+  id: string;
+  name: string;
+  slug?: string;
+  latitude: number;
+  longitude: number;
+  rating?: number;
+  address: string;
+  phone?: string;
+  website?: string;
+  description?: string;
+  source_url?: string;
+  business_hours?: BusinessHoursData;
+  status: 'pending' | 'verified' | 'disputed';
+  verification_count: number;
+  verified_at?: string;
+  admin_verified?: boolean;
+  navigator_id?: string;
+  vanguard_ids?: string[];
+  created_at: string;
+  updated_at?: string;
+  founding_crew?: {
+    navigator?: {
+      user_id: string;
+      username?: string;
+    };
+    vanguard?: Array<{
+      user_id: string;
+      username?: string;
+      role: 'vanguard_2nd' | 'vanguard_3rd';
+    }>;
+  };
+  average_rating?: number;
+  log_count: number;
+  recent_logs?: CoffeeLog[];
+}
+
+export interface CafeLogsResponse {
+  logs: CoffeeLog[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+export interface LogFormData {
+  rating?: number;
+  comment?: string;
+  photo_urls?: string[];
+  is_public: boolean;
+  anonymous: boolean;
+  coffee_type?: string;
 }
 
