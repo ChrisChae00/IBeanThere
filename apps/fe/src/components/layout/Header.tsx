@@ -46,7 +46,7 @@ export default function Header({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const discoverRef = useRef<HTMLDivElement>(null);
-  const coffeeLogsRef = useRef<HTMLAnchorElement>(null);
+  const myCoffeeJourneyRef = useRef<HTMLAnchorElement>(null);
   const shopRef = useRef<HTMLAnchorElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const divider1Ref = useRef<HTMLDivElement>(null);
@@ -78,8 +78,8 @@ export default function Header({
       ]
     },
     {
-      id: 'my_coffee_logs',
-      labelKey: 'my_coffee_logs',
+      id: 'my_coffee_journey',
+      labelKey: 'my_coffee_journey',
       items: [
         {
           labelKey: 'coffee_logs_item_1',
@@ -135,12 +135,12 @@ export default function Header({
       
       const rect = megaMenuRef.current.getBoundingClientRect();
       const discoverRect = discoverRef.current?.getBoundingClientRect();
-      const coffeeLogsRect = coffeeLogsRef.current?.getBoundingClientRect();
+      const myCoffeeJourneyRect = myCoffeeJourneyRef.current?.getBoundingClientRect();
       const shopRect = shopRef.current?.getBoundingClientRect();
       
       const isInAnyNavItem = 
         (discoverRect && e.clientX >= discoverRect.left && e.clientX <= discoverRect.right && e.clientY >= discoverRect.top && e.clientY <= discoverRect.bottom) ||
-        (coffeeLogsRect && e.clientX >= coffeeLogsRect.left && e.clientX <= coffeeLogsRect.right && e.clientY >= coffeeLogsRect.top && e.clientY <= coffeeLogsRect.bottom) ||
+        (myCoffeeJourneyRect && e.clientX >= myCoffeeJourneyRect.left && e.clientX <= myCoffeeJourneyRect.right && e.clientY >= myCoffeeJourneyRect.top && e.clientY <= myCoffeeJourneyRect.bottom) ||
         (shopRect && e.clientX >= shopRect.left && e.clientX <= shopRect.right && e.clientY >= shopRect.top && e.clientY <= shopRect.bottom);
       
       if (!isInAnyNavItem && !megaMenuRef.current?.contains(e.target as Node)) {
@@ -220,13 +220,13 @@ export default function Header({
               
               <div ref={divider1Ref} className="h-6 w-px bg-[var(--color-border)]" />
               <Link 
-                ref={coffeeLogsRef}
-                href={`/${locale}/my-coffee-logs`}
+                ref={myCoffeeJourneyRef}
+                href={`/${locale}/my-logs`}
                 className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors min-h-[44px] px-1 flex items-center"
-                onMouseEnter={() => setActiveCategory('my_coffee_logs')}
+                onMouseEnter={() => setActiveCategory('my_coffee_journey')}
                 onMouseLeave={() => {}}
               >
-                {t('my_coffee_logs')}
+                {t('my_coffee_journey')}
               </Link>
               <div ref={divider2Ref} className="h-6 w-px bg-[var(--color-border)]" />
               <Link 
@@ -294,7 +294,7 @@ export default function Header({
                 
                 if (category.id === 'discover') {
                   adjustedOffset = getNavItemLeft(navRef as React.RefObject<HTMLElement>) - megaMenuPadding;
-                } else if (category.id === 'my_coffee_logs') {
+                } else if (category.id === 'my_coffee_journey') {
                   adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
                 } else if (category.id === 'shop') {
                   adjustedOffset = getDividerRight(divider2Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;

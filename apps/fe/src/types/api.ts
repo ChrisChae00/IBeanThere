@@ -46,6 +46,7 @@ export interface CafeSearchResponse {
 
 export interface TrendingCafeResponse {
   id: string;
+  slug?: string;
   name: string;
   address: string;
   latitude: number;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { CafeDetailResponse } from '@/types/api';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
@@ -19,32 +20,23 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const locale = params.locale as string;
   const { user } = useAuth();
 
-  const handleWriteLog = () => {
+  const handleWriteLog = (e: React.MouseEvent) => {
     if (!user) {
+      e.preventDefault();
       router.push(`/${locale}/signin`);
       return;
     }
-    const cafePath = cafe.slug || cafe.id;
-    router.push(`/${locale}/cafes/${cafePath}/log`);
   };
+
+  const cafePath = cafe.slug || cafe.id;
+  const logPagePath = `/${locale}/cafes/${cafePath}/log`;
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[var(--color-cardText)] mb-2">{cafe.name}</h1>
-        {cafe.average_rating && (
-          <div className="flex items-center gap-2">
-            <StarRating rating={cafe.average_rating} size="lg" />
-            <span className="text-sm text-[var(--color-cardTextSecondary)]">
-              ({cafe.log_count} {t('logs')})
-            </span>
-          </div>
-        )}
-      </div>
-
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-4">{cafe.name}</h1>
+        <div className="h-px bg-[var(--color-border)] mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
 
@@ -68,20 +60,37 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
 
       {/* Coffee Logs Feed Card */}
       <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <h2 className="text-xl font-bold text-[var(--color-cardText)] mb-4">{t('coffee_logs')}</h2>
+        <div className="flex flex-col gap-4 mb-4">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-xl font-bold text-[var(--color-text)]">{t('coffee_logs')}</h2>
+            {user ? (
+              <Link
+                href={logPagePath}
+                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                aria-label={t('write_log')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                {t('write_log')}
+              </Link>
+            ) : (
+              <button
+                onClick={handleWriteLog}
+                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                aria-label={t('write_log')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                {t('write_log')}
+              </button>
+            )}
+          </div>
+          <div className="h-px bg-[var(--color-border)]"></div>
+        </div>
         <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
       </div>
-
-      {/* Floating Action Button */}
-      <button
-        onClick={handleWriteLog}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-full shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center z-50"
-        aria-label={t('write_log')}
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
     </div>
   );
 }

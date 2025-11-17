@@ -102,10 +102,10 @@ export default function MyLogsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[var(--color-cardText)] mb-2">
+        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
           {t('my_logs')}
         </h1>
-        <p className="text-[var(--color-cardTextSecondary)]">
+        <p className="text-[var(--color-textSecondary)]">
           {t('my_logs_description')}
         </p>
       </div>
@@ -121,8 +121,8 @@ export default function MyLogsPage() {
               onClick={() => setFilter(filterType)}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 filter === filterType
-                  ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-                  : 'border-transparent text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)]'
+                  ? 'border-[var(--color-primary)] text-[var(--color-text)]'
+                  : 'border-transparent text-[var(--color-textSecondary)] hover:text-[var(--color-secondary)]'
               }`}
             >
               {t(translationKey)}
@@ -140,7 +140,7 @@ export default function MyLogsPage() {
       {/* Edit Form */}
       {editingLog && (
         <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg border border-[var(--color-border)]">
-          <h2 className="text-xl font-bold text-[var(--color-cardText)] mb-4">
+          <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">
             {t('edit_log')}
           </h2>
           <CoffeeLogForm
@@ -155,7 +155,7 @@ export default function MyLogsPage() {
       {/* Logs List */}
       {filteredLogs.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-[var(--color-cardTextSecondary)]">
+          <p className="text-[var(--color-textSecondary)]">
             {t('no_logs_found')}
           </p>
         </div>

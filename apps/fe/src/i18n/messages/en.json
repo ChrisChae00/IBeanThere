@@ -25,7 +25,7 @@
       "help": "Help",
       "help_item_1": "FAQ",
       "help_item_2": "Contact",
-      "my_coffee_logs": "My Coffee Logs",
+      "my_coffee_journey": "My Coffee Journey",
       "coffee_logs_item_1": "My logs",
       "coffee_logs_item_2": "Stats",
       "shop": "Shop",
@@ -355,9 +355,6 @@
         "apply_to_all_days": "Apply to All Days",
         "clear_all_hours": "Clear All"
       },
-      "detail": {
-        "view_on_google_maps": "View on Google Maps"
-      },
       "modal": {
         "title": "Cafe Information",
         "name": "Name",
@@ -390,6 +387,7 @@
         "view_details": "View Details"
       },
       "detail": {
+        "view_on_google_maps": "View on Google Maps",
         "average_rating": "Average Rating",
         "total_logs": "Total Logs",
         "logs": "logs",

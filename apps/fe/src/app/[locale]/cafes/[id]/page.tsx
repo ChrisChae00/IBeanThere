@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCafeDetail } from '@/lib/api/cafes';
 import CafeDetailClient from './CafeDetailClient';
 import Script from 'next/script';
+import { redirect } from 'next/navigation';
 
 interface CafeDetailPageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -47,11 +48,15 @@ export async function generateMetadata({ params }: CafeDetailPageProps): Promise
 }
 
 export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
   
   try {
     // id can be either slug or UUID
     const cafe = await getCafeDetail(id);
+    
+    if (cafe.slug && cafe.slug !== id) {
+      redirect(`/${locale}/cafes/${cafe.slug}`);
+    }
     
     const structuredData = {
       '@context': 'https://schema.org',

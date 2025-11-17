@@ -14,6 +14,7 @@ interface CoffeeLogFeedProps {
 
 export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFeedProps) {
   const t = useTranslations('cafe.log');
+  const PAGE_SIZE = 20;
   const [logs, setLogs] = useState<CoffeeLog[]>(initialLogs);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -21,28 +22,42 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+
     if (initialLogs.length > 0) {
       setLogs(initialLogs);
       setPage(1);
-      setHasMore(initialLogs.length >= 20);
+      setHasMore(initialLogs.length >= PAGE_SIZE);
     } else {
-      // If no initial logs, fetch first page
-      const fetchInitialLogs = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const response = await getCafeLogs(cafeId, 1);
-          setLogs(response.logs);
-          setPage(1);
-          setHasMore(response.has_more);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : t('error_loading_logs'));
-        } finally {
+      setLogs([]);
+      setPage(1);
+      setHasMore(true);
+    }
+
+    const fetchLatestLogs = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await getCafeLogs(cafeId, 1);
+        if (!isActive) return;
+        setLogs(response.logs);
+        setPage(1);
+        setHasMore(response.has_more);
+      } catch (err) {
+        if (!isActive) return;
+        setError(err instanceof Error ? err.message : t('error_loading_logs'));
+      } finally {
+        if (isActive) {
           setIsLoading(false);
         }
-      };
-      fetchInitialLogs();
-    }
+      }
+    };
+
+    fetchLatestLogs();
+
+    return () => {
+      isActive = false;
+    };
   }, [cafeId, initialLogs, t]);
 
   const loadMore = async () => {
@@ -72,7 +87,7 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
   if (logs.length === 0 && !isLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--color-cardTextSecondary)]">{t('no_logs_yet')}</p>
+        <p className="text-[var(--color-textSecondary)]">{t('no_logs_yet')}</p>
       </div>
     );
   }

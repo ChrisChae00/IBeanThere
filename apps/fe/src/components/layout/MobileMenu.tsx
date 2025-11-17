@@ -148,7 +148,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                 onClick={toggleCoffeeLogs}
                 className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-background)] transition-colors font-medium min-h-[44px]"
               >
-                <span>{t('my_coffee_logs')}</span>
+                <span>{t('my_coffee_journey')}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${isCoffeeLogsExpanded ? 'rotate-180' : ''}`}
                   fill="none"

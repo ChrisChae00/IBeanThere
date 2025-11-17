@@ -196,37 +196,34 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
             )}
           </div>
 
-          {/* Today's Hours */}
+          {/* Today's Hours - Clickable Dropdown */}
           {todayHours && (
-            <div className="p-3 bg-[var(--color-surface)] rounded-lg">
+            <button
+              onClick={() => setShowAllHours(!showAllHours)}
+              className="w-full p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors"
+            >
               <div className="flex items-center justify-between">
-                <span className="font-medium text-[var(--color-text)]">
+                <span className="font-medium">
                   {t('today')} ({getDayName(today)})
                 </span>
-                <span className="text-[var(--color-text)]">
-                  {todayHours.closed
-                    ? t('closed')
-                    : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span>
+                    {todayHours.closed
+                      ? t('closed')
+                      : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </button>
           )}
-
-          {/* Show All Hours Button */}
-          <button
-            onClick={() => setShowAllHours(!showAllHours)}
-            className="flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium text-[var(--color-primaryText)] bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 rounded-lg transition-colors"
-          >
-            <span>{showAllHours ? t('hide_hours') : t('show_all_hours')}</span>
-            <svg
-              className={`w-4 h-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
 
           {/* All Week Hours */}
           {showAllHours && (
