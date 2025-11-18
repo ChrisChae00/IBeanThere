@@ -167,7 +167,7 @@ export default function ExploreMapPage({
               href={`/${locale}/discover/pending-spots`}
               className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
-              <span className="text-xl">🧭</span>
+              <span className="text-xl">+</span>
               {t('be_navigator')}
             </Link>
           </div>

@@ -18,9 +18,12 @@ export interface ThemePalette {
     cardBackground: string;
     cardText: string;
     cardTextSecondary: string;
+    surfaceText: string;
+    surfaceTextSecondary: string;
     authText: string;
     starFilled: string;
     starEmpty: string;
+    starEmptyOutline: string;
     cardShadow: string;
     pending: string;
     white: string;

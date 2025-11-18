@@ -15,6 +15,7 @@ export default function WriteLogPage() {
   const t = useTranslations('cafe.log');
   const router = useRouter();
   const params = useParams();
+  const locale = params.locale as string;
   const { user, isLoading: authLoading } = useAuth();
   const cafeId = params.id as string;
 
@@ -88,26 +89,28 @@ export default function WriteLogPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
-          {t('write_log_for')} {cafe.name}
-        </h1>
-        <p className="text-sm text-[var(--color-cardTextSecondary)]">
-          {t('write_log_description')}
-        </p>
-      </div>
-
-      {error && (
+      <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6">
         <div className="mb-6">
-          <ErrorAlert message={error} />
+          <h1 className="text-2xl font-bold text-[var(--color-surfaceText)] mb-2">
+            {locale === 'ko' ? `${cafe.name} ${t('write_log_for')}` : `${t('write_log_for')} ${cafe.name}`}
+          </h1>
+          <p className="text-sm text-[var(--color-surfaceTextSecondary)]">
+            {t('write_log_description')}
+          </p>
         </div>
-      )}
 
-      <CoffeeLogForm
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isLoading={isSubmitting}
-      />
+        {error && (
+          <div className="mb-6">
+            <ErrorAlert message={error} />
+          </div>
+        )}
+
+        <CoffeeLogForm
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isLoading={isSubmitting}
+        />
+      </div>
     </div>
   );
 }

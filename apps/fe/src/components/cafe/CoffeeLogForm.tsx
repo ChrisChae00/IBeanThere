@@ -79,7 +79,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Rating */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-cardTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
           {t('rating')} <span className="text-[var(--color-error)]">*</span>
         </label>
         <div className="flex items-center gap-2">
@@ -97,6 +97,8 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
                     : 'text-[var(--color-starEmpty)]'
                 }`}
                 fill="currentColor"
+                stroke={rating && rating >= value ? 'currentColor' : 'var(--color-starEmptyOutline)'}
+                strokeWidth="1.5"
                 viewBox="0 0 20 20"
               >
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -104,7 +106,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
             </button>
           ))}
           {rating && (
-            <span className="text-sm text-[var(--color-cardTextSecondary)] ml-2">
+            <span className="text-sm text-[var(--color-surfaceTextSecondary)] ml-2">
               {rating}/5
             </span>
           )}
@@ -116,7 +118,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
 
       {/* Coffee Type */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-cardTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
           {t('coffee_type')} ({t('optional')})
         </label>
         <select
@@ -135,7 +137,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
 
       {/* Comment */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-cardTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
           {t('comment')} ({t('optional')})
         </label>
         <textarea
@@ -153,7 +155,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
           {errors.comment && (
             <p className="text-sm text-[var(--color-error)]">{errors.comment}</p>
           )}
-          <p className="text-xs text-[var(--color-cardTextSecondary)] ml-auto">
+          <p className="text-xs text-[var(--color-surfaceTextSecondary)] ml-auto">
             {comment.length}/1000
           </p>
         </div>
@@ -169,7 +171,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
       {/* Privacy Settings */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-[var(--color-cardTextSecondary)]">
+          <label className="text-sm font-medium text-[var(--color-surfaceTextSecondary)]">
             {t('public')}
           </label>
           <ToggleButton
@@ -178,12 +180,12 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
             className="public-toggle"
           />
         </div>
-        <p className="text-xs text-[var(--color-cardTextSecondary)]">
+        <p className="text-xs text-[var(--color-surfaceTextSecondary)]">
           {t('public_description')}
         </p>
 
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-[var(--color-cardTextSecondary)]">
+          <label className="text-sm font-medium text-[var(--color-surfaceTextSecondary)]">
             {t('anonymous')}
           </label>
           <ToggleButton
@@ -192,7 +194,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
             className="anonymous-toggle"
           />
         </div>
-        <p className="text-xs text-[var(--color-cardTextSecondary)]">
+        <p className="text-xs text-[var(--color-surfaceTextSecondary)]">
           {t('anonymous_description')}
         </p>
       </div>
@@ -203,7 +205,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-cardText)] hover:bg-[var(--color-surface)] transition-colors"
+            className="flex-1 px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-surfaceText)] hover:bg-[var(--color-surface)]/80 transition-colors"
             disabled={isLoading}
           >
             {t('cancel')}

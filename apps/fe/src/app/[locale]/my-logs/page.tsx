@@ -8,8 +8,10 @@ import { getMyLogs, deleteLog, updateLog } from '@/lib/api/logs';
 import { CoffeeLog, LogFormData } from '@/types/api';
 import CoffeeLogCard from '@/components/cafe/CoffeeLogCard';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
+import CafeSearchModal from '@/components/cafe/CafeSearchModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorAlert from '@/components/ui/ErrorAlert';
+import { PlusIcon } from '@/components/ui/PlusIcon';
 
 type FilterType = 'all' | 'public' | 'private';
 
@@ -25,6 +27,7 @@ export default function MyLogsPage() {
   const [error, setError] = useState<string | null>(null);
   const [editingLog, setEditingLog] = useState<CoffeeLog | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -101,13 +104,24 @@ export default function MyLogsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
-          {t('my_logs')}
-        </h1>
-        <p className="text-[var(--color-textSecondary)]">
-          {t('my_logs_description')}
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+            {t('my_logs')}
+          </h1>
+          <p className="text-[var(--color-textSecondary)]">
+            {t('my_logs_description')}
+          </p>
+        </div>
+        
+        {/* Write Log Button */}
+        <button
+          onClick={() => setShowSearchModal(true)}
+          className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 whitespace-nowrap"
+        >
+          <PlusIcon size={18} className="text-[var(--color-primaryText)]" />
+          {t('write_log')}
+        </button>
       </div>
 
       {/* Filter Tabs */}
@@ -170,6 +184,11 @@ export default function MyLogsPage() {
             />
           ))}
         </div>
+      )}
+
+      {/* Cafe Search Modal */}
+      {showSearchModal && (
+        <CafeSearchModal onClose={() => setShowSearchModal(false)} />
       )}
     </div>
   );

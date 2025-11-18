@@ -21,9 +21,12 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#f5f0e8', // Light beige for hero text
           cardText: '#442f19', // Dark brown for card text
           cardTextSecondary: '#93795d', // Light brown for secondary text (hover state, lighter)
+          surfaceText: '#442f19', // Text for surface (same as cardText since surface is light)
+          surfaceTextSecondary: '#93795d', // Secondary text for surface
           authText: '#442f19', // Dark brown text (same as text) for auth pages on secondary background
           starFilled: '#FFA500', // Vibrant orange for filled stars
           starEmpty: '#D3D3D3', // Light gray with better contrast
+          starEmptyOutline: '#B0B0B0', // Darker gray for star outline
           cardShadow: '#8C5A3A', // Same as primary for morning coffee
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
@@ -51,9 +54,12 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#e9ded2', // Light beige for hero text
           cardText: '#1A120B', // Dark background color for text on light primary
           cardTextSecondary: '#5e432d', // Dark brown secondary text
+          surfaceText: '#e9ded2', // Light text for dark surface
+          surfaceTextSecondary: '#d4c7b8', // Light secondary text for dark surface
           authText: '#e9ded2', // Light cream text (same as text) for auth pages on secondary background
           starFilled: '#FFB347', // Warm orange for dark mode
           starEmpty: '#808080', // Medium gray for better contrast in dark mode
+          starEmptyOutline: '#606060', // Darker gray for star outline
           cardShadow: '#d4c7b8', // Same as primary for espresso
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
@@ -81,9 +87,12 @@ export const themes: Record<string, ThemePalette> = {
           textHero: '#f0f2e8', // Light beige for hero text // Medium olive green for cta text
           cardText: '#4a5c2a', // Dark olive for card text
           cardTextSecondary: '#85a035', // Medium olive secondary text
+          surfaceText: '#4a5c2a', // Text for surface (same as cardText since surface is light)
+          surfaceTextSecondary: '#85a035', // Secondary text for surface
           authText: '#e0e8d0', // Very light desaturated green (same as background) for auth pages on secondary background
           starFilled: '#FF8C00', // Dark orange for matcha theme
           starEmpty: '#A0A0A0', // Medium gray for better contrast
+          starEmptyOutline: '#808080', // Darker gray for star outline
           cardShadow: '#85a035', // Same as primary for matcha latte
           pending: '#9CA3AF', // Gray for pending markers
           white: '#FFFFFF', // White for contrast
@@ -111,10 +120,13 @@ export const themes: Record<string, ThemePalette> = {
       textHero: '#FFF9F0', // Very light cream for hero text  
       cardText: '#362C1D', // Dark brown for card text
       cardTextSecondary: '#8B7355', // Medium brown secondary text
+      surfaceText: '#362C1D', // Text for surface (same as cardText since surface is light)
+      surfaceTextSecondary: '#8B7355', // Secondary text for surface
       authText: '#362C1D', // Dark brown text (same as text) for auth pages on secondary background
-      starFilled: '#FF7F50', // Coral orange for vanilla theme
-      starEmpty: '#B8860B', // Dark goldenrod for better contrast
-      cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
+          starFilled: '#FF7F50', // Coral orange for vanilla theme
+          starEmpty: '#B8860B', // Dark goldenrod for better contrast
+          starEmptyOutline: '#8B6914', // Darker goldenrod for star outline
+          cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
       pending: '#9CA3AF', // Gray for pending markers
       white: '#FFFFFF', // White for contrast
       userMarkerMap: '#E78E17', // Secondary color for user marker

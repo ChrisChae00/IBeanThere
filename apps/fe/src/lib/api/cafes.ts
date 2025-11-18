@@ -224,3 +224,31 @@ export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse>
   }
 }
 
+export async function searchCafes(
+  lat: number,
+  lng: number,
+  radius: number = 2000
+): Promise<CafeSearchResponse> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const url = `${apiUrl}/api/v1/cafes/search?lat=${lat}&lng=${lng}&radius=${radius}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to search cafes: ${response.status} ${response.statusText}`);
+    }
+    
+    const data: CafeSearchResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error searching cafes:', error);
+    throw error;
+  }
+}
+

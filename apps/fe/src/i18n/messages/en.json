@@ -400,6 +400,7 @@
         "write_log_description": "Share your coffee experience at this cafe",
         "my_logs": "My Coffee Logs",
         "my_logs_description": "Manage all your coffee logs",
+        "write_log": "Write Log",
         "rating": "Rating",
         "rating_required": "Rating is required",
         "coffee_type": "Coffee Type",
@@ -443,7 +444,16 @@
         "error_creating_log": "Failed to create log",
         "error_updating_log": "Failed to update log",
         "error_deleting_log": "Failed to delete log",
-        "cafe_not_found": "Cafe not found"
+        "cafe_not_found": "Cafe not found",
+        "search_cafe": "Search Cafe",
+        "search_placeholder": "Search by cafe name...",
+        "search_nearby": "Search Nearby Cafes",
+        "no_cafes_found": "No cafes found",
+        "select_cafe_to_write_log": "Select a cafe to write a log",
+        "loading_cafes": "Loading cafes...",
+        "location_permission_required": "Location permission is required to search nearby cafes",
+        "location_error": "Failed to get your location",
+        "search_error": "Failed to search cafes"
       }
     }
   }

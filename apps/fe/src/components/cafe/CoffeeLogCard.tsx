@@ -81,12 +81,12 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
           {cafePath ? (
             <Link
               href={cafePath}
-              className="text-base font-semibold text-[var(--color-text)] hover:text-[var(--color-secondary)] transition-colors"
+              className="text-base font-semibold text-[var(--color-cardText)] hover:text-[var(--color-secondary)] transition-colors"
             >
               {cafe.name}
             </Link>
           ) : (
-            <p className="text-base font-semibold text-[var(--color-text)]">
+            <p className="text-base font-semibold text-[var(--color-cardText)]">
               {isLoadingCafe ? 'Loading...' : cafe.name}
             </p>
           )}
@@ -101,10 +101,10 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
             size="sm"
           />
           <div>
-            <p className="text-sm font-medium text-[var(--color-text)]">
+            <p className="text-sm font-medium text-[var(--color-cardText)]">
               {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
             </p>
-            <p className="text-xs text-[var(--color-textSecondary)]">
+            <p className="text-xs text-[var(--color-cardTextSecondary)]">
               {formatRelativeDate(log.visited_at)}
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
             {onEdit && (
               <button
                 onClick={() => onEdit(log)}
-                className="text-sm text-[var(--color-text)] hover:text-[var(--color-secondary)] hover:underline transition-colors"
+                className="text-sm text-[var(--color-cardText)] hover:text-[var(--color-secondary)] hover:underline transition-colors"
               >
                 {t('edit')}
               </button>
@@ -133,15 +133,15 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
 
       {/* Rating */}
       {log.rating && (
-        <div>
-          <StarRating rating={log.rating} size="sm" />
+        <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+          <StarRating rating={log.rating} size="sm" textColor="surface" />
         </div>
       )}
 
       {/* Coffee Type */}
       {log.coffee_type && (
         <div>
-          <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full">
+          <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
             {log.coffee_type}
           </span>
         </div>
@@ -149,7 +149,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
 
       {/* Comment */}
       {log.comment && (
-        <p className="text-sm text-[var(--color-text)] whitespace-pre-wrap">
+        <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap">
           {log.comment}
         </p>
       )}

@@ -35,7 +35,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-4">{cafe.name}</h1>
+        <h1 className="text-3xl font-bold text-[var(--color-cardText)] mb-4">{cafe.name}</h1>
         <div className="h-px bg-[var(--color-border)] mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
@@ -62,7 +62,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
       <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-[var(--color-text)]">{t('coffee_logs')}</h2>
+            <h2 className="text-xl font-bold text-[var(--color-cardText)]">{t('coffee_logs')}</h2>
             {user ? (
               <Link
                 href={logPagePath}
