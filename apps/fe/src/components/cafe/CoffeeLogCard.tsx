@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
+import { Card } from '@/components/ui';
 import StarRating from '@/components/ui/StarRating';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/hooks/useAuth';
@@ -74,7 +75,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
   const cafePath = cafe ? getCafePath({ id: log.cafe_id, slug: cafe.slug }, locale) : null;
 
   return (
-    <div className="bg-[var(--color-cardBackground)] rounded-lg p-4 space-y-3 border border-[var(--color-border)]">
+    <Card>
       {/* Cafe Name */}
       {cafe && (
         <div className="pb-2 border-b border-[var(--color-border)]">
@@ -168,7 +169,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 

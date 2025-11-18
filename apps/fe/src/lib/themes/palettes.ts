@@ -43,7 +43,7 @@ export const themes: Record<string, ThemePalette> = {
           secondary: '#5e432d', // Dark brown
           accent: '#8b7355', // Medium brown accent
           background: '#1A120B', // Very dark brown from image 2A1A13
-          cardBackground: '#d4c7b8', // Dark brown surface from image
+          cardBackground: '#2A1A13', // Slightly lighter surface for dark mode cards
           surface: '#3C2A21', // Dark brown surface from image
           text: '#e9ded2', // Light cream text
           textSecondary: '#d4c7b8', // Light beige secondary text
@@ -52,8 +52,8 @@ export const themes: Record<string, ThemePalette> = {
           warning: '#FFA726', // Lighter orange for dark mode
           error: '#EF5350', // Lighter red for dark mode
           textHero: '#e9ded2', // Light beige for hero text
-          cardText: '#1A120B', // Dark background color for text on light primary
-          cardTextSecondary: '#5e432d', // Dark brown secondary text
+          cardText: '#e9ded2', // Light text for dark card background
+          cardTextSecondary: '#d4c7b8', // Light beige secondary text
           surfaceText: '#e9ded2', // Light text for dark surface
           surfaceTextSecondary: '#d4c7b8', // Light secondary text for dark surface
           authText: '#e9ded2', // Light cream text (same as text) for auth pages on secondary background

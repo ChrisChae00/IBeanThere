@@ -12,6 +12,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import LocationIcon from '@/components/ui/LocationIcon';
 import CoffeeIcon from '@/components/ui/CoffeeIcon';
+import { Modal, Input, Button } from '@/components/ui';
 
 interface CafeSearchModalProps {
   onClose: () => void;
@@ -156,70 +157,26 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
   }, [userLocation]);
 
   return (
-    <div 
-      className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/50" 
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-[var(--color-cardBackground)] rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-[var(--color-cardBackground)] border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[var(--color-cardText)]">
-            {t('search_cafe')}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
-            aria-label={t('cancel')}
-          >
-            <svg
-              className="w-5 h-5 text-[var(--color-cardText)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="px-6 py-4 space-y-4">
+    <Modal isOpen onClose={onClose} title={t('search_cafe')} size="sm">
+      <div className="space-y-4">
           {/* Search Input */}
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <CoffeeIcon size={18} className="text-[var(--color-cardTextSecondary)]" />
-            </div>
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('search_placeholder')}
-              className="w-full pl-10 pr-4 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all"
-            />
-          </div>
+          <Input
+            ref={searchInputRef}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('search_placeholder')}
+            icon={<CoffeeIcon size={18} className="text-[var(--color-cardTextSecondary)]" />}
+          />
 
           {/* Search Nearby Button */}
-          <button
+          <Button
             onClick={handleSearchNearby}
-            disabled={locationLoading || isLoading}
-            className="w-full px-4 py-3 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+            fullWidth
+            loading={locationLoading || isLoading}
+            leftIcon={<LocationIcon size={20} className="text-[var(--color-primaryText)]" />}
           >
-            {locationLoading || isLoading ? (
-              <>
-                <LoadingSpinner size="sm" />
-                {t('loading_cafes')}
-              </>
-            ) : (
-              <>
-                <LocationIcon size={20} className="text-[var(--color-primaryText)]" />
-                {t('search_nearby')}
-              </>
-            )}
-          </button>
+            {t('search_nearby')}
+          </Button>
 
           {/* Error Messages */}
           {(error || locationError) && (
@@ -296,9 +253,8 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
               })}
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

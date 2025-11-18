@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 
 interface CafeInfoModalProps {
   cafe: CafeMapData;
@@ -57,7 +59,6 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
         className="relative bg-[var(--color-cardBackground)] rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-[var(--color-cardBackground)] border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-[var(--color-cardText)]">{cafe.name}</h2>
           <button
@@ -76,19 +77,14 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           </button>
         </div>
 
-        {/* Content */}
         <div className="px-6 py-4 space-y-4">
-          {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                cafe.status === 'verified'
-                  ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-                  : 'bg-[var(--color-pending)]/10 text-[var(--color-pending)]'
-              }`}
+            <Badge
+              variant={cafe.status === 'verified' ? 'success' : 'info'}
+              size="sm"
             >
               {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
-            </span>
+            </Badge>
             {cafe.verification_count && (
               <span className="text-sm text-[var(--color-cardTextSecondary)]">
                 {t('verifications', { count: cafe.verification_count })}
@@ -167,9 +163,11 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               )}
 
               {/* Show All Hours Button */}
-              <button
+              <Button
                 onClick={() => setShowAllHours(!showAllHours)}
-                className="flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium text-[var(--color-primaryText)] bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 rounded-lg transition-colors"
+                fullWidth
+                variant="secondary"
+                size="sm"
               >
                 <span>{showAllHours ? t('hide_hours') : t('show_all_hours')}</span>
                 <svg
@@ -180,7 +178,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Button>
 
               {/* All Week Hours */}
               {showAllHours && (
@@ -220,7 +218,6 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             </div>
           )}
 
-          {/* Actions */}
           <div className="space-y-2">
             <Link
               href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}

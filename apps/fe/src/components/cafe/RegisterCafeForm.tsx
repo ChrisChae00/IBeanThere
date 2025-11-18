@@ -7,7 +7,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { validateInitialDistance } from '@/lib/utils/checkIn';
 import { CafeRegistrationRequest } from '@/types/api';
 import { BusinessHours } from '@/types/map';
-import { ErrorAlert, LoadingSpinner } from '@/components/ui';
+import { ErrorAlert, Button, Input } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import OpeningHoursInput from './OpeningHoursInput';
 
@@ -343,18 +343,19 @@ export default function RegisterCafeForm({
             </label>
             
             <div className="flex gap-2 mb-4">
-              <button
+              <Button
                 type="button"
                 onClick={handleCurrentLocationClick}
-                className={`flex-1 px-4 py-3 rounded-lg border-2 transition-colors min-h-[44px] ${
+                className={`flex-1 border-2 ${
                   locationMode === 'current'
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                    ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]'
                     : 'border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-primary)]'
                 }`}
-                disabled={locationLoading}
+                variant="outline"
+                loading={locationLoading}
               >
-                {locationLoading ? <LoadingSpinner size="sm" /> : t('use_current_location')}
-              </button>
+                {t('use_current_location')}
+              </Button>
             </div>
             <p className="text-sm text-[var(--color-text-secondary)] mb-4">
               {t('select_on_map_hint')}
@@ -390,14 +391,15 @@ export default function RegisterCafeForm({
                 className="flex-1 px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
                 placeholder={t('postcode_placeholder')}
               />
-              <button
+              <Button
                 type="button"
                 onClick={handlePostcodeSearch}
-                disabled={isSearchingPostcode || !formData.postcode.trim()}
-                className="px-4 py-2.5 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] whitespace-nowrap"
+                disabled={!formData.postcode.trim()}
+                loading={isSearchingPostcode}
+                className="whitespace-nowrap"
               >
-                {isSearchingPostcode ? <LoadingSpinner size="sm" /> : t('search_postcode')}
-              </button>
+                {t('search_postcode')}
+              </Button>
             </div>
             
             {/* Distance Indicator */}
@@ -436,33 +438,21 @@ export default function RegisterCafeForm({
             
           </div>
           
-          {/* Cafe Name */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-              {t('name_label')} *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
-              placeholder={t('name_placeholder')}
-              required
-            />
-          </div>
+          <Input
+            label={`${t('name_label')} *`}
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder={t('name_placeholder')}
+            required
+          />
           
-          {/* Address */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-              {t('address_label')}
-            </label>
-            <input
-              type="text"
+            <Input
+              label={t('address_label')}
               name="address"
               value={formData.address}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
               placeholder={t('address_placeholder')}
             />
             {addressFetched && formData.address && (
@@ -477,47 +467,31 @@ export default function RegisterCafeForm({
             )}
           </div>
           
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-              {t('phone_label')}
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
-              placeholder={t('phone_placeholder')}
-            />
-          </div>
+          <Input
+            label={t('phone_label')}
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder={t('phone_placeholder')}
+          />
           
-          {/* Website */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-              {t('website_label')}
-            </label>
-            <input
-              type="url"
-              name="website"
-              value={formData.website}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
-              placeholder={t('website_placeholder')}
-            />
-          </div>
+          <Input
+            label={t('website_label')}
+            type="url"
+            name="website"
+            value={formData.website}
+            onChange={handleInputChange}
+            placeholder={t('website_placeholder')}
+          />
           
-          {/* Google Maps URL */}
           <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-              {t('google_maps_url_label')}
-            </label>
-            <input
+            <Input
+              label={t('google_maps_url_label')}
               type="url"
               name="source_url"
               value={formData.source_url}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
               placeholder={t('google_maps_url_placeholder')}
             />
             <p className="text-xs text-[var(--color-text-secondary)] mt-1">
@@ -533,20 +507,22 @@ export default function RegisterCafeForm({
           
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              className="flex-1"
               onClick={onCancel}
-              className="flex-1 px-6 py-3 border border-[var(--color-border)] rounded-lg text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
             >
               {t('cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isLoading || !isValidDistance || !formData.name.trim()}
-              className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="flex-1"
+              loading={isLoading}
+              disabled={!isValidDistance || !formData.name.trim()}
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : t('submit')}
-            </button>
+              {t('submit')}
+            </Button>
           </div>
         </form>
     </div>

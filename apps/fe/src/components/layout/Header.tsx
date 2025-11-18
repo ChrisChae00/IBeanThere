@@ -190,7 +190,7 @@ export default function Header({
   
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60 shadow-[var(--ibean-shadow-warm-sm)] motion-fade-in">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -257,14 +257,14 @@ export default function Header({
                 <>
                   <Link 
                     href={`/${locale}/signin`}
-                    className="border-2 border-[var(--color-text)] text-[var(--color-text)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] hover:text-[var(--color-textHero)] font-medium transition-colors min-h-[44px] flex items-center"
+                    className="border border-[var(--color-border)] text-[var(--color-text)] px-4 py-2 rounded-full hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] font-medium transition-all min-h-[44px] flex items-center"
                   >
                     {t('sign_in')}
                   </Link>
                   <div className="h-6 w-px bg-[var(--color-border)]" />
                   <Link 
                     href={`/${locale}/register`}
-                    className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-1.5 rounded-full hover:bg-[var(--color-secondary)] hover:text-[var(--color-textHero)] transition-colors font-medium min-h-[44px] flex items-center"
+                    className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-5 py-2 rounded-full hover:bg-[var(--color-secondary)] transition-all font-medium min-h-[44px] flex items-center shadow-[var(--ibean-shadow-warm-sm)]"
                   >
                     {t('get_started')}
                   </Link>
@@ -279,7 +279,7 @@ export default function Header({
       {activeCategory && (
         <div 
           ref={megaMenuRef}
-          className="fixed top-16 left-0 right-0 z-40 bg-[var(--color-primary)] border-b border-[var(--color-border)] shadow-xl"
+          className="fixed top-16 left-0 right-0 z-40 glass-panel border-t border-[var(--color-border)]/70"
           onMouseEnter={() => setActiveCategory(activeCategory)}
           onMouseLeave={() => setActiveCategory(null)}
         >

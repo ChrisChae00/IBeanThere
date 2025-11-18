@@ -6,7 +6,7 @@ import { LogFormData, CoffeeLog } from '@/types/api';
 import StarRating from '@/components/ui/StarRating';
 import PhotoUpload from '@/components/ui/PhotoUpload';
 import ToggleButton from '@/components/ui/ToggleButton';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Button, Input } from '@/components/ui';
 
 interface CoffeeLogFormProps {
   initialData?: CoffeeLog;
@@ -137,10 +137,9 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
 
       {/* Comment */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
-          {t('comment')} ({t('optional')})
-        </label>
-        <textarea
+        <Input
+          multiline
+          label={`${t('comment')} (${t('optional')})`}
           value={comment}
           onChange={(e) => {
             setComment(e.target.value);
@@ -148,16 +147,11 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
           }}
           rows={4}
           maxLength={1000}
-          className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
           placeholder={t('comment_placeholder')}
+          error={errors.comment}
         />
-        <div className="flex justify-between mt-1">
-          {errors.comment && (
-            <p className="text-sm text-[var(--color-error)]">{errors.comment}</p>
-          )}
-          <p className="text-xs text-[var(--color-surfaceTextSecondary)] ml-auto">
-            {comment.length}/1000
-          </p>
+        <div className="mt-1 text-right text-xs text-[var(--color-surfaceTextSecondary)]">
+          {comment.length}/1000
         </div>
       </div>
 
@@ -202,29 +196,24 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
       {/* Actions */}
       <div className="flex gap-3">
         {onCancel && (
-          <button
+          <Button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-surfaceText)] hover:bg-[var(--color-surface)]/80 transition-colors"
+            variant="outline"
+            className="flex-1"
             disabled={isLoading}
           >
             {t('cancel')}
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           type="submit"
-          disabled={isLoading || !rating}
-          className="flex-1 px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex-1"
+          loading={isLoading}
+          disabled={!rating}
         >
-          {isLoading ? (
-            <>
-              <LoadingSpinner size="sm" />
-              {t('submitting')}
-            </>
-          ) : (
-            t('submit')
-          )}
-        </button>
+          {t('submit')}
+        </Button>
       </div>
     </form>
   );

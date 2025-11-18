@@ -2,6 +2,7 @@
 
 import { PendingCafe } from '@/lib/api/admin';
 import { useTranslations } from 'next-intl';
+import { Card, Badge, Button } from '@/components/ui';
 
 interface PendingCafeCardProps {
   cafe: PendingCafe;
@@ -21,12 +22,7 @@ export default function PendingCafeCard({
   const t = useTranslations('admin');
 
   return (
-    <div 
-      className="bg-[var(--color-surface)] rounded-lg p-6 border border-[var(--color-border)]"
-      style={{
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
-      }}
-    >
+    <Card variant="elevated" padding="lg">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
@@ -50,9 +46,9 @@ export default function PendingCafeCard({
             </span>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-warning)]/20 text-[var(--color-warning)]">
+        <Badge variant="warning" size="sm">
           {t('pending')}
-        </span>
+        </Badge>
       </div>
 
       {(cafe.phone || cafe.website || cafe.description) && (
@@ -101,22 +97,25 @@ export default function PendingCafeCard({
       )}
 
       <div className="flex gap-3 mt-4">
-        <button
+        <Button
           onClick={() => onVerify(cafe.id)}
-          disabled={isVerifying || isDeleting}
-          className="flex-1 px-4 py-2 bg-[var(--color-success)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-opacity min-h-[44px]"
+          disabled={isDeleting}
+          loading={isVerifying}
+          className="flex-1"
         >
-          {isVerifying ? t('verifying') : t('verify')}
-        </button>
-        <button
+          {t('verify')}
+        </Button>
+        <Button
           onClick={() => onDelete(cafe.id)}
-          disabled={isVerifying || isDeleting}
-          className="flex-1 px-4 py-2 bg-[var(--color-error)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-opacity min-h-[44px]"
+          disabled={isVerifying}
+          loading={isDeleting}
+          variant="danger"
+          className="flex-1"
         >
-          {isDeleting ? t('deleting') : t('delete')}
-        </button>
+          {t('delete')}
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 

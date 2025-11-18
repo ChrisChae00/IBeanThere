@@ -6,7 +6,17 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
-import { MailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, ErrorAlert } from '@/components/ui';
+import {
+  MailIcon,
+  LockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  GoogleIcon,
+  FacebookIcon,
+  ErrorAlert,
+  Button,
+  Input
+} from '@/components/ui';
 
 interface LoginFormProps {
   locale: string;
@@ -84,48 +94,34 @@ export default function LoginForm({ locale }: LoginFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <ErrorAlert message={displayError} />
 
-      {/* Email Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('email_address')}
-        </label>
-        <div className="relative">
-          <MailIcon size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)]" />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-            placeholder={t('email_placeholder')}
-            required
-          />
-        </div>
-      </div>
+      <Input
+        label={t('email_address')}
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={t('email_placeholder')}
+        icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+        required
+      />
 
-      {/* Password Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('password')}
-        </label>
-        <div className="relative">
-          <LockIcon size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)]" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-12 pr-12 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-            placeholder={t('password_placeholder')}
-            required
-          />
+      <Input
+        label={t('password')}
+        type={showPassword ? 'text' : 'password'}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder={t('password_placeholder')}
+        icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+        required
+        endAdornment={
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition"
           >
             {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Remember Me & Forgot Password */}
       <div className="flex items-center justify-between">
@@ -138,22 +134,19 @@ export default function LoginForm({ locale }: LoginFormProps) {
           />
           <span className="ml-2 text-sm text-[var(--color-text-secondary)]">{t('remember_me')}</span>
         </label>
-        <button
+        <Button
           type="button"
-          className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] font-medium min-h-[44px] flex items-center"
+          variant="ghost"
+          size="sm"
+          className="px-0 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
         >
           {t('forgot_password')}
-        </button>
+        </Button>
       </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-[var(--color-primary)] text-[var(--color-background)] py-4 rounded-xl font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isLoading ? '⏳' : t('sign_in')}
-      </button>
+      <Button type="submit" fullWidth size="lg" loading={isLoading}>
+        {t('sign_in')}
+      </Button>
 
       {/* Divider */}
       <div className="relative my-6">
@@ -169,24 +162,26 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
       {/* Social Sign In */}
       <div className="grid grid-cols-2 gap-4">
-        <button
+        <Button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={oauthLoading}
-          className="flex items-center justify-center py-3 px-4 border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          fullWidth
+          leftIcon={<GoogleIcon size={20} />}
         >
-          <GoogleIcon size={20} className="mr-2" />
-          <span className="text-[var(--color-text-secondary)] font-medium">{t('google')}</span>
-        </button>
-        <button
+          {t('google')}
+        </Button>
+        <Button
           type="button"
           onClick={handleFacebookSignIn}
           disabled={oauthLoading}
-          className="flex items-center justify-center py-3 px-4 border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          fullWidth
+          leftIcon={<FacebookIcon size={20} />}
         >
-          <FacebookIcon size={20} className="mr-2" />
-          <span className="text-[var(--color-text-secondary)] font-medium">{t('facebook')}</span>
-        </button>
+          {t('facebook')}
+        </Button>
       </div>
 
       {/* Sign Up Link */}

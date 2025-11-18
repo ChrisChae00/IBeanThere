@@ -6,6 +6,21 @@
 /* CSS variables are set dynamically by ThemeContext */
 
 /* Base styles */
+:root {
+  --ibean-space-xs: 1rem;        /* 16px */
+  --ibean-space-sm: 1.5rem;      /* 24px */
+  --ibean-space-md: 2rem;        /* 32px */
+  --ibean-space-lg: 3rem;        /* 48px */
+  --ibean-radius-sm: 0.5rem;     /* 8px */
+  --ibean-radius-md: 0.75rem;    /* 12px */
+  --ibean-radius-lg: 1rem;       /* 16px */
+  --ibean-radius-xl: 1.5rem;     /* 24px */
+  --ibean-shadow-warm-sm: 0 12px 30px rgba(26, 18, 11, 0.12);
+  --ibean-shadow-warm-md: 0 20px 45px rgba(26, 18, 11, 0.16);
+  --ibean-shadow-warm-lg: 0 32px 70px rgba(26, 18, 11, 0.2);
+  --ibean-transition: 200ms ease;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,6 +33,80 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-feature-settings: 'liga' on, 'calt' on;
+}
+
+h1, .type-display {
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: clamp(1.5rem, 2vw, 1.75rem);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.type-subtitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-textSecondary);
+}
+
+.type-body {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.type-caption {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-textSecondary);
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  transition:
+    background-color var(--ibean-transition),
+    color var(--ibean-transition),
+    border-color var(--ibean-transition),
+    box-shadow var(--ibean-transition),
+    transform var(--ibean-transition);
+}
+
+.cozy-card {
+  border-radius: var(--ibean-radius-xl);
+  background: var(--color-cardBackground);
+  border: 1px solid var(--color-border);
+  padding: var(--ibean-space-sm);
+  box-shadow: var(--ibean-shadow-warm-md);
+}
+
+.glass-panel {
+  border-radius: var(--ibean-radius-lg);
+  background: color-mix(in srgb, var(--color-cardBackground) 75%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  box-shadow: var(--ibean-shadow-warm-sm);
+  backdrop-filter: blur(16px);
+}
+
+.section-spacing {
+  padding-block: var(--ibean-space-lg);
+  padding-inline: clamp(var(--ibean-space-xs), 5vw, var(--ibean-space-lg));
 }
 
 /* Component styles */
@@ -229,6 +318,36 @@ body {
 .palette-info {
   border-top: 1px solid var(--color-border);
   padding-top: 1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-fade-in {
+  animation: fadeIn 300ms var(--ibean-transition) both;
+}
+
+.motion-slide-up {
+  animation: slideUp 400ms var(--ibean-transition) both;
 }
 
 .palette-info div {

@@ -6,7 +6,17 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
-import { MailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, ErrorAlert } from '@/components/ui';
+import {
+  MailIcon,
+  LockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  GoogleIcon,
+  FacebookIcon,
+  ErrorAlert,
+  Button,
+  Input
+} from '@/components/ui';
 
 interface SignupFormProps {
   locale: string;
@@ -211,95 +221,66 @@ export default function SignupForm({ locale }: SignupFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <ErrorAlert message={displayError} />
 
-      {/* Username Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('username')}
-        </label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleInputChange}
-          className="w-full px-4 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-          placeholder={t('username_placeholder')}
-          required
-        />
-        <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-          {t('username_hint')}
-        </p>
-      </div>
+      <Input
+        label={t('username')}
+        name="username"
+        value={formData.username}
+        onChange={handleInputChange}
+        placeholder={t('username_placeholder')}
+        helperText={t('username_hint')}
+        required
+      />
 
-      {/* Email Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('email_address')}
-        </label>
-        <div className="relative">
-          <MailIcon size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)]" />
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full pl-12 pr-4 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-            placeholder={t('email_placeholder')}
-            required
-          />
-        </div>
-      </div>
+      <Input
+        label={t('email_address')}
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleInputChange}
+        placeholder={t('email_placeholder')}
+        icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+        required
+      />
 
-      {/* Password Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('password')}
-        </label>
-        <div className="relative">
-          <LockIcon size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)]" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full pl-12 pr-12 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-            placeholder={t('create_password_placeholder')}
-            required
-          />
+      <Input
+        label={t('password')}
+        type={showPassword ? 'text' : 'password'}
+        name="password"
+        value={formData.password}
+        onChange={handleInputChange}
+        placeholder={t('create_password_placeholder')}
+        icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+        required
+        endAdornment={
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition"
           >
             {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
           </button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Confirm Password Field */}
-      <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
-          {t('confirm_password')}
-        </label>
-        <div className="relative">
-          <LockIcon size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)]" />
-          <input
-            type={showConfirmPassword ? 'text' : 'password'}
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            className="w-full pl-12 pr-12 py-4 border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] min-h-[44px]"
-            placeholder={t('confirm_password_placeholder')}
-            required
-          />
+      <Input
+        label={t('confirm_password')}
+        type={showConfirmPassword ? 'text' : 'password'}
+        name="confirmPassword"
+        value={formData.confirmPassword}
+        onChange={handleInputChange}
+        placeholder={t('confirm_password_placeholder')}
+        icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+        required
+        endAdornment={
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition"
           >
             {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Terms Agreement */}
       <div className="flex items-start space-x-3">
@@ -323,13 +304,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
       </div>
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-[var(--color-primary)] text-[var(--color-background)] py-4 rounded-xl font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isLoading ? '⏳' : t('create_account')}
-      </button>
+      <Button type="submit" fullWidth size="lg" loading={isLoading}>
+        {t('create_account')}
+      </Button>
 
       {/* Divider */}
       <div className="relative my-6">
@@ -345,24 +322,26 @@ export default function SignupForm({ locale }: SignupFormProps) {
 
       {/* Social Sign Up */}
       <div className="grid grid-cols-2 gap-4">
-        <button
+        <Button
           type="button"
           onClick={handleGoogleSignUp}
           disabled={oauthLoading}
-          className="flex items-center justify-center py-3 px-4 border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          fullWidth
+          leftIcon={<GoogleIcon size={20} />}
         >
-          <GoogleIcon size={20} className="mr-2" />
-          <span className="text-[var(--color-text-secondary)] font-medium">{t('google')}</span>
-        </button>
-        <button
+          {t('google')}
+        </Button>
+        <Button
           type="button"
           onClick={handleFacebookSignUp}
           disabled={oauthLoading}
-          className="flex items-center justify-center py-3 px-4 border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          fullWidth
+          leftIcon={<FacebookIcon size={20} />}
         >
-          <FacebookIcon size={20} className="mr-2" />
-          <span className="text-[var(--color-text-secondary)] font-medium">{t('facebook')}</span>
-        </button>
+          {t('facebook')}
+        </Button>
       </div>
 
       {/* Sign In Link */}
