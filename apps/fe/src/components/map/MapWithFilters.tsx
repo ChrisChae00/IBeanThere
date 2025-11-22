@@ -8,7 +8,7 @@ import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import CafeInfoModal from './CafeInfoModal';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { ToggleButton, RefreshIcon } from '@/components/ui';
+import { RefreshIcon } from '@/components/ui';
 import UserLocationIcon from '../ui/UserLocationIcon';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
@@ -51,7 +51,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
-  const [userManuallyDisabled, setUserManuallyDisabled] = useState(false);
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
     showFranchises: true,
     blockedFranchises: [],
@@ -127,8 +126,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         const state = result.state as 'prompt' | 'granted' | 'denied';
         setLocationPermission(state);
         
-        // Auto-start location tracking if permission already granted (only if user hasn't manually disabled)
-        if (state === 'granted' && !userManuallyDisabled) {
+        // Auto-start location tracking if permission already granted
+        // Check user preference from localStorage
+        const autoTrackingEnabled = typeof window !== 'undefined' 
+          ? localStorage.getItem('location_auto_tracking_enabled') !== 'false'
+          : true; // Default to true for SSR
+        
+        if (state === 'granted' && autoTrackingEnabled) {
           getCurrentLocation()
             .then(() => {
               setTrackingEnabled(true);
@@ -147,8 +151,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           const newState = result.state as 'prompt' | 'granted' | 'denied';
           setLocationPermission(newState);
           
-          // Auto-start tracking when permission changes to granted (only if user hasn't manually disabled)
-          if (newState === 'granted' && !trackingEnabled && !userManuallyDisabled) {
+          // Check user preference from localStorage
+          const autoTrackingEnabled = typeof window !== 'undefined' 
+            ? localStorage.getItem('location_auto_tracking_enabled') !== 'false'
+            : true; // Default to true for SSR
+          
+          // Auto-start tracking when permission changes to granted (if user preference allows)
+          if (newState === 'granted' && !trackingEnabled && autoTrackingEnabled) {
             getCurrentLocation()
               .then(() => {
                 setTrackingEnabled(true);
@@ -162,14 +171,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           } else if (newState !== 'granted' && trackingEnabled) {
             // Stop tracking if permission is revoked
             setTrackingEnabled(false);
-            setUserManuallyDisabled(false);
           }
         };
       }).catch(() => {
         setLocationPermission('prompt');
       });
     }
-  }, [getCurrentLocation, trackingEnabled, userManuallyDisabled]);
+  }, [getCurrentLocation, trackingEnabled]);
 
   // Update center when location is available and trigger initial search
   useEffect(() => {
@@ -255,8 +263,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     try {
       await getCurrentLocation();
       setLocationPermission('granted');
-      // Auto-start tracking when permission is granted
-      setTrackingEnabled(true);
+      // Auto-start tracking when permission is granted (if user preference allows)
+      const autoTrackingEnabled = typeof window !== 'undefined' 
+        ? localStorage.getItem('location_auto_tracking_enabled') !== 'false'
+        : true; // Default to true for SSR
+      if (autoTrackingEnabled) {
+        setTrackingEnabled(true);
+      }
       return true;
     } catch (error) {
       setLocationPermission('denied');
@@ -384,39 +397,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     setNearbyCafes([]);
   };
 
-  const toggleTracking = async () => {
-    if (trackingEnabled) {
-      stopTracking();
-      setTrackingEnabled(false);
-      setUserManuallyDisabled(true);
-    } else {
-      setUserManuallyDisabled(false);
-      try {
-        if (locationPermission !== 'granted') {
-          const permissionGranted = await handleRequestPermission();
-          // If permission request failed, handleRequestPermission already set permission to 'denied'
-          // Don't show error message here as it's handled internally
-          if (!permissionGranted) {
-            return;
-          }
-        }
-        if (coords || locationPermission === 'granted') {
-          startTracking();
-          setTrackingEnabled(true);
-        }
-      } catch (error) {
-        // Only show error for unexpected errors, not permission-related ones
-        if (process.env.NODE_ENV === 'development') {
-          console.debug('Failed to start tracking:', error);
-        }
-        // Only show error if it's not a permission denial (which is already handled)
-        if (error instanceof Error && error.message !== 'Location permission denied') {
-          showToast(t('location_error'), 'error');
-        }
-      }
-    }
-  };
-
   const handleRefreshCafes = async () => {
     clearCache();
     lastSearchRef.current = null;
@@ -433,34 +413,32 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Header: Title/Subtitle on left, Controls on right - Same line */}
-      <div className="flex items-start justify-between gap-4 mb-2">
-        {/* Left side: Title and Subtitle with Results Info */}
-        <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            {mapTitle && (
-              <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
-                {mapTitle}
-              </h2>
-            )}
-            {mapSubtitle && (
-              <p className="text-[var(--color-text-secondary)]">
-                {mapSubtitle}
-              </p>
-            )}
-          </div>
+      {/* Header: Title/Subtitle on top, Controls below on small screens */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
+        {/* Left side: Title and Subtitle */}
+        <div className="flex-1 min-w-0">
+          {mapTitle && (
+            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2 sm:whitespace-nowrap">
+              {mapTitle}
+            </h2>
+          )}
+          {mapSubtitle && (
+            <p className="text-[var(--color-text-secondary)] sm:whitespace-nowrap">
+              {mapSubtitle}
+            </p>
+          )}
         </div>
-        {/* Right side: Controls and Results Info - No left margin, right-aligned */}
-        <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-auto">
-          <div className="flex items-center gap-2">
+        {/* Right side: Controls and Results Info */}
+        <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
             <button
               onClick={handleRefreshCafes}
-              className="flex items-center gap-2 px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors flex-shrink-0"
               title={t('refresh_cafes')}
               disabled={isLoading}
             >
-              <RefreshIcon className="w-5 h-5" />
-              <span className="text-sm">{t('refresh')}</span>
+              <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="text-xs sm:text-sm whitespace-nowrap">{t('refresh')}</span>
             </button>
 
             <FranchiseFilterComponent
@@ -469,24 +447,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               totalCafes={allCafes.length}
               localCafes={localCafes}
               franchiseCafes={franchiseCafes}
-            />
-            
-            <ToggleButton
-              checked={isTracking}
-              onChange={(checked) => {
-                if (checked) {
-                  setUserManuallyDisabled(false);
-                  toggleTracking();
-                } else {
-                  stopTracking();
-                  setTrackingEnabled(false);
-                  setUserManuallyDisabled(true);
-                }
-              }}
-              onLabel={t('location_sharing_on_short')}
-              offLabel={t('location_sharing')}
-              disabled={locationPermission === 'denied'}
-              className="min-w-[80px]"
             />
           </div>
           {/* Results Info - Compact */}

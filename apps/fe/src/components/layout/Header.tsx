@@ -159,7 +159,7 @@ export default function Header({
   const getNavItemLeft = (ref: React.RefObject<HTMLElement>) => {
     if (!ref.current) return 0;
     const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-7xl')?.getBoundingClientRect();
+    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
     if (!container) return 0;
     return rect.left - container.left;
   };
@@ -167,7 +167,7 @@ export default function Header({
   const getNavItemRight = (ref: React.RefObject<HTMLElement>) => {
     if (!ref.current) return 0;
     const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-7xl')?.getBoundingClientRect();
+    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
     if (!container) return 0;
     return rect.right - container.left;
   };
@@ -175,7 +175,7 @@ export default function Header({
   const getDividerRight = (ref: React.RefObject<HTMLElement>) => {
     if (!ref.current) return 0;
     const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-7xl')?.getBoundingClientRect();
+    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
     if (!container) return 0;
     return rect.right - container.left;
   };
@@ -191,7 +191,7 @@ export default function Header({
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-accent)] shadow-[var(--ibean-shadow-warm-sm)] motion-fade-in">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href={`/${locale}`} className="flex items-center space-x-1">
@@ -283,7 +283,7 @@ export default function Header({
           onMouseEnter={() => setActiveCategory(activeCategory)}
           onMouseLeave={() => setActiveCategory(null)}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="py-3">
               {(() => {
                 const category = getCategoryById(activeCategory);

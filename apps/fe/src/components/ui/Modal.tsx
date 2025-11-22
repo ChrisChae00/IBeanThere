@@ -99,7 +99,7 @@ export default function Modal({
                 {closeButton && (
                   <button
                     onClick={onClose}
-                    className="rounded-full bg-[var(--color-surface)] p-2 text-[var(--color-cardText)] transition hover:bg-[var(--color-surface)]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] transition hover:bg-[var(--color-surface)]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     aria-label="Close modal"
                   >
                     <span aria-hidden="true">✕</span>

@@ -258,6 +258,20 @@
       "first_discoverer": "이 카페의 첫 발견자"
     },
 
+    "settings": {
+      "title": "설정",
+      "privacy_location": "개인정보 보호 및 위치",
+      "location_services": "위치 서비스",
+      "auto_tracking_title": "자동 카페 감지",
+      "auto_tracking_description": "카페 근처에 있을 때 알림을 받습니다. 위치 정보는 앱이 열려 있을 때만 사용됩니다.",
+      "location_permission_status": "위치 권한 상태",
+      "permission_granted": "허용됨",
+      "permission_denied": "거부됨",
+      "permission_prompt": "설정 안 됨",
+      "manage_browser_settings": "브라우저 설정에서 관리",
+      "location_data_usage": "위치 정보는 앱이 열려 있고 이 기능을 활성화한 경우에만 사용됩니다."
+    },
+
     "discover": {
       "explore_map": {
         "title": "우리 동네 카페 찾기",

@@ -85,7 +85,7 @@ export default function RegisterCafePage() {
     <main className="min-h-screen bg-[var(--color-background)]">
       {/* Page Title Section */}
       <section className="pt-6  bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-2">
               {t('title')}
             </h1>
@@ -94,7 +94,7 @@ export default function RegisterCafePage() {
       
       {/* Main Content: Map on Left, Form on Right */}
       <section className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             {/* Left: Interactive Map */}
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg flex flex-col">

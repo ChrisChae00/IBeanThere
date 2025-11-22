@@ -8,7 +8,7 @@ export default async function Footer({ locale }: { locale: string }) {
   
   return (
     <footer className="bg-[var(--color-primary)] text-[var(--color-primaryText)] py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Logo */}
           <div className="flex items-center justify-center space-x-1 mb-4">

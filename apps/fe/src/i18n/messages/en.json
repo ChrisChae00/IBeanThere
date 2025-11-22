@@ -259,6 +259,20 @@
       "first_discoverer": "First discoverer of this cafe"
     },
 
+    "settings": {
+      "title": "Settings",
+      "privacy_location": "Privacy & Location",
+      "location_services": "Location Services",
+      "auto_tracking_title": "Automatic Cafe Detection",
+      "auto_tracking_description": "Get notified when you're near a cafe. Location is only used when the app is open.",
+      "location_permission_status": "Location Permission Status",
+      "permission_granted": "Granted",
+      "permission_denied": "Denied",
+      "permission_prompt": "Not Set",
+      "manage_browser_settings": "Manage in Browser Settings",
+      "location_data_usage": "Location is only used when the app is open and you have enabled this feature."
+    },
+
     "discover": {
       "explore_map": {
         "title": "Discover Your Coffee Neighborhood",

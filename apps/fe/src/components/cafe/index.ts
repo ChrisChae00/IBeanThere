@@ -3,3 +3,7 @@ export { default as CafeSearchModal } from './CafeSearchModal';
 export { default as CoffeeLogCard } from './CoffeeLogCard';
 export { default as CoffeeLogForm } from './CoffeeLogForm';
 export { default as CoffeeLogFeed } from './CoffeeLogFeed';
+export { default as CafeCardImage } from './CafeCardImage';
+export { default as TrendingCafeCard } from './TrendingCafeCard';
+export { default as CafeGridCard } from './CafeGridCard';
+export { default as TrendingCafesSection } from './TrendingCafesSection';

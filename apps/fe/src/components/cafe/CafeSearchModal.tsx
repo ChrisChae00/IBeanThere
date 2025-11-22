@@ -11,7 +11,7 @@ import { CafeSearchResponse } from '@/types/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import LocationIcon from '@/components/ui/LocationIcon';
-import CoffeeIcon from '@/components/ui/CoffeeIcon';
+import SearchIcon from '@/components/ui/SearchIcon';
 import { Modal, Input, Button } from '@/components/ui';
 
 interface CafeSearchModalProps {
@@ -165,7 +165,7 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('search_placeholder')}
-            icon={<CoffeeIcon size={18} className="text-[var(--color-cardTextSecondary)]" />}
+            icon={<SearchIcon size={18} className="text-[var(--color-cardTextSecondary)]" />}
           />
 
           {/* Search Nearby Button */}

@@ -64,7 +64,7 @@ export default function PendingSpotsPage() {
     <main className="min-h-screen bg-[var(--color-background)]">
       {/* Page Title Section with Gradient and CTA */}
       <section className="pt-6 pb-4 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="text-center md:text-left">
               <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-4">
@@ -87,7 +87,7 @@ export default function PendingSpotsPage() {
 
       {/* Pending Cafes Grid Section */}
       <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div 
             className="bg-[var(--color-surface)] rounded-xl p-8 border border-[var(--color-border)]"
             style={{

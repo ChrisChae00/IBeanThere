@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { FranchiseFilter } from '@/types/map';
+import SearchIcon from '@/components/ui/SearchIcon';
 
 interface FranchiseFilterProps {
   filter: FranchiseFilter;
@@ -17,7 +18,7 @@ export default function FranchiseFilterComponent({
   onFilterChange, 
   totalCafes,
   localCafes,
-  franchiseCafes 
+  franchiseCafes
 }: FranchiseFilterProps) {
   const t = useTranslations('map');
   const [isOpen, setIsOpen] = useState(false);
@@ -52,11 +53,11 @@ export default function FranchiseFilterComponent({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-3 py-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors flex items-center gap-1.5 text-xs font-medium h-8 min-w-[80px]"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-2 sm:px-3 py-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors flex items-center gap-1 sm:gap-1.5 text-xs font-medium h-auto min-h-[32px] sm:min-h-[36px] min-w-[60px] sm:min-w-[80px] flex-shrink-0"
       >
-        <span className="text-sm">🔍</span>
-        <span className="hidden sm:inline">{t('filter_cafes')}</span>
-        <span className="text-xs bg-[var(--color-primary)] text-white rounded-full px-2 py-0.5">
+        <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-text)] flex-shrink-0" />
+        <span>{t('filter_cafes')}</span>
+        <span className="text-xs bg-[var(--color-primary)] text-white rounded-full px-1.5 sm:px-2 py-0.5">
           {filter.filterMode === 'all' ? totalCafes : filter.filterMode === 'local' ? localCafes : 0}
         </span>
       </button>

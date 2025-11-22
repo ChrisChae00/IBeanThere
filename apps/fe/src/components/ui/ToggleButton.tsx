@@ -35,36 +35,40 @@ export default function ToggleButton({
       <label
         htmlFor={toggleId}
         className={`
-          relative block cursor-pointer select-none
-          h-8 rounded-full
+          relative inline-flex cursor-pointer select-none
+          min-h-[32px] sm:min-h-[36px] h-auto
+          py-1.5 sm:py-2
+          rounded-full
           bg-transparent
-          flex items-center justify-center
           transition-all duration-300 ease-in-out
+          items-center justify-center
+          flex-shrink-0
           ${checked 
-            ? 'border-[var(--color-primary)]' 
-            : 'border-[var(--color-border)]'
+            ? 'w-[60px] sm:w-[80px] border-[var(--color-primary)] px-2.5' 
+            : 'w-auto min-w-[60px] sm:min-w-[80px] border-[var(--color-border)] px-3'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         style={{
           borderWidth: '1px',
           borderStyle: 'solid',
-          minWidth: '110px',
-          paddingLeft: '15px',
-          paddingRight: '15px'
+          boxSizing: 'border-box'
         }}
       >
         <span
           className={`
-            absolute inset-0
-            flex items-center justify-center
+            ${checked ? 'opacity-0 absolute' : 'opacity-100'}
             text-xs font-medium
             text-[var(--color-text-secondary)]
             pointer-events-none
             transition-opacity duration-300
-            ${checked ? 'opacity-0' : 'opacity-100'}
+            whitespace-nowrap
           `}
-          style={{ fontFamily: 'Arial, sans-serif' }}
+          style={{ 
+            fontFamily: 'Arial, sans-serif',
+            textAlign: 'center',
+            maxWidth: checked ? '0' : 'none'
+          }}
         >
           {offLabel}
         </span>
@@ -76,16 +80,22 @@ export default function ToggleButton({
             text-xs font-medium
             transition-all duration-400 ease-in-out
             ${checked 
-              ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)] left-0.5 right-0.5 translate-x-0' 
-              : 'bg-transparent right-0.5 w-5 -translate-x-[50px]'
+              ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)] translate-x-0' 
+              : 'bg-transparent w-5 -translate-x-[50px]'
             }
             overflow-hidden
+            whitespace-nowrap
           `}
           style={{
             fontFamily: 'Arial, sans-serif',
-            top: '3px',
-            height: '24px',
-            width: checked ? 'calc(100% - 4px)' : '28px',
+            top: '1px',
+            bottom: '1px',
+            left: checked ? '1px' : 'auto',
+            right: checked ? '1px' : '1px',
+            height: 'calc(100% - 2px)',
+            width: checked ? 'calc(100% - 2px)' : '28px',
+            minWidth: checked ? 'calc(100% - 2px)' : '28px',
+            textAlign: 'center',
             textIndent: checked ? '0' : '100px',
             transition: checked 
               ? 'all 0.4s, width 0.2s 0.4s linear, text-indent 0.3s 0.4s linear'

@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      maxWidth: {
+        '8xl': '96rem',
+      },
       boxShadow: {
         'primary': '0 4px 6px -1px var(--color-primary), 0 2px 4px -1px var(--color-primary)',
         'primary-lg': '0 10px 15px -3px var(--color-primary), 0 4px 6px -2px var(--color-primary)',
