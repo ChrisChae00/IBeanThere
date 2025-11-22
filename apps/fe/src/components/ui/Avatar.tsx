@@ -25,7 +25,7 @@ export function Avatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
   };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-[var(--color-primary)] text-[var(--color-primaryText)] flex items-center justify-center overflow-hidden ${className}`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-[var(--color-primary)] text-[var(--color-primaryText)] flex items-center justify-center overflow-hidden transition-colors group-hover:bg-[var(--color-primaryText)] group-hover:text-[var(--color-primary)] ${className}`}>
       {src && !imageError ? (
         <img
           src={src}
@@ -39,7 +39,7 @@ export function Avatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
           height={size === 'xs' ? 20 : size === 'sm' ? 24 : size === 'md' ? 28 : size === 'lg' ? 32 : size === 'xl' ? 36 : 36}
           viewBox="0 0 1024 1024" 
           fill="currentColor"
-          className="text-[var(--color-primaryText)]"
+          className="transition-colors"
         >
           <path fill="currentColor" opacity="1.000000" stroke="none" 
             d="

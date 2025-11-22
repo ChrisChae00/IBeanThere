@@ -190,7 +190,7 @@ export default function Header({
   
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60 shadow-[var(--ibean-shadow-warm-sm)] motion-fade-in">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-accent)] shadow-[var(--ibean-shadow-warm-sm)] motion-fade-in">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -279,7 +279,7 @@ export default function Header({
       {activeCategory && (
         <div 
           ref={megaMenuRef}
-          className="fixed top-16 left-0 right-0 z-40 glass-panel border-t border-[var(--color-border)]/70"
+          className="fixed top-16 left-0 right-0 z-40 bg-[var(--color-primary)] border-t border-[var(--color-border)]/70"
           onMouseEnter={() => setActiveCategory(activeCategory)}
           onMouseLeave={() => setActiveCategory(null)}
         >

@@ -8,12 +8,12 @@ export default async function HomePage({
   const { locale } = await params;
   
   return (
-    <main>
+    <>
       <Hero locale={locale} />
       <Features locale={locale} />
       <Stats locale={locale} />
       <Testimonials locale={locale} />
       <CTA locale={locale} />
-    </main>
+    </>
   );
 }

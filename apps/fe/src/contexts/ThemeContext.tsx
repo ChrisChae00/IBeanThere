@@ -15,8 +15,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [currentThemeName, setCurrentThemeName] = useState<string>('morningCoffee');
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Handle hydration
+  // Initialize CSS variables and handle hydration
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const root = document.documentElement;
+    
+    // Initialize with default theme first
+    const defaultTheme = themes['morningCoffee'];
+    Object.entries(defaultTheme.colors).forEach(([key, value]) => {
+      const cssVarName = `--color-${key}`;
+      root.style.setProperty(cssVarName, value);
+    });
+    
+    // Then check for saved theme
     setIsHydrated(true);
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme && themes[savedTheme]) {
@@ -26,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Update CSS variables when theme changes
   useEffect(() => {
-    if (!isHydrated) return;
+    if (typeof window === 'undefined' || !isHydrated) return;
     
     const root = document.documentElement;
     const theme = themes[currentThemeName];
