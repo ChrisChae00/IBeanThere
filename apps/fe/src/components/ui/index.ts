@@ -16,6 +16,7 @@ export { default as ErrorAlert } from './ErrorAlert';
 export { default as StarRating } from './StarRating';
 export { default as ToggleButton } from './ToggleButton';
 export { default as PlusIcon } from './PlusIcon';
+export { default as WriteIcon } from './WriteIcon';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as RefreshIcon } from './RefreshIcon';
 export { default as SearchIcon } from './SearchIcon';

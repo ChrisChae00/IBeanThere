@@ -10,6 +10,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { calculateDistance } from '@/lib/utils/checkIn';
 import { TrendingCafesSection, CafeGridCard } from '@/components/cafe';
 import { CAFE_GRID_ITEMS_PER_PAGE } from '@/lib/constants/cafe';
+import { PlusIcon } from '@/components/ui';
 
 type FilterType = 'all' | 'closest' | 'top_rated' | 'most_popular';
 
@@ -110,7 +111,7 @@ export default function ExploreMapPage({
               href={`/${locale}/discover/pending-spots`}
               className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
-              <span className="text-xl">+</span>
+              <PlusIcon className="text-xl font-bold" />
               {t('be_navigator')}
             </Link>
           </div>

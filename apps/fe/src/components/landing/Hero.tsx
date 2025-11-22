@@ -5,7 +5,7 @@ export default async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'landing.hero' });
   
   return (
-    <section className="relative overflow-hidden h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]">
+    <section className="relative overflow-hidden min-h-[calc(100vh-4rem)]">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -14,6 +14,8 @@ export default async function Hero({ locale }: { locale: string }) {
           fill
           className="object-cover"
           priority
+          quality={90}
+          sizes="100vw"
         />
         {/* Black overlay for readability */}
         <div className="absolute inset-0 bg-black/50" />
@@ -22,7 +24,7 @@ export default async function Hero({ locale }: { locale: string }) {
       </div>
 
       {/* Content */}
-      <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center pt-16 sm:pt-20">
+      <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-[70%] sm:pt-[50%] lg:pt-[20%]">
         <div className="max-w-3xl space-y-6 motion-slide-up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--color-textHero)] leading-tight drop-shadow-lg break-keep">
             {t('title')}

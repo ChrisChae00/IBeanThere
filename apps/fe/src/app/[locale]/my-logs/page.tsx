@@ -11,7 +11,7 @@ import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import CafeSearchModal from '@/components/cafe/CafeSearchModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorAlert from '@/components/ui/ErrorAlert';
-import { PlusIcon } from '@/components/ui/PlusIcon';
+import { WriteIcon } from '@/components/ui';
 
 type FilterType = 'all' | 'public' | 'private';
 
@@ -119,7 +119,7 @@ export default function MyLogsPage() {
           onClick={() => setShowSearchModal(true)}
           className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 whitespace-nowrap"
         >
-          <PlusIcon size={18} className="text-[var(--color-primaryText)]" />
+          <WriteIcon size={18} className="text-[var(--color-primaryText)]" />
           {t('write_log')}
         </button>
       </div>
