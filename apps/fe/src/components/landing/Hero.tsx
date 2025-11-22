@@ -24,7 +24,7 @@ export default async function Hero({ locale }: { locale: string }) {
       </div>
 
       {/* Content */}
-      <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-[70%] sm:pt-[50%] lg:pt-[20%]">
+      <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-[30%] sm:pt-[25%] md:pt-[20%] lg:pt-[20%]">
         <div className="max-w-3xl space-y-6 motion-slide-up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--color-textHero)] leading-tight drop-shadow-lg break-keep">
             {t('title')}
