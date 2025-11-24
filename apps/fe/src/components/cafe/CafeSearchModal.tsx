@@ -13,6 +13,7 @@ import ErrorAlert from '@/components/ui/ErrorAlert';
 import LocationIcon from '@/components/ui/LocationIcon';
 import SearchIcon from '@/components/ui/SearchIcon';
 import { Modal, Input, Button } from '@/components/ui';
+import CoffeeIcon from '@/components/ui/CoffeeIcon';
 
 interface CafeSearchModalProps {
   onClose: () => void;
