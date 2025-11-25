@@ -73,6 +73,7 @@ class CafeResponse(BaseModel):
     # Founding Crew
     navigator_id: Optional[str] = None
     vanguard_ids: Optional[list] = None
+    founding_crew: Optional[Dict[str, Any]] = None
     
     created_at: datetime
     updated_at: Optional[datetime] = None

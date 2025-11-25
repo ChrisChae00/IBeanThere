@@ -117,6 +117,13 @@ export interface CoffeeLog {
   is_public: boolean;
   anonymous: boolean;
   coffee_type?: string;
+  atmosphere_rating?: number;
+  parking_info?: string;
+  acidity_rating?: number;
+  body_rating?: number;
+  sweetness_rating?: number;
+  bitterness_rating?: number;
+  aftertaste_rating?: number;
   author_display_name?: string;
   updated_at?: string;
 }
@@ -173,5 +180,38 @@ export interface LogFormData {
   is_public: boolean;
   anonymous: boolean;
   coffee_type?: string;
+  atmosphere_rating?: number;
+  parking_info?: string;
+  acidity_rating?: number;
+  body_rating?: number;
+  sweetness_rating?: number;
+  bitterness_rating?: number;
+  aftertaste_rating?: number;
 }
 
+export interface FoundingStats {
+  navigator_count: number;
+  vanguard_count: number;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  username: string;
+  display_name: string;
+  bio?: string;
+  avatar_url?: string;
+  role?: string;
+  founding_stats?: FoundingStats;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface UserPublicResponse {
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  bio?: string;
+  founding_stats?: FoundingStats;
+  created_at: string;
+}

@@ -33,6 +33,11 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+class FoundingStats(BaseModel):
+    """Statistics about user's founding contributions."""
+    navigator_count: int = 0
+    vanguard_count: int = 0
+
 class UserResponse(BaseModel):
     """User model for API responses (authenticated user)."""
     id: str
@@ -42,6 +47,7 @@ class UserResponse(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     role: Optional[str] = None  # User role from public.users table ('user', 'admin', etc.)
+    founding_stats: Optional[FoundingStats] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -51,6 +57,7 @@ class UserPublicResponse(BaseModel):
     display_name: str  # if not set, username will be used
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
+    founding_stats: Optional[FoundingStats] = None
     created_at: datetime
 
 class UserRegistrationResponse(BaseModel):

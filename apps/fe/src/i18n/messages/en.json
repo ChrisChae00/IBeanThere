@@ -467,7 +467,34 @@
         "loading_cafes": "Loading cafes...",
         "location_permission_required": "Location permission is required to search nearby cafes",
         "location_error": "Failed to get your location",
-        "search_error": "Failed to search cafes"
+        "search_error": "Failed to search cafes",
+        "detailed_review": "Detailed Review",
+        "atmosphere": "Atmosphere",
+        "acidity": "Acidity",
+        "body": "Body",
+        "has_merch": "Sells Merchandise/Goods",
+        "coffee_type_placeholder": "Select or type coffee name",
+        "cafe_atmosphere": "Cafe Atmosphere",
+        "coffee_taste": "Coffee Taste",
+        "parking_availability": "Parking Availability",
+        "parking_not_specified": "Not specified",
+        "parking_free": "Free Parking (Cafe/Plaza)",
+        "parking_street_paid": "Street Parking (Paid)",
+        "parking_street_free": "Street Parking (Free)",
+        "parking_unknown": "No Parking / Unknown",
+        "sweetness": "Sweetness",
+        "bitterness": "Bitterness",
+        "aftertaste": "Aftertaste"
       }
+    },
+    "profile": {
+      "title": "My Profile",
+      "member_since": "Member since {date}",
+      "navigator_title": "Navigator",
+      "cafes_discovered": "Cafes Discovered",
+      "navigator_description": "You were the first to discover and register these cafes.",
+      "vanguard_title": "Vanguard",
+      "cafes_verified": "Cafes Verified",
+      "vanguard_description": "You helped verify these cafes by being among the first to check in."
     }
   }

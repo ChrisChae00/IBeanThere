@@ -33,6 +33,14 @@ class CafeVisitCreate(BaseModel):
     is_public: bool = True
     anonymous: bool = False
     coffee_type: Optional[str] = Field(None, max_length=100)
+    # Detailed review fields
+    atmosphere_rating: Optional[int] = Field(None, ge=1, le=5, description="Atmosphere rating (1-5)")
+    parking_info: Optional[str] = Field(None, max_length=50, description="Parking availability info")
+    acidity_rating: Optional[int] = Field(None, ge=1, le=5, description="Acidity rating (1-5)")
+    body_rating: Optional[int] = Field(None, ge=1, le=5, description="Body rating (1-5)")
+    sweetness_rating: Optional[int] = Field(None, ge=1, le=5, description="Sweetness rating (1-5)")
+    bitterness_rating: Optional[int] = Field(None, ge=1, le=5, description="Bitterness rating (1-5)")
+    aftertaste_rating: Optional[int] = Field(None, ge=1, le=5, description="Aftertaste rating (1-5)")
 
 class CafeVisitUpdate(BaseModel):
     """Update model for confirming auto-detected visits and adding log content"""
@@ -45,6 +53,14 @@ class CafeVisitUpdate(BaseModel):
     is_public: Optional[bool] = None
     anonymous: Optional[bool] = None
     coffee_type: Optional[str] = Field(None, max_length=100)
+    # Detailed review fields
+    atmosphere_rating: Optional[int] = Field(None, ge=1, le=5, description="Atmosphere rating (1-5)")
+    parking_info: Optional[str] = Field(None, max_length=50, description="Parking availability info")
+    acidity_rating: Optional[int] = Field(None, ge=1, le=5, description="Acidity rating (1-5)")
+    body_rating: Optional[int] = Field(None, ge=1, le=5, description="Body rating (1-5)")
+    sweetness_rating: Optional[int] = Field(None, ge=1, le=5, description="Sweetness rating (1-5)")
+    bitterness_rating: Optional[int] = Field(None, ge=1, le=5, description="Bitterness rating (1-5)")
+    aftertaste_rating: Optional[int] = Field(None, ge=1, le=5, description="Aftertaste rating (1-5)")
 
 class CafeVisitResponse(BaseModel):
     """Response model for cafe visit"""
@@ -67,6 +83,14 @@ class CafeVisitResponse(BaseModel):
     is_public: bool = True
     anonymous: bool = False
     coffee_type: Optional[str] = None
+    # Detailed review fields
+    atmosphere_rating: Optional[int] = None
+    parking_info: Optional[str] = None
+    acidity_rating: Optional[int] = None
+    body_rating: Optional[int] = None
+    sweetness_rating: Optional[int] = None
+    bitterness_rating: Optional[int] = None
+    aftertaste_rating: Optional[int] = None
     updated_at: Optional[datetime] = None
     # For public display
     author_display_name: Optional[str] = None
@@ -104,6 +128,14 @@ class CafeLogPublicResponse(BaseModel):
     comment: Optional[str] = None
     photo_urls: Optional[List[str]] = None
     coffee_type: Optional[str] = None
+    # Detailed review fields
+    atmosphere_rating: Optional[int] = None
+    parking_info: Optional[str] = None
+    acidity_rating: Optional[int] = None
+    body_rating: Optional[int] = None
+    sweetness_rating: Optional[int] = None
+    bitterness_rating: Optional[int] = None
+    aftertaste_rating: Optional[int] = None
     author_display_name: Optional[str] = None
     updated_at: Optional[datetime] = None
 

@@ -28,7 +28,30 @@ async def get_user_profiles(display_name: str, supabase: Client = Depends(get_su
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No users found with this display name"
             )
-        return [UserPublicResponse(**user) for user in users.data]
+        # Get founding stats for each user
+        response_users = []
+        for user in users.data:
+            # Get user ID first (needed for querying checkins)
+            user_id_result = supabase.table("users").select("id").eq("username", user["username"]).single().execute()
+            if user_id_result.data:
+                user_id = user_id_result.data["id"]
+                
+                # Count Navigator roles
+                nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+                navigator_count = nav_count.count if nav_count.count is not None else 0
+                
+                # Count Vanguard roles
+                van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
+                vanguard_count = van_count.count if van_count.count is not None else 0
+                
+                user["founding_stats"] = {
+                    "navigator_count": navigator_count,
+                    "vanguard_count": vanguard_count
+                }
+            
+            response_users.append(UserPublicResponse(**user))
+            
+        return response_users
     except HTTPException:
         raise
     except Exception as e:
@@ -58,7 +81,40 @@ async def get_user_profile_by_username(username: str, supabase: Client = Depends
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        return UserPublicResponse(**user.data)
+        user_data = user.data
+        user_id = user_data.get("id") # Although we queried by username, we need ID for stats. 
+        # Wait, the query above only selects specific fields. We need to select ID too.
+        
+        # Re-query to get ID if not present (or just include ID in the select above)
+        # Let's modify the select in the original code block instead of re-querying if possible.
+        # But here I can only replace the block.
+        
+        # Actually, let's fix the select query in the previous lines to include ID.
+        # But I can't change lines outside this block easily without a larger chunk.
+        # I'll just fetch ID here if it's missing, or better, I'll update the select query in a separate chunk if needed.
+        # Looking at line 55: select("""username, display_name, avatar_url, bio, created_at""")
+        # It does NOT include ID. I need to include ID to query checkins.
+        
+        # Let's do a separate query for ID since I can't easily change the select here without overlapping.
+        # Or I can just use the ID from the user table since 'username' is unique.
+        user_full = supabase.table("users").select("id").eq("username", username).single().execute()
+        if user_full.data:
+            user_id = user_full.data["id"]
+            
+            # Count Navigator roles
+            nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+            navigator_count = nav_count.count if nav_count.count is not None else 0
+            
+            # Count Vanguard roles
+            van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
+            vanguard_count = van_count.count if van_count.count is not None else 0
+            
+            user_data["founding_stats"] = {
+                "navigator_count": navigator_count,
+                "vanguard_count": vanguard_count
+            }
+            
+        return UserPublicResponse(**user_data)
     except HTTPException:
         raise
     except Exception as e:
@@ -179,6 +235,15 @@ async def get_my_profile(
         # Use username as default if display_name is not provided
         display_name = user_data.get('display_name') or user_data['username']
         
+        # Get founding stats
+        # Count Navigator roles
+        nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", current_user.id).eq("founding_role", "navigator").execute()
+        navigator_count = nav_count.count if nav_count.count is not None else 0
+        
+        # Count Vanguard roles
+        van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", current_user.id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
+        vanguard_count = van_count.count if van_count.count is not None else 0
+        
         return UserResponse(
             id=user_data['id'],
             email=user_data['email'],
@@ -187,6 +252,10 @@ async def get_my_profile(
             bio=user_data.get('bio'),
             avatar_url=user_data.get('avatar_url'),
             role=user_data.get('role', 'user'),  # Get role from public.users table
+            founding_stats={
+                "navigator_count": navigator_count,
+                "vanguard_count": vanguard_count
+            },
             created_at=user_data['created_at'],
             updated_at=user_data.get('updated_at')
         )

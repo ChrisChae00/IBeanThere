@@ -465,7 +465,34 @@
         "loading_cafes": "카페를 불러오는 중...",
         "location_permission_required": "주변 카페 검색을 위해 위치 권한이 필요합니다",
         "location_error": "위치를 가져올 수 없습니다",
-        "search_error": "카페 검색에 실패했습니다"
+        "search_error": "카페 검색에 실패했습니다",
+        "detailed_review": "상세 리뷰",
+        "atmosphere": "분위기",
+        "acidity": "산미",
+        "body": "바디감",
+        "has_merch": "굳즈/용품 판매",
+        "coffee_type_placeholder": "커피 이름을 선택하거나 입력하세요",
+        "cafe_atmosphere": "카페 분위기",
+        "coffee_taste": "커피 맛",
+        "parking_availability": "주차 정보",
+        "parking_not_specified": "선택 안 함",
+        "parking_free": "무료 주차 (카페/상가)",
+        "parking_street_paid": "길거리 주차 (유료)",
+        "parking_street_free": "길거리 주차 (무료)",
+        "parking_unknown": "주차 공간 없음 / 알 수 없음",
+        "sweetness": "단맛",
+        "bitterness": "쓴맛",
+        "aftertaste": "후미 (뒷맛)"
       }
+    },
+    "profile": {
+      "title": "내 프로필",
+      "member_since": "가입일: {date}",
+      "navigator_title": "내비게이터",
+      "cafes_discovered": "발견한 카페",
+      "navigator_description": "이 카페들을 가장 먼저 발견하고 등록했습니다.",
+      "vanguard_title": "뱅가드",
+      "cafes_verified": "검증한 카페",
+      "vanguard_description": "첫 체크인을 통해 이 카페들을 검증하는 데 기여했습니다."
     }
   }

@@ -148,7 +148,14 @@ async def record_cafe_visit(
             "photo_urls": visit_data.photo_urls if visit_data.photo_urls else [],
             "is_public": visit_data.is_public,
             "anonymous": visit_data.anonymous,
-            "coffee_type": visit_data.coffee_type
+            "coffee_type": visit_data.coffee_type,
+            "atmosphere_rating": visit_data.atmosphere_rating,
+            "parking_info": visit_data.parking_info,
+            "acidity_rating": visit_data.acidity_rating,
+            "body_rating": visit_data.body_rating,
+            "sweetness_rating": visit_data.sweetness_rating,
+            "bitterness_rating": visit_data.bitterness_rating,
+            "aftertaste_rating": visit_data.aftertaste_rating
         }
         
         result = supabase.table("cafe_visits").insert(visit_record).execute()
@@ -181,6 +188,13 @@ async def record_cafe_visit(
             "is_public": visit.get("is_public", True),
             "anonymous": visit.get("anonymous", False),
             "coffee_type": visit.get("coffee_type"),
+            "atmosphere_rating": visit.get("atmosphere_rating"),
+            "parking_info": visit.get("parking_info"),
+            "acidity_rating": visit.get("acidity_rating"),
+            "body_rating": visit.get("body_rating"),
+            "sweetness_rating": visit.get("sweetness_rating"),
+            "bitterness_rating": visit.get("bitterness_rating"),
+            "aftertaste_rating": visit.get("aftertaste_rating"),
             "updated_at": visit.get("updated_at")
         }
         
@@ -272,6 +286,27 @@ async def update_visit(
         
         if update_data.coffee_type is not None:
             update_payload["coffee_type"] = update_data.coffee_type
+            
+        if update_data.atmosphere_rating is not None:
+            update_payload["atmosphere_rating"] = update_data.atmosphere_rating
+            
+        if update_data.parking_info is not None:
+            update_payload["parking_info"] = update_data.parking_info
+            
+        if update_data.sweetness_rating is not None:
+            update_payload["sweetness_rating"] = update_data.sweetness_rating
+            
+        if update_data.bitterness_rating is not None:
+            update_payload["bitterness_rating"] = update_data.bitterness_rating
+            
+        if update_data.aftertaste_rating is not None:
+            update_payload["aftertaste_rating"] = update_data.aftertaste_rating
+            
+        if update_data.acidity_rating is not None:
+            update_payload["acidity_rating"] = update_data.acidity_rating
+            
+        if update_data.body_rating is not None:
+            update_payload["body_rating"] = update_data.body_rating
         
         result = supabase.table("cafe_visits").update(update_payload).eq("id", visit_id).execute()
         
@@ -303,6 +338,13 @@ async def update_visit(
             "is_public": visit.get("is_public", True),
             "anonymous": visit.get("anonymous", False),
             "coffee_type": visit.get("coffee_type"),
+            "atmosphere_rating": visit.get("atmosphere_rating"),
+            "parking_info": visit.get("parking_info"),
+            "acidity_rating": visit.get("acidity_rating"),
+            "body_rating": visit.get("body_rating"),
+            "sweetness_rating": visit.get("sweetness_rating"),
+            "bitterness_rating": visit.get("bitterness_rating"),
+            "aftertaste_rating": visit.get("aftertaste_rating"),
             "updated_at": visit.get("updated_at")
         }
         
@@ -529,7 +571,7 @@ async def get_cafe_logs(
         
         # Get public logs with ratings
         result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, anonymous, updated_at, user_id"
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, anonymous, updated_at, user_id, atmosphere_rating, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating"
         ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
             "visited_at", desc=True
         ).range(offset, offset + page_size - 1).execute()
@@ -573,6 +615,13 @@ async def get_cafe_logs(
                 comment=log.get("comment"),
                 photo_urls=log.get("photo_urls", []),
                 coffee_type=log.get("coffee_type"),
+                atmosphere_rating=log.get("atmosphere_rating"),
+                parking_info=log.get("parking_info"),
+                acidity_rating=log.get("acidity_rating"),
+                body_rating=log.get("body_rating"),
+                sweetness_rating=log.get("sweetness_rating"),
+                bitterness_rating=log.get("bitterness_rating"),
+                aftertaste_rating=log.get("aftertaste_rating"),
                 author_display_name=author_display_name,
                 updated_at=datetime.fromisoformat(log["updated_at"].replace("Z", "+00:00")) if log.get("updated_at") else None
             ))
@@ -638,6 +687,13 @@ async def get_my_logs(
                 "is_public": visit.get("is_public", True),
                 "anonymous": visit.get("anonymous", False),
                 "coffee_type": visit.get("coffee_type"),
+                "atmosphere_rating": visit.get("atmosphere_rating"),
+                "parking_info": visit.get("parking_info"),
+                "acidity_rating": visit.get("acidity_rating"),
+                "body_rating": visit.get("body_rating"),
+                "sweetness_rating": visit.get("sweetness_rating"),
+                "bitterness_rating": visit.get("bitterness_rating"),
+                "aftertaste_rating": visit.get("aftertaste_rating"),
                 "updated_at": visit.get("updated_at")
             })
         

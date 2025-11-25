@@ -554,6 +554,36 @@ async def get_cafe_details(cafe_identifier: str):
             "recent_logs": recent_logs
         }
         
+        # Populate Founding Crew details
+        founding_crew = {}
+        
+        # 1. Navigator
+        if cafe.get("navigator_id"):
+            try:
+                nav_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", cafe["navigator_id"]).single().execute()
+                if nav_user.data:
+                    founding_crew["navigator"] = nav_user.data
+            except Exception:
+                pass
+                
+        # 2. Vanguards
+        if cafe.get("vanguard_ids"):
+            vanguards = []
+            for vanguard in cafe["vanguard_ids"]:
+                try:
+                    van_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", vanguard["user_id"]).single().execute()
+                    if van_user.data:
+                        vanguard_data = van_user.data
+                        vanguard_data["role"] = vanguard.get("role")
+                        vanguards.append(vanguard_data)
+                except Exception:
+                    continue
+            if vanguards:
+                founding_crew["vanguard"] = vanguards
+                
+        if founding_crew:
+            response["founding_crew"] = founding_crew
+        
         return response
         
     except HTTPException:
