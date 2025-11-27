@@ -1,15 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
-import InteractiveMap from '@/components/map/InteractiveMap';
 import RegisterCafeForm from '@/components/cafe/RegisterCafeForm';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import UserLocationIcon from '@/components/ui/UserLocationIcon';
+
+const InteractiveMap = dynamic(() => import('@/components/map/InteractiveMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full bg-[var(--color-background)]">
+      <LoadingSpinner size="lg" />
+    </div>
+  ),
+});
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
