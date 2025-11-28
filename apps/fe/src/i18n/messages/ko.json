@@ -29,8 +29,10 @@
       "coffee_logs_item_1": "내 기록",
       "coffee_logs_item_2": "통계",
       "shop": "공식몰",
-      "shop_item_1": "상품",
-      "shop_item_2": "선물",
+      "shop_essentials": "노마드 에센셜",
+      "shop_explorer": "탐험가 라인",
+      "shop_wearable": "웨어러블",
+      "shop_gift": "선물 패키지",
       "sign_in": "로그인",
       "sign_up": "회원가입",
       "profile": "프로필",
@@ -494,5 +496,71 @@
       "vanguard_title": "뱅가드",
       "cafes_verified": "검증한 카페",
       "vanguard_description": "첫 체크인을 통해 이 카페들을 검증하는 데 기여했습니다."
+    },
+    "shop": {
+      "hero_badge": "공식 스토어",
+      "hero_title": "커피 노마드를 위한 장비",
+      "hero_subtitle": "탐험, 기록, 검증을 위한 필수품. IBeanThere 커뮤니티를 위해 디자인되었습니다.",
+      "explore_collection": "컬렉션 둘러보기",
+      "sections": {
+        "essentials": {
+          "title": "카페 노마드 에센셜",
+          "subtitle": "카페에서 작업하거나 휴식을 취하는 분들을 위한 실용적인 아이템입니다."
+        },
+        "explorer": {
+          "title": "탐험가 & 수집가",
+          "subtitle": "Founding Crew 시스템과 연계하여 소속감을 주는 굿즈입니다."
+        },
+        "wearable": {
+          "title": "웨어러블",
+          "subtitle": "편안한 '원마일 웨어' 혹은 '스트릿 무드' 의류입니다."
+        },
+        "gift": {
+          "title": "선물 패키지",
+          "subtitle": "지인에게 선물하기 좋은 구성입니다."
+        }
+      },
+      "products": {
+        "tumbler": {
+          "title": "슬릭 리유저블 텀블러",
+          "desc": "무광 블랙/화이트 베이스의 미니멀한 디자인. 가방에 넣어도 새지 않는 밀폐형."
+        },
+        "pouch": {
+          "title": "노트북/아이패드 파우치",
+          "desc": "커피 얼룩에 강한 방수 재질. 'Work from Cafe' 디자인."
+        },
+        "ecobag": {
+          "title": "타이벡 에코백",
+          "desc": "가볍고 질긴 타이벡 소재. 크라프트지 질감에 로고 포인트."
+        },
+        "keyring": {
+          "title": "지도 마커 키링",
+          "desc": "지도 핀 모양의 키링. 내비게이터/뱅가드 등급을 뽐내세요."
+        },
+        "passport": {
+          "title": "카페 여권 노트",
+          "desc": "스탬프와 스티커를 위한 아날로그 노트. 당신의 여정을 기록하세요."
+        },
+        "stickers": {
+          "title": "리무버블 스티커 팩",
+          "desc": "노트북과 텀블러 꾸미기. 'Verified Cafe', 'Coffee Lover' 그래픽."
+        },
+        "hoodie": {
+          "title": "헤비웨이트 후드티",
+          "desc": "카페 투어를 위한 편안한 핏. 등판에 'Support Your Local Cafe' 슬로건."
+        },
+        "cap": {
+          "title": "빈티지 볼캡",
+          "desc": "깊은 핏의 모자에 커피 원두 자수. 빈티지한 워시드 컬러."
+        },
+        "dripbag": {
+          "title": "IBeanThere 셀렉션 드립백",
+          "desc": "플랫폼 내 평점 높은 로스터리의 큐레이션 드립백."
+        },
+        "coaster": {
+          "title": "지도 코스터",
+          "desc": "규조토 또는 가죽 재질. 컵을 올리면 완성되는 지도 디자인."
+        }
+      }
     }
   }

@@ -29,8 +29,10 @@
       "coffee_logs_item_1": "My logs",
       "coffee_logs_item_2": "Stats",
       "shop": "Shop",
-      "shop_item_1": "Products",
-      "shop_item_2": "Gift",
+      "shop_essentials": "Nomad Essentials",
+      "shop_explorer": "Explorer Line",
+      "shop_wearable": "Wearables",
+      "shop_gift": "Gifts",
       "sign_in": "Sign In",
       "sign_up": "Sign Up",
       "profile": "Profile",
@@ -496,5 +498,71 @@
       "vanguard_title": "Vanguard",
       "cafes_verified": "Cafes Verified",
       "vanguard_description": "You helped verify these cafes by being among the first to check in."
+    },
+    "shop": {
+      "hero_badge": "Official Store",
+      "hero_title": "Gear for the Coffee Nomad",
+      "hero_subtitle": "Essentials for exploration, logging, and verification. Designed for the IBeanThere community.",
+      "explore_collection": "Explore Collection",
+      "sections": {
+        "essentials": {
+          "title": "Cafe Nomad Essentials",
+          "subtitle": "Practical items for those who work and relax in cafes."
+        },
+        "explorer": {
+          "title": "Explorer & Collector",
+          "subtitle": "Items that foster a sense of belonging, linked to the Founding Crew system."
+        },
+        "wearable": {
+          "title": "Wearables",
+          "subtitle": "Comfortable 'One-Mile Wear' or 'Street Mood' clothing."
+        },
+        "gift": {
+          "title": "Gift Packages",
+          "subtitle": "Perfect compositions for gifting to friends."
+        }
+      },
+      "products": {
+        "tumbler": {
+          "title": "Sleek Reusable Tumbler",
+          "desc": "Minimalist design with matte black/white base. Leak-proof for your bag."
+        },
+        "pouch": {
+          "title": "Laptop/iPad Pouch",
+          "desc": "Water-resistant material strong against coffee stains. 'Work from Cafe' design."
+        },
+        "ecobag": {
+          "title": "Tyvek Eco Bag",
+          "desc": "Lightweight and durable Tyvek material. Kraft paper texture with logo point."
+        },
+        "keyring": {
+          "title": "Map Marker Keyring",
+          "desc": "Map pin shaped keyring. Show off your Navigator/Vanguard status."
+        },
+        "passport": {
+          "title": "Cafe Passport Note",
+          "desc": "Analog note for stamps and stickers. Record your journey physically."
+        },
+        "stickers": {
+          "title": "Removable Sticker Pack",
+          "desc": "Decorate your laptop and tumbler. 'Verified Cafe', 'Coffee Lover' graphics."
+        },
+        "hoodie": {
+          "title": "Heavyweight Hoodie",
+          "desc": "Comfortable fit for cafe hopping. 'Support Your Local Cafe' slogan on back."
+        },
+        "cap": {
+          "title": "Vintage Ball Cap",
+          "desc": "Deep fit cap with coffee bean embroidery. Washed vintage color."
+        },
+        "dripbag": {
+          "title": "IBeanThere Selection Drip Bag",
+          "desc": "Curated drip bags from top-rated roasteries on the platform."
+        },
+        "coaster": {
+          "title": "Map Coaster",
+          "desc": "Diatomaceous earth or leather. Map design that completes with a cup."
+        }
+      }
     }
   }
