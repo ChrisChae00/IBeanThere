@@ -11,19 +11,19 @@ export default function ShopPage() {
       id: 'tumbler',
       titleKey: 'products.tumbler.title',
       descKey: 'products.tumbler.desc',
-      tags: ['Sustainable', 'Minimalist'],
+      tags: ['sustainable', 'minimalist'],
     },
     {
       id: 'pouch',
       titleKey: 'products.pouch.title',
       descKey: 'products.pouch.desc',
-      tags: ['Waterproof', 'Protective'],
+      tags: ['waterproof', 'protective'],
     },
     {
       id: 'ecobag',
       titleKey: 'products.ecobag.title',
       descKey: 'products.ecobag.desc',
-      tags: ['Lightweight', 'Durable'],
+      tags: ['lightweight', 'durable'],
     },
   ];
 
@@ -32,19 +32,19 @@ export default function ShopPage() {
       id: 'keyring',
       titleKey: 'products.keyring.title',
       descKey: 'products.keyring.desc',
-      tags: ['Collectible', 'Accessory'],
+      tags: ['collectible', 'accessory'],
     },
     {
       id: 'passport',
       titleKey: 'products.passport.title',
       descKey: 'products.passport.desc',
-      tags: ['Stationery', 'Analog'],
+      tags: ['stationery', 'analog'],
     },
     {
       id: 'stickers',
       titleKey: 'products.stickers.title',
       descKey: 'products.stickers.desc',
-      tags: ['Decoration', 'Fun'],
+      tags: ['decoration', 'fun'],
     },
   ];
 
@@ -53,13 +53,13 @@ export default function ShopPage() {
       id: 'hoodie',
       titleKey: 'products.hoodie.title',
       descKey: 'products.hoodie.desc',
-      tags: ['Comfort', 'Streetwear'],
+      tags: ['comfort', 'streetwear'],
     },
     {
       id: 'cap',
       titleKey: 'products.cap.title',
       descKey: 'products.cap.desc',
-      tags: ['Vintage', 'Casual'],
+      tags: ['vintage', 'casual'],
     },
   ];
 
@@ -68,13 +68,13 @@ export default function ShopPage() {
       id: 'dripbag',
       titleKey: 'products.dripbag.title',
       descKey: 'products.dripbag.desc',
-      tags: ['Selection', 'Premium'],
+      tags: ['selection', 'premium'],
     },
     {
       id: 'coaster',
       titleKey: 'products.coaster.title',
       descKey: 'products.coaster.desc',
-      tags: ['Home', 'Design'],
+      tags: ['home', 'design'],
     },
   ];
 

@@ -82,21 +82,35 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             <Badge
               variant={cafe.status === 'verified' ? 'success' : 'info'}
               size="sm"
+              className="border border-[var(--color-border)]"
             >
               {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
             </Badge>
-            {cafe.verification_count && (
+            {cafe.status !== 'verified' && cafe.verification_count && (
               <span className="text-sm text-[var(--color-cardTextSecondary)]">
                 {t('verifications', { count: cafe.verification_count })}
               </span>
             )}
           </div>
 
-          {/* Address */}
+          {/* Address + Google Maps Link */}
           {cafe.address && (
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
               <p className="text-[var(--color-cardText)]">{cafe.address}</p>
+              {cafe.source_url && (
+                <a
+                  href={cafe.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[var(--color-cardText)] hover:underline"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <span>{t('google_maps')}</span>
+                </a>
+              )}
             </div>
           )}
 
@@ -106,7 +120,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('phone')}</h3>
               <a
                 href={`tel:${cafe.phoneNumber}`}
-                className="text-[var(--color-primary)] hover:underline"
+                className="text-[var(--color-cardText)] hover:underline"
               >
                 {cafe.phoneNumber}
               </a>
@@ -121,7 +135,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                 href={cafe.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--color-primary)] hover:underline break-all"
+                className="text-[var(--color-cardText)] hover:underline break-all"
               >
                 {cafe.website}
               </a>
@@ -146,39 +160,34 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                 )}
               </div>
 
-              {/* Today's Hours */}
+              {/* Today's Hours - Clickable Dropdown */}
               {todayHours && (
-                <div className="p-3 bg-[var(--color-surface)] rounded-lg">
+                <button
+                  onClick={() => setShowAllHours(!showAllHours)}
+                  className="w-full p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-[var(--color-text)]">
+                    <span className="font-medium">
                       {t('today')} ({getDayName(today)})
                     </span>
-                    <span className="text-[var(--color-text)]">
-                      {todayHours.closed
-                        ? t('closed')
-                        : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {todayHours.closed
+                          ? t('closed')
+                          : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
+                </button>
               )}
-
-              {/* Show All Hours Button */}
-              <Button
-                onClick={() => setShowAllHours(!showAllHours)}
-                fullWidth
-                variant="secondary"
-                size="sm"
-              >
-                <span>{showAllHours ? t('hide_hours') : t('show_all_hours')}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </Button>
 
               {/* All Week Hours */}
               {showAllHours && (
@@ -214,7 +223,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           {!cafe.businessHours && (
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('opening_hours')}</h3>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('no_hours_available')}</p>
+              <p className="text-sm text-[var(--color-cardText)]">{t('no_hours_available')}</p>
             </div>
           )}
 
@@ -226,19 +235,6 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             >
               {t('view_details')}
             </Link>
-            {cafe.source_url && (
-              <a
-                href={cafe.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 border border-[var(--color-border)] text-[var(--color-cardText)] rounded-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                {t('google_maps')}
-              </a>
-            )}
           </div>
         </div>
       </div>

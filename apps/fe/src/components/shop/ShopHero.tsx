@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 
 export default function ShopHero() {
   const t = useTranslations('shop');
+  const subtitleLine1 = t('hero_subtitle_line1');
+  const subtitleLine2 = t('hero_subtitle_line2');
 
   return (
     <div className="relative w-full h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-[var(--color-surface)]">
@@ -22,7 +24,8 @@ export default function ShopHero() {
           {t('hero_title')}
         </h1>
         <p className="text-xl md:text-2xl text-[var(--color-textSecondary)] mb-10 max-w-2xl mx-auto">
-          {t('hero_subtitle')}
+          <span className="block">{subtitleLine1}</span>
+          {subtitleLine2 && <span className="block">{subtitleLine2}</span>}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a 

@@ -2,12 +2,14 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ProductCardProps {
   title: string;
   description: string;
   price?: string;
   imageSrc?: string;
+  /** i18n keys under shop.tags.*, e.g. 'tags.sustainable' */
   tags?: string[];
   isComingSoon?: boolean;
 }
@@ -21,6 +23,7 @@ export default function ProductCard({
   isComingSoon = true,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const t = useTranslations('shop');
 
   return (
     <div 
@@ -38,8 +41,14 @@ export default function ProductCard({
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[var(--color-textSecondary)]">
-            <span className="text-4xl">☕</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Image
+              src="/icons/coffee-logo.svg"
+              alt={title}
+              width={96}
+              height={96}
+              className="opacity-70"
+            />
           </div>
         )}
         
@@ -47,7 +56,7 @@ export default function ProductCard({
         {isComingSoon && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className="bg-[var(--color-background)] text-[var(--color-text)] px-4 py-2 rounded-full font-medium text-sm shadow-lg">
-              Coming Soon
+              {t('product.coming_soon')}
             </span>
           </div>
         )}
@@ -61,7 +70,7 @@ export default function ProductCard({
               key={index}
               className="text-xs font-medium px-2 py-1 rounded-md bg-[var(--color-surface-hover)] text-[var(--color-textSecondary)]"
             >
-              {tag}
+              {t(`tags.${tag}` as any)}
             </span>
           ))}
         </div>
@@ -76,13 +85,13 @@ export default function ProductCard({
         
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--color-border)]">
           <span className="font-semibold text-[var(--color-text)]">
-            {price || 'Coming Soon'}
+            {price || t('product.coming_soon')}
           </span>
           <button 
             className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors"
             disabled={isComingSoon}
           >
-            {isComingSoon ? 'Notify Me' : 'Add to Cart'}
+            {isComingSoon ? t('product.notify_me') : t('product.add_to_cart')}
           </button>
         </div>
       </div>

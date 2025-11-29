@@ -500,7 +500,8 @@
     "shop": {
       "hero_badge": "공식 스토어",
       "hero_title": "커피 노마드를 위한 장비",
-      "hero_subtitle": "탐험, 기록, 검증을 위한 필수품. IBeanThere 커뮤니티를 위해 디자인되었습니다.",
+      "hero_subtitle_line1": "커피와 카페를 진짜 좋아하는 사람들끼리만 눈치채는,",
+      "hero_subtitle_line2": "IBeanThere만의 신호.",
       "explore_collection": "컬렉션 둘러보기",
       "sections": {
         "essentials": {
@@ -519,6 +520,33 @@
           "title": "선물 패키지",
           "subtitle": "지인에게 선물하기 좋은 구성입니다."
         }
+      },
+      "product": {
+        "coming_soon": "Coming Soon",
+        "notify_me": "알림 받기",
+        "add_to_cart": "장바구니 담기"
+      },
+      "tags": {
+        "sustainable": "지속 가능",
+        "minimalist": "미니멀",
+        "waterproof": "방수",
+        "protective": "보호력",
+        "lightweight": "가벼움",
+        "durable": "내구성",
+        "collectible": "컬렉터블",
+        "accessory": "액세서리",
+        "stationery": "문구",
+        "analog": "아날로그",
+        "decoration": "데코레이션",
+        "fun": "재미",
+        "comfort": "편안함",
+        "streetwear": "스트릿웨어",
+        "vintage": "빈티지",
+        "casual": "캐주얼",
+        "selection": "셀렉션",
+        "premium": "프리미엄",
+        "home": "홈",
+        "design": "디자인"
       },
       "products": {
         "tumbler": {

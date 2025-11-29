@@ -392,7 +392,7 @@
         "close": "Close",
         "status_pending": "Pending Verification",
         "status_verified": "Verified",
-        "verifications": "{count} verification | {count} verifications",
+        "verifications": "{count, plural, one {# verification} other {# verifications}}",
         "day_monday": "Monday",
         "day_tuesday": "Tuesday",
         "day_wednesday": "Wednesday",
@@ -502,7 +502,8 @@
     "shop": {
       "hero_badge": "Official Store",
       "hero_title": "Gear for the Coffee Nomad",
-      "hero_subtitle": "Essentials for exploration, logging, and verification. Designed for the IBeanThere community.",
+      "hero_subtitle_line1": "A subtle signal only people who truly love coffee and cafes",
+      "hero_subtitle_line2": "will notice.",
       "explore_collection": "Explore Collection",
       "sections": {
         "essentials": {
@@ -521,6 +522,33 @@
           "title": "Gift Packages",
           "subtitle": "Perfect compositions for gifting to friends."
         }
+      },
+      "product": {
+        "coming_soon": "Coming Soon",
+        "notify_me": "Notify Me",
+        "add_to_cart": "Add to Cart"
+      },
+      "tags": {
+        "sustainable": "Sustainable",
+        "minimalist": "Minimalist",
+        "waterproof": "Waterproof",
+        "protective": "Protective",
+        "lightweight": "Lightweight",
+        "durable": "Durable",
+        "collectible": "Collectible",
+        "accessory": "Accessory",
+        "stationery": "Stationery",
+        "analog": "Analog",
+        "decoration": "Decoration",
+        "fun": "Fun",
+        "comfort": "Comfort",
+        "streetwear": "Streetwear",
+        "vintage": "Vintage",
+        "casual": "Casual",
+        "selection": "Selection",
+        "premium": "Premium",
+        "home": "Home",
+        "design": "Design"
       },
       "products": {
         "tumbler": {

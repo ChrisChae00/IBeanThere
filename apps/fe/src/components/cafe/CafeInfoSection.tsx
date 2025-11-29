@@ -128,13 +128,19 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
         </div>
       )}
 
-      {/* Pending Status (only show if not verified and no founding crew) */}
-      {cafe.status !== 'verified' && !foundingCrew && (
+      {/* Status Badge + Verification Count (only show count when not verified and no founding crew) */}
+      {!foundingCrew && (
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-pending)]/10 text-[var(--color-pending)]">
-            {t('status_pending')}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium border border-[var(--color-border)] ${
+              cafe.status === 'verified'
+                ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                : 'bg-[var(--color-pending)]/10 text-[var(--color-pending)]'
+            }`}
+          >
+            {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
           </span>
-          {cafe.verification_count && (
+          {cafe.status !== 'verified' && cafe.verification_count && (
             <span className="text-sm text-[var(--color-cardTextSecondary)]">
               {t('verifications', { count: cafe.verification_count })}
             </span>
@@ -142,11 +148,24 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
         </div>
       )}
 
-      {/* Address */}
+      {/* Address + Google Maps Link */}
       {cafe.address && (
         <div className="space-y-1">
           <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
           <p className="text-[var(--color-cardText)]">{cafe.address}</p>
+          {sourceUrl && (
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm text-[var(--color-cardText)] hover:underline"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+              <span>{t('google_maps')}</span>
+            </a>
+          )}
         </div>
       )}
 
@@ -156,7 +175,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
           <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('phone')}</h3>
           <a
             href={`tel:${phoneNumber}`}
-            className="text-[var(--color-primary)] hover:underline"
+            className="text-[var(--color-cardText)] hover:underline"
           >
             {phoneNumber}
           </a>
@@ -171,7 +190,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
             href={website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--color-primary)] hover:underline break-all"
+            className="text-[var(--color-cardText)] hover:underline break-all"
           >
             {website}
           </a>
@@ -259,24 +278,10 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {!businessHours && (
         <div className="space-y-1">
           <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('opening_hours')}</h3>
-          <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('no_hours_available')}</p>
+          <p className="text-sm text-[var(--color-cardText)]">{t('no_hours_available')}</p>
         </div>
       )}
 
-      {/* Google Maps Link */}
-      {sourceUrl && (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px]"
-        >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-          </svg>
-          {t('google_maps')}
-        </a>
-      )}
     </div>
   );
 }
