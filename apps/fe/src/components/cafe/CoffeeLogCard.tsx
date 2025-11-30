@@ -29,6 +29,15 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
     cafeName ? { name: cafeName } : null
   );
   const [isLoadingCafe, setIsLoadingCafe] = useState(!cafeName);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  const hasAdvancedData = Boolean(
+    log.dessert || log.price || log.bean_origin || log.processing_method || 
+    log.roast_level || log.extraction_method || log.extraction_equipment || 
+    log.aroma_rating || log.wifi_quality || log.wifi_rating || log.outlet_info ||
+    log.furniture_comfort || log.noise_level || log.noise_rating || 
+    log.temperature_lighting || log.facilities_info
+  );
 
   useEffect(() => {
     if (cafeName || !log.cafe_id) {
@@ -139,25 +148,9 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
         </div>
       )}
 
-      {/* Coffee Type */}
-      {log.coffee_type && (
-        <div>
-          <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
-            {log.coffee_type}
-          </span>
-        </div>
-      )}
-
-      {/* Comment */}
-      {log.comment && (
-        <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap">
-          {log.comment}
-        </p>
-      )}
-
       {/* Photos */}
       {log.photo_urls && log.photo_urls.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 mb-4">
           {log.photo_urls.map((url, index) => (
             <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
               <img
@@ -167,6 +160,106 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Coffee Type */}
+      {log.coffee_type && (
+        <div className="mb-2">
+          <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
+            {log.coffee_type}
+          </span>
+        </div>
+      )}
+
+      {/* Basic Info: Dessert & Price */}
+      {(log.dessert || log.price) && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {log.dessert && (
+            <span className="text-xs text-[var(--color-cardTextSecondary)]">
+              {t('dessert')}: {log.dessert}
+            </span>
+          )}
+          {log.price && (
+            <span className="text-xs text-[var(--color-cardTextSecondary)]">
+              {t('price')}: {log.price}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Comment */}
+      {log.comment && (
+        <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap mb-4">
+          {log.comment}
+        </p>
+      )}
+
+      {/* Advanced Logging Section */}
+      {hasAdvancedData && (
+        <div className="border-t border-[var(--color-border)] pt-4 mt-4">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-sm text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition-colors"
+            aria-expanded={showAdvanced}
+          >
+            <span>{t('detailed_review')}</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showAdvanced && (
+            <div className="mt-4 space-y-4 text-sm">
+              {/* Coffee & Taste Advanced */}
+              {(log.bean_origin || log.processing_method || log.roast_level || 
+                log.extraction_method || log.extraction_equipment || log.aroma_rating ||
+                log.acidity_rating || log.sweetness_rating || log.bitterness_rating ||
+                log.body_rating || log.aftertaste_rating) && (
+                <div className="space-y-2">
+                  <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
+                  <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                    {log.bean_origin && <div>{t('bean_origin')}: {log.bean_origin}</div>}
+                    {log.processing_method && <div>{t('processing_method')}: {log.processing_method}</div>}
+                    {log.roast_level && <div>{t('roast_level')}: {log.roast_level}</div>}
+                    {log.extraction_method && <div>{t('extraction_method')}: {log.extraction_method}</div>}
+                    {log.extraction_equipment && <div>{t('extraction_equipment')}: {log.extraction_equipment}</div>}
+                    {log.aroma_rating && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
+                    {log.acidity_rating && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
+                    {log.sweetness_rating && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
+                    {log.bitterness_rating && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
+                    {log.body_rating && <div>{t('body')}: {log.body_rating}/10</div>}
+                    {log.aftertaste_rating && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Space & Work Environment */}
+              {(log.wifi_quality || log.wifi_rating || log.outlet_info ||
+                log.furniture_comfort || log.noise_level || log.noise_rating ||
+                log.temperature_lighting || log.facilities_info) && (
+                <div className="space-y-2">
+                  <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
+                  <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                    {log.wifi_rating && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
+                    {log.wifi_quality && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
+                    {log.outlet_info && <div>{t('outlet_info')}: {log.outlet_info}</div>}
+                    {log.furniture_comfort && <div>{t('furniture_comfort')}: {log.furniture_comfort}</div>}
+                    {log.noise_rating && <div>{t('noise_rating')}: {log.noise_rating}/5</div>}
+                    {log.noise_level && <div>{t('noise_level')}: {log.noise_level}</div>}
+                    {log.temperature_lighting && <div>{t('temperature_lighting')}: {log.temperature_lighting}</div>}
+                    {log.facilities_info && <div>{t('facilities_info')}: {log.facilities_info}</div>}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Card>

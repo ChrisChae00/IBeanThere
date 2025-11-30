@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LogFormData, CoffeeLog } from '@/types/api';
-import StarRating from '@/components/ui/StarRating';
-import PhotoUpload from '@/components/ui/PhotoUpload';
 import ToggleButton from '@/components/ui/ToggleButton';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
+import BasicLoggingSection from './logging/BasicLoggingSection';
+import AdvancedCoffeeSection from './logging/AdvancedCoffeeSection';
+import AdvancedSpaceSection from './logging/AdvancedSpaceSection';
 
 interface CoffeeLogFormProps {
   initialData?: CoffeeLog;
@@ -15,42 +16,70 @@ interface CoffeeLogFormProps {
   isLoading?: boolean;
 }
 
-const COFFEE_TYPES = [
-  'Espresso',
-  'Americano',
-  'Latte',
-  'Cappuccino',
-  'Macchiato',
-  'Mocha',
-  'Flat White',
-  'Cold Brew',
-  'Iced Coffee',
-  'Other'
-];
-
 export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoading }: CoffeeLogFormProps) {
   const t = useTranslations('cafe.log');
+  
+  // Basic logging state
   const [rating, setRating] = useState<number | undefined>(initialData?.rating);
   const [comment, setComment] = useState(initialData?.comment || '');
   const [photoUrls, setPhotoUrls] = useState<string[]>(initialData?.photo_urls || []);
+  const [coffeeType, setCoffeeType] = useState(initialData?.coffee_type || '');
+  const [dessert, setDessert] = useState(initialData?.dessert || '');
+  const [price, setPrice] = useState<number | undefined>(initialData?.price);
+  const [priceCurrency, setPriceCurrency] = useState<string>(() => {
+    // Browser language-based default currency
+    if (typeof window === 'undefined') return 'CAD'; // SSR fallback
+    
+    const lang = navigator.language || navigator.languages?.[0] || 'en';
+    
+    if (lang.startsWith('en-CA')) return 'CAD';
+    if (lang.startsWith('en-US')) return 'USD';
+    if (lang.startsWith('ko')) return 'KRW';
+    if (lang.startsWith('ja')) return 'JPY';
+    if (lang.startsWith('zh-CN')) return 'CNY';
+    if (lang.startsWith('en-GB')) return 'GBP';
+    if (lang.startsWith('en-AU')) return 'AUD';
+    
+    // Default to CAD for North America focus
+    return 'CAD';
+  });
+  
+  // Privacy settings
   const [isPublic, setIsPublic] = useState(initialData?.is_public ?? true);
   const [anonymous, setAnonymous] = useState(initialData?.anonymous ?? false);
-  const [coffeeType, setCoffeeType] = useState(initialData?.coffee_type || '');
+  
+  // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Detailed Review State
-  const [showDetailedReview, setShowDetailedReview] = useState(false);
-  const [atmosphereRating, setAtmosphereRating] = useState<number | undefined>(initialData?.atmosphere_rating);
-  const [parkingInfo, setParkingInfo] = useState(initialData?.parking_info || '');
+  // Advanced Coffee & Taste state
+  const [beanOrigin, setBeanOrigin] = useState(initialData?.bean_origin || '');
+  const [processingMethod, setProcessingMethod] = useState(initialData?.processing_method || '');
+  const [roastLevel, setRoastLevel] = useState(initialData?.roast_level || '');
+  const [extractionMethod, setExtractionMethod] = useState(initialData?.extraction_method || '');
+  const [extractionEquipment, setExtractionEquipment] = useState(initialData?.extraction_equipment || '');
+  const [aromaRating, setAromaRating] = useState<number | undefined>(initialData?.aroma_rating);
   const [acidityRating, setAcidityRating] = useState<number | undefined>(initialData?.acidity_rating);
   const [bodyRating, setBodyRating] = useState<number | undefined>(initialData?.body_rating);
   const [sweetnessRating, setSweetnessRating] = useState<number | undefined>(initialData?.sweetness_rating);
   const [bitternessRating, setBitternessRating] = useState<number | undefined>(initialData?.bitterness_rating);
   const [aftertasteRating, setAftertasteRating] = useState<number | undefined>(initialData?.aftertaste_rating);
 
-  const handleRatingClick = (value: number) => {
-    setRating(value);
-    setErrors(prev => ({ ...prev, rating: '' }));
+  // Advanced Space & Work Environment state
+  const [wifiQuality, setWifiQuality] = useState(initialData?.wifi_quality || '');
+  const [wifiRating, setWifiRating] = useState<number | undefined>(initialData?.wifi_rating);
+  const [wifiComment, setWifiComment] = useState('');
+  const [outletInfo, setOutletInfo] = useState(initialData?.outlet_info || '');
+  const [furnitureComfort, setFurnitureComfort] = useState(initialData?.furniture_comfort || '');
+  const [noiseLevel, setNoiseLevel] = useState(initialData?.noise_level || '');
+  const [temperatureLighting, setTemperatureLighting] = useState(initialData?.temperature_lighting || '');
+  const [facilitiesInfo, setFacilitiesInfo] = useState(initialData?.facilities_info || '');
+
+  const handleErrorClear = (field: string) => {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,209 +108,98 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         is_public: isPublic,
         anonymous,
         coffee_type: coffeeType || undefined,
-        atmosphere_rating: atmosphereRating,
-        parking_info: parkingInfo || undefined,
+        dessert: dessert.trim() || undefined,
+        price: price || undefined,
+        bean_origin: beanOrigin.trim() || undefined,
+        processing_method: processingMethod || undefined,
+        roast_level: roastLevel || undefined,
+        extraction_method: extractionMethod.trim() || undefined,
+        extraction_equipment: extractionEquipment.trim() || undefined,
+        aroma_rating: aromaRating,
         acidity_rating: acidityRating,
         body_rating: bodyRating,
         sweetness_rating: sweetnessRating,
         bitterness_rating: bitternessRating,
         aftertaste_rating: aftertasteRating,
+        wifi_quality: wifiQuality.trim() || undefined,
+        wifi_rating: wifiRating,
+        outlet_info: outletInfo.trim() || undefined,
+        furniture_comfort: furnitureComfort.trim() || undefined,
+        noise_level: noiseLevel || undefined,
+        temperature_lighting: temperatureLighting.trim() || undefined,
+        facilities_info: facilitiesInfo.trim() || undefined,
       });
     } catch (error) {
       console.error('Error submitting log:', error);
     }
   };
 
-  const renderStarRating = (
-    value: number | undefined,
-    onChange: (val: number) => void,
-    label: string
-  ) => (
-    <div>
-      <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-1">
-        {label}
-      </label>
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => onChange(star)}
-            className="focus:outline-none"
-          >
-            <svg
-              className={`w-6 h-6 transition-colors ${
-                value && value >= star
-                  ? 'text-[var(--color-starFilled)]'
-                  : 'text-[var(--color-starEmpty)]'
-              }`}
-              fill="currentColor"
-              stroke={value && value >= star ? 'currentColor' : 'var(--color-starEmptyOutline)'}
-              strokeWidth="1.5"
-              viewBox="0 0 20 20"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Rating */}
-      <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
-          {t('rating')} <span className="text-[var(--color-error)]">*</span>
-        </label>
-        <div className="flex items-center gap-2">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => handleRatingClick(value)}
-              className="focus:outline-none"
-            >
-              <svg
-                className={`w-8 h-8 transition-colors ${
-                  rating && rating >= value
-                    ? 'text-[var(--color-starFilled)]'
-                    : 'text-[var(--color-starEmpty)]'
-                }`}
-                fill="currentColor"
-                stroke={rating && rating >= value ? 'currentColor' : 'var(--color-starEmptyOutline)'}
-                strokeWidth="1.5"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            </button>
-          ))}
-          {rating && (
-            <span className="text-sm text-[var(--color-surfaceTextSecondary)] ml-2">
-              {rating}/5
-            </span>
-          )}
-        </div>
-        {errors.rating && (
-          <p className="text-sm text-[var(--color-error)] mt-1">{errors.rating}</p>
-        )}
-      </div>
+      {/* Basic Logging Section */}
+      <BasicLoggingSection
+        rating={rating}
+        onRatingChange={setRating}
+        coffeeType={coffeeType}
+        onCoffeeTypeChange={setCoffeeType}
+        dessert={dessert}
+        onDessertChange={setDessert}
+        price={price}
+        onPriceChange={setPrice}
+        priceCurrency={priceCurrency}
+        onPriceCurrencyChange={setPriceCurrency}
+        comment={comment}
+        onCommentChange={setComment}
+        photoUrls={photoUrls}
+        onPhotoUrlsChange={setPhotoUrls}
+        errors={errors}
+        onErrorClear={handleErrorClear}
+      />
 
-      {/* Coffee Type - Custom Input */}
-      <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
-          {t('coffee_type')} ({t('optional')})
-        </label>
-        <input
-          list="coffee-types"
-          value={coffeeType}
-          onChange={(e) => setCoffeeType(e.target.value)}
-          placeholder={t('coffee_type_placeholder')}
-          className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-        <datalist id="coffee-types">
-          {COFFEE_TYPES.map((type) => (
-            <option key={type} value={type} />
-          ))}
-        </datalist>
-      </div>
+      {/* Advanced Coffee & Taste Section */}
+      <AdvancedCoffeeSection
+        beanOrigin={beanOrigin}
+        onBeanOriginChange={setBeanOrigin}
+        processingMethod={processingMethod}
+        onProcessingMethodChange={setProcessingMethod}
+        roastLevel={roastLevel}
+        onRoastLevelChange={setRoastLevel}
+        extractionMethod={extractionMethod}
+        onExtractionMethodChange={setExtractionMethod}
+        extractionEquipment={extractionEquipment}
+        onExtractionEquipmentChange={setExtractionEquipment}
+        aromaRating={aromaRating}
+        onAromaRatingChange={setAromaRating}
+        acidityRating={acidityRating}
+        onAcidityRatingChange={setAcidityRating}
+        sweetnessRating={sweetnessRating}
+        onSweetnessRatingChange={setSweetnessRating}
+        bitternessRating={bitternessRating}
+        onBitternessRatingChange={setBitternessRating}
+        bodyRating={bodyRating}
+        onBodyRatingChange={setBodyRating}
+        aftertasteRating={aftertasteRating}
+        onAftertasteRatingChange={setAftertasteRating}
+      />
 
-      {/* Detailed Review Section */}
-      <div className="border border-[var(--color-border)] rounded-lg overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setShowDetailedReview(!showDetailedReview)}
-          className="w-full px-4 py-3 flex items-center justify-between bg-[var(--color-background)] hover:bg-[var(--color-surfaceHover)] transition-colors"
-        >
-          <span className="font-medium text-[var(--color-text)]">{t('detailed_review')}</span>
-          <svg
-            className={`w-5 h-5 transition-transform ${showDetailedReview ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        
-        {showDetailedReview && (
-          <div className="p-4 space-y-6 bg-[var(--color-cardBackground)]">
-            {/* Cafe Atmosphere Section */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-[var(--color-text)] uppercase tracking-wide">
-                {t('cafe_atmosphere')}
-              </h4>
-              <div className="space-y-4">
-                {renderStarRating(atmosphereRating, setAtmosphereRating, t('atmosphere'))}
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)]">
-                    {t('parking_availability')}
-                  </label>
-                  <select
-                    value={parkingInfo}
-                    onChange={(e) => setParkingInfo(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  >
-                    <option value="">{t('parking_not_specified')}</option>
-                    <option value="free_parking">{t('parking_free')}</option>
-                    <option value="street_paid">{t('parking_street_paid')}</option>
-                    <option value="street_free">{t('parking_street_free')}</option>
-                    <option value="unknown">{t('parking_unknown')}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-[var(--color-border)]"></div>
-
-            {/* Coffee Taste Section */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-[var(--color-text)] uppercase tracking-wide">
-                {t('coffee_taste')}
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderStarRating(acidityRating, setAcidityRating, t('acidity'))}
-                {renderStarRating(bodyRating, setBodyRating, t('body'))}
-                {renderStarRating(sweetnessRating, setSweetnessRating, t('sweetness'))}
-                {renderStarRating(bitternessRating, setBitternessRating, t('bitterness'))}
-                <div className="md:col-span-2">
-                  {renderStarRating(aftertasteRating, setAftertasteRating, t('aftertaste'))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Comment */}
-      <div>
-        <Input
-          multiline
-          label={`${t('comment')} (${t('optional')})`}
-          value={comment}
-          onChange={(e) => {
-            setComment(e.target.value);
-            setErrors(prev => ({ ...prev, comment: '' }));
-          }}
-          rows={4}
-          maxLength={1000}
-          placeholder={t('comment_placeholder')}
-          error={errors.comment}
-        />
-        <div className="mt-1 text-right text-xs text-[var(--color-surfaceTextSecondary)]">
-          {comment.length}/1000
-        </div>
-      </div>
-
-      {/* Photo Upload */}
-      <PhotoUpload
-        photos={photoUrls}
-        onChange={setPhotoUrls}
-        maxPhotos={5}
+      {/* Advanced Space & Work Environment Section */}
+      <AdvancedSpaceSection
+        wifiQuality={wifiQuality}
+        onWifiQualityChange={setWifiQuality}
+        wifiRating={wifiRating}
+        onWifiRatingChange={setWifiRating}
+        wifiComment={wifiComment}
+        onWifiCommentChange={setWifiComment}
+        outletInfo={outletInfo}
+        onOutletInfoChange={setOutletInfo}
+        furnitureComfort={furnitureComfort}
+        onFurnitureComfortChange={setFurnitureComfort}
+        noiseLevel={noiseLevel}
+        onNoiseLevelChange={setNoiseLevel}
+        temperatureLighting={temperatureLighting}
+        onTemperatureLightingChange={setTemperatureLighting}
+        facilitiesInfo={facilitiesInfo}
+        onFacilitiesInfoChange={setFacilitiesInfo}
       />
 
       {/* Privacy Settings */}
@@ -340,4 +258,3 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
     </form>
   );
 }
-

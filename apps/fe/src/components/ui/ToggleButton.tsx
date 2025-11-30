@@ -36,13 +36,13 @@ export default function ToggleButton({
         htmlFor={toggleId}
         className={`
           relative inline-flex cursor-pointer select-none
-          min-h-[32px] sm:min-h-[36px] h-auto
-          py-1.5 sm:py-2
+          h-[32px] sm:h-[36px]
           rounded-full
           bg-transparent
           transition-all duration-300 ease-in-out
           items-center justify-center
           flex-shrink-0
+          overflow-hidden
           ${checked 
             ? 'w-[60px] sm:w-[80px] border-[var(--color-primary)] px-2.5' 
             : 'w-auto min-w-[60px] sm:min-w-[80px] border-[var(--color-border)] px-3'
@@ -57,16 +57,20 @@ export default function ToggleButton({
       >
         <span
           className={`
-            ${checked ? 'opacity-0 absolute' : 'opacity-100'}
+            absolute
             text-xs font-medium
             text-[var(--color-text-secondary)]
             pointer-events-none
             transition-opacity duration-300
             whitespace-nowrap
+            ${checked ? 'opacity-0' : 'opacity-100'}
           `}
           style={{ 
             fontFamily: 'Arial, sans-serif',
             textAlign: 'center',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
             maxWidth: checked ? '0' : 'none'
           }}
         >
@@ -85,14 +89,13 @@ export default function ToggleButton({
             }
             overflow-hidden
             whitespace-nowrap
+            top-[1px]
+            bottom-[1px]
           `}
           style={{
             fontFamily: 'Arial, sans-serif',
-            top: '1px',
-            bottom: '1px',
             left: checked ? '1px' : 'auto',
             right: checked ? '1px' : '1px',
-            height: 'calc(100% - 2px)',
             width: checked ? 'calc(100% - 2px)' : '28px',
             minWidth: checked ? 'calc(100% - 2px)' : '28px',
             textAlign: 'center',

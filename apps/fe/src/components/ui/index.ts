@@ -28,3 +28,4 @@ export { default as Badge } from './Badge';
 export { default as Label } from './Label';
 export { default as PhotoUpload } from './PhotoUpload';
 export { default as Toast } from './Toast';
+export { default as IntensitySlider } from './IntensitySlider';

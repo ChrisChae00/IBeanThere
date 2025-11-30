@@ -117,6 +117,8 @@ export interface CoffeeLog {
   is_public: boolean;
   anonymous: boolean;
   coffee_type?: string;
+  dessert?: string;
+  price?: number;
   atmosphere_rating?: number;
   parking_info?: string;
   acidity_rating?: number;
@@ -124,6 +126,20 @@ export interface CoffeeLog {
   sweetness_rating?: number;
   bitterness_rating?: number;
   aftertaste_rating?: number;
+  bean_origin?: string;
+  processing_method?: string;
+  roast_level?: string;
+  extraction_method?: string;
+  extraction_equipment?: string;
+  aroma_rating?: number;
+  wifi_quality?: string;
+  wifi_rating?: number;
+  outlet_info?: string;
+  furniture_comfort?: string;
+  noise_level?: string;
+  noise_rating?: number;
+  temperature_lighting?: string;
+  facilities_info?: string;
   author_display_name?: string;
   updated_at?: string;
 }
@@ -180,6 +196,8 @@ export interface LogFormData {
   is_public: boolean;
   anonymous: boolean;
   coffee_type?: string;
+  dessert?: string;
+  price?: number;
   atmosphere_rating?: number;
   parking_info?: string;
   acidity_rating?: number;
@@ -187,6 +205,20 @@ export interface LogFormData {
   sweetness_rating?: number;
   bitterness_rating?: number;
   aftertaste_rating?: number;
+  bean_origin?: string;
+  processing_method?: string;
+  roast_level?: string;
+  extraction_method?: string;
+  extraction_equipment?: string;
+  aroma_rating?: number;
+  wifi_quality?: string;
+  wifi_rating?: number;
+  outlet_info?: string;
+  furniture_comfort?: string;
+  noise_level?: string;
+  noise_rating?: number;
+  temperature_lighting?: string;
+  facilities_info?: string;
 }
 
 export interface FoundingStats {
