@@ -149,13 +149,29 @@ async def record_cafe_visit(
             "is_public": visit_data.is_public,
             "anonymous": visit_data.anonymous,
             "coffee_type": visit_data.coffee_type,
+            "dessert": visit_data.dessert,
+            "price": str(visit_data.price) if visit_data.price is not None else None,
             "atmosphere_rating": visit_data.atmosphere_rating,
             "parking_info": visit_data.parking_info,
             "acidity_rating": visit_data.acidity_rating,
             "body_rating": visit_data.body_rating,
             "sweetness_rating": visit_data.sweetness_rating,
             "bitterness_rating": visit_data.bitterness_rating,
-            "aftertaste_rating": visit_data.aftertaste_rating
+            "aftertaste_rating": visit_data.aftertaste_rating,
+            "bean_origin": visit_data.bean_origin,
+            "processing_method": visit_data.processing_method,
+            "roast_level": visit_data.roast_level,
+            "extraction_method": visit_data.extraction_method,
+            "extraction_equipment": visit_data.extraction_equipment,
+            "aroma_rating": visit_data.aroma_rating,
+            "wifi_quality": visit_data.wifi_quality,
+            "wifi_rating": visit_data.wifi_rating,
+            "outlet_info": visit_data.outlet_info,
+            "furniture_comfort": visit_data.furniture_comfort,
+            "noise_level": visit_data.noise_level,
+            "noise_rating": visit_data.noise_rating,
+            "temperature_lighting": visit_data.temperature_lighting,
+            "facilities_info": visit_data.facilities_info
         }
         
         result = supabase.table("cafe_visits").insert(visit_record).execute()
@@ -188,6 +204,8 @@ async def record_cafe_visit(
             "is_public": visit.get("is_public", True),
             "anonymous": visit.get("anonymous", False),
             "coffee_type": visit.get("coffee_type"),
+            "dessert": visit.get("dessert"),
+            "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
             "atmosphere_rating": visit.get("atmosphere_rating"),
             "parking_info": visit.get("parking_info"),
             "acidity_rating": visit.get("acidity_rating"),
@@ -195,6 +213,20 @@ async def record_cafe_visit(
             "sweetness_rating": visit.get("sweetness_rating"),
             "bitterness_rating": visit.get("bitterness_rating"),
             "aftertaste_rating": visit.get("aftertaste_rating"),
+            "bean_origin": visit.get("bean_origin"),
+            "processing_method": visit.get("processing_method"),
+            "roast_level": visit.get("roast_level"),
+            "extraction_method": visit.get("extraction_method"),
+            "extraction_equipment": visit.get("extraction_equipment"),
+            "aroma_rating": visit.get("aroma_rating"),
+            "wifi_quality": visit.get("wifi_quality"),
+            "wifi_rating": visit.get("wifi_rating"),
+            "outlet_info": visit.get("outlet_info"),
+            "furniture_comfort": visit.get("furniture_comfort"),
+            "noise_level": visit.get("noise_level"),
+            "noise_rating": visit.get("noise_rating"),
+            "temperature_lighting": visit.get("temperature_lighting"),
+            "facilities_info": visit.get("facilities_info"),
             "updated_at": visit.get("updated_at")
         }
         
@@ -286,6 +318,12 @@ async def update_visit(
         
         if update_data.coffee_type is not None:
             update_payload["coffee_type"] = update_data.coffee_type
+        
+        if update_data.dessert is not None:
+            update_payload["dessert"] = update_data.dessert
+        
+        if update_data.price is not None:
+            update_payload["price"] = str(update_data.price)
             
         if update_data.atmosphere_rating is not None:
             update_payload["atmosphere_rating"] = update_data.atmosphere_rating
@@ -307,6 +345,48 @@ async def update_visit(
             
         if update_data.body_rating is not None:
             update_payload["body_rating"] = update_data.body_rating
+        
+        if update_data.bean_origin is not None:
+            update_payload["bean_origin"] = update_data.bean_origin
+        
+        if update_data.processing_method is not None:
+            update_payload["processing_method"] = update_data.processing_method
+        
+        if update_data.roast_level is not None:
+            update_payload["roast_level"] = update_data.roast_level
+        
+        if update_data.extraction_method is not None:
+            update_payload["extraction_method"] = update_data.extraction_method
+        
+        if update_data.extraction_equipment is not None:
+            update_payload["extraction_equipment"] = update_data.extraction_equipment
+        
+        if update_data.aroma_rating is not None:
+            update_payload["aroma_rating"] = update_data.aroma_rating
+        
+        if update_data.wifi_quality is not None:
+            update_payload["wifi_quality"] = update_data.wifi_quality
+        
+        if update_data.wifi_rating is not None:
+            update_payload["wifi_rating"] = update_data.wifi_rating
+        
+        if update_data.outlet_info is not None:
+            update_payload["outlet_info"] = update_data.outlet_info
+        
+        if update_data.furniture_comfort is not None:
+            update_payload["furniture_comfort"] = update_data.furniture_comfort
+        
+        if update_data.noise_level is not None:
+            update_payload["noise_level"] = update_data.noise_level
+        
+        if update_data.noise_rating is not None:
+            update_payload["noise_rating"] = update_data.noise_rating
+        
+        if update_data.temperature_lighting is not None:
+            update_payload["temperature_lighting"] = update_data.temperature_lighting
+        
+        if update_data.facilities_info is not None:
+            update_payload["facilities_info"] = update_data.facilities_info
         
         result = supabase.table("cafe_visits").update(update_payload).eq("id", visit_id).execute()
         
@@ -338,6 +418,8 @@ async def update_visit(
             "is_public": visit.get("is_public", True),
             "anonymous": visit.get("anonymous", False),
             "coffee_type": visit.get("coffee_type"),
+            "dessert": visit.get("dessert"),
+            "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
             "atmosphere_rating": visit.get("atmosphere_rating"),
             "parking_info": visit.get("parking_info"),
             "acidity_rating": visit.get("acidity_rating"),
@@ -345,6 +427,20 @@ async def update_visit(
             "sweetness_rating": visit.get("sweetness_rating"),
             "bitterness_rating": visit.get("bitterness_rating"),
             "aftertaste_rating": visit.get("aftertaste_rating"),
+            "bean_origin": visit.get("bean_origin"),
+            "processing_method": visit.get("processing_method"),
+            "roast_level": visit.get("roast_level"),
+            "extraction_method": visit.get("extraction_method"),
+            "extraction_equipment": visit.get("extraction_equipment"),
+            "aroma_rating": visit.get("aroma_rating"),
+            "wifi_quality": visit.get("wifi_quality"),
+            "wifi_rating": visit.get("wifi_rating"),
+            "outlet_info": visit.get("outlet_info"),
+            "furniture_comfort": visit.get("furniture_comfort"),
+            "noise_level": visit.get("noise_level"),
+            "noise_rating": visit.get("noise_rating"),
+            "temperature_lighting": visit.get("temperature_lighting"),
+            "facilities_info": visit.get("facilities_info"),
             "updated_at": visit.get("updated_at")
         }
         
@@ -571,7 +667,7 @@ async def get_cafe_logs(
         
         # Get public logs with ratings
         result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, anonymous, updated_at, user_id, atmosphere_rating, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating"
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
         ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
             "visited_at", desc=True
         ).range(offset, offset + page_size - 1).execute()
@@ -615,6 +711,8 @@ async def get_cafe_logs(
                 comment=log.get("comment"),
                 photo_urls=log.get("photo_urls", []),
                 coffee_type=log.get("coffee_type"),
+                dessert=log.get("dessert"),
+                price=Decimal(str(log.get("price"))) if log.get("price") is not None else None,
                 atmosphere_rating=log.get("atmosphere_rating"),
                 parking_info=log.get("parking_info"),
                 acidity_rating=log.get("acidity_rating"),
@@ -622,6 +720,20 @@ async def get_cafe_logs(
                 sweetness_rating=log.get("sweetness_rating"),
                 bitterness_rating=log.get("bitterness_rating"),
                 aftertaste_rating=log.get("aftertaste_rating"),
+                bean_origin=log.get("bean_origin"),
+                processing_method=log.get("processing_method"),
+                roast_level=log.get("roast_level"),
+                extraction_method=log.get("extraction_method"),
+                extraction_equipment=log.get("extraction_equipment"),
+                aroma_rating=log.get("aroma_rating"),
+                wifi_quality=log.get("wifi_quality"),
+                wifi_rating=log.get("wifi_rating"),
+                outlet_info=log.get("outlet_info"),
+                furniture_comfort=log.get("furniture_comfort"),
+                noise_level=log.get("noise_level"),
+                noise_rating=log.get("noise_rating"),
+                temperature_lighting=log.get("temperature_lighting"),
+                facilities_info=log.get("facilities_info"),
                 author_display_name=author_display_name,
                 updated_at=datetime.fromisoformat(log["updated_at"].replace("Z", "+00:00")) if log.get("updated_at") else None
             ))
@@ -687,6 +799,8 @@ async def get_my_logs(
                 "is_public": visit.get("is_public", True),
                 "anonymous": visit.get("anonymous", False),
                 "coffee_type": visit.get("coffee_type"),
+                "dessert": visit.get("dessert"),
+                "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
                 "atmosphere_rating": visit.get("atmosphere_rating"),
                 "parking_info": visit.get("parking_info"),
                 "acidity_rating": visit.get("acidity_rating"),
@@ -694,6 +808,20 @@ async def get_my_logs(
                 "sweetness_rating": visit.get("sweetness_rating"),
                 "bitterness_rating": visit.get("bitterness_rating"),
                 "aftertaste_rating": visit.get("aftertaste_rating"),
+                "bean_origin": visit.get("bean_origin"),
+                "processing_method": visit.get("processing_method"),
+                "roast_level": visit.get("roast_level"),
+                "extraction_method": visit.get("extraction_method"),
+                "extraction_equipment": visit.get("extraction_equipment"),
+                "aroma_rating": visit.get("aroma_rating"),
+                "wifi_quality": visit.get("wifi_quality"),
+                "wifi_rating": visit.get("wifi_rating"),
+                "outlet_info": visit.get("outlet_info"),
+                "furniture_comfort": visit.get("furniture_comfort"),
+                "noise_level": visit.get("noise_level"),
+                "noise_rating": visit.get("noise_rating"),
+                "temperature_lighting": visit.get("temperature_lighting"),
+                "facilities_info": visit.get("facilities_info"),
                 "updated_at": visit.get("updated_at")
             })
         
