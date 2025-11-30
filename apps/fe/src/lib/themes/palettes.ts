@@ -124,8 +124,8 @@ export const themes: Record<string, ThemePalette> = {
       surfaceTextSecondary: '#8B7355', // Secondary text for surface
       authText: '#362C1D', // Dark brown text (same as text) for auth pages on secondary background
           starFilled: '#FF7F50', // Coral orange for vanilla theme
-          starEmpty: '#B8860B', // Dark goldenrod for better contrast
-          starEmptyOutline: '#8B6914', // Darker goldenrod for star outline
+          starEmpty: '#A0A0A0', // Medium gray for better contrast (same as matcha latte)
+          starEmptyOutline: '#808080', // Darker gray for star outline (same as matcha latte)
           cardShadow: '#9d6345', // Rose brown for vanilla theme card shadows
       pending: '#9CA3AF', // Gray for pending markers
       white: '#FFFFFF', // White for contrast

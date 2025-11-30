@@ -399,7 +399,11 @@
         "day_friday": "금요일",
         "day_saturday": "토요일",
         "day_sunday": "일요일",
-        "view_details": "상세 보기"
+        "view_details": "상세 보기",
+        "founding_crew": "개척 크루",
+        "navigator": "개척자",
+        "vanguards": "선봉대",
+        "first_discoverer": "이 카페의 첫 발견자"
       },
       "detail": {
         "average_rating": "평균 평점",

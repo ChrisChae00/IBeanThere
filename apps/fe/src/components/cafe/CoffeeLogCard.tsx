@@ -40,7 +40,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
         const parsed = JSON.parse(log.outlet_info);
         return parsed.availability || parsed.location || parsed.comment;
       } catch {
-        return Boolean(log.outlet_info);
+        return Boolean(log.outlet_info && log.outlet_info.trim());
       }
     })();
     
@@ -51,20 +51,38 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
         const parsed = JSON.parse(log.parking_info);
         return parsed.type;
       } catch {
-        return Boolean(log.parking_info);
+        return Boolean(log.parking_info && log.parking_info.trim());
       }
     })();
     
-    return Boolean(
-      log.bean_origin || log.processing_method || 
-      log.roast_level || log.extraction_method || log.extraction_equipment || 
-      log.aroma_rating !== undefined || log.acidity_rating !== undefined || 
-      log.sweetness_rating !== undefined || log.bitterness_rating !== undefined ||
-      log.body_rating !== undefined || log.aftertaste_rating !== undefined ||
-      log.wifi_quality || log.wifi_rating || hasOutletInfo ||
-      log.furniture_comfort || log.noise_level || log.noise_rating || 
-      log.temperature_lighting || hasParkingInfo
+    // Check Coffee & Taste data
+    const hasCoffeeTasteData = Boolean(
+      (log.bean_origin && log.bean_origin.trim()) ||
+      (log.processing_method && log.processing_method.trim()) ||
+      (log.roast_level && log.roast_level.trim()) ||
+      (log.extraction_method && log.extraction_method.trim()) ||
+      (log.extraction_equipment && log.extraction_equipment.trim()) ||
+      (log.aroma_rating !== undefined && log.aroma_rating !== null) ||
+      (log.acidity_rating !== undefined && log.acidity_rating !== null) ||
+      (log.sweetness_rating !== undefined && log.sweetness_rating !== null) ||
+      (log.bitterness_rating !== undefined && log.bitterness_rating !== null) ||
+      (log.body_rating !== undefined && log.body_rating !== null) ||
+      (log.aftertaste_rating !== undefined && log.aftertaste_rating !== null)
     );
+    
+    // Check Space & Work Environment data
+    const hasSpaceWorkData = Boolean(
+      (log.wifi_quality && log.wifi_quality.trim()) ||
+      (log.wifi_rating !== undefined && log.wifi_rating !== null) ||
+      hasOutletInfo ||
+      (log.furniture_comfort && log.furniture_comfort.trim()) ||
+      (log.noise_level && log.noise_level.trim()) ||
+      (log.noise_rating !== undefined && log.noise_rating !== null) ||
+      (log.temperature_lighting && log.temperature_lighting.trim()) ||
+      hasParkingInfo
+    );
+    
+    return hasCoffeeTasteData || hasSpaceWorkData;
   })();
 
   useEffect(() => {
@@ -216,7 +234,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Rating & Atmosphere Tags */}
       <div className="flex flex-wrap items-center gap-2">
         {log.rating && (
-          <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+          <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg">
             <StarRating rating={log.rating} size="sm" textColor="surface" />
           </div>
         )}
@@ -236,7 +254,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full border border-[var(--color-primary)]/30"
+                    className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full border border-[var(--color-border)]"
                   >
                     {t(`atmosphere_${tag}`)}
                   </span>
@@ -267,7 +285,18 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {(log.coffee_type || log.price) && (
         <div className="flex items-center gap-3 mb-3">
           {log.coffee_type && (
-            <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg">
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 142 96" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="flex-shrink-0"
+              >
+                <path d="M27.15 88.25 c-3.50 -1.50 -4.10 -6.45 -1.10 -8.95 l1.55 -1.30 45.45 0 c48.90 0 47.60 -0.05 48.95 2.45 1 1.95 0.60 4.90 -0.95 6.65 l-1.45 1.65 -45.45 0.10 c-38.30 0.10 -45.65 0 -47 -0.60z" fill="currentColor"/>
+                <path d="M53.65 72 c-4.05 -0.85 -8.30 -3.65 -10.40 -7 -2.60 -4.15 -2.75 -5.55 -2.75 -27.80 0 -12.20 0.20 -21.15 0.50 -21.90 0.25 -0.70 1.20 -1.75 2.10 -2.30 1.60 -0.95 2.55 -1 35.40 -1 19 0 35 0.20 36.65 0.50 16.30 2.65 23.90 21.55 13.90 34.65 -4.25 5.60 -9.45 8.15 -17.70 8.75 l-5.10 0.35 -0.35 2.40 c-0.90 6.50 -6.45 12.10 -13.10 13.30 -3.50 0.65 -35.95 0.65 -39.15 0.05z m61.05 -27.55 c4.70 -1.20 7.80 -5.45 7.80 -10.80 0 -6.30 -5.05 -10.65 -12.30 -10.65 l-3.65 0 -0.15 10.80 c-0.10 5.95 -0.05 10.90 0.05 11 0.45 0.40 6.20 0.20 8.25 -0.35z" fill="currentColor"/>
+              </svg>
               {log.coffee_type}
             </span>
           )}
@@ -320,28 +349,42 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
           {showAdvanced && (
             <div className="mt-4 space-y-4 text-sm">
               {/* Coffee & Taste Advanced */}
-              {(log.bean_origin || log.processing_method || log.roast_level || 
-                log.extraction_method || log.extraction_equipment || 
-                log.aroma_rating !== undefined || log.acidity_rating !== undefined || 
-                log.sweetness_rating !== undefined || log.bitterness_rating !== undefined ||
-                log.body_rating !== undefined || log.aftertaste_rating !== undefined) && (
-                <div className="space-y-2">
-                  <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
-                  <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
-                    {log.bean_origin && <div>{t('bean_origin')}: {log.bean_origin}</div>}
-                    {log.processing_method && <div>{t('processing_method')}: {log.processing_method}</div>}
-                    {log.roast_level && <div>{t('roast_level')}: {log.roast_level}</div>}
-                    {log.extraction_method && <div>{t('extraction_method')}: {log.extraction_method}</div>}
-                    {log.extraction_equipment && <div>{t('extraction_equipment')}: {log.extraction_equipment}</div>}
-                    {log.aroma_rating !== undefined && log.aroma_rating !== null && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
-                    {log.acidity_rating !== undefined && log.acidity_rating !== null && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
-                    {log.sweetness_rating !== undefined && log.sweetness_rating !== null && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
-                    {log.bitterness_rating !== undefined && log.bitterness_rating !== null && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
-                    {log.body_rating !== undefined && log.body_rating !== null && <div>{t('body')}: {log.body_rating}/10</div>}
-                    {log.aftertaste_rating !== undefined && log.aftertaste_rating !== null && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
+              {(() => {
+                const hasCoffeeTasteData = Boolean(
+                  (log.bean_origin && log.bean_origin.trim()) ||
+                  (log.processing_method && log.processing_method.trim()) ||
+                  (log.roast_level && log.roast_level.trim()) ||
+                  (log.extraction_method && log.extraction_method.trim()) ||
+                  (log.extraction_equipment && log.extraction_equipment.trim()) ||
+                  (log.aroma_rating !== undefined && log.aroma_rating !== null) ||
+                  (log.acidity_rating !== undefined && log.acidity_rating !== null) ||
+                  (log.sweetness_rating !== undefined && log.sweetness_rating !== null) ||
+                  (log.bitterness_rating !== undefined && log.bitterness_rating !== null) ||
+                  (log.body_rating !== undefined && log.body_rating !== null) ||
+                  (log.aftertaste_rating !== undefined && log.aftertaste_rating !== null)
+                );
+                
+                if (!hasCoffeeTasteData) return null;
+                
+                return (
+                  <div className="space-y-2">
+                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
+                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                      {log.bean_origin && log.bean_origin.trim() && <div>{t('bean_origin')}: {log.bean_origin}</div>}
+                      {log.processing_method && log.processing_method.trim() && <div>{t('processing_method')}: {log.processing_method}</div>}
+                      {log.roast_level && log.roast_level.trim() && <div>{t('roast_level')}: {log.roast_level}</div>}
+                      {log.extraction_method && log.extraction_method.trim() && <div>{t('extraction_method')}: {log.extraction_method}</div>}
+                      {log.extraction_equipment && log.extraction_equipment.trim() && <div>{t('extraction_equipment')}: {log.extraction_equipment}</div>}
+                      {log.aroma_rating !== undefined && log.aroma_rating !== null && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
+                      {log.acidity_rating !== undefined && log.acidity_rating !== null && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
+                      {log.sweetness_rating !== undefined && log.sweetness_rating !== null && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
+                      {log.bitterness_rating !== undefined && log.bitterness_rating !== null && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
+                      {log.body_rating !== undefined && log.body_rating !== null && <div>{t('body')}: {log.body_rating}/10</div>}
+                      {log.aftertaste_rating !== undefined && log.aftertaste_rating !== null && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Space & Work Environment */}
               {(() => {
@@ -352,7 +395,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                     const parsed = JSON.parse(log.outlet_info);
                     return parsed.availability || parsed.location || parsed.comment;
                   } catch {
-                    return Boolean(log.outlet_info);
+                    return Boolean(log.outlet_info && log.outlet_info.trim());
                   }
                 })();
                 
@@ -363,58 +406,71 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                     const parsed = JSON.parse(log.parking_info);
                     return parsed.type;
                   } catch {
-                    return Boolean(log.parking_info);
+                    return Boolean(log.parking_info && log.parking_info.trim());
                   }
                 })();
                 
-                return Boolean(
-                  log.wifi_quality || log.wifi_rating || hasOutletInfo ||
-                  log.furniture_comfort || log.noise_level || log.noise_rating ||
-                  log.temperature_lighting || hasParkingInfo
+                const hasSpaceWorkData = Boolean(
+                  (log.wifi_quality && log.wifi_quality.trim()) ||
+                  (log.wifi_rating !== undefined && log.wifi_rating !== null) ||
+                  hasOutletInfo ||
+                  (log.furniture_comfort && log.furniture_comfort.trim()) ||
+                  (log.noise_level && log.noise_level.trim()) ||
+                  (log.noise_rating !== undefined && log.noise_rating !== null) ||
+                  (log.temperature_lighting && log.temperature_lighting.trim()) ||
+                  hasParkingInfo
                 );
-              })() && (
-                <div className="space-y-2">
-                  <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
-                  <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
-                    {log.wifi_rating && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
-                    {log.wifi_quality && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
-                    {log.outlet_info && (() => {
-                      try {
-                        const outlet = JSON.parse(log.outlet_info);
-                        if (outlet.availability) {
-                          const availabilityLabel = t(`outlet_availability_${outlet.availability}`);
-                          const locationLabel = outlet.location ? ` - ${t(`outlet_location_${outlet.location}`)}` : '';
-                          const commentLabel = outlet.comment ? ` (${outlet.comment})` : '';
-                          return <div>{t('outlet_info')}: {availabilityLabel}{locationLabel}{commentLabel}</div>;
+                
+                if (!hasSpaceWorkData) return null;
+                
+                return (
+                  <div className="space-y-2">
+                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
+                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                      {log.wifi_rating !== undefined && log.wifi_rating !== null && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
+                      {log.wifi_quality && log.wifi_quality.trim() && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
+                      {log.outlet_info && (() => {
+                        try {
+                          const outlet = JSON.parse(log.outlet_info);
+                          if (outlet.availability) {
+                            const availabilityLabel = t(`outlet_availability_${outlet.availability}`);
+                            const locationLabel = outlet.location ? ` - ${t(`outlet_location_${outlet.location}`)}` : '';
+                            const commentLabel = outlet.comment ? ` (${outlet.comment})` : '';
+                            return <div>{t('outlet_info')}: {availabilityLabel}{locationLabel}{commentLabel}</div>;
+                          }
+                        } catch {
+                          // Legacy format: just display as-is
+                          if (log.outlet_info && log.outlet_info.trim()) {
+                            return <div>{t('outlet_info')}: {log.outlet_info}</div>;
+                          }
                         }
-                      } catch {
-                        // Legacy format: just display as-is
-                        return <div>{t('outlet_info')}: {log.outlet_info}</div>;
-                      }
-                      return null;
-                    })()}
-                    {log.furniture_comfort && <div>{t('furniture_comfort')}: {log.furniture_comfort}</div>}
-                    {log.noise_rating && <div>{t('noise_rating')}: {log.noise_rating}/5</div>}
-                    {log.noise_level && <div>{t('noise_level')}: {log.noise_level}</div>}
-                    {log.temperature_lighting && <div>{t('temperature_lighting')}: {log.temperature_lighting}</div>}
-                    {log.parking_info && (() => {
-                      try {
-                        const parking = JSON.parse(log.parking_info);
-                        if (parking.type) {
-                          const typeLabel = t(`parking_type_${parking.type}`);
-                          const paidLabel = parking.paid ? ` (${t('parking_paid')})` : '';
-                          const commentLabel = parking.comment ? ` - ${parking.comment}` : '';
-                          return <div>{t('parking_availability')}: {typeLabel}{paidLabel}{commentLabel}</div>;
+                        return null;
+                      })()}
+                      {log.furniture_comfort && log.furniture_comfort.trim() && <div>{t('furniture_comfort')}: {log.furniture_comfort}</div>}
+                      {log.noise_rating !== undefined && log.noise_rating !== null && <div>{t('noise_rating')}: {log.noise_rating}/5</div>}
+                      {log.noise_level && log.noise_level.trim() && <div>{t('noise_level')}: {log.noise_level}</div>}
+                      {log.temperature_lighting && log.temperature_lighting.trim() && <div>{t('temperature_lighting')}: {log.temperature_lighting}</div>}
+                      {log.parking_info && (() => {
+                        try {
+                          const parking = JSON.parse(log.parking_info);
+                          if (parking.type) {
+                            const typeLabel = t(`parking_type_${parking.type}`);
+                            const paidLabel = parking.paid ? ` (${t('parking_paid')})` : '';
+                            const commentLabel = parking.comment ? ` - ${parking.comment}` : '';
+                            return <div>{t('parking_availability')}: {typeLabel}{paidLabel}{commentLabel}</div>;
+                          }
+                        } catch {
+                          // Legacy format: just display as-is
+                          if (log.parking_info && log.parking_info.trim()) {
+                            return <div>{t('parking_availability')}: {log.parking_info}</div>;
+                          }
                         }
-                      } catch {
-                        // Legacy format: just display as-is
-                        return <div>{t('parking_availability')}: {log.parking_info}</div>;
-                      }
-                      return null;
-                    })()}
+                        return null;
+                      })()}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
         </div>

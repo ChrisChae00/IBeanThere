@@ -400,7 +400,11 @@
         "day_friday": "Friday",
         "day_saturday": "Saturday",
         "day_sunday": "Sunday",
-        "view_details": "View Details"
+        "view_details": "View Details",
+        "founding_crew": "Founding Crew",
+        "navigator": "Navigator",
+        "vanguards": "Vanguards",
+        "first_discoverer": "First discoverer of this cafe"
       },
       "detail": {
         "view_on_google_maps": "View on Google Maps",

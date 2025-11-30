@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from typing import List, Optional
+import json
 from app.models.visit import (
     CafeViewCreate,
     CafeViewResponse,
@@ -679,7 +680,7 @@ async def get_cafe_logs(
         
         # Get public logs with ratings
         result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
         ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
             "visited_at", desc=True
         ).range(offset, offset + page_size - 1).execute()
@@ -727,7 +728,11 @@ async def get_cafe_logs(
                 price=Decimal(str(log.get("price"))) if log.get("price") is not None else None,
                 price_currency=log.get("price_currency"),
                 atmosphere_rating=log.get("atmosphere_rating"),
-                atmosphere_tags=log.get("atmosphere_tags") if log.get("atmosphere_tags") is None or isinstance(log.get("atmosphere_tags"), list) else [],
+                atmosphere_tags=(
+                    log.get("atmosphere_tags") 
+                    if log.get("atmosphere_tags") is None or isinstance(log.get("atmosphere_tags"), list)
+                    else (json.loads(log.get("atmosphere_tags")) if isinstance(log.get("atmosphere_tags"), str) else [])
+                ),
                 parking_info=log.get("parking_info"),
                 acidity_rating=log.get("acidity_rating"),
                 body_rating=log.get("body_rating"),
@@ -817,6 +822,11 @@ async def get_my_logs(
                 "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
                 "price_currency": visit.get("price_currency"),
                 "atmosphere_rating": visit.get("atmosphere_rating"),
+                "atmosphere_tags": (
+                    visit.get("atmosphere_tags") 
+                    if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list)
+                    else (json.loads(visit.get("atmosphere_tags")) if isinstance(visit.get("atmosphere_tags"), str) else [])
+                ),
                 "parking_info": visit.get("parking_info"),
                 "acidity_rating": visit.get("acidity_rating"),
                 "body_rating": visit.get("body_rating"),
