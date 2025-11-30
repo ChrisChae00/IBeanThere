@@ -91,18 +91,19 @@ export default function IntensitySlider({
         <label className="text-sm font-medium text-[var(--color-text)]">
           {label}
         </label>
-        {currentValue !== undefined && (
-          <div className="px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)]">
-            <span className="text-sm font-semibold text-[var(--color-primary)]">
-              {currentValue}
+        <div className="h-[24px] flex items-center">
+          {currentValue !== undefined ? (
+            <div className="px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)]">
+              <span className="text-sm font-semibold text-[var(--color-primary)]">
+                {currentValue}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xs text-[var(--color-surfaceTextSecondary)] invisible">
+              -
             </span>
-          </div>
-        )}
-        {currentValue === undefined && (
-          <span className="text-xs text-[var(--color-surfaceTextSecondary)]">
-            -
-          </span>
-        )}
+          )}
+        </div>
       </div>
       <div className="relative">
         <div
