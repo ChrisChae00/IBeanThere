@@ -36,8 +36,10 @@ class CafeVisitCreate(BaseModel):
     # Basic logging fields
     dessert: Optional[str] = Field(None, max_length=200, description="Dessert ordered")
     price: Optional[Decimal] = Field(None, description="Price paid")
+    price_currency: Optional[str] = Field(None, max_length=10, description="Currency code (USD, KRW, EUR, etc.)")
     # Detailed review fields
     atmosphere_rating: Optional[int] = Field(None, ge=1, le=5, description="Atmosphere rating (1-5)")
+    atmosphere_tags: Optional[List[str]] = Field(None, description="Cafe atmosphere tags (e.g., cozy, modern, minimalist)")
     parking_info: Optional[str] = Field(None, max_length=50, description="Parking availability info")
     acidity_rating: Optional[int] = Field(None, ge=0, le=10, description="Acidity intensity rating (0-10)")
     body_rating: Optional[int] = Field(None, ge=0, le=10, description="Body intensity rating (0-10)")
@@ -75,8 +77,10 @@ class CafeVisitUpdate(BaseModel):
     # Basic logging fields
     dessert: Optional[str] = Field(None, max_length=200, description="Dessert ordered")
     price: Optional[Decimal] = Field(None, description="Price paid")
+    price_currency: Optional[str] = Field(None, max_length=10, description="Currency code (USD, KRW, EUR, etc.)")
     # Detailed review fields
     atmosphere_rating: Optional[int] = Field(None, ge=1, le=5, description="Atmosphere rating (1-5)")
+    atmosphere_tags: Optional[List[str]] = Field(None, description="Cafe atmosphere tags (e.g., cozy, modern, minimalist)")
     parking_info: Optional[str] = Field(None, max_length=50, description="Parking availability info")
     acidity_rating: Optional[int] = Field(None, ge=0, le=10, description="Acidity intensity rating (0-10)")
     body_rating: Optional[int] = Field(None, ge=0, le=10, description="Body intensity rating (0-10)")
@@ -124,8 +128,10 @@ class CafeVisitResponse(BaseModel):
     # Basic logging fields
     dessert: Optional[str] = None
     price: Optional[Decimal] = None
+    price_currency: Optional[str] = None
     # Detailed review fields
     atmosphere_rating: Optional[int] = None
+    atmosphere_tags: Optional[List[str]] = None
     parking_info: Optional[str] = None
     acidity_rating: Optional[int] = None
     body_rating: Optional[int] = None
@@ -188,8 +194,10 @@ class CafeLogPublicResponse(BaseModel):
     # Basic logging fields
     dessert: Optional[str] = None
     price: Optional[Decimal] = None
+    price_currency: Optional[str] = None
     # Detailed review fields
     atmosphere_rating: Optional[int] = None
+    atmosphere_tags: Optional[List[str]] = None
     parking_info: Optional[str] = None
     acidity_rating: Optional[int] = None
     body_rating: Optional[int] = None

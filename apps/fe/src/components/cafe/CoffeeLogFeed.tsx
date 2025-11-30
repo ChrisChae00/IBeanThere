@@ -95,7 +95,7 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
   return (
     <div className="space-y-4">
       {logs.map((log) => (
-        <CoffeeLogCard key={log.id} log={log} />
+        <CoffeeLogCard key={log.id} log={log} hideCafeName={true} />
       ))}
 
       {error && (

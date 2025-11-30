@@ -151,7 +151,9 @@ async def record_cafe_visit(
             "coffee_type": visit_data.coffee_type,
             "dessert": visit_data.dessert,
             "price": str(visit_data.price) if visit_data.price is not None else None,
+            "price_currency": visit_data.price_currency,
             "atmosphere_rating": visit_data.atmosphere_rating,
+            "atmosphere_tags": visit_data.atmosphere_tags,
             "parking_info": visit_data.parking_info,
             "acidity_rating": visit_data.acidity_rating,
             "body_rating": visit_data.body_rating,
@@ -206,7 +208,9 @@ async def record_cafe_visit(
             "coffee_type": visit.get("coffee_type"),
             "dessert": visit.get("dessert"),
             "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
+            "price_currency": visit.get("price_currency"),
             "atmosphere_rating": visit.get("atmosphere_rating"),
+            "atmosphere_tags": visit.get("atmosphere_tags") if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list) else [],
             "parking_info": visit.get("parking_info"),
             "acidity_rating": visit.get("acidity_rating"),
             "body_rating": visit.get("body_rating"),
@@ -324,9 +328,15 @@ async def update_visit(
         
         if update_data.price is not None:
             update_payload["price"] = str(update_data.price)
+        
+        if update_data.price_currency is not None:
+            update_payload["price_currency"] = update_data.price_currency
             
         if update_data.atmosphere_rating is not None:
             update_payload["atmosphere_rating"] = update_data.atmosphere_rating
+        
+        if update_data.atmosphere_tags is not None:
+            update_payload["atmosphere_tags"] = update_data.atmosphere_tags
             
         if update_data.parking_info is not None:
             update_payload["parking_info"] = update_data.parking_info
@@ -420,7 +430,9 @@ async def update_visit(
             "coffee_type": visit.get("coffee_type"),
             "dessert": visit.get("dessert"),
             "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
+            "price_currency": visit.get("price_currency"),
             "atmosphere_rating": visit.get("atmosphere_rating"),
+            "atmosphere_tags": visit.get("atmosphere_tags") if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list) else [],
             "parking_info": visit.get("parking_info"),
             "acidity_rating": visit.get("acidity_rating"),
             "body_rating": visit.get("body_rating"),
@@ -713,7 +725,9 @@ async def get_cafe_logs(
                 coffee_type=log.get("coffee_type"),
                 dessert=log.get("dessert"),
                 price=Decimal(str(log.get("price"))) if log.get("price") is not None else None,
+                price_currency=log.get("price_currency"),
                 atmosphere_rating=log.get("atmosphere_rating"),
+                atmosphere_tags=log.get("atmosphere_tags") if log.get("atmosphere_tags") is None or isinstance(log.get("atmosphere_tags"), list) else [],
                 parking_info=log.get("parking_info"),
                 acidity_rating=log.get("acidity_rating"),
                 body_rating=log.get("body_rating"),
@@ -801,6 +815,7 @@ async def get_my_logs(
                 "coffee_type": visit.get("coffee_type"),
                 "dessert": visit.get("dessert"),
                 "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
+                "price_currency": visit.get("price_currency"),
                 "atmosphere_rating": visit.get("atmosphere_rating"),
                 "parking_info": visit.get("parking_info"),
                 "acidity_rating": visit.get("acidity_rating"),

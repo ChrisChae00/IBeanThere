@@ -119,7 +119,9 @@ export interface CoffeeLog {
   coffee_type?: string;
   dessert?: string;
   price?: number;
+  price_currency?: string;
   atmosphere_rating?: number;
+  atmosphere_tags?: string[];
   parking_info?: string;
   acidity_rating?: number;
   body_rating?: number;
@@ -198,7 +200,9 @@ export interface LogFormData {
   coffee_type?: string;
   dessert?: string;
   price?: number;
+  price_currency?: string;
   atmosphere_rating?: number;
+  atmosphere_tags?: string[];
   parking_info?: string;
   acidity_rating?: number;
   body_rating?: number;

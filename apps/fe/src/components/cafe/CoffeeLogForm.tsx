@@ -21,12 +21,18 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
   
   // Basic logging state
   const [rating, setRating] = useState<number | undefined>(initialData?.rating);
+  const [atmosphereTags, setAtmosphereTags] = useState<string[]>(initialData?.atmosphere_tags || []);
   const [comment, setComment] = useState(initialData?.comment || '');
   const [photoUrls, setPhotoUrls] = useState<string[]>(initialData?.photo_urls || []);
   const [coffeeType, setCoffeeType] = useState(initialData?.coffee_type || '');
   const [dessert, setDessert] = useState(initialData?.dessert || '');
   const [price, setPrice] = useState<number | undefined>(initialData?.price);
   const [priceCurrency, setPriceCurrency] = useState<string>(() => {
+    // Use initial data if available
+    if (initialData?.price_currency) {
+      return initialData.price_currency;
+    }
+    
     // Browser language-based default currency
     if (typeof window === 'undefined') return 'CAD'; // SSR fallback
     
@@ -68,11 +74,51 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
   const [wifiQuality, setWifiQuality] = useState(initialData?.wifi_quality || '');
   const [wifiRating, setWifiRating] = useState<number | undefined>(initialData?.wifi_rating);
   const [wifiComment, setWifiComment] = useState('');
-  const [outletInfo, setOutletInfo] = useState(initialData?.outlet_info || '');
   const [furnitureComfort, setFurnitureComfort] = useState(initialData?.furniture_comfort || '');
+  
+  // Outlet info state (structured)
+  const parseOutletInfo = (outletInfo?: string) => {
+    if (!outletInfo) return { availability: '', location: '', comment: '' };
+    try {
+      const parsed = JSON.parse(outletInfo);
+      return {
+        availability: parsed.availability || '',
+        location: parsed.location || '',
+        comment: parsed.comment || ''
+      };
+    } catch {
+      // Legacy format: just a string
+      return { availability: '', location: '', comment: outletInfo };
+    }
+  };
+  
+  const initialOutlet = parseOutletInfo(initialData?.outlet_info);
+  const [outletAvailability, setOutletAvailability] = useState<string>(initialOutlet.availability);
+  const [outletLocation, setOutletLocation] = useState<string>(initialOutlet.location);
+  const [outletComment, setOutletComment] = useState<string>(initialOutlet.comment);
   const [noiseLevel, setNoiseLevel] = useState(initialData?.noise_level || '');
   const [temperatureLighting, setTemperatureLighting] = useState(initialData?.temperature_lighting || '');
-  const [facilitiesInfo, setFacilitiesInfo] = useState(initialData?.facilities_info || '');
+  
+  // Parking info state (structured)
+  const parseParkingInfo = (parkingInfo?: string) => {
+    if (!parkingInfo) return { type: '', paid: false, comment: '' };
+    try {
+      const parsed = JSON.parse(parkingInfo);
+      return {
+        type: parsed.type || '',
+        paid: parsed.paid || false,
+        comment: parsed.comment || ''
+      };
+    } catch {
+      // Legacy format: just a string
+      return { type: '', paid: false, comment: parkingInfo };
+    }
+  };
+  
+  const initialParking = parseParkingInfo(initialData?.parking_info);
+  const [parkingType, setParkingType] = useState<string>(initialParking.type);
+  const [parkingPaid, setParkingPaid] = useState<boolean>(initialParking.paid);
+  const [parkingComment, setParkingComment] = useState<string>(initialParking.comment);
 
   const handleErrorClear = (field: string) => {
     setErrors(prev => {
@@ -103,6 +149,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
     try {
       await onSubmit({
         rating,
+        atmosphere_tags: atmosphereTags.length > 0 ? atmosphereTags : undefined,
         comment: comment.trim() || undefined,
         photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         is_public: isPublic,
@@ -110,6 +157,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         coffee_type: coffeeType || undefined,
         dessert: dessert.trim() || undefined,
         price: price || undefined,
+        price_currency: priceCurrency || undefined,
         bean_origin: beanOrigin.trim() || undefined,
         processing_method: processingMethod || undefined,
         roast_level: roastLevel || undefined,
@@ -123,11 +171,19 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         aftertaste_rating: aftertasteRating,
         wifi_quality: wifiQuality.trim() || undefined,
         wifi_rating: wifiRating,
-        outlet_info: outletInfo.trim() || undefined,
+        outlet_info: outletAvailability ? JSON.stringify({
+          availability: outletAvailability,
+          location: outletLocation || undefined,
+          comment: outletComment.trim() || undefined
+        }) : undefined,
         furniture_comfort: furnitureComfort.trim() || undefined,
         noise_level: noiseLevel || undefined,
         temperature_lighting: temperatureLighting.trim() || undefined,
-        facilities_info: facilitiesInfo.trim() || undefined,
+        parking_info: parkingType ? JSON.stringify({
+          type: parkingType,
+          paid: parkingPaid,
+          comment: parkingComment.trim() || undefined
+        }) : undefined,
       });
     } catch (error) {
       console.error('Error submitting log:', error);
@@ -140,6 +196,8 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
       <BasicLoggingSection
         rating={rating}
         onRatingChange={setRating}
+        atmosphereTags={atmosphereTags}
+        onAtmosphereTagsChange={setAtmosphereTags}
         coffeeType={coffeeType}
         onCoffeeTypeChange={setCoffeeType}
         dessert={dessert}
@@ -190,16 +248,24 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         onWifiRatingChange={setWifiRating}
         wifiComment={wifiComment}
         onWifiCommentChange={setWifiComment}
-        outletInfo={outletInfo}
-        onOutletInfoChange={setOutletInfo}
+        outletAvailability={outletAvailability}
+        onOutletAvailabilityChange={setOutletAvailability}
+        outletLocation={outletLocation}
+        onOutletLocationChange={setOutletLocation}
+        outletComment={outletComment}
+        onOutletCommentChange={setOutletComment}
         furnitureComfort={furnitureComfort}
         onFurnitureComfortChange={setFurnitureComfort}
         noiseLevel={noiseLevel}
         onNoiseLevelChange={setNoiseLevel}
         temperatureLighting={temperatureLighting}
         onTemperatureLightingChange={setTemperatureLighting}
-        facilitiesInfo={facilitiesInfo}
-        onFacilitiesInfoChange={setFacilitiesInfo}
+        parkingType={parkingType}
+        onParkingTypeChange={setParkingType}
+        parkingPaid={parkingPaid}
+        onParkingPaidChange={setParkingPaid}
+        parkingComment={parkingComment}
+        onParkingCommentChange={setParkingComment}
       />
 
       {/* Privacy Settings */}

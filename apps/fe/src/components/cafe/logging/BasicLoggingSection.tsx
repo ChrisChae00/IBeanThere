@@ -7,6 +7,8 @@ import { Input } from '@/components/ui';
 interface BasicLoggingSectionProps {
   rating: number | undefined;
   onRatingChange: (value: number) => void;
+  atmosphereTags: string[];
+  onAtmosphereTagsChange: (tags: string[]) => void;
   coffeeType: string;
   onCoffeeTypeChange: (value: string) => void;
   dessert: string;
@@ -48,9 +50,23 @@ const CURRENCIES = [
   { value: 'CAD', labelKey: 'currency_cad' }
 ];
 
+const ATMOSPHERE_TAGS = [
+  { value: 'cozy', labelKey: 'atmosphere_cozy' },
+  { value: 'modern', labelKey: 'atmosphere_modern' },
+  { value: 'minimalist', labelKey: 'atmosphere_minimalist' },
+  { value: 'casual', labelKey: 'atmosphere_casual' },
+  { value: 'industrial', labelKey: 'atmosphere_industrial' },
+  { value: 'vintage', labelKey: 'atmosphere_vintage' },
+  { value: 'bright', labelKey: 'atmosphere_bright' },
+  { value: 'spacious', labelKey: 'atmosphere_spacious' },
+  { value: 'artistic', labelKey: 'atmosphere_artistic' }
+];
+
 export default function BasicLoggingSection({
   rating,
   onRatingChange,
+  atmosphereTags,
+  onAtmosphereTagsChange,
   coffeeType,
   onCoffeeTypeChange,
   dessert,
@@ -119,6 +135,54 @@ export default function BasicLoggingSection({
         </div>
         {errors.rating && (
           <p className="text-sm text-[var(--color-error)] mt-1">{errors.rating}</p>
+        )}
+      </div>
+
+      {/* Atmosphere Tags */}
+      <div>
+        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+          {t('atmosphere_tags')} {atmosphereTags.length > 0 && (
+            <span className="text-xs text-[var(--color-surfaceTextSecondary)]">
+              ({atmosphereTags.length}/3)
+            </span>
+          )}
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {ATMOSPHERE_TAGS.map((tag) => {
+            const isSelected = atmosphereTags.includes(tag.value);
+            const isDisabled = !isSelected && atmosphereTags.length >= 3;
+            return (
+              <button
+                key={tag.value}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    onAtmosphereTagsChange(atmosphereTags.filter(t => t !== tag.value));
+                  } else if (atmosphereTags.length < 3) {
+                    onAtmosphereTagsChange([...atmosphereTags, tag.value]);
+                  }
+                }}
+                disabled={isDisabled}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)] border-2 border-[var(--color-primary)]'
+                    : isDisabled
+                    ? 'bg-[var(--color-surface)] text-[var(--color-surfaceTextSecondary)] border-2 border-[var(--color-border)] opacity-50 cursor-not-allowed'
+                    : 'bg-[var(--color-surface)] text-[var(--color-surfaceText)] border-2 border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
+                }`}
+                aria-label={t(tag.labelKey)}
+                aria-pressed={isSelected}
+                aria-disabled={isDisabled}
+              >
+                {t(tag.labelKey)}
+              </button>
+            );
+          })}
+        </div>
+        {atmosphereTags.length >= 3 && (
+          <p className="text-xs text-[var(--color-surfaceTextSecondary)] mt-1">
+            {t('atmosphere_tags_max_reached') || 'Maximum 3 tags selected'}
+          </p>
         )}
       </div>
 

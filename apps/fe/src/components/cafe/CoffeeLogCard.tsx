@@ -17,9 +17,10 @@ interface CoffeeLogCardProps {
   onEdit?: (log: CoffeeLog) => void;
   onDelete?: (logId: string) => void;
   cafeName?: string;
+  hideCafeName?: boolean;
 }
 
-export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: CoffeeLogCardProps) {
+export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCafeName = false }: CoffeeLogCardProps) {
   const t = useTranslations('cafe.log');
   const params = useParams();
   const locale = params.locale as string;
@@ -31,13 +32,40 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
   const [isLoadingCafe, setIsLoadingCafe] = useState(!cafeName);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
-  const hasAdvancedData = Boolean(
-    log.dessert || log.price || log.bean_origin || log.processing_method || 
-    log.roast_level || log.extraction_method || log.extraction_equipment || 
-    log.aroma_rating || log.wifi_quality || log.wifi_rating || log.outlet_info ||
-    log.furniture_comfort || log.noise_level || log.noise_rating || 
-    log.temperature_lighting || log.facilities_info
-  );
+  const hasAdvancedData = (() => {
+    // Check if outlet_info has actual data (could be JSON string)
+    const hasOutletInfo = (() => {
+      if (!log.outlet_info) return false;
+      try {
+        const parsed = JSON.parse(log.outlet_info);
+        return parsed.availability || parsed.location || parsed.comment;
+      } catch {
+        return Boolean(log.outlet_info);
+      }
+    })();
+    
+    // Check if parking_info has actual data (could be JSON string)
+    const hasParkingInfo = (() => {
+      if (!log.parking_info) return false;
+      try {
+        const parsed = JSON.parse(log.parking_info);
+        return parsed.type;
+      } catch {
+        return Boolean(log.parking_info);
+      }
+    })();
+    
+    return Boolean(
+      log.bean_origin || log.processing_method || 
+      log.roast_level || log.extraction_method || log.extraction_equipment || 
+      log.aroma_rating !== undefined || log.acidity_rating !== undefined || 
+      log.sweetness_rating !== undefined || log.bitterness_rating !== undefined ||
+      log.body_rating !== undefined || log.aftertaste_rating !== undefined ||
+      log.wifi_quality || log.wifi_rating || hasOutletInfo ||
+      log.furniture_comfort || log.noise_level || log.noise_rating || 
+      log.temperature_lighting || hasParkingInfo
+    );
+  })();
 
   useEffect(() => {
     if (cafeName || !log.cafe_id) {
@@ -83,10 +111,54 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
 
   const cafePath = cafe ? getCafePath({ id: log.cafe_id, slug: cafe.slug }, locale) : null;
 
+  const formatPrice = (price: number | undefined, currency?: string) => {
+    if (price === undefined || price === null) return null;
+    
+    const currencySymbols: Record<string, string> = {
+      'USD': '$',
+      'KRW': '₩',
+      'EUR': '€',
+      'JPY': '¥',
+      'GBP': '£',
+      'CNY': '¥',
+      'AUD': '$',
+      'CAD': '$'
+    };
+    
+    // If currency is provided, use it
+    if (currency && currencySymbols[currency]) {
+      return `${currencySymbols[currency]}${price}`;
+    }
+    
+    // If currency is provided but not in our list, use it as-is
+    if (currency) {
+      return `${currency} ${price}`;
+    }
+    
+    // Default: use browser language to determine currency
+    if (typeof window !== 'undefined') {
+      const lang = navigator.language || navigator.languages?.[0] || 'en';
+      let defaultCurrency = 'USD';
+      
+      if (lang.startsWith('en-CA')) defaultCurrency = 'CAD';
+      else if (lang.startsWith('en-US')) defaultCurrency = 'USD';
+      else if (lang.startsWith('ko')) defaultCurrency = 'KRW';
+      else if (lang.startsWith('ja')) defaultCurrency = 'JPY';
+      else if (lang.startsWith('zh-CN')) defaultCurrency = 'CNY';
+      else if (lang.startsWith('en-GB')) defaultCurrency = 'GBP';
+      else if (lang.startsWith('en-AU')) defaultCurrency = 'AUD';
+      
+      return `${currencySymbols[defaultCurrency]}${price}`;
+    }
+    
+    // Fallback: just show the number
+    return price.toString();
+  };
+
   return (
     <Card>
       {/* Cafe Name */}
-      {cafe && (
+      {!hideCafeName && cafe && (
         <div className="pb-2 border-b border-[var(--color-border)]">
           {cafePath ? (
             <Link
@@ -141,12 +213,40 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
         )}
       </div>
 
-      {/* Rating */}
-      {log.rating && (
-        <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
-          <StarRating rating={log.rating} size="sm" textColor="surface" />
-        </div>
-      )}
+      {/* Rating & Atmosphere Tags */}
+      <div className="flex flex-wrap items-center gap-2">
+        {log.rating && (
+          <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+            <StarRating rating={log.rating} size="sm" textColor="surface" />
+          </div>
+        )}
+        {(() => {
+          // Parse atmosphere_tags if it's a string (JSONB from database)
+          let tags = log.atmosphere_tags;
+          if (typeof tags === 'string') {
+            try {
+              tags = JSON.parse(tags);
+            } catch {
+              tags = [];
+            }
+          }
+          if (Array.isArray(tags) && tags.length > 0) {
+            return (
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full border border-[var(--color-primary)]/30"
+                  >
+                    {t(`atmosphere_${tag}`)}
+                  </span>
+                ))}
+              </div>
+            );
+          }
+          return null;
+        })()}
+      </div>
 
       {/* Photos */}
       {log.photo_urls && log.photo_urls.length > 0 && (
@@ -163,36 +263,38 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
         </div>
       )}
 
-      {/* Coffee Type */}
-      {log.coffee_type && (
-        <div className="mb-2">
-          <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
-            {log.coffee_type}
-          </span>
+      {/* Coffee Type & Price */}
+      {(log.coffee_type || log.price) && (
+        <div className="flex items-center gap-3 mb-3">
+          {log.coffee_type && (
+            <span className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-surfaceText)] rounded-full border border-[var(--color-border)]">
+              {log.coffee_type}
+            </span>
+          )}
+          {log.price !== undefined && log.price !== null && (
+            <span className="text-sm font-medium text-[var(--color-cardText)]">
+              {formatPrice(log.price, log.price_currency) ?? log.price}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Basic Info: Dessert & Price */}
-      {(log.dessert || log.price) && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {log.dessert && (
-            <span className="text-xs text-[var(--color-cardTextSecondary)]">
-              {t('dessert')}: {log.dessert}
-            </span>
-          )}
-          {log.price && (
-            <span className="text-xs text-[var(--color-cardTextSecondary)]">
-              {t('price')}: {log.price}
-            </span>
-          )}
+      {/* Dessert */}
+      {log.dessert && (
+        <div className="mb-3">
+          <span className="text-xs text-[var(--color-cardTextSecondary)]">
+            {t('dessert')}: {log.dessert}
+          </span>
         </div>
       )}
 
       {/* Comment */}
       {log.comment && (
-        <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap mb-4">
-          {log.comment}
-        </p>
+        <div className="mb-4 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+          <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap">
+            {log.comment}
+          </p>
+        </div>
       )}
 
       {/* Advanced Logging Section */}
@@ -219,9 +321,10 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
             <div className="mt-4 space-y-4 text-sm">
               {/* Coffee & Taste Advanced */}
               {(log.bean_origin || log.processing_method || log.roast_level || 
-                log.extraction_method || log.extraction_equipment || log.aroma_rating ||
-                log.acidity_rating || log.sweetness_rating || log.bitterness_rating ||
-                log.body_rating || log.aftertaste_rating) && (
+                log.extraction_method || log.extraction_equipment || 
+                log.aroma_rating !== undefined || log.acidity_rating !== undefined || 
+                log.sweetness_rating !== undefined || log.bitterness_rating !== undefined ||
+                log.body_rating !== undefined || log.aftertaste_rating !== undefined) && (
                 <div className="space-y-2">
                   <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
                   <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
@@ -230,31 +333,85 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName }: Coffe
                     {log.roast_level && <div>{t('roast_level')}: {log.roast_level}</div>}
                     {log.extraction_method && <div>{t('extraction_method')}: {log.extraction_method}</div>}
                     {log.extraction_equipment && <div>{t('extraction_equipment')}: {log.extraction_equipment}</div>}
-                    {log.aroma_rating && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
-                    {log.acidity_rating && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
-                    {log.sweetness_rating && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
-                    {log.bitterness_rating && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
-                    {log.body_rating && <div>{t('body')}: {log.body_rating}/10</div>}
-                    {log.aftertaste_rating && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
+                    {log.aroma_rating !== undefined && log.aroma_rating !== null && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
+                    {log.acidity_rating !== undefined && log.acidity_rating !== null && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
+                    {log.sweetness_rating !== undefined && log.sweetness_rating !== null && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
+                    {log.bitterness_rating !== undefined && log.bitterness_rating !== null && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
+                    {log.body_rating !== undefined && log.body_rating !== null && <div>{t('body')}: {log.body_rating}/10</div>}
+                    {log.aftertaste_rating !== undefined && log.aftertaste_rating !== null && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
                   </div>
                 </div>
               )}
 
               {/* Space & Work Environment */}
-              {(log.wifi_quality || log.wifi_rating || log.outlet_info ||
-                log.furniture_comfort || log.noise_level || log.noise_rating ||
-                log.temperature_lighting || log.facilities_info) && (
+              {(() => {
+                // Check if outlet_info has actual data
+                const hasOutletInfo = (() => {
+                  if (!log.outlet_info) return false;
+                  try {
+                    const parsed = JSON.parse(log.outlet_info);
+                    return parsed.availability || parsed.location || parsed.comment;
+                  } catch {
+                    return Boolean(log.outlet_info);
+                  }
+                })();
+                
+                // Check if parking_info has actual data
+                const hasParkingInfo = (() => {
+                  if (!log.parking_info) return false;
+                  try {
+                    const parsed = JSON.parse(log.parking_info);
+                    return parsed.type;
+                  } catch {
+                    return Boolean(log.parking_info);
+                  }
+                })();
+                
+                return Boolean(
+                  log.wifi_quality || log.wifi_rating || hasOutletInfo ||
+                  log.furniture_comfort || log.noise_level || log.noise_rating ||
+                  log.temperature_lighting || hasParkingInfo
+                );
+              })() && (
                 <div className="space-y-2">
                   <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
                   <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
                     {log.wifi_rating && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
                     {log.wifi_quality && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
-                    {log.outlet_info && <div>{t('outlet_info')}: {log.outlet_info}</div>}
+                    {log.outlet_info && (() => {
+                      try {
+                        const outlet = JSON.parse(log.outlet_info);
+                        if (outlet.availability) {
+                          const availabilityLabel = t(`outlet_availability_${outlet.availability}`);
+                          const locationLabel = outlet.location ? ` - ${t(`outlet_location_${outlet.location}`)}` : '';
+                          const commentLabel = outlet.comment ? ` (${outlet.comment})` : '';
+                          return <div>{t('outlet_info')}: {availabilityLabel}{locationLabel}{commentLabel}</div>;
+                        }
+                      } catch {
+                        // Legacy format: just display as-is
+                        return <div>{t('outlet_info')}: {log.outlet_info}</div>;
+                      }
+                      return null;
+                    })()}
                     {log.furniture_comfort && <div>{t('furniture_comfort')}: {log.furniture_comfort}</div>}
                     {log.noise_rating && <div>{t('noise_rating')}: {log.noise_rating}/5</div>}
                     {log.noise_level && <div>{t('noise_level')}: {log.noise_level}</div>}
                     {log.temperature_lighting && <div>{t('temperature_lighting')}: {log.temperature_lighting}</div>}
-                    {log.facilities_info && <div>{t('facilities_info')}: {log.facilities_info}</div>}
+                    {log.parking_info && (() => {
+                      try {
+                        const parking = JSON.parse(log.parking_info);
+                        if (parking.type) {
+                          const typeLabel = t(`parking_type_${parking.type}`);
+                          const paidLabel = parking.paid ? ` (${t('parking_paid')})` : '';
+                          const commentLabel = parking.comment ? ` - ${parking.comment}` : '';
+                          return <div>{t('parking_availability')}: {typeLabel}{paidLabel}{commentLabel}</div>;
+                        }
+                      } catch {
+                        // Legacy format: just display as-is
+                        return <div>{t('parking_availability')}: {log.parking_info}</div>;
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
               )}

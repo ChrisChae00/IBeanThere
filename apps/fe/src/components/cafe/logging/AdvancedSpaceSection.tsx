@@ -11,16 +11,24 @@ interface AdvancedSpaceSectionProps {
   onWifiRatingChange: (value: number | undefined) => void;
   wifiComment: string;
   onWifiCommentChange: (value: string) => void;
-  outletInfo: string;
-  onOutletInfoChange: (value: string) => void;
+  outletAvailability: string;
+  onOutletAvailabilityChange: (value: string) => void;
+  outletLocation: string;
+  onOutletLocationChange: (value: string) => void;
+  outletComment: string;
+  onOutletCommentChange: (value: string) => void;
   furnitureComfort: string;
   onFurnitureComfortChange: (value: string) => void;
   noiseLevel: string;
   onNoiseLevelChange: (value: string) => void;
   temperatureLighting: string;
   onTemperatureLightingChange: (value: string) => void;
-  facilitiesInfo: string;
-  onFacilitiesInfoChange: (value: string) => void;
+  parkingType: string;
+  onParkingTypeChange: (value: string) => void;
+  parkingPaid: boolean;
+  onParkingPaidChange: (value: boolean) => void;
+  parkingComment: string;
+  onParkingCommentChange: (value: string) => void;
 }
 
 const renderStarRating = (
@@ -67,6 +75,26 @@ const NOISE_LEVELS = [
   { value: 'loud', labelKey: 'noise_level_loud' }
 ];
 
+const PARKING_TYPES = [
+  { value: 'cafe_plaza', labelKey: 'parking_type_cafe_plaza' },
+  { value: 'street', labelKey: 'parking_type_street' },
+  { value: 'nearby', labelKey: 'parking_type_nearby' }
+];
+
+const OUTLET_AVAILABILITIES = [
+  { value: 'none', labelKey: 'outlet_availability_none' },
+  { value: 'limited', labelKey: 'outlet_availability_limited' },
+  { value: 'moderate', labelKey: 'outlet_availability_moderate' },
+  { value: 'many', labelKey: 'outlet_availability_many' }
+];
+
+const OUTLET_LOCATIONS = [
+  { value: 'table', labelKey: 'outlet_location_table' },
+  { value: 'wall', labelKey: 'outlet_location_wall' },
+  { value: 'floor', labelKey: 'outlet_location_floor' },
+  { value: 'mixed', labelKey: 'outlet_location_mixed' }
+];
+
 export default function AdvancedSpaceSection({
   wifiQuality,
   onWifiQualityChange,
@@ -74,16 +102,24 @@ export default function AdvancedSpaceSection({
   onWifiRatingChange,
   wifiComment,
   onWifiCommentChange,
-  outletInfo,
-  onOutletInfoChange,
+  outletAvailability,
+  onOutletAvailabilityChange,
+  outletLocation,
+  onOutletLocationChange,
+  outletComment,
+  onOutletCommentChange,
   furnitureComfort,
   onFurnitureComfortChange,
   noiseLevel,
   onNoiseLevelChange,
   temperatureLighting,
   onTemperatureLightingChange,
-  facilitiesInfo,
-  onFacilitiesInfoChange
+  parkingType,
+  onParkingTypeChange,
+  parkingPaid,
+  onParkingPaidChange,
+  parkingComment,
+  onParkingCommentChange
 }: AdvancedSpaceSectionProps) {
   const t = useTranslations('cafe.log');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -176,15 +212,62 @@ export default function AdvancedSpaceSection({
               </div>
               
               <div>
-                <Input
-                  multiline
-                  label={t('outlet_info')}
-                  value={outletInfo}
-                  onChange={(e) => onOutletInfoChange(e.target.value)}
-                  placeholder={t('outlet_info_placeholder')}
-                  rows={2}
-                  aria-label={t('outlet_info')}
-                />
+                <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+                  {t('outlet_info')}
+                </label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-[var(--color-surfaceTextSecondary)] mb-1">
+                      {t('outlet_availability')}
+                    </label>
+                    <select
+                      value={outletAvailability}
+                      onChange={(e) => onOutletAvailabilityChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      aria-label={t('outlet_availability')}
+                    >
+                      <option value="">{t('optional')}</option>
+                      {OUTLET_AVAILABILITIES.map((availability) => (
+                        <option key={availability.value} value={availability.value}>
+                          {t(availability.labelKey)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {outletAvailability && outletAvailability !== 'none' && (
+                    <div>
+                      <label className="block text-xs text-[var(--color-surfaceTextSecondary)] mb-1">
+                        {t('outlet_location')}
+                      </label>
+                      <select
+                        value={outletLocation}
+                        onChange={(e) => onOutletLocationChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        aria-label={t('outlet_location')}
+                      >
+                        <option value="">{t('optional')}</option>
+                        {OUTLET_LOCATIONS.map((location) => (
+                          <option key={location.value} value={location.value}>
+                            {t(location.labelKey)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  {outletAvailability && (
+                    <Input
+                      multiline
+                      label={t('outlet_comment')}
+                      value={outletComment}
+                      onChange={(e) => onOutletCommentChange(e.target.value)}
+                      placeholder={t('outlet_comment_placeholder')}
+                      rows={2}
+                      aria-label={t('outlet_comment')}
+                    />
+                  )}
+                </div>
               </div>
               
               <div>
@@ -257,15 +340,49 @@ export default function AdvancedSpaceSection({
               </div>
               
               <div>
-                <Input
-                  multiline
-                  label={t('facilities_info')}
-                  value={facilitiesInfo}
-                  onChange={(e) => onFacilitiesInfoChange(e.target.value)}
-                  placeholder={t('facilities_info_placeholder')}
-                  rows={2}
-                  aria-label={t('facilities_info')}
-                />
+                <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+                  {t('parking_availability')}
+                </label>
+                <select
+                  value={parkingType}
+                  onChange={(e) => onParkingTypeChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] mb-3"
+                  aria-label={t('parking_type')}
+                >
+                  <option value="">{t('parking_not_specified')}</option>
+                  {PARKING_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {t(type.labelKey)}
+                    </option>
+                  ))}
+                </select>
+                
+                {parkingType && (
+                  <>
+                    <div className="flex items-center gap-2 mb-3">
+                      <input
+                        type="checkbox"
+                        id="parking-paid"
+                        checked={parkingPaid}
+                        onChange={(e) => onParkingPaidChange(e.target.checked)}
+                        className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                      />
+                      <label htmlFor="parking-paid" className="text-sm text-[var(--color-surfaceTextSecondary)]">
+                        {t('parking_paid')}
+                      </label>
+                    </div>
+                    
+                    <Input
+                      multiline
+                      label={t('parking_comment')}
+                      value={parkingComment}
+                      onChange={(e) => onParkingCommentChange(e.target.value)}
+                      placeholder={t('parking_comment_placeholder')}
+                      rows={2}
+                      aria-label={t('parking_comment')}
+                    />
+                  </>
+                )}
               </div>
             </div>
             )}
