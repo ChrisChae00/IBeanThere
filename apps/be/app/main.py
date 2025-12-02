@@ -15,8 +15,8 @@ app = FastAPI(title="IBeanThere API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=settings.allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
