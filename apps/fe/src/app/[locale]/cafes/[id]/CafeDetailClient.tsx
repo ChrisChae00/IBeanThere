@@ -1,0 +1,97 @@
+'use client';
+
+import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { CafeDetailResponse } from '@/types/api';
+import CafeInfoSection from '@/components/cafe/CafeInfoSection';
+import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
+import StarRating from '@/components/ui/StarRating';
+import { useAuth } from '@/hooks/useAuth';
+
+interface CafeDetailClientProps {
+  cafe: CafeDetailResponse;
+}
+
+export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
+  const t = useTranslations('cafe.detail');
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const { user } = useAuth();
+
+  const handleWriteLog = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      router.push(`/${locale}/signin`);
+      return;
+    }
+  };
+
+  const cafePath = cafe.slug || cafe.id;
+  const logPagePath = `/${locale}/cafes/${cafePath}/log`;
+
+  return (
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Cafe Info Section Card */}
+      <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+        <h1 className="text-3xl font-bold text-[var(--color-cardText)] mb-4">{cafe.name}</h1>
+        <div className="h-px bg-[var(--color-border)] mb-4"></div>
+        <CafeInfoSection cafe={cafe} />
+      </div>
+
+      {/* Stats Card */}
+      {cafe.average_rating && (
+        <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('average_rating')}</p>
+              <p className="text-2xl font-bold text-[var(--color-cardText)]">
+                {cafe.average_rating.toFixed(1)}/5
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('total_logs')}</p>
+              <p className="text-2xl font-bold text-[var(--color-cardText)]">{cafe.log_count}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Coffee Logs Feed Card */}
+      <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+        <div className="flex flex-col gap-4 mb-4">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-xl font-bold text-[var(--color-cardText)]">{t('coffee_logs')}</h2>
+            {user ? (
+              <Link
+                href={logPagePath}
+                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                aria-label={t('write_log')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                {t('write_log')}
+              </Link>
+            ) : (
+              <button
+                onClick={handleWriteLog}
+                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                aria-label={t('write_log')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                {t('write_log')}
+              </button>
+            )}
+          </div>
+          <div className="h-px bg-[var(--color-border)]"></div>
+        </div>
+        <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
+      </div>
+    </div>
+  );
+}
+

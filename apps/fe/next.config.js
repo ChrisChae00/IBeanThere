@@ -1,6 +1,18 @@
 /** @type {import(next).NextConfig} */
-const nextConfig = {
+const withNextIntl = require('next-intl/plugin')(
+  './src/i18n/request.ts'
+);
+
+module.exports = withNextIntl({
   reactStrictMode: true,
-  experimental: { appDir: true }
-};
-module.exports = nextConfig;
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/uxpilot-auth.appspot.com/**',
+      },
+    ],
+  },
+});
