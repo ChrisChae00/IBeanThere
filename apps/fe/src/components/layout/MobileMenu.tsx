@@ -198,10 +198,10 @@ export default function MobileMenu({ locale }: { locale: string }) {
               )}
             </div>
 
-            <div className="h-px bg-[var(--color-border)] mx-6" />
+            {/* <div className="h-px bg-[var(--color-border)] mx-6" /> */}
 
             {/* Shop Section - Expandable */}
-            <div className="border-b border-[var(--color-border)]">
+            {/* <div className="border-b border-[var(--color-border)]">
               <button
                 onClick={toggleShop}
                 className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
@@ -249,7 +249,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   </Link>
                 </div>
               )}
-            </div>
+            </div> */}
             
             {/* Conditional rendering based on authentication status */}
             {isLoading ? (

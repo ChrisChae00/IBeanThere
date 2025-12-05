@@ -101,6 +101,7 @@ export default function Header({
         }
       ]
     },
+    /*
     {
       id: 'shop',
       labelKey: 'shop',
@@ -143,6 +144,7 @@ export default function Header({
         }
       ]
     }
+    */
   ];
   
   const getCategoryById = (id: string) => menuCategories.find(cat => cat.id === id);
@@ -246,7 +248,7 @@ export default function Header({
               >
                 {t('my_coffee_journey')}
               </Link>
-              <div ref={divider2Ref} className="h-6 w-px bg-[var(--color-border)]" />
+              {/* <div ref={divider2Ref} className="h-6 w-px bg-[var(--color-border)]" />
               <Link 
                 ref={shopRef}
                 href={`/${locale}/shop`}
@@ -255,7 +257,7 @@ export default function Header({
                 onMouseLeave={() => {}}
               >
                 {t('shop')}
-              </Link>
+              </Link> */}
             </nav>
 
             {/* Mobile Menu Button */}

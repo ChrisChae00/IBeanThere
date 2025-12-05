@@ -124,7 +124,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     if ('permissions' in navigator) {
       navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((result) => {
         const state = result.state as 'prompt' | 'granted' | 'denied';
-        setLocationPermission(state);
+        // Only auto-set if granted. If denied or prompt, let user try clicking 'Share Location'.
+        // This fixes the issue where Safari reports 'denied' and hides the button immediately.
+        if (state === 'granted') {
+          setLocationPermission('granted');
+        } else {
+          setLocationPermission('prompt');
+        }
         
         // Auto-start location tracking if permission already granted
         // Check user preference from localStorage

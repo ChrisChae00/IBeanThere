@@ -109,8 +109,8 @@ export const themes: Record<string, ThemePalette> = {
       secondary: '#C7A17A', // Medium brown 8B7355 93795d
       accent: '#F5E6A3', // Soft yellow like vanilla flower
       background: '#FFF8DC', // Very light cream background
-      cardBackground: 'rgba(255, 249, 240, 0.7)', // Very light cream background
-      surface: 'rgba(255, 249, 240, 0.75)', // Even whiter vanilla cream surface
+      cardBackground: '#FFF9F0', // Very light cream background (opaque for better readability)
+      surface: '#FFF9F0', // Even whiter vanilla cream surface (opaque)
       text: '#362C1D', // Dark brown text for readability
       textSecondary: '#8B7355', // Medium brown secondary text
       border: '#F5E6A3', // Soft yellow border like vanilla flower

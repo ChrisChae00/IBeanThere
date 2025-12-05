@@ -69,3 +69,9 @@ apps/be/scripts/
 *.tmp
 *.temp
 .DS_Store
+
+# TestSprite
+testsprite_tests
+.testsprite_tests
+
+

@@ -183,7 +183,23 @@
       "register_new_cafe": "Register Cafe",
       "login_required_to_register": "Please sign in to register a cafe",
       "cafe_registered_successfully": "Cafe registered successfully!",
-      "selected_location": "Selected Location"
+      "selected_location": "Selected Location",
+      "browser_guide": {
+        "title": "How to Enable Location",
+        "chrome": "Chrome",
+        "safari": "Safari",
+        "firefox": "Firefox",
+        "edge": "Edge",
+        "chrome_step1": "Click the <icon>info</icon> icon next to the URL",
+        "chrome_step2": "Toggle 'Location' to ON",
+        "safari_step1": "Go to Safari Settings > Websites > Location",
+        "safari_step2": "Select 'Allow' for this site",
+        "firefox_step1": "Click the permission icon in address bar",
+        "firefox_step2": "Remove the 'Blocked' permission",
+        "edge_step1": "Click the lock icon 🔒 in the address bar",
+        "edge_step2": "Select 'Permissions' and allow Location",
+        "refresh_page": "Refresh Page"
+      }
     },
 
     "visit": {
