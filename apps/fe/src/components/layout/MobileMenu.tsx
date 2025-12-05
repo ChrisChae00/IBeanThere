@@ -220,18 +220,32 @@ export default function MobileMenu({ locale }: { locale: string }) {
               {isShopExpanded && (
                 <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
                   <Link 
-                    href={`/${locale}/shop/products`}
+                    href={`/${locale}/shop#essentials`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
-                    <span className="truncate">{t('shop_item_1')}</span>
+                    <span className="truncate">{t('shop_essentials')}</span>
                   </Link>
                   <Link 
-                    href={`/${locale}/shop/gift`}
+                    href={`/${locale}/shop#explorer`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
-                    <span className="truncate">{t('shop_item_2')}</span>
+                    <span className="truncate">{t('shop_explorer')}</span>
+                  </Link>
+                  <Link 
+                    href={`/${locale}/shop#wearable`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
+                  >
+                    <span className="truncate">{t('shop_wearable')}</span>
+                  </Link>
+                  <Link 
+                    href={`/${locale}/shop#gift`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
+                  >
+                    <span className="truncate">{t('shop_gift')}</span>
                   </Link>
                 </div>
               )}
