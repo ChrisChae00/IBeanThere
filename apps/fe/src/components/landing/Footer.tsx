@@ -56,7 +56,7 @@ export default async function Footer({ locale }: { locale: string }) {
           </div>
 
           {/* Links */}
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 text-[var(--color-primaryText)]/70 mb-4">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-y-2 sm:gap-x-8 text-[var(--color-primaryText)]/70 mb-4">
             <Link href={`/${locale}/privacy`} className="hover:text-[var(--color-primaryText)] transition-colors">
               {t('privacy_policy')}
             </Link>
