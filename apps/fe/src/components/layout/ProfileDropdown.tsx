@@ -41,7 +41,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
 
   if (!user) return null;
 
-  const displayName = user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+  const displayName = user.user_metadata?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
 
   return (
     <div className="relative" ref={dropdownRef}>

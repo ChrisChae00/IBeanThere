@@ -77,7 +77,10 @@ export default function SignupForm({ locale }: SignupFormProps) {
     }
 
     // 4. Prohibit reserved words
-    const reservedWords = ['admin', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined'];
+    const reservedWords = [
+      'admin', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
+      'support', 'help', 'ibeanthere', 'system', 'manager', 'official', 'operator'
+    ];
     if (reservedWords.includes(username.toLowerCase())) {
       return { isValid: false, error: 'username_reserved' };
     }
@@ -293,13 +296,13 @@ export default function SignupForm({ locale }: SignupFormProps) {
         />
         <label className="text-sm text-[var(--color-text-secondary)]">
           {t('terms_agreement')}{' '}
-          <span className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium cursor-pointer">
+          <Link href={`/${locale}/terms`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
             {t('terms_of_service')}
-          </span>{' '}
+          </Link>{' '}
           {t('and')}{' '}
-          <span className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium cursor-pointer">
+          <Link href={`/${locale}/privacy`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
             {t('privacy_policy')}
-          </span>
+          </Link>
         </label>
       </div>
 

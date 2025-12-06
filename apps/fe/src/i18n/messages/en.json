@@ -97,7 +97,9 @@
       "start_journey": "Start Your Coffee Journey Today!",
       "start_journey_subtitle": "Join thousands of coffee enthusiasts and begin documenting your unique coffee experiences.",
       "sign_in": "Sign In",
-      "sign_in_subtitle": "Enter your credentials to access your account",
+      "sign_in_subtitle": "Sign in to continue your coffee journey",
+      "sign_in_title": "Welcome Back",
+      "sign_in_button": "Sign In",
       "create_account": "Create Account",
       "create_account_subtitle": "Join the coffee community today",
       "discover_cafes": "Discover cafes",
@@ -108,7 +110,7 @@
       "email_address": "Email Address",
       "username": "Username",
       "username_placeholder": "Choose a unique username",
-      "username_hint": "Username must be between 3 and 20 characters, containing only letters, numbers, underscores (_), and hyphens (-), and must start with a letter",
+      "username_hint": "3-20 characters, letters, numbers, _, - only",
       "password": "Password",
       "last_name": "Last Name",
       "confirm_password": "Confirm Password",
@@ -120,18 +122,29 @@
       "privacy_policy": "Privacy Policy",
       "or_continue_with": "Or continue with",
       "or_sign_up_with": "Or sign up with",
+      "or_sign_in_with": "Or sign in with",
       "already_have_account": "Already have an account?",
       "dont_have_account": "Don't have an account?",
       "sign_in_link": "Sign in",
       "sign_up_link": "Sign up",
       "email_placeholder": "your@email.com",
       "password_placeholder": "Enter your password",
-      "create_password_placeholder": "Create a strong password",
+      "create_password_placeholder": "Create a password",
       "confirm_password_placeholder": "Confirm your password",
       "first_name_placeholder": "John",
       "last_name_placeholder": "Doe",
       "google": "Google",
-      "facebook": "Facebook"
+      "facebook": "Facebook",
+      "complete_profile_title": "Welcome to IBeanThere!",
+      "complete_profile_subtitle": "Let's set up your profile to get started.",
+      "finish_setup": "Complete Your Profile",
+      "finish_setup_desc": "Please choose a username and display name.",
+      "complete_setup": "Complete Setup",
+      "display_name": "Display Name",
+      "display_name_placeholder": "Your public name",
+      "feature_profile": "Personalized Profile",
+      "feature_experience": "Track Your Experience",
+      "feature_security": "Secure Account"
     },
     
     "map": {
@@ -693,6 +706,92 @@
         "coaster": {
           "title": "Map Coaster",
           "desc": "Diatomaceous earth or leather. Map design that completes with a cup."
+        }
+      }
+    },
+    "legal": {
+      "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",
+      "last_updated": "Last Updated: {date}",
+      "terms": {
+        "title": "Terms of Service",
+        "intro": {
+          "title": "1. Introduction",
+          "content": "Welcome to IBeanThere. By accessing or using our mobile application and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services."
+        },
+        "account": {
+          "title": "2. User Accounts",
+          "content": "To access certain features, you must create an account. You agree to provide accurate, current, and complete information. You are strictly responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account."
+        },
+        "content": {
+          "title": "3. User Content",
+          "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content, but you grant IBeanThere a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content."
+        },
+        "conduct": {
+          "title": "4. Acceptable Use",
+          "content": "You agree not to modify, reverse engineer, or create derivative works of our service. You must not post content that is illegal, abusive, harassing, or violates any third-party rights."
+        },
+        "location": {
+          "title": "5. Location Services",
+          "content": "Some features of our app require access to your device's location. You can control these permissions through your device settings. We use location data to provide local cafe recommendations."
+        },
+        "termination": {
+          "title": "6. Termination",
+          "content": "We may suspend or terminate your access to the service at any time, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties, or for any other reason."
+        },
+        "liability": {
+          "title": "7. Limitation of Liability",
+          "content": "To the maximum extent permitted by law, IBeanThere shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses."
+        },
+        "governing_law": {
+          "title": "8. Governing Law",
+          "content": "These Terms shall be governed by and construed in accordance with the laws of Canada and the province of British Columbia, without regard to its conflict of law provisions."
+        },
+        "contact": {
+          "title": "9. Contact Us",
+          "content": "If you have any questions about these Terms, please contact us at support@ibeanthere.app."
+        }
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "intro": {
+          "title": "1. Introduction",
+          "content": "IBeanThere (\"we,\" \"our,\" or \"us\") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application."
+        },
+        "collection": {
+          "title": "2. Information We Collect",
+          "sections": {
+            "personal": "<strong>Personal Information:</strong> We collect information you provide directly to us, such as your name, email address, and profile information when you register.",
+            "location": "<strong>Location Data:</strong> With your consent, we collect precise geolocation data to show you nearby cafes and verify check-ins.",
+            "usage": "<strong>Usage Data:</strong> We automatically collect information about how you interact with our services, including log data, device information, and interactions with content."
+          }
+        },
+        "use": {
+          "title": "3. How We Use Your Information",
+          "content": "We use the information we collect to provide and improve our services, personalize your experience, process your requests, and communicate with you. We process your data based on your consent and our legitimate business interests."
+        },
+        "sharing": {
+          "title": "4. Disclosure of Information",
+          "content": "We do not sell your personal information. We may share information with third-party service providers who help us operate our services (e.g., cloud hosting, analytics), subject to confidentiality obligations."
+        },
+        "retention": {
+          "title": "5. Data Retention",
+          "content": "We retain your personal information only for as long as necessary to fulfill the purposes for which we collected it, including for the purposes of satisfying any legal, accounting, or reporting requirements."
+        },
+        "security": {
+          "title": "6. Data Security",
+          "content": "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
+        },
+        "rights": {
+          "title": "7. Your Rights (GDPR & PIPEDA)",
+          "content": "Depending on your location, you may have the right to access, correct, or delete your personal information, as well as the right to restrict or object to certain processing. To exercise these rights, please contact us."
+        },
+        "international": {
+          "title": "8. International Transfers",
+          "content": "Your information may be transferred to and processed in countries other than your country of residence, where data protection laws may differ. We ensure appropriate safeguards are in place for such transfers."
+        },
+        "contact": {
+          "title": "9. Contact Us",
+          "content": "If you have questions about this Privacy Policy or our data practices, please contact our Data Privacy Officer at privacy@ibeanthere.app."
         }
       }
     }

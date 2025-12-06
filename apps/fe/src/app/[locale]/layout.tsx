@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { Header } from '@/components/layout';
 import { Footer } from '@/components/landing';
+import { AuthWatcher } from '@/components/auth';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
 
@@ -56,6 +57,7 @@ export default async function LocaleLayout({
         <ThemeProvider>
           <ToastProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
+              <AuthWatcher />
               <Header locale={locale} />
               <main className="pt-16 flex-1">
                 {children}

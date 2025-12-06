@@ -1,5 +1,9 @@
-import { ReactNode } from 'react';
+"use client";
+
+import { ReactNode, useEffect } from 'react';
 import { Logo, CoffeeBean } from '@/components/ui';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -17,6 +21,14 @@ export default function AuthLayout({
   subtitle, 
   features 
 }: AuthLayoutProps) {
+  const { needsProfileSetup, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Logic moved to AuthWatcher
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Branding & Visual (35%) */}
