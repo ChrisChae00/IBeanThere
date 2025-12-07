@@ -314,7 +314,8 @@ function MapContent({
   onMapClick,
   center,
   zoom,
-  forceCenterUpdate
+  forceCenterUpdate,
+  useClustering
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
@@ -326,6 +327,7 @@ function MapContent({
   center: { lat: number; lng: number };
   zoom: number;
   forceCenterUpdate?: boolean;
+  useClustering: boolean;
 }) {
   const map = useMap();
   const { currentTheme } = useTheme();
@@ -343,7 +345,7 @@ function MapContent({
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
-      <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
+      {useClustering && <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />}
       {userLocation && (
         <Marker
           key={`user-${markerKey}`}
@@ -386,7 +388,7 @@ export default function InteractiveMap({
   const tCommon = useTranslations('common');
   const centerLatLng: [number, number] = [center.lat, center.lng];
 
-  const shouldUseClustering = cafes.length >= 10;
+  const shouldUseClustering = cafes.length >= 5;
   const displayCafes = shouldUseClustering ? [] : cafes;
 
   return (
@@ -427,6 +429,7 @@ export default function InteractiveMap({
           center={center}
           zoom={zoom}
           forceCenterUpdate={forceCenterUpdate}
+          useClustering={shouldUseClustering}
         />
 
         {displayCafes.map((cafe) => {
