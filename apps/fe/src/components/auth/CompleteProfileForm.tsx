@@ -257,6 +257,7 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
           placeholder={t('display_name_placeholder')}
           value={formData.displayName}
           onChange={handleInputChange}
+          helperText={t('display_name_hint')}
           required
         />
 

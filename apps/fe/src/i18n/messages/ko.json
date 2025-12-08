@@ -139,6 +139,7 @@
       "complete_setup": "설정 완료",
       "display_name": "닉네임",
       "display_name_placeholder": "공개 프로필 이름",
+      "display_name_hint": "닉네임은 언제든지 변경할 수 있습니다.",
       "feature_profile": "개인 맞춤 프로필",
       "feature_experience": "경험 기록하기",
       "feature_security": "안전한 계정 관리",
