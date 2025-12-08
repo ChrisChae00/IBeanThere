@@ -599,7 +599,7 @@ async def get_cafe_details(cafe_identifier: str):
 @router.post("/register")
 async def register_cafe(
     request: CafeRegistrationRequest = Body(...),
-    current_user = Depends(get_current_user),
+    current_user = Depends(require_permission(Permission.CREATE_CAFE)),
     supabase: Client = Depends(get_supabase_client)
 ):
     """

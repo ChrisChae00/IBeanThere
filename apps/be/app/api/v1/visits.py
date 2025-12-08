@@ -12,7 +12,7 @@ from app.models.visit import (
     CafeLogPublicResponse,
     CafeLogsResponse
 )
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_admin_role
 from app.models.error import ErrorCode, ErrorDetail, create_error_response
 from app.database.supabase import get_supabase_client
 from supabase import Client
@@ -557,14 +557,15 @@ async def get_cafe_stats(cafe_id: str):
 async def get_cafe_visits(
     cafe_id: str,
     limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0)
+    offset: int = Query(default=0, ge=0),
+    current_user = Depends(get_current_user)
 ):
     """
     Get all visits for a specific cafe.
     
+    - Requires authentication
     - Returns paginated list of visits
     - Ordered by visited_at (most recent first)
-    - Used for duplicate check-in detection
     """
     try:
         supabase = get_supabase_client()
@@ -590,16 +591,18 @@ async def get_cafe_visits(
 @router.get("/cafes/{cafe_id}/visits/check-duplicate")
 async def check_duplicate_visit(
     cafe_id: str,
-    user_id: str = Query(..., description="User ID to check")
+    current_user = Depends(get_current_user)
 ):
     """
     Check if user has already checked in to this cafe today.
     
+    - Requires authentication
     - Returns duplicate status and visit info if exists
     - Used by frontend to prevent duplicate check-ins
     """
     try:
         supabase = get_supabase_client()
+        user_id = current_user.id
         
         from datetime import datetime, timezone, timedelta
         
@@ -634,12 +637,14 @@ async def check_duplicate_visit(
         )
 
 @router.post("/admin/update-trending-scores")
-async def update_trending_scores():
+async def update_trending_scores(
+    current_user = Depends(require_admin_role)
+):
     """
     Manually trigger trending score recalculation for all cafes.
     
+    - Admin only - requires authentication with admin role
     - Should be run via cron job hourly
-    - Admin only in production
     """
     try:
         supabase = get_supabase_client()
