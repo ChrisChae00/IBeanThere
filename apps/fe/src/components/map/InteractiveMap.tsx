@@ -389,7 +389,6 @@ export default function InteractiveMap({
   const centerLatLng: [number, number] = [center.lat, center.lng];
 
   const shouldUseClustering = cafes.length >= 5;
-  const displayCafes = shouldUseClustering ? [] : cafes;
 
   return (
     <div className="relative w-full h-full min-h-[500px] z-0">
@@ -432,7 +431,7 @@ export default function InteractiveMap({
           useClustering={shouldUseClustering}
         />
 
-        {displayCafes.map((cafe) => {
+        {!shouldUseClustering && cafes.map((cafe) => {
           const markerState = getMarkerState(cafe);
           return (
             <Marker
