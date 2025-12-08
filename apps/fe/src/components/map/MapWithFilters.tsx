@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import InteractiveMap from './InteractiveMap';
+import LoadingSpinner from '../ui/LoadingSpinner';
+
+const InteractiveMap = dynamic(() => import('./InteractiveMap'), {
+  loading: () => <div className="h-full w-full flex items-center justify-center"><LoadingSpinner /></div>,
+  ssr: false
+});
 import LocationPermissionOverlay from './LocationPermissionOverlay';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import CafeInfoModal from './CafeInfoModal';
-import LoadingSpinner from '../ui/LoadingSpinner';
 import { RefreshIcon } from '@/components/ui';
 import UserLocationIcon from '../ui/UserLocationIcon';
 import { useLocation } from '@/hooks/useLocation';
