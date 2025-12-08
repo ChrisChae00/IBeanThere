@@ -12,7 +12,7 @@ import {
   EyeIcon,
   EyeOffIcon,
   GoogleIcon,
-  FacebookIcon,
+
   ErrorAlert,
   Button,
   Input
@@ -273,9 +273,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
     signInWithOAuth('google', locale);
   };
 
-  const handleFacebookSignUp = () => {
-    signInWithOAuth('facebook', locale);
-  };
+
 
   const displayError = error || oauthError;
 
@@ -402,7 +400,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
       </div>
 
       {/* Social Sign Up */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="w-full">
         <Button
           type="button"
           onClick={handleGoogleSignUp}
@@ -410,18 +408,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
           variant="outline"
           fullWidth
           leftIcon={<GoogleIcon size={20} />}
+          className="hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
         >
           {t('google')}
-        </Button>
-        <Button
-          type="button"
-          onClick={handleFacebookSignUp}
-          disabled={oauthLoading}
-          variant="outline"
-          fullWidth
-          leftIcon={<FacebookIcon size={20} />}
-        >
-          {t('facebook')}
         </Button>
       </div>
 

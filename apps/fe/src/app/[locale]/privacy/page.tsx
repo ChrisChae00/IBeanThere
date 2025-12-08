@@ -1,8 +1,13 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function PrivacyPage() {
-  const t = useTranslations('legal.privacy');
-  const tLegal = useTranslations('legal');
+export default async function PrivacyPage({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'legal.privacy' });
+  const tLegal = await getTranslations({ locale, namespace: 'legal' });
 
   const sections = [
     'intro',
