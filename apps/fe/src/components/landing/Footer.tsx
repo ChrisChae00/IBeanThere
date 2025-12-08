@@ -21,7 +21,7 @@ export default async function Footer({ locale }: { locale: string }) {
           {/* Social Links */}
           <div className="flex justify-center space-x-6 mb-4">
             <a 
-              href="https://instagram.com" 
+              href="https://www.instagram.com/ibeanthere_official?igsh=d25qMGJ6Y2cyNDBl&utm_source=qr" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-[var(--color-primaryText)]/70 hover:text-[var(--color-primaryText)] transition-colors"

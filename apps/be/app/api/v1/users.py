@@ -225,15 +225,64 @@ async def get_my_profile(
         UserResponse: The user profile.
     """
     try: 
-        user = supabase.table("users").select("*").eq("id", current_user.id).single().execute()
-        if not user or not user.data:
-            raise HTTPException(
+        try:
+            user = supabase.table("users").select("*").eq("id", current_user.id).single().execute()
+            user_data = user.data
+        except Exception:
+            # Self-Healing: If user profile is missing in public.users but Auth is valid (which it is to get here),
+            # recreate the profile using metadata from the Auth User (current_user).
+            print(f"User profile missing for {current_user.id}. Attempting self-healing.")
+            
+            user_meta = current_user.user_metadata or {}
+            
+            # Determine username
+            username = user_meta.get('username') or user_meta.get('preferred_username')
+            if not username:
+                email_parts = current_user.email.split('@') if current_user.email else []
+                username = email_parts[0] if email_parts else f"user_{current_user.id[:8]}"
+            
+            # Determine display name
+            display_name = user_meta.get('display_name') or user_meta.get('full_name') or user_meta.get('name') or username
+            
+            # Determine avatar
+            avatar_url = user_meta.get('avatar_url') or user_meta.get('picture')
+            
+            # Insert new profile
+            new_profile_data = {
+                "id": current_user.id,
+                "email": current_user.email,
+                "username": username,
+                "display_name": display_name,
+                "avatar_url": avatar_url,
+                "role": "user"
+            }
+            
+            try:
+                # Use upsert to be safe, though insert is fine too since we know it failed fetch
+                new_user = supabase.table("users").upsert(new_profile_data).select("*").single().execute()
+                user_data = new_user.data
+            except Exception as insert_error:
+                print(f"Self-healing failed: {insert_error}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="User data corrupted and failed to restore."
+                )
+
+        if not user_data:
+             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        user_data = user.data
+
+        # Handle cases where username might be missing (e.g. fresh Google Auth)
+        username = user_data.get('username')
+        if not username:
+            # Fallback: Create a temporary username from email or ID
+            email_parts = user_data.get('email', '').split('@')
+            username = email_parts[0] if email_parts else f"user_{user_data['id'][:8]}"
+
         # Use username as default if display_name is not provided
-        display_name = user_data.get('display_name') or user_data['username']
+        display_name = user_data.get('display_name') or username
         
         # Get founding stats
         # Count Navigator roles
@@ -247,7 +296,7 @@ async def get_my_profile(
         return UserResponse(
             id=user_data['id'],
             email=user_data['email'],
-            username=user_data['username'],
+            username=username,
             display_name=display_name,
             bio=user_data.get('bio'),
             avatar_url=user_data.get('avatar_url'),
@@ -310,11 +359,20 @@ async def register_user_profile(
             # Update existing profile
             from datetime import datetime, timezone
             
+            now = datetime.now(timezone.utc)
             update_data = {
                 "username": profile.username,
                 "display_name": display_name,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": now.isoformat()
             }
+            
+            # Store consent timestamps if user accepted
+            if profile.terms_accepted:
+                update_data["terms_accepted_at"] = now.isoformat()
+            if profile.privacy_accepted:
+                update_data["privacy_accepted_at"] = now.isoformat()
+            if profile.consent_version:
+                update_data["consent_version"] = profile.consent_version
             
             # Only update fields that are provided
             if profile.avatar_url is not None:
@@ -333,7 +391,10 @@ async def register_user_profile(
             profile_data = updated_profile.data[0]
         else:
             # Create new profile (shouldn't happen if trigger works, but keep as fallback)
-            new_profile = supabase.table("users").insert({
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            
+            insert_data = {
                 "id": current_user.id,
                 "email": current_user.email,  # Extracted from JWT
                 "username": profile.username,
@@ -341,7 +402,17 @@ async def register_user_profile(
                 "avatar_url": profile.avatar_url,
                 "bio": profile.bio,
                 "role": "user"  # Default role for new users
-            }).execute()
+            }
+            
+            # Add consent timestamps if accepted
+            if profile.terms_accepted:
+                insert_data["terms_accepted_at"] = now.isoformat()
+            if profile.privacy_accepted:
+                insert_data["privacy_accepted_at"] = now.isoformat()
+            if profile.consent_version:
+                insert_data["consent_version"] = profile.consent_version
+            
+            new_profile = supabase.table("users").insert(insert_data).execute()
             
             if not new_profile.data:
                 raise HTTPException(
