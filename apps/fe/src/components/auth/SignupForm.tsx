@@ -161,6 +161,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
           const payload = JSON.stringify({
             username: formData.username,
             display_name: formData.username,
+            terms_accepted: true,
+            privacy_accepted: true,
+            consent_version: '1.0.0'
           });
           
           // Use fetch with keepalive to ensure request completes during redirect

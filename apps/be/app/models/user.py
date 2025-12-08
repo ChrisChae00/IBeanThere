@@ -16,6 +16,10 @@ class UserProfileCreate(BaseModel):
     display_name: Optional[str] = Field(None, max_length=30, description="Public display name")
     avatar_url: Optional[str] = None
     bio: Optional[str] = Field(None, max_length=500, description="Public bio")
+    # Consent tracking (GDPR compliance)
+    terms_accepted: bool = Field(False, description="User accepted Terms of Service")
+    privacy_accepted: bool = Field(False, description="User accepted Privacy Policy")
+    consent_version: str = Field("1.0.0", description="Version of terms/privacy at time of consent")
 
 class UserUpdate(BaseModel):
     """Model for updating user information."""

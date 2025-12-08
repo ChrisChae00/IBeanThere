@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -24,6 +25,7 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   
   const supabase = createClient();
   const { translateError } = useErrorTranslator();
@@ -91,6 +93,12 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
       return;
     }
 
+    if (!agreeToTerms) {
+      setError(tErrors('terms_required'));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -106,6 +114,9 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
       const payload = JSON.stringify({
         username: formData.username,
         display_name: formData.displayName || formData.username,
+        terms_accepted: true,
+        privacy_accepted: true,
+        consent_version: '1.0.0'
       });
 
       const response = await fetch(`${apiUrl}/api/v1/users/register`, {
@@ -181,12 +192,33 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
           required
         />
 
+        {/* Terms Agreement */}
+        <div className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            checked={agreeToTerms}
+            onChange={(e) => setAgreeToTerms(e.target.checked)}
+            className="w-4 h-4 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] mt-1"
+            required
+          />
+          <label className="text-sm text-[var(--color-text-secondary)]">
+            {t('terms_agreement')}{' '}
+            <Link href={`/${locale}/terms`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+              {t('terms_of_service')}
+            </Link>{' '}
+            {t('and')}{' '}
+            <Link href={`/${locale}/privacy`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+              {t('privacy_policy')}
+            </Link>
+          </label>
+        </div>
+
         <Button
           type="submit"
           fullWidth
           size="lg"
           className="bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white transition-colors"
-          disabled={isLoading || (!validation.isValid && formData.username.length > 0)}
+          disabled={isLoading || (!validation.isValid && formData.username.length > 0) || !agreeToTerms}
           loading={isLoading}
         >
           {t('complete_setup')}

@@ -359,11 +359,20 @@ async def register_user_profile(
             # Update existing profile
             from datetime import datetime, timezone
             
+            now = datetime.now(timezone.utc)
             update_data = {
                 "username": profile.username,
                 "display_name": display_name,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": now.isoformat()
             }
+            
+            # Store consent timestamps if user accepted
+            if profile.terms_accepted:
+                update_data["terms_accepted_at"] = now.isoformat()
+            if profile.privacy_accepted:
+                update_data["privacy_accepted_at"] = now.isoformat()
+            if profile.consent_version:
+                update_data["consent_version"] = profile.consent_version
             
             # Only update fields that are provided
             if profile.avatar_url is not None:
@@ -382,7 +391,10 @@ async def register_user_profile(
             profile_data = updated_profile.data[0]
         else:
             # Create new profile (shouldn't happen if trigger works, but keep as fallback)
-            new_profile = supabase.table("users").insert({
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            
+            insert_data = {
                 "id": current_user.id,
                 "email": current_user.email,  # Extracted from JWT
                 "username": profile.username,
@@ -390,7 +402,17 @@ async def register_user_profile(
                 "avatar_url": profile.avatar_url,
                 "bio": profile.bio,
                 "role": "user"  # Default role for new users
-            }).execute()
+            }
+            
+            # Add consent timestamps if accepted
+            if profile.terms_accepted:
+                insert_data["terms_accepted_at"] = now.isoformat()
+            if profile.privacy_accepted:
+                insert_data["privacy_accepted_at"] = now.isoformat()
+            if profile.consent_version:
+                insert_data["consent_version"] = profile.consent_version
+            
+            new_profile = supabase.table("users").insert(insert_data).execute()
             
             if not new_profile.data:
                 raise HTTPException(
