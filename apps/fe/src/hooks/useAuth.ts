@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -16,16 +14,20 @@ export function useAuth() {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       
-      // Check for temporary username pattern
-      if (session?.user?.user_metadata?.username) {
-        const username = session.user.user_metadata.username;
-        // Simple check: if username starts with 'user_' and matches ID part, it's likely temp
-        // Or if username is missing from metadata entirely
-        const isTemp = username.startsWith('user_') && username.length > 5; // A bit loose, but practical
-        setNeedsProfileSetup(isTemp);
-      } else if (session?.user) {
-         // If no username at all, definitely need onboarding
-         setNeedsProfileSetup(true);
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        
+        // Check for temporary username pattern
+        const username = metadata.username;
+        const isTempUsername = !username || (username.startsWith('user_') && username.length > 5);
+        
+        // Check for consent acceptance (new requirement)
+        // If terms_accepted is missing or false, they need to complete profile
+        const hasAcceptedTerms = !!metadata.terms_accepted;
+        
+        setNeedsProfileSetup(isTempUsername || !hasAcceptedTerms);
+      } else {
+        setNeedsProfileSetup(false);
       }
       
       setIsLoading(false);
@@ -38,12 +40,15 @@ export function useAuth() {
       async (event, session) => {
         setUser(session?.user ?? null);
         
-        if (session?.user?.user_metadata?.username) {
-            const username = session.user.user_metadata.username;
-            const isTemp = username.startsWith('user_') && username.length > 5;
-            setNeedsProfileSetup(isTemp);
-        } else if (session?.user) {
-            setNeedsProfileSetup(true);
+        if (session?.user) {
+            const metadata = session.user.user_metadata || {};
+            
+            const username = metadata.username;
+            const isTempUsername = !username || (username.startsWith('user_') && username.length > 5);
+            
+            const hasAcceptedTerms = !!metadata.terms_accepted;
+            
+            setNeedsProfileSetup(isTempUsername || !hasAcceptedTerms);
         } else {
             setNeedsProfileSetup(false);
         }

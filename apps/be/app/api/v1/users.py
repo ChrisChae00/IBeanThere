@@ -139,6 +139,18 @@ async def check_username_availability(
         dict: Availability status and username
     """
     try:
+        # Check reserved words first (including 'admin' and 'admin_account')
+        reserved_words = [
+            'admin', 'admin_account', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
+            'support', 'help', 'ibeanthere', 'system', 'manager', 'official', 'operator'
+        ]
+        if username.lower() in reserved_words:
+            return {
+                "available": False,
+                "username": username,
+                "reason": "reserved"
+            }
+        
         existing_user = supabase.table("users").select("username").eq("username", username).execute()
         return {
             "available": len(existing_user.data) == 0,
@@ -337,6 +349,16 @@ async def register_user_profile(
         UserRegistrationResponse: Profile registration completion response
     """
     try:
+        import os
+        # 0. Restrict 'admin' username
+        if profile.username.lower() == "admin":
+            admin_email = os.getenv("ADMIN_EMAIL")
+            if not admin_email or current_user.email != admin_email:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="The username 'admin' is reserved."
+                )
+
         # Check if profile already exists
         existing_profile = supabase.table("users").select("*").eq("id", current_user.id).execute()
         
@@ -421,6 +443,25 @@ async def register_user_profile(
                 )
             
             profile_data = new_profile.data[0]
+
+        # Critical: Sync consent status to Supabase Auth metadata
+        # This allows frontend useAuth to know user has consented without extra DB calls
+        try:
+            auth_update_data = {}
+            if profile.terms_accepted:
+                auth_update_data["terms_accepted"] = True
+            if profile.privacy_accepted:
+                auth_update_data["privacy_accepted"] = True
+            
+            if auth_update_data:
+                supabase.auth.admin.update_user_by_id(
+                    current_user.id,
+                    {"user_metadata": auth_update_data}
+                )
+        except Exception as auth_error:
+            # Non-blocking error, just log it
+            print(f"Warning: Failed to sync consent to auth metadata: {auth_error}")
+
         return UserRegistrationResponse(
             id=profile_data["id"],
             username=profile_data["username"],
@@ -459,7 +500,16 @@ async def update_my_profile(
         UserResponse: Updated profile information
     """
     try:
-        
+        import os
+        # Restrict 'admin' username
+        if profile.username and profile.username.lower() == "admin":
+            admin_email = os.getenv("ADMIN_EMAIL")
+            if not admin_email or current_user.email != admin_email:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="The username 'admin' is reserved."
+                )
+
         # Check username uniqueness if username is being updated
         if profile.username is not None:
             existing_username = supabase.table("users").select("id").eq("username", profile.username).execute()

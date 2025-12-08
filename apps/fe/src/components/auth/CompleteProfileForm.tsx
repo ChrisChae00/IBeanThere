@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
@@ -27,6 +27,11 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
   const [error, setError] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   
+  // Async validation state
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+  
   const supabase = createClient();
   const { translateError } = useErrorTranslator();
 
@@ -36,13 +41,18 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
       ...prev,
       [name]: value,
     }));
+    
+    if (name === 'username') {
+      setUsernameError('');
+      setIsUsernameAvailable(false);
+    }
   };
 
   const validateUsername = (username: string): { isValid: boolean; error?: string } => {
-    // 1. Allow only letters, numbers, underscores (_), and hyphens (-)
-    const allowedCharsRegex = /^[a-zA-Z0-9_-]+$/;
+    // 1. Allow only lowercase letters, numbers, underscores (_), and hyphens (-) - Instagram style
+    const allowedCharsRegex = /^[a-z0-9_-]+$/;
     if (!allowedCharsRegex.test(username)) {
-      return { isValid: false, error: 'username_invalid_chars' };
+      return { isValid: false, error: 'username_lowercase_only' };
     }
 
     // 2. Length between 3 and 20 characters
@@ -51,17 +61,17 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
     }
 
     // 3. Start with a letter
-    const startsWithLetterRegex = /^[a-zA-Z]/;
+    const startsWithLetterRegex = /^[a-z]/;
     if (!startsWithLetterRegex.test(username)) {
       return { isValid: false, error: 'username_start_letter' };
     }
 
     // 4. Prohibit reserved words
     const reservedWords = [
-      'admin', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
+      'admin', 'admin_account', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
       'support', 'help', 'ibeanthere', 'system', 'manager', 'official', 'operator'
     ];
-    if (reservedWords.includes(username.toLowerCase())) {
+    if (reservedWords.includes(username)) {
       return { isValid: false, error: 'username_reserved' };
     }
 
@@ -80,6 +90,40 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
     return { isValid: true };
   };
 
+  // Debounced username check
+  useEffect(() => {
+    const checkUsername = async () => {
+      const username = formData.username;
+      if (!username || username.length < 3) return;
+      
+      const validation = validateUsername(username);
+      if (!validation.isValid) return; // Don't check API if basic validation fails
+
+      setIsCheckingUsername(true);
+      setIsUsernameAvailable(false);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiUrl}/api/v1/users/check-username/${username}`);
+        if (response.ok) {
+           const data = await response.json();
+           if (!data.available) {
+             setUsernameError('username_taken');
+             setIsUsernameAvailable(false);
+           } else {
+             setIsUsernameAvailable(true);
+           }
+        }
+      } catch (err) {
+        console.error('Failed to check username availability', err);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    };
+
+    const timer = setTimeout(checkUsername, 500);
+    return () => clearTimeout(timer);
+  }, [formData.username]);
+
   const validation = validateUsername(formData.username);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,6 +135,12 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
       setError(tErrors(validation.error!));
       setIsLoading(false);
       return;
+    }
+    
+    if (usernameError) {
+        setError(tErrors(usernameError));
+        setIsLoading(false);
+        return;
     }
 
     if (!agreeToTerms) {
@@ -139,7 +189,9 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
       const { error: updateError } = await supabase.auth.updateUser({
         data: {
           username: formData.username,
-          display_name: formData.displayName || formData.username
+          display_name: formData.displayName || formData.username,
+          terms_accepted: true, // Optimistic update
+          privacy_accepted: true
         }
       });
 
@@ -167,6 +219,21 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
     }
   };
 
+  // Determine helper text or error
+  let inputError = undefined;
+  if (validation.error && formData.username.length > 0) {
+      inputError = tErrors(validation.error);
+  } else if (usernameError) {
+      inputError = tErrors(usernameError);
+  }
+
+  let helperText = t('username_hint');
+  if (isCheckingUsername) {
+      helperText = t('checking_availability') || 'Checking availability...';
+  } else if (isUsernameAvailable && !inputError) {
+      helperText = t('username_available') || 'Username is available';
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <ErrorAlert message={error} />
@@ -178,8 +245,9 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
           placeholder={t('username_placeholder')}
           value={formData.username}
           onChange={handleInputChange}
-          error={validation.error && formData.username.length > 0 ? tErrors(validation.error) : undefined}
-          helperText={t('username_hint')}
+          error={inputError}
+          helperText={helperText}
+          helperTextClassName={isUsernameAvailable && !inputError ? 'text-[var(--color-success)]' : ''}
           required
         />
         
@@ -218,7 +286,7 @@ export default function CompleteProfileForm({ locale, returnUrl = '/' }: Complet
           fullWidth
           size="lg"
           className="bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white transition-colors"
-          disabled={isLoading || (!validation.isValid && formData.username.length > 0) || !agreeToTerms}
+          disabled={isLoading || isCheckingUsername || !!inputError || !validation.isValid || !agreeToTerms}
           loading={isLoading}
         >
           {t('complete_setup')}

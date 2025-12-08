@@ -11,6 +11,7 @@ type InputElementProps = InputHTMLAttributes<HTMLInputElement> &
 export interface InputProps extends Omit<InputElementProps, 'size'> {
   label?: string;
   helperText?: string;
+  helperTextClassName?: string;
   error?: string;
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';
@@ -27,6 +28,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
     {
       label,
       helperText,
+      helperTextClassName,
       error,
       icon,
       iconPosition = 'left',
@@ -106,7 +108,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
             className={`text-xs ${
               error
                 ? 'text-[var(--color-error)]'
-                : 'text-[var(--color-cardTextSecondary)]'
+                : helperTextClassName || 'text-[var(--color-cardTextSecondary)]'
             }`}
           >
             {error || helperText}
