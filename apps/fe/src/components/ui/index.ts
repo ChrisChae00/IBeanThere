@@ -31,6 +31,7 @@ export { default as PhotoUpload } from './PhotoUpload';
 export { default as Toast } from './Toast';
 export { default as IntensitySlider } from './IntensitySlider';
 export { default as InfoIcon } from './InfoIcon';
+export { default as EditIcon } from './EditIcon';
 export { default as Tooltip } from './Tooltip';
 export { default as AchievementBadge } from './AchievementBadge';
 export { default as TasteTag } from './TasteTag';
