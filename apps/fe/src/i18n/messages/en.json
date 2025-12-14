@@ -20,8 +20,9 @@
       "pending_spots": "Pending Spots",
       "pending_spots_description": "New cafes waiting for verification",
       "community": "Community",
-      "community_item_1": "Featured",
-      "community_item_2": "Events",
+      "community_board": "Forum",
+      "community_badges": "Badge Gallery",
+      "community_activity": "Friend Activity",
       "help": "Help",
       "help_item_1": "FAQ",
       "help_item_2": "Contact",
@@ -742,6 +743,28 @@
           "desc": "Diatomaceous earth or leather. Map design that completes with a cup."
         }
       }
+    },
+    "community": {
+      "title": "Community",
+      "subtitle": "See what your Taste Mates are discovering",
+      "login_required_title": "Join the Community",
+      "login_required_description": "Sign in to see logs from your Taste Mates and discover new cafes.",
+      "sign_in": "Sign In",
+      "tab_feed": "Feed",
+      "tab_explore": "Explore",
+      "explore_coming_soon": "Explore feature coming soon!",
+      "taste_mates_title": "Taste Mates",
+      "no_taste_mates": "No Taste Mates yet",
+      "no_taste_mates_hint": "Trust users whose coffee taste you like to see their logs here!",
+      "feed_empty": "No logs from your Taste Mates yet",
+      "feed_empty_hint": "Start trusting more users to see their coffee discoveries!",
+      "loading": "Loading...",
+      "load_more": "Load More",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "days_ago": "{count} days ago",
+      "view_cafe": "View Cafe",
+      "like": "Like"
     },
     "legal": {
       "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",

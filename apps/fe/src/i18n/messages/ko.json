@@ -20,8 +20,9 @@
       "pending_spots": "대기 중인 카페",
       "pending_spots_description": "검증 대기 중인 새로운 카페들",
       "community": "커뮤니티",
-      "community_item_1": "추천 콘텐츠",
-      "community_item_2": "이벤트",
+      "community_board": "게시판",
+      "community_badges": "뱃지 갤러리",
+      "community_activity": "친구 활동",
       "help": "도움말",
       "help_item_1": "자주 묻는 질문",
       "help_item_2": "문의하기",
@@ -737,6 +738,28 @@
           "desc": "규조토 또는 가죽 재질. 컵을 올리면 완성되는 지도 디자인."
         }
       }
+    },
+    "community": {
+      "title": "커뮤니티",
+      "subtitle": "나의 Taste Mate들이 발견한 카페를 확인해보세요",
+      "login_required_title": "커뮤니티에 참여하세요",
+      "login_required_description": "로그인하여 Taste Mate들의 로그를 보고 새로운 카페를 발견하세요.",
+      "sign_in": "로그인",
+      "tab_feed": "피드",
+      "tab_explore": "탐색",
+      "explore_coming_soon": "탐색 기능이 곧 출시됩니다!",
+      "taste_mates_title": "Taste Mates",
+      "no_taste_mates": "아직 Taste Mate가 없습니다",
+      "no_taste_mates_hint": "취향이 맞는 유저를 신뢰하면 여기서 그들의 로그를 볼 수 있어요!",
+      "feed_empty": "아직 Taste Mate들의 로그가 없습니다",
+      "feed_empty_hint": "더 많은 유저를 신뢰하고 그들의 커피 발견을 확인해보세요!",
+      "loading": "로딩 중...",
+      "load_more": "더 보기",
+      "today": "오늘",
+      "yesterday": "어제",
+      "days_ago": "{count}일 전",
+      "view_cafe": "카페 보기",
+      "like": "좋아요"
     },
     "legal": {
       "disclaimer_translation": "이 변역문은 편의를 위해 제공되며, 영문 원본과 차이가 있을 경우 영문을 우선합니다.",

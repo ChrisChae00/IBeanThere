@@ -46,11 +46,13 @@ export default function Header({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const discoverRef = useRef<HTMLDivElement>(null);
+  const communityRef = useRef<HTMLAnchorElement>(null);
   const myCoffeeJourneyRef = useRef<HTMLAnchorElement>(null);
   const shopRef = useRef<HTMLAnchorElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const divider1Ref = useRef<HTMLDivElement>(null);
   const divider2Ref = useRef<HTMLDivElement>(null);
+  const divider3Ref = useRef<HTMLDivElement>(null);
   
   const menuCategories: MenuCategory[] = [
     {
@@ -72,6 +74,39 @@ export default function Header({
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )
+        }
+      ]
+    },
+    {
+      id: 'community',
+      labelKey: 'community',
+      items: [
+        {
+          labelKey: 'community_board',
+          href: `/${locale}/community/board`,
+          icon: (
+            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          )
+        },
+        {
+          labelKey: 'community_badges',
+          href: `/${locale}/community/badges`,
+          icon: (
+            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+          )
+        },
+        {
+          labelKey: 'community_activity',
+          href: `/${locale}/community`,
+          icon: (
+            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           )
         }
@@ -155,11 +190,13 @@ export default function Header({
       
       const rect = megaMenuRef.current.getBoundingClientRect();
       const discoverRect = discoverRef.current?.getBoundingClientRect();
+      const communityRect = communityRef.current?.getBoundingClientRect();
       const myCoffeeJourneyRect = myCoffeeJourneyRef.current?.getBoundingClientRect();
       const shopRect = shopRef.current?.getBoundingClientRect();
       
       const isInAnyNavItem = 
         (discoverRect && e.clientX >= discoverRect.left && e.clientX <= discoverRect.right && e.clientY >= discoverRect.top && e.clientY <= discoverRect.bottom) ||
+        (communityRect && e.clientX >= communityRect.left && e.clientX <= communityRect.right && e.clientY >= communityRect.top && e.clientY <= communityRect.bottom) ||
         (myCoffeeJourneyRect && e.clientX >= myCoffeeJourneyRect.left && e.clientX <= myCoffeeJourneyRect.right && e.clientY >= myCoffeeJourneyRect.top && e.clientY <= myCoffeeJourneyRect.bottom) ||
         (shopRect && e.clientX >= shopRect.left && e.clientX <= shopRect.right && e.clientY >= shopRect.top && e.clientY <= shopRect.bottom);
       
@@ -240,6 +277,16 @@ export default function Header({
               
               <div ref={divider1Ref} className="h-6 w-px bg-[var(--color-border)]" />
               <Link 
+                ref={communityRef}
+                href={`/${locale}/community`}
+                className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors min-h-[44px] px-1 flex items-center"
+                onMouseEnter={() => setActiveCategory('community')}
+                onMouseLeave={() => {}}
+              >
+                {t('community')}
+              </Link>
+              <div ref={divider2Ref} className="h-6 w-px bg-[var(--color-border)]" />
+              <Link 
                 ref={myCoffeeJourneyRef}
                 href={`/${locale}/my-logs`}
                 className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors min-h-[44px] px-1 flex items-center"
@@ -248,7 +295,7 @@ export default function Header({
               >
                 {t('my_coffee_journey')}
               </Link>
-              {/* <div ref={divider2Ref} className="h-6 w-px bg-[var(--color-border)]" />
+              {/* <div ref={divider3Ref} className="h-6 w-px bg-[var(--color-border)]" />
               <Link 
                 ref={shopRef}
                 href={`/${locale}/shop`}
@@ -314,10 +361,12 @@ export default function Header({
                 
                 if (category.id === 'discover') {
                   adjustedOffset = getNavItemLeft(navRef as React.RefObject<HTMLElement>) - megaMenuPadding;
-                } else if (category.id === 'my_coffee_journey') {
+                } else if (category.id === 'community') {
                   adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
-                } else if (category.id === 'shop') {
+                } else if (category.id === 'my_coffee_journey') {
                   adjustedOffset = getDividerRight(divider2Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
+                } else if (category.id === 'shop') {
+                  adjustedOffset = getDividerRight(divider3Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
                 }
                 
                 return (
