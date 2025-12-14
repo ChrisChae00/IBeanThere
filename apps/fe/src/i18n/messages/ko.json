@@ -759,7 +759,14 @@
       "yesterday": "어제",
       "days_ago": "{count}일 전",
       "view_cafe": "카페 보기",
-      "like": "좋아요"
+      "like": "좋아요",
+      "badge_gallery_title": "뱃지 갤러리",
+      "badge_gallery_description": "새로운 카페를 탐험하고 커피 여정을 공유하며 뱃지를 수집하세요. 모든 뱃지를 모을 수 있을까요?",
+      "collection_progress": "수집 현황",
+      "all_badges_earned": "축하합니다! 모든 뱃지를 획득하셨습니다!",
+      "badges_remaining": "아직 {count}개가 남았습니다",
+      "locked": "잠김",
+      "how_to_unlock": "획득 방법"
     },
     "legal": {
       "disclaimer_translation": "이 변역문은 편의를 위해 제공되며, 영문 원본과 차이가 있을 경우 영문을 우선합니다.",

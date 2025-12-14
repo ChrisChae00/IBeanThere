@@ -317,3 +317,5 @@ export interface UserBadge {
   awarded_at: string;
 }
 
+export type BadgeResponse = UserBadge;
+

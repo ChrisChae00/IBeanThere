@@ -150,14 +150,12 @@ async def get_user_badges(
     """
     try:
         # Get user ID by username
-        user = supabase.table("users").select("id").eq("username", username).single().execute()
+        user = supabase.table("users").select("id").eq("username", username).limit(1).execute()
         if not user.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
+            # User not found in public table
+            return []
         
-        user_id = user.data["id"]
+        user_id = user.data[0]["id"]
         
         # Get badges
         badges = supabase.table("user_badges").select("badge_code, awarded_at").eq("user_id", user_id).execute()
@@ -166,6 +164,8 @@ async def get_user_badges(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"User badges error: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get user badges"
