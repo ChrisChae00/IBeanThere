@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import AchievementBadge from '@/components/ui/AchievementBadge';
 import TasteTag from '@/components/ui/TasteTag';
 import Button from '@/components/ui/Button';
+import EditIcon from '@/components/ui/EditIcon';
 import ProfileEditForm from './ProfileEditForm';
 
 export default function ProfileClient() {
@@ -90,7 +91,19 @@ export default function ProfileClient() {
   return (
     <div className="space-y-6">
       {/* Profile Header - Compact Design */}
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
+      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm relative">
+        {/* Edit Button - Top Right (Desktop) */}
+        <div className="absolute top-4 right-4 hidden md:block">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            leftIcon={<EditIcon size={16} />}
+          >
+            {t('edit_profile')}
+          </Button>
+        </div>
+
         <div className="flex flex-col md:flex-row items-start gap-6">
           {/* Avatar */}
           <div className="flex-shrink-0">
@@ -167,17 +180,17 @@ export default function ProfileClient() {
                 {t('member_since', { date: new Date(profile.created_at).toLocaleDateString() })}
               </span>
             </div>
-            
-            {/* Edit Button */}
-            <div className="pt-3">
+
+            {/* Edit Button - Mobile Only */}
+            <div className="pt-5 md:hidden w-full">
               <Button
                 variant="secondary"
-                size="sm"
+                size="md"
+                fullWidth
                 onClick={() => setIsEditing(true)}
+                leftIcon={<EditIcon size={18} />}
+                className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm active:scale-[0.98]"
               >
-                <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
                 {t('edit_profile')}
               </Button>
             </div>
