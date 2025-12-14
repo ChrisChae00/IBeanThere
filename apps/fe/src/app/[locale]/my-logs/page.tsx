@@ -151,21 +151,6 @@ export default function MyLogsPage() {
         </div>
       )}
 
-      {/* Edit Form */}
-      {editingLog && (
-        <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg border border-[var(--color-border)]">
-          <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">
-            {t('edit_log')}
-          </h2>
-          <CoffeeLogForm
-            initialData={editingLog}
-            onSubmit={handleUpdate}
-            onCancel={() => setEditingLog(null)}
-            isLoading={isSubmitting}
-          />
-        </div>
-      )}
-
       {/* Logs List */}
       {filteredLogs.length === 0 ? (
         <div className="text-center py-12">
@@ -176,12 +161,26 @@ export default function MyLogsPage() {
       ) : (
         <div className="space-y-4">
           {filteredLogs.map((log) => (
-            <CoffeeLogCard
-              key={log.id}
-              log={log}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            editingLog?.id === log.id ? (
+              <div key={log.id} className="p-6 bg-[var(--color-cardBackground)] rounded-lg border border-[var(--color-border)]">
+                <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">
+                  {t('edit_log')}
+                </h2>
+                <CoffeeLogForm
+                  initialData={editingLog}
+                  onSubmit={handleUpdate}
+                  onCancel={() => setEditingLog(null)}
+                  isLoading={isSubmitting}
+                />
+              </div>
+            ) : (
+              <CoffeeLogCard
+                key={log.id}
+                log={log}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )
           ))}
         </div>
       )}

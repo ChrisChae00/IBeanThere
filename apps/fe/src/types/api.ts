@@ -230,6 +230,16 @@ export interface FoundingStats {
   vanguard_count: number;
 }
 
+export type TasteTag = 
+  | 'acidic' 
+  | 'full_body' 
+  | 'light_roast' 
+  | 'dessert_lover'
+  | 'work_friendly'
+  | 'cozy'
+  | 'roastery'
+  | 'specialty';
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -239,6 +249,9 @@ export interface UserResponse {
   avatar_url?: string;
   role?: string;
   founding_stats?: FoundingStats;
+  taste_tags?: TasteTag[];
+  trust_count?: number;
+  is_trusted_by_me?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -249,5 +262,7 @@ export interface UserPublicResponse {
   avatar_url?: string;
   bio?: string;
   founding_stats?: FoundingStats;
+  taste_tags?: TasteTag[];
+  trust_count?: number;
   created_at: string;
 }

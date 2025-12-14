@@ -139,6 +139,18 @@ async def check_username_availability(
         dict: Availability status and username
     """
     try:
+        # Check reserved words first (including 'admin' and 'admin_account')
+        reserved_words = [
+            'admin', 'admin_account', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
+            'support', 'help', 'ibeanthere', 'system', 'manager', 'official', 'operator'
+        ]
+        if username.lower() in reserved_words:
+            return {
+                "available": False,
+                "username": username,
+                "reason": "reserved"
+            }
+        
         existing_user = supabase.table("users").select("username").eq("username", username).execute()
         return {
             "available": len(existing_user.data) == 0,
@@ -305,6 +317,9 @@ async def get_my_profile(
                 "navigator_count": navigator_count,
                 "vanguard_count": vanguard_count
             },
+            taste_tags=await _get_user_taste_tags(supabase, current_user.id),
+            trust_count=await _get_user_trust_count(supabase, current_user.id),
+            is_trusted_by_me=False,  # Can't trust yourself
             created_at=user_data['created_at'],
             updated_at=user_data.get('updated_at')
         )
@@ -337,6 +352,16 @@ async def register_user_profile(
         UserRegistrationResponse: Profile registration completion response
     """
     try:
+        import os
+        # 0. Restrict 'admin' username
+        if profile.username.lower() == "admin":
+            admin_email = os.getenv("ADMIN_EMAIL")
+            if not admin_email or current_user.email != admin_email:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="The username 'admin' is reserved."
+                )
+
         # Check if profile already exists
         existing_profile = supabase.table("users").select("*").eq("id", current_user.id).execute()
         
@@ -421,6 +446,25 @@ async def register_user_profile(
                 )
             
             profile_data = new_profile.data[0]
+
+        # Critical: Sync consent status to Supabase Auth metadata
+        # This allows frontend useAuth to know user has consented without extra DB calls
+        try:
+            auth_update_data = {}
+            if profile.terms_accepted:
+                auth_update_data["terms_accepted"] = True
+            if profile.privacy_accepted:
+                auth_update_data["privacy_accepted"] = True
+            
+            if auth_update_data:
+                supabase.auth.admin.update_user_by_id(
+                    current_user.id,
+                    {"user_metadata": auth_update_data}
+                )
+        except Exception as auth_error:
+            # Non-blocking error, just log it
+            print(f"Warning: Failed to sync consent to auth metadata: {auth_error}")
+
         return UserRegistrationResponse(
             id=profile_data["id"],
             username=profile_data["username"],
@@ -459,7 +503,16 @@ async def update_my_profile(
         UserResponse: Updated profile information
     """
     try:
-        
+        import os
+        # Restrict 'admin' username
+        if profile.username and profile.username.lower() == "admin":
+            admin_email = os.getenv("ADMIN_EMAIL")
+            if not admin_email or current_user.email != admin_email:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="The username 'admin' is reserved."
+                )
+
         # Check username uniqueness if username is being updated
         if profile.username is not None:
             existing_username = supabase.table("users").select("id").eq("username", profile.username).execute()
@@ -491,9 +544,43 @@ async def update_my_profile(
                 detail="User profile not found"
             )
         
+        # Handle taste_tags update (sync with user_taste_tags table)
+        if profile.taste_tags is not None:
+            from app.models.user import TASTE_TAGS
+            
+            # Validate tags
+            invalid_tags = [tag for tag in profile.taste_tags if tag not in TASTE_TAGS]
+            if invalid_tags:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid taste tags: {', '.join(invalid_tags)}"
+                )
+            
+            # Limit to 5 tags
+            if len(profile.taste_tags) > 5:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Maximum 5 taste tags allowed"
+                )
+            
+            # Delete existing tags
+            supabase.table("user_taste_tags").delete().eq("user_id", current_user.id).execute()
+            
+            # Insert new tags
+            if profile.taste_tags:
+                tags_to_insert = [
+                    {"user_id": current_user.id, "tag": tag}
+                    for tag in profile.taste_tags
+                ]
+                supabase.table("user_taste_tags").insert(tags_to_insert).execute()
+        
         profile_data = updated_profile.data[0]
         # Use username as default if display_name is not provided
         display_name = profile_data.get("display_name") or profile_data["username"]
+        
+        # Fetch updated taste tags
+        taste_tags = await _get_user_taste_tags(supabase, current_user.id)
+        trust_count = await _get_user_trust_count(supabase, current_user.id)
         
         return UserResponse(
             id=profile_data["id"],
@@ -502,6 +589,9 @@ async def update_my_profile(
             display_name=display_name,
             avatar_url=profile_data.get("avatar_url"),
             bio=profile_data.get("bio"),
+            taste_tags=taste_tags,
+            trust_count=trust_count,
+            is_trusted_by_me=False,  # Can't trust yourself
             created_at=profile_data["created_at"],
             updated_at=profile_data.get("updated_at")
         )
@@ -511,4 +601,234 @@ async def update_my_profile(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update profile"
+        ) from e
+
+
+# =========================================================
+# Helper Functions for Taste & Trust
+# =========================================================
+
+async def _get_user_taste_tags(supabase: Client, user_id: str) -> List[str]:
+    """Get taste tags for a user."""
+    try:
+        result = supabase.table("user_taste_tags").select("tag").eq("user_id", user_id).execute()
+        return [row["tag"] for row in result.data] if result.data else []
+    except Exception:
+        return []
+
+
+async def _get_user_trust_count(supabase: Client, user_id: str) -> int:
+    """Get the count of users who trust this user."""
+    try:
+        result = supabase.table("user_trust").select("id", count="exact").eq("trustee_id", user_id).execute()
+        return result.count if result.count is not None else 0
+    except Exception:
+        return 0
+
+
+async def _is_user_trusted_by(supabase: Client, truster_id: str, trustee_id: str) -> bool:
+    """Check if truster trusts trustee."""
+    try:
+        result = supabase.table("user_trust").select("id").eq("truster_id", truster_id).eq("trustee_id", trustee_id).execute()
+        return len(result.data) > 0 if result.data else False
+    except Exception:
+        return False
+
+
+async def _get_daily_trust_count(supabase: Client, user_id: str) -> int:
+    """Get today's trust count for a user."""
+    try:
+        from datetime import date
+        today = date.today().isoformat()
+        result = supabase.table("user_trust_daily_count").select("trust_count").eq("user_id", user_id).eq("trust_date", today).execute()
+        if result.data and len(result.data) > 0:
+            return result.data[0]["trust_count"]
+        return 0
+    except Exception:
+        return 0
+
+
+async def _increment_daily_trust_count(supabase: Client, user_id: str) -> None:
+    """Increment today's trust count for a user."""
+    try:
+        from datetime import date
+        today = date.today().isoformat()
+        # Try to update existing record
+        existing = supabase.table("user_trust_daily_count").select("id, trust_count").eq("user_id", user_id).eq("trust_date", today).execute()
+        if existing.data and len(existing.data) > 0:
+            new_count = existing.data[0]["trust_count"] + 1
+            supabase.table("user_trust_daily_count").update({"trust_count": new_count}).eq("id", existing.data[0]["id"]).execute()
+        else:
+            supabase.table("user_trust_daily_count").insert({
+                "user_id": user_id,
+                "trust_date": today,
+                "trust_count": 1
+            }).execute()
+    except Exception as e:
+        print(f"Warning: Failed to increment daily trust count: {e}")
+
+
+# =========================================================
+# Trust (Taste Mate) API Endpoints
+# =========================================================
+
+DAILY_TRUST_LIMIT = 5  # Maximum trusts per day
+
+
+@router.post("/{username}/trust", status_code=status.HTTP_201_CREATED)
+async def trust_user(
+    username: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Trust a user (Taste Mate).
+    - Cannot trust yourself
+    - Daily limit: 5 trusts per day
+    - Cannot trust the same user twice
+    """
+    try:
+        # Get target user by username
+        target_user = supabase.table("users").select("id").eq("username", username).single().execute()
+        if not target_user.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        target_user_id = target_user.data["id"]
+        
+        # Cannot trust yourself
+        if target_user_id == current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot trust yourself"
+            )
+        
+        # Check daily limit
+        daily_count = await _get_daily_trust_count(supabase, current_user.id)
+        if daily_count >= DAILY_TRUST_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Daily trust limit reached ({DAILY_TRUST_LIMIT}/day)"
+            )
+        
+        # Check if already trusting
+        is_already_trusted = await _is_user_trusted_by(supabase, current_user.id, target_user_id)
+        if is_already_trusted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Already trusting this user"
+            )
+        
+        # Create trust relationship
+        supabase.table("user_trust").insert({
+            "truster_id": current_user.id,
+            "trustee_id": target_user_id
+        }).execute()
+        
+        # Increment daily count
+        await _increment_daily_trust_count(supabase, current_user.id)
+        
+        return {"message": "User trusted successfully", "username": username}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to trust user"
+        ) from e
+
+
+@router.delete("/{username}/trust", status_code=status.HTTP_204_NO_CONTENT)
+async def untrust_user(
+    username: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Remove trust from a user (Taste Mate).
+    """
+    try:
+        # Get target user by username
+        target_user = supabase.table("users").select("id").eq("username", username).single().execute()
+        if not target_user.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        target_user_id = target_user.data["id"]
+        
+        # Delete trust relationship
+        result = supabase.table("user_trust").delete().eq("truster_id", current_user.id).eq("trustee_id", target_user_id).execute()
+        
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Trust relationship not found"
+            )
+        
+        return None  # 204 No Content
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to untrust user"
+        ) from e
+
+
+@router.get("/me/trusting", response_model=List[UserPublicResponse])
+async def get_trusting_users(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get list of users I trust (Taste Mates).
+    """
+    try:
+        # Get trust relationships where I am the truster
+        trusts = supabase.table("user_trust").select("trustee_id").eq("truster_id", current_user.id).execute()
+        
+        if not trusts.data:
+            return []
+        
+        trustee_ids = [t["trustee_id"] for t in trusts.data]
+        
+        # Get user profiles for trustee IDs
+        users = supabase.table("users").select("username, display_name, avatar_url, bio, created_at").in_("id", trustee_ids).execute()
+        
+        if not users.data:
+            return []
+        
+        result = []
+        for user in users.data:
+            # Get founding stats and taste tags for each user
+            user_id_result = supabase.table("users").select("id").eq("username", user["username"]).single().execute()
+            if user_id_result.data:
+                user_id = user_id_result.data["id"]
+                
+                nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+                navigator_count = nav_count.count if nav_count.count is not None else 0
+                
+                van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
+                vanguard_count = van_count.count if van_count.count is not None else 0
+                
+                user["founding_stats"] = {
+                    "navigator_count": navigator_count,
+                    "vanguard_count": vanguard_count
+                }
+                user["taste_tags"] = await _get_user_taste_tags(supabase, user_id)
+                user["trust_count"] = await _get_user_trust_count(supabase, user_id)
+            
+            result.append(UserPublicResponse(**user))
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get trusting users"
         ) from e

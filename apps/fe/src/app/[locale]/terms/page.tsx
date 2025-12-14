@@ -1,8 +1,13 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function TermsPage() {
-  const t = useTranslations('legal.terms');
-  const tLegal = useTranslations('legal');
+export default async function TermsPage({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'legal.terms' });
+  const tLegal = await getTranslations({ locale, namespace: 'legal' });
 
   const sections = [
     'intro',

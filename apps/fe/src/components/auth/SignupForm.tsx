@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -12,7 +12,7 @@ import {
   EyeIcon,
   EyeOffIcon,
   GoogleIcon,
-  FacebookIcon,
+
   ErrorAlert,
   Button,
   Input
@@ -37,6 +37,11 @@ export default function SignupForm({ locale }: SignupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Async validation state
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+
   const supabase = createClient();
   const { isLoading: oauthLoading, error: oauthError, signInWithOAuth } = useOAuthSignIn();
   const { translateError } = useErrorTranslator();
@@ -51,6 +56,10 @@ export default function SignupForm({ locale }: SignupFormProps) {
     if (name === 'email') {
       setError('');
     }
+    if (name === 'username') {
+      setUsernameError('');
+      setIsUsernameAvailable(false);
+    }
   };
 
   const validateEmail = (email: string): boolean => {
@@ -59,10 +68,10 @@ export default function SignupForm({ locale }: SignupFormProps) {
   };
 
   const validateUsername = (username: string): { isValid: boolean; error?: string } => {
-    // 1. Allow only letters, numbers, underscores (_), and hyphens (-)
-    const allowedCharsRegex = /^[a-zA-Z0-9_-]+$/;
+    // 1. Allow only lowercase letters, numbers, underscores (_), and hyphens (-) - Instagram style
+    const allowedCharsRegex = /^[a-z0-9_-]+$/;
     if (!allowedCharsRegex.test(username)) {
-      return { isValid: false, error: 'username_invalid_chars' };
+      return { isValid: false, error: 'username_lowercase_only' };
     }
 
     // 2. Length between 3 and 20 characters
@@ -71,17 +80,17 @@ export default function SignupForm({ locale }: SignupFormProps) {
     }
 
     // 3. Start with a letter
-    const startsWithLetterRegex = /^[a-zA-Z]/;
+    const startsWithLetterRegex = /^[a-z]/;
     if (!startsWithLetterRegex.test(username)) {
       return { isValid: false, error: 'username_start_letter' };
     }
 
     // 4. Prohibit reserved words
     const reservedWords = [
-      'admin', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
+      'admin', 'admin_account', 'root', 'api', 'www', 'test', 'user', 'guest', 'null', 'undefined',
       'support', 'help', 'ibeanthere', 'system', 'manager', 'official', 'operator'
     ];
-    if (reservedWords.includes(username.toLowerCase())) {
+    if (reservedWords.includes(username)) {
       return { isValid: false, error: 'username_reserved' };
     }
 
@@ -100,6 +109,41 @@ export default function SignupForm({ locale }: SignupFormProps) {
     return { isValid: true };
   };
 
+  // Debounced username check
+  useEffect(() => {
+    const checkUsername = async () => {
+      const username = formData.username;
+      if (!username || username.length < 3) return;
+      
+      const validation = validateUsername(username);
+      if (!validation.isValid) return;
+
+      setIsCheckingUsername(true);
+      setIsUsernameAvailable(false);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiUrl}/api/v1/users/check-username/${username}`);
+        if (response.ok) {
+           const data = await response.json();
+           if (!data.available) {
+             setUsernameError('username_taken');
+             setIsUsernameAvailable(false);
+           } else {
+             setIsUsernameAvailable(true);
+           }
+        }
+      } catch (err) {
+        console.error('Failed to check username availability', err);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    };
+
+    const timer = setTimeout(checkUsername, 500);
+    return () => clearTimeout(timer);
+  }, [formData.username]);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -111,6 +155,12 @@ export default function SignupForm({ locale }: SignupFormProps) {
       setError(tErrors(usernameValidation.error!));
       setIsLoading(false);
       return;
+    }
+
+    if (usernameError) {
+        setError(tErrors(usernameError));
+        setIsLoading(false);
+        return;
     }
 
     if (!validateEmail(formData.email)) {
@@ -138,6 +188,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
         options: {
           data: {
             username: formData.username,
+            // Optimistically set terms_accepted true for local check
+            terms_accepted: true,
+            privacy_accepted: true
           },
         },
       });
@@ -183,6 +236,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
             } else {
               if (process.env.NODE_ENV === 'development') {
                 response.json().then(errorData => {
+                   // If error is forbidden/bad request (like admin reserved), we might want to know.
+                   // But since we are redirecting, we can't show it easily unless we wait.
+                   // Since we validated async before submit, this should be rare.
                   console.warn('Profile API call failed (non-critical):', errorData.detail || 'Unknown error');
                 }).catch(() => {
                   console.warn('Profile API call failed (non-critical):', response.status, response.statusText);
@@ -217,11 +273,26 @@ export default function SignupForm({ locale }: SignupFormProps) {
     signInWithOAuth('google', locale);
   };
 
-  const handleFacebookSignUp = () => {
-    signInWithOAuth('facebook', locale);
-  };
+
 
   const displayError = error || oauthError;
+
+  // Helpers for validation display
+  const usernameValidation = validateUsername(formData.username);
+  let usernameHelperText = t('username_hint');
+  let usernameInputError = undefined;
+
+  if (usernameValidation.error && formData.username.length > 0) {
+      usernameInputError = tErrors(usernameValidation.error);
+  } else if (usernameError) {
+      usernameInputError = tErrors(usernameError);
+  }
+
+  if (isCheckingUsername) {
+      usernameHelperText = t('checking_availability') || 'Checking availability...';
+  } else if (isUsernameAvailable && !usernameInputError) {
+      usernameHelperText = t('username_available') || 'Username is available';
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -233,7 +304,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
         value={formData.username}
         onChange={handleInputChange}
         placeholder={t('username_placeholder')}
-        helperText={t('username_hint')}
+        helperText={usernameHelperText}
+        helperTextClassName={isUsernameAvailable && !usernameInputError ? 'text-[var(--color-success)]' : ''}
+        error={usernameInputError}
         required
       />
 
@@ -310,7 +383,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" fullWidth size="lg" loading={isLoading}>
+      <Button type="submit" fullWidth size="lg" loading={isLoading} disabled={isCheckingUsername || !!usernameInputError}>
         {t('create_account')}
       </Button>
 
@@ -327,7 +400,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
       </div>
 
       {/* Social Sign Up */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="w-full">
         <Button
           type="button"
           onClick={handleGoogleSignUp}
@@ -335,18 +408,9 @@ export default function SignupForm({ locale }: SignupFormProps) {
           variant="outline"
           fullWidth
           leftIcon={<GoogleIcon size={20} />}
+          className="hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
         >
           {t('google')}
-        </Button>
-        <Button
-          type="button"
-          onClick={handleFacebookSignUp}
-          disabled={oauthLoading}
-          variant="outline"
-          fullWidth
-          leftIcon={<FacebookIcon size={20} />}
-        >
-          {t('facebook')}
         </Button>
       </div>
 

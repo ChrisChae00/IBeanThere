@@ -1,5 +1,6 @@
 export { default as Logo } from './Logo';
 export { default as CoffeeBean } from './CoffeeBean';
+export { default as CoffeeIcon } from './CoffeeIcon';
 export { Avatar } from './Avatar';
 export { default as LocationIcon } from './LocationIcon';
 export { default as UserLocationIcon } from './UserLocationIcon';
@@ -31,3 +32,7 @@ export { default as Toast } from './Toast';
 export { default as IntensitySlider } from './IntensitySlider';
 export { default as InfoIcon } from './InfoIcon';
 export { default as EditIcon } from './EditIcon';
+export { default as Tooltip } from './Tooltip';
+export { default as AchievementBadge } from './AchievementBadge';
+export { default as TasteTag } from './TasteTag';
+export { default as AvatarUpload } from './AvatarUpload';

@@ -1,6 +1,18 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+
+# Available taste tags
+TASTE_TAGS = [
+    "acidic",
+    "full_body", 
+    "light_roast",
+    "dessert_lover",
+    "work_friendly",
+    "cozy",
+    "roastery",
+    "specialty"
+]
 
 class UserBase(BaseModel):
     """Base user model with common fields."""
@@ -27,6 +39,7 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = Field(None, max_length=30, description="Public display name")
     avatar_url: Optional[str] = None
     bio: Optional[str] = Field(None, max_length=500, description="Public bio")
+    taste_tags: Optional[List[str]] = Field(None, max_length=5, description="User taste preference tags (max 5)")
 
 class User(UserBase):
     """Complete user model with all fields."""
@@ -52,6 +65,9 @@ class UserResponse(BaseModel):
     avatar_url: Optional[str] = None
     role: Optional[str] = None  # User role from public.users table ('user', 'admin', etc.)
     founding_stats: Optional[FoundingStats] = None
+    taste_tags: Optional[List[str]] = None
+    trust_count: int = 0
+    is_trusted_by_me: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -62,6 +78,8 @@ class UserPublicResponse(BaseModel):
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
     founding_stats: Optional[FoundingStats] = None
+    taste_tags: Optional[List[str]] = None
+    trust_count: int = 0
     created_at: datetime
 
 class UserRegistrationResponse(BaseModel):
