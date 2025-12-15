@@ -628,6 +628,8 @@
       "taste_tags_title": "Coffee Preferences",
       "achievements": "Achievements",
       "edit_profile": "Edit Profile",
+      "back": "Back",
+      "go_back": "Go Back",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",
@@ -771,7 +773,13 @@
       "all_badges_earned": "Congratulations! You've earned all available badges!",
       "badges_remaining": "{count} more to unlock",
       "locked": "Locked",
-      "how_to_unlock": "How to Unlock"
+      "how_to_unlock": "How to Unlock",
+      "search_users_placeholder": "Find coffee lovers...",
+      "search_failed": "Search failed",
+      "no_users_found": "No users found",
+      "follow": "Follow",
+      "following": "Following",
+      "feed_title": "Community Feed"
     },
     "legal": {
       "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",

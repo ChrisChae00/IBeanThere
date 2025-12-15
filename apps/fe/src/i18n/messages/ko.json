@@ -623,6 +623,8 @@
       "taste_tags_title": "커피 취향",
       "achievements": "업적",
       "edit_profile": "프로필 수정",
+      "back": "뒤로",
+      "go_back": "돌아가기",
       "save": "저장",
       "saving": "저장 중...",
       "cancel": "취소",
@@ -766,7 +768,13 @@
       "all_badges_earned": "축하합니다! 모든 뱃지를 획득하셨습니다!",
       "badges_remaining": "아직 {count}개가 남았습니다",
       "locked": "잠김",
-      "how_to_unlock": "획득 방법"
+      "how_to_unlock": "획득 방법",
+      "search_users_placeholder": "커피 친구 찾기...",
+      "search_failed": "검색 실패",
+      "no_users_found": "검색 결과가 없습니다",
+      "follow": "팔로우",
+      "following": "팔로잉",
+      "feed_title": "커뮤니티 피드"
     },
     "legal": {
       "disclaimer_translation": "이 변역문은 편의를 위해 제공되며, 영문 원본과 차이가 있을 경우 영문을 우선합니다.",

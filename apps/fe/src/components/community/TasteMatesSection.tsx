@@ -1,53 +1,25 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrustedUser } from '@/types/api';
-import { Session } from '@supabase/supabase-js';
 
 interface TasteMatesSectionProps {
-  session: Session | null;
+  tasteMates: TrustedUser[];
+  isLoading: boolean;
 }
 
-export default function TasteMatesSection({ session }: TasteMatesSectionProps) {
+export default function TasteMatesSection({ tasteMates, isLoading }: TasteMatesSectionProps) {
   const t = useTranslations('community');
-  const [tasteMates, setTasteMates] = useState<TrustedUser[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTasteMates = async () => {
-      if (!session?.access_token) return;
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/taste-mates`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setTasteMates(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch taste mates:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTasteMates();
-  }, [session?.access_token]);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex gap-3 overflow-x-auto pb-2">
+      <div className="mb-6">
+        <h2 className="text-sm font-medium text-muted-foreground mb-3 px-4">
+          {t('taste_mates_title')}
+        </h2>
+        <div className="flex gap-3 overflow-x-auto pb-4 px-4 scrollbar-hide">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
@@ -61,10 +33,10 @@ export default function TasteMatesSection({ session }: TasteMatesSectionProps) {
 
   if (tasteMates.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="bg-muted/50 rounded-xl p-6 text-center">
-          <p className="text-muted-foreground mb-2">{t('no_taste_mates')}</p>
-          <p className="text-sm text-muted-foreground">
+      <div className="mb-8 px-4">
+        <div className="bg-[var(--color-surface)] rounded-xl p-6 text-center border border-[var(--color-border)]">
+          <p className="text-[var(--color-text)] mb-2 font-medium">{t('no_taste_mates')}</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">
             {t('no_taste_mates_hint')}
           </p>
         </div>
@@ -73,19 +45,19 @@ export default function TasteMatesSection({ session }: TasteMatesSectionProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4">
+    <div className="mb-8 px-4">
       <h2 className="text-sm font-medium text-muted-foreground mb-3">
         {t('taste_mates_title')}
       </h2>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
         {tasteMates.map((mate) => (
           <Link
             key={mate.id}
             href={`/profile/${mate.username}`}
-            className="flex-shrink-0 flex flex-col items-center gap-2 group"
+            className="flex-shrink-0 flex flex-col items-center gap-2 group w-16"
           >
             <div className="relative">
-              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-colors">
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--color-border)] group-hover:border-[var(--color-primary)] transition-colors bg-[var(--color-surface)]">
                 {mate.avatar_url ? (
                   <Image
                     src={mate.avatar_url}
@@ -95,13 +67,13 @@ export default function TasteMatesSection({ session }: TasteMatesSectionProps) {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center text-xl font-bold text-muted-foreground">
+                  <div className="w-full h-full flex items-center justify-center text-xl font-bold text-[var(--color-text-secondary)]">
                     {mate.display_name.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
             </div>
-            <span className="text-xs text-foreground truncate max-w-[64px]">
+            <span className="text-xs text-[var(--color-text)] truncate w-full text-center">
               {mate.display_name}
             </span>
           </Link>
@@ -110,3 +82,4 @@ export default function TasteMatesSection({ session }: TasteMatesSectionProps) {
     </div>
   );
 }
+
