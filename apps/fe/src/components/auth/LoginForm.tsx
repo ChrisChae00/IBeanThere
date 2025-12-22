@@ -147,15 +147,12 @@ export default function LoginForm({ locale }: LoginFormProps) {
       </Button>
 
       {/* Divider */}
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[var(--color-border)]"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-[var(--color-background)] text-[var(--color-text-secondary)]">
-            {t('or_continue_with')}
-          </span>
-        </div>
+      <div className="flex items-center gap-4 my-6">
+        <div className="flex-1 border-t border-[var(--color-border)]"></div>
+        <span className="text-sm text-[var(--color-text-secondary)]">
+          {t('or_continue_with')}
+        </span>
+        <div className="flex-1 border-t border-[var(--color-border)]"></div>
       </div>
 
       {/* Social Sign In */}

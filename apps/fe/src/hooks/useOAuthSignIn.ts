@@ -28,7 +28,7 @@ export function useOAuthSignIn(): UseOAuthSignInReturn {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/${locale}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}`,
         },
       });
 

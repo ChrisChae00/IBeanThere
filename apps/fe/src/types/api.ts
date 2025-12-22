@@ -266,3 +266,56 @@ export interface UserPublicResponse {
   trust_count?: number;
   created_at: string;
 }
+
+// =========================================================
+// Community Types
+// =========================================================
+
+export interface TrustedUser {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  trust_count: number;
+  trusted_at: string;
+}
+
+export interface CommunityFeedItem {
+  id: string;
+  cafe_id: string;
+  cafe_name: string;
+  user_id: string;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  visited_at: string;
+  rating?: number;
+  comment?: string;
+  photo_urls?: string[];
+  coffee_type?: string;
+  like_count: number;
+  is_liked_by_me: boolean;
+}
+
+export interface CommunityFeedResponse {
+  items: CommunityFeedItem[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+export interface BadgeInfo {
+  code: string;
+  name: string;
+  description: string;
+  icon_url?: string;
+}
+
+export interface UserBadge {
+  badge_code: string;
+  awarded_at: string;
+}
+
+export type BadgeResponse = UserBadge;
+

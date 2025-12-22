@@ -52,7 +52,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         aria-label="Profile menu"
       >
         <Avatar 
-          src={user.user_metadata?.avatar_url} 
+          src={undefined} 
           alt={displayName}
           size="sm"
         />
