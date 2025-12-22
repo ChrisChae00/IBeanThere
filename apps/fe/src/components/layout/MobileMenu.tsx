@@ -268,7 +268,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <div className="flex-shrink-0 group-hover:[&>div]:bg-[var(--color-primaryText)] group-hover:[&>div]:text-[var(--color-primary)]">
                         <Avatar 
-                          src={user.user_metadata?.avatar_url} 
+                          src={undefined} 
                           alt={user.user_metadata?.username || user.email || 'User'}
                           size="sm"
                           className="flex-shrink-0"
