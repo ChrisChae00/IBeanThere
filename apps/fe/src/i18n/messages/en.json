@@ -19,6 +19,8 @@
       "explore_map_description": "Find cafes on the map",
       "pending_spots": "Pending Spots",
       "pending_spots_description": "New cafes waiting for verification",
+      "dropbean": "Drop Bean",
+      "dropbean_description": "Record your visit at cafes within 50m",
       "community": "Community",
       "community_board": "Forum",
       "community_badges": "Badge Gallery",
@@ -29,6 +31,7 @@
       "my_coffee_journey": "My Coffee Journey",
       "coffee_logs_item_1": "My logs",
       "coffee_logs_item_2": "Stats",
+      "my_beans": "My Beans",
       "shop": "Shop",
       "shop_essentials": "Nomad Essentials",
       "shop_explorer": "Explorer Line",
@@ -40,6 +43,40 @@
       "settings": "Settings",
       "get_started": "Get Started",
       "admin_dashboard": "Admin Dashboard"
+    },
+    "drop_bean": {
+      "button": "Drop Bean",
+      "success": "Bean Dropped!",
+      "already_today": "Already Dropped Today",
+      "too_far": "Too far ({distance}m away, must be within 50m)",
+      "error": "Failed to drop bean. Please try again.",
+      "login_required": "Please sign in to drop a bean",
+      "level_up": "Level Up! Now {level}",
+      "total_drops": "{count} drops total",
+      "drops": "{count} drops",
+      "next_level": "{drops} more to level up",
+      "levels": {
+        "1": "Sleeping Bean",
+        "2": "Sprouting",
+        "3": "Growing",
+        "4": "Sapling",
+        "5": "Fruiting Tree"
+      }
+    },
+    "dropbean": {
+      "title": "Drop Bean",
+      "subtitle": "Record your visit at cafes within 50m",
+      "no_cafes": "No cafes within 50m",
+      "no_cafes_hint": "Move closer to a cafe or register a new one!",
+      "loading": "Finding nearby cafes...",
+      "location_required": "Location permission required",
+      "enable_location": "Enable Location",
+      "enable_location_hint": "Enable location to find cafes within 50m",
+      "refresh": "Refresh",
+      "sign_in_to_drop": "Sign in to Drop",
+      "m_away": "{distance}m away",
+      "view_cafe_map": "View Cafe Map",
+      "register_new_cafe": "Register New Cafe"
     },
     "landing": {
       "hero": {

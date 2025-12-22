@@ -16,6 +16,7 @@ interface MenuCategory {
   labelKey: string;
   items: Array<{
     labelKey: string;
+    descriptionKey?: string;
     href: string;
     icon: React.ReactNode;
   }>;
@@ -61,6 +62,7 @@ export default function Header({
       items: [
         {
           labelKey: 'explore_map',
+          descriptionKey: 'explore_map_description',
           href: `/${locale}/discover/explore-map`,
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +71,19 @@ export default function Header({
           )
         },
         {
+          labelKey: 'dropbean',
+          descriptionKey: 'dropbean_description',
+          href: `/${locale}/discover/dropbean`,
+          icon: (
+            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          )
+        },
+        {
           labelKey: 'pending_spots',
+          descriptionKey: 'pending_spots_description',
           href: `/${locale}/discover/pending-spots`,
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,12 +272,12 @@ export default function Header({
                 onMouseEnter={() => setActiveCategory('discover')}
                 onMouseLeave={() => {}}
               >
-                <button
+                <Link
+                  href={`/${locale}/discover/explore-map`}
                   className="text-[var(--color-text)] hover:text-[var(--color-textSecondary)] font-medium transition-colors min-h-[44px] px-1 flex items-center"
-                  aria-haspopup="true"
                 >
                   {t('discover')}
-                </button>
+                </Link>
               </div>
               
               <div ref={divider1Ref} className="h-6 w-px bg-[var(--color-border)]" />
@@ -365,15 +379,20 @@ export default function Header({
                     className="flex-shrink-0"
                     style={{ paddingLeft: adjustedOffset }}
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-3">
                       {category.items.map((item, index) => (
                         <Link
                           key={index}
                           href={item.href}
-                          className="block px-2 py-2 text-base text-[var(--color-primaryText)] hover:underline transition-colors"
+                          className="block px-3 py-2 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/10 rounded-lg transition-colors"
                           onClick={() => setActiveCategory(null)}
                         >
-                          <span className="font-medium">{t(item.labelKey)}</span>
+                          <span className="font-semibold text-base block">{t(item.labelKey)}</span>
+                          {item.descriptionKey && (
+                            <p className="text-xs text-[var(--color-primaryText)]/50 mt-0.5">
+                              {t(item.descriptionKey)}
+                            </p>
+                          )}
                         </Link>
                       ))}
                     </div>

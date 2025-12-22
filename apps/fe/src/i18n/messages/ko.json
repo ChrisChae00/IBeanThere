@@ -19,6 +19,8 @@
       "explore_map_description": "지도에서 카페를 찾아보세요",
       "pending_spots": "대기 중인 카페",
       "pending_spots_description": "검증 대기 중인 새로운 카페들",
+      "dropbean": "커피콩 심기",
+      "dropbean_description": "50m 이내 카페에 방문 기록 남기기",
       "community": "커뮤니티",
       "community_board": "게시판",
       "community_badges": "뱃지 갤러리",
@@ -29,6 +31,7 @@
       "my_coffee_journey": "내 커피 여정",
       "coffee_logs_item_1": "내 기록",
       "coffee_logs_item_2": "통계",
+      "my_beans": "내 커피콩",
       "shop": "공식몰",
       "shop_essentials": "노마드 에센셜",
       "shop_explorer": "탐험가 라인",
@@ -40,6 +43,40 @@
       "settings": "설정",
       "get_started": "시작하기",
       "admin_dashboard": "관리자 대시보드"
+    },
+    "drop_bean": {
+      "button": "커피콩 심기",
+      "success": "커피콩을 심었습니다!",
+      "already_today": "오늘 이미 심었습니다",
+      "too_far": "너무 멀어요 ({distance}m, 50m 이내여야 함)",
+      "error": "심기 실패. 다시 시도해주세요.",
+      "login_required": "커피콩을 심으려면 로그인이 필요합니다",
+      "level_up": "레벨 업! 이제 {level}",
+      "total_drops": "총 {count}회 방문",
+      "drops": "{count}회 방문",
+      "next_level": "다음 레벨까지 {drops}회 남음",
+      "levels": {
+        "1": "잠든 콩",
+        "2": "싹이 난 콩",
+        "3": "자라는 중",
+        "4": "묘목",
+        "5": "열매 맺은 나무"
+      }
+    },
+    "dropbean": {
+      "title": "커피콩 심기",
+      "subtitle": "50m 이내 카페에 방문 기록 남기기",
+      "no_cafes": "50m 이내 카페가 없습니다",
+      "no_cafes_hint": "카페에 더 가까이 가거나 새 카페를 등록하세요!",
+      "loading": "주변 카페 찾는 중...",
+      "location_required": "위치 권한이 필요합니다",
+      "enable_location": "위치 권한 허용",
+      "enable_location_hint": "50m 이내 카페를 찾으려면 위치 권한을 허용하세요",
+      "refresh": "새로고침",
+      "sign_in_to_drop": "로그인 후 심기",
+      "m_away": "{distance}m 거리",
+      "view_cafe_map": "카페 지도 보기",
+      "register_new_cafe": "새 카페 등록"
     },
     "landing": {
       "hero": {
