@@ -17,7 +17,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
   const [isUserMenuExpanded, setIsUserMenuExpanded] = useState(false);
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
-  const { user, isLoading, signOut } = useAuth();
+  const { user, profile, isLoading, signOut } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -268,20 +268,15 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <div className="flex-shrink-0 group-hover:[&>div]:bg-[var(--color-primaryText)] group-hover:[&>div]:text-[var(--color-primary)]">
                         <Avatar 
-                          src={undefined} 
-                          alt={user.user_metadata?.username || user.email || 'User'}
+                          src={profile?.avatar_url || undefined} 
+                          alt={profile?.display_name || user.user_metadata?.username || 'User'}
                           size="sm"
                           className="flex-shrink-0"
                         />
                       </div>
-                      <div className="min-w-0 flex-1 overflow-hidden text-left">
-                        <p className="text-[var(--color-text)] font-medium truncate leading-tight text-sm mt-0 group-hover:text-[var(--color-primaryText)] transition-colors">
-                          {user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
-                        </p>
-                        <p className="text-[var(--color-textSecondary)] text-xs truncate leading-tight mt-0.5 group-hover:text-[var(--color-primaryText)] transition-colors opacity-80 group-hover:opacity-100">
-                          {user.email}
-                        </p>
-                      </div>
+                      <p className="text-[var(--color-text)] font-medium truncate leading-tight text-sm group-hover:text-[var(--color-primaryText)] transition-colors">
+                        {profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
+                      </p>
                     </div>
                     <svg
                       className={`w-4 h-4 transition-transform flex-shrink-0 ml-2 ${isUserMenuExpanded ? 'rotate-180' : ''}`}

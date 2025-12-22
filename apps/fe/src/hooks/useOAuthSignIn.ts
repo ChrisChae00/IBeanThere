@@ -25,10 +25,21 @@ export function useOAuthSignIn(): UseOAuthSignInReturn {
     setError('');
 
     try {
+      // Force localhost in development to prevent redirect to production
+      const origin = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+      
+      // Store locale in sessionStorage for callback to use
+      // (query params in redirectTo cause Supabase URL matching to fail)
+      sessionStorage.setItem('oauth_redirect_locale', locale);
+      
+      const redirectTo = `${origin}/auth/callback`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}`,
+          redirectTo,
         },
       });
 

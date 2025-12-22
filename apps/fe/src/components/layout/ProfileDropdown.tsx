@@ -17,7 +17,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
   const tLog = useTranslations('cafe.log');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { isAdmin } = useAdminAuth();
 
   // Close the dropdown when clicking outside
@@ -41,7 +41,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
 
   if (!user) return null;
 
-  const displayName = user.user_metadata?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+  const displayName = profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -52,7 +52,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         aria-label="Profile menu"
       >
         <Avatar 
-          src={undefined} 
+          src={profile?.avatar_url || undefined} 
           alt={displayName}
           size="sm"
         />
