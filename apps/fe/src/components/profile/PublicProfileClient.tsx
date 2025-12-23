@@ -5,10 +5,10 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { UserPublicResponse, TrustedUser } from '@/types/api';
-import { Avatar } from '@/components/ui/Avatar';
-import AchievementBadge from '@/components/ui/AchievementBadge';
-import TasteTag from '@/components/ui/TasteTag';
-import Button from '@/components/ui/Button';
+import { Avatar } from '@/shared/ui';
+import { AchievementBadge } from '@/shared/ui';
+import { TasteTag } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import { UserPlus, Check, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

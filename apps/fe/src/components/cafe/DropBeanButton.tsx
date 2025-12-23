@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from '@/hooks/useLocation';
-import Button from '@/components/ui/Button';
+import { Button } from '@/shared/ui';
 import { GrowthIcon } from '@/components/cafe/GrowthIcon';
 
 interface DropBeanButtonProps {

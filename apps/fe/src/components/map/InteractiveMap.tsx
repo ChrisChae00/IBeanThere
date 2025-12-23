@@ -11,7 +11,7 @@ import 'leaflet.markercluster';
 import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
 import { createCustomMarkerIcon, createUserLocationIcon, createSelectedLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
 import { useTheme } from '@/contexts/ThemeContext';
-import UserLocationIcon from '@/components/ui/UserLocationIcon';
+import { UserLocationIcon } from '@/shared/ui';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {

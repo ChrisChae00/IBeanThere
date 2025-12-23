@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar } from '@/components/ui/Avatar';
-import Logo from '@/components/ui/Logo';
+import { Avatar } from '@/shared/ui';
+import { Logo } from '@/shared/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
 

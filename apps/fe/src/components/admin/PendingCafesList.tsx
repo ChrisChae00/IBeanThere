@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getPendingCafes, verifyCafe, deleteCafe, PendingCafe } from '@/lib/api/admin';
-import ErrorAlert from '@/components/ui/ErrorAlert';
+import { ErrorAlert } from '@/shared/ui';
 import PendingCafeCard from './PendingCafeCard';
 
 export default function PendingCafesList() {

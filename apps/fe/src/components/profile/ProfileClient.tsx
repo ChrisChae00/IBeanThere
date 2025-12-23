@@ -5,11 +5,11 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { UserResponse, TasteTag as TasteTagType } from '@/types/api';
-import { Avatar } from '@/components/ui/Avatar';
-import AchievementBadge from '@/components/ui/AchievementBadge';
-import TasteTag from '@/components/ui/TasteTag';
-import Button from '@/components/ui/Button';
-import EditIcon from '@/components/ui/EditIcon';
+import { Avatar } from '@/shared/ui';
+import { AchievementBadge } from '@/shared/ui';
+import { TasteTag } from '@/shared/ui';
+import { Button } from '@/shared/ui';
+import { EditIcon } from '@/shared/ui';
 import ProfileEditForm from './ProfileEditForm';
 
 export default function ProfileClient() {

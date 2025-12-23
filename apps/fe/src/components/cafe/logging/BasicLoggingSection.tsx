@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import PhotoUpload from '@/components/ui/PhotoUpload';
+import { PhotoUpload } from '@/shared/ui';
 import { Input } from '@/components/ui';
 
 interface BasicLoggingSectionProps {

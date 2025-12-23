@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import Logo from '@/components/ui/Logo';
+import { Logo } from '@/shared/ui';
 import MobileMenu from './MobileMenu';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';

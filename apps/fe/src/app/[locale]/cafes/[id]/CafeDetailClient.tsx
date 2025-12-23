@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { CafeDetailResponse } from '@/types/api';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
-import StarRating from '@/components/ui/StarRating';
+import { StarRating } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 
 interface CafeDetailClientProps {

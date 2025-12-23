@@ -9,8 +9,8 @@ import { CoffeeLog, LogFormData } from '@/types/api';
 import CoffeeLogCard from '@/components/cafe/CoffeeLogCard';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import CafeSearchModal from '@/components/cafe/CafeSearchModal';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import ErrorAlert from '@/components/ui/ErrorAlert';
+import { LoadingSpinner } from '@/shared/ui';
+import { ErrorAlert } from '@/shared/ui';
 import { WriteIcon} from '@/components/ui';
 
 type FilterType = 'all' | 'public' | 'private';

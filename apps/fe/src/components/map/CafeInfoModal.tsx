@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+import { Badge } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 
 interface CafeInfoModalProps {
   cafe: CafeMapData;

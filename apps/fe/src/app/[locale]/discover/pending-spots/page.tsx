@@ -6,7 +6,7 @@ import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getPendingCafes } from '@/lib/api/cafes';
 import { CafeSearchResponse} from '@/types/api';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { LoadingSpinner } from '@/shared/ui';
 import { PlusIcon } from '@/components/ui';
 
 export default function PendingSpotsPage() {

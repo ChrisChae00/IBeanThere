@@ -10,7 +10,7 @@ import { CafeMapData } from '@/types/map';
 import { calculateDistance } from '@/lib/utils/checkIn';
 import { DropBeanButton, GrowthIcon } from '@/components/cafe';
 import { Button, LoadingSpinner } from '@/components/ui';
-import LocationIcon from '@/components/ui/LocationIcon';
+import { LocationIcon } from '@/shared/ui';
 
 const NEARBY_RADIUS_METERS = 50;
 
