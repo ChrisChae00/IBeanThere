@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/shared/ui';
 import { Button } from '@/shared/ui';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { useTheme } from '@/contexts/ThemeContext';
 import PasswordChangeForm from './PasswordChangeForm';
 

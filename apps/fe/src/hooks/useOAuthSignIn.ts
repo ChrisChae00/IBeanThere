@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { useErrorTranslator } from './useErrorTranslator';
 
 type OAuthProvider = 'google' | 'facebook';

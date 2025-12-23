@@ -1,7 +1,7 @@
 import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse } from '@/types/api';
 
 async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/lib/supabase/client');
+  const { createClient } = await import('@/shared/lib/supabase/client');
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   

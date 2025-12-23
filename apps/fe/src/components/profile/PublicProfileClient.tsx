@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { UserPublicResponse, TrustedUser } from '@/types/api';
 import { Avatar } from '@/shared/ui';
 import { AchievementBadge } from '@/shared/ui';

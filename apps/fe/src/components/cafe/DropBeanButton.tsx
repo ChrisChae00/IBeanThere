@@ -147,7 +147,7 @@ export default function DropBeanButton({
   };
 
   const getAccessToken = async (): Promise<string> => {
-    const { createClient } = await import('@/lib/supabase/client');
+    const { createClient } = await import('@/shared/lib/supabase/client');
     const supabase = createClient();
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token || '';

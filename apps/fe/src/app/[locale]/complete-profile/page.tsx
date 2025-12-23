@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import AuthLayout from '@/components/auth/AuthLayout';
-import CompleteProfileForm from '@/components/auth/CompleteProfileForm';
+import { AuthLayout } from '@/components/auth';
+import { CompleteProfileForm } from '@/components/auth';
 import { User, Coffee, Shield } from 'lucide-react';
 
 export default function CompleteProfilePage({

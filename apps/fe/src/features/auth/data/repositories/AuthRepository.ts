@@ -4,7 +4,7 @@
  * Implements IAuthRepository using Supabase and API
  */
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { IAuthRepository, AuthSession, UserProfile } from '../../domain';
 import { UserProfileDTO } from '../dto/UserDTO';
 import { Result, success, failure } from '@/shared/types';

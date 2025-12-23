@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function AuthWatcher() {
+export function AuthWatcher() {
   const { needsProfileSetup, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

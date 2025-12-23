@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { UserResponse, TasteTag } from '@/types/api';
-import { createClient } from '@/lib/supabase/client';
-import { uploadAvatar, validateImageFile } from '@/lib/supabase/storage';
+import { createClient } from '@/shared/lib/supabase/client';
+import { uploadAvatar, validateImageFile } from '@/shared/lib/supabase/storage';
 import { AvatarUpload, Button, Input } from '@/shared/ui';
 import TasteTagSelector from './TasteTagSelector';
 

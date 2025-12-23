@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/shared/lib/supabase/server';
 import ProfileClient from '@/components/profile/ProfileClient';
 
 export default async function ProfilePage({

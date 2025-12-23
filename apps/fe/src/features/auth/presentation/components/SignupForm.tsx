@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
 import {
@@ -22,7 +22,7 @@ interface SignupFormProps {
   locale: string;
 }
 
-export default function SignupForm({ locale }: SignupFormProps) {
+export function SignupForm({ locale }: SignupFormProps) {
   const t = useTranslations('auth');
   const tErrors = useTranslations('errors');
   const [formData, setFormData] = useState({
