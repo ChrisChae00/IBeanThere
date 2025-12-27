@@ -529,6 +529,17 @@ async def get_cafe_details(cafe_identifier: str):
                     "author_display_name": author_display_name
                 })
         
+        # Get total beans dropped at this cafe
+        total_beans_dropped = 0
+        try:
+            beans_result = supabase.table("cafe_beans").select("drop_count").eq("cafe_id", cafe_id).execute()
+            print(f"[DEBUG] get_cafe_details cafe_id={cafe_id}, beans_result={beans_result.data}")
+            if beans_result.data:
+                total_beans_dropped = sum(bean.get("drop_count", 0) for bean in beans_result.data)
+        except Exception as e:
+            print(f"[DEBUG] beans query error: {e}")
+            pass  # Silently handle if table doesn't exist or query fails
+        
         response = {
             "id": cafe.get("id", ""),
             "name": cafe.get("name", ""),
@@ -551,7 +562,8 @@ async def get_cafe_details(cafe_identifier: str):
             "updated_at": updated_at,
             "average_rating": float(average_rating) if average_rating else None,
             "log_count": log_count,
-            "recent_logs": recent_logs
+            "recent_logs": recent_logs,
+            "total_beans_dropped": total_beans_dropped
         }
         
         # Populate Founding Crew details
