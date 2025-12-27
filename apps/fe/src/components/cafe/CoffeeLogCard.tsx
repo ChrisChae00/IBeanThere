@@ -123,7 +123,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     } else if (diffDays < 7) {
       return t('days_ago', { count: diffDays });
     } else {
-      return date.toLocaleDateString();
+      return date.toISOString().split('T')[0];
     }
   };
 

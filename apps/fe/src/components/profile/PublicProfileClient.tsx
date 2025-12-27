@@ -248,7 +248,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
               )}
               
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-                {t('member_since', { date: new Date(profile.created_at).toLocaleDateString() })}
+                {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
               </span>
             </div>
           </div>

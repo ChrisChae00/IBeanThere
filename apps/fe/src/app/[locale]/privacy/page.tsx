@@ -30,7 +30,7 @@ export default async function PrivacyPage({
         <div className="bg-[var(--color-background)] p-4 rounded border border-[var(--color-border)] mb-8 text-sm text-[var(--color-text-secondary)]">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
-            {tLegal('last_updated', { date: new Date().toLocaleDateString() })}
+            {tLegal('last_updated', { date: new Date().toISOString().split('T')[0] })}
           </p>
         </div>
 

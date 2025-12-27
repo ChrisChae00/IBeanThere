@@ -207,7 +207,6 @@ export default function DropBeanButton({
         disabled={!canDrop || isLoading || locationLoading}
         loading={isLoading || locationLoading}
         className={sizeClasses[size]}
-        leftIcon={<span className="text-lg">🫘</span>}
       >
         {canDrop ? t('button') : t('already_today')}
       </Button>

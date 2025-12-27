@@ -181,6 +181,7 @@ export interface CafeDetailResponse {
   average_rating?: number;
   log_count: number;
   recent_logs?: CoffeeLog[];
+  total_beans_dropped?: number;
 }
 
 export interface CafeLogsResponse {

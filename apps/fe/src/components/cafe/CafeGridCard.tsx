@@ -4,28 +4,24 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { TrendingCafeResponse } from '@/types/api';
 import CafeCardImage from './CafeCardImage';
+import DropBeanButton from './DropBeanButton';
 import { getCafePath } from '@/lib/utils/slug';
 import { extractCity } from '@/lib/utils/address';
 
 interface CafeGridCardProps {
   cafe: TrendingCafeResponse;
   locale: string;
-  onCheckIn?: (cafeId: string) => void;
 }
 
-export default function CafeGridCard({ cafe, locale, onCheckIn }: CafeGridCardProps) {
+export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
   const tMap = useTranslations('map');
-  const tVisit = useTranslations('visit');
   
   const cafeImage = cafe.main_image || cafe.image;
   const cafePath = getCafePath(cafe, locale);
 
-  const handleCheckIn = (e: React.MouseEvent) => {
+  const handleDropBeanClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onCheckIn) {
-      onCheckIn(cafe.id);
-    }
   };
 
   return (
@@ -45,12 +41,15 @@ export default function CafeGridCard({ cafe, locale, onCheckIn }: CafeGridCardPr
           <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
             🔥 {tMap('trending')}
           </span>
-          <button 
-            onClick={handleCheckIn}
-            className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[var(--color-secondary)] transition-colors whitespace-nowrap"
-          >
-            {tVisit('check_in_button')}
-          </button>
+          <div onClick={handleDropBeanClick}>
+            <DropBeanButton
+              cafeId={cafe.id}
+              cafeLat={cafe.latitude}
+              cafeLng={cafe.longitude}
+              size="sm"
+              showGrowthInfo={false}
+            />
+          </div>
         </div>
       </div>
     </Link>

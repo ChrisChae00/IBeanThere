@@ -13,6 +13,12 @@ module.exports = withNextIntl({
         port: '',
         pathname: '/uxpilot-auth.appspot.com/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'fzejqetlgfckydwpywdv.supabase.co',
+        port: '',
+        pathname: '/storage/**',
+      },
     ],
   },
 });

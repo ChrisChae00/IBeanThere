@@ -205,6 +205,13 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <span className="truncate">{t('coffee_logs_item_1')}</span>
                   </Link>
                   <Link 
+                    href={`/${locale}/my-beans`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
+                  >
+                    <span className="truncate">{t('my_beans')}</span>
+                  </Link>
+                  <Link 
                     href={`/${locale}/my-coffee-logs/stats`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"

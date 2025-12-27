@@ -78,6 +78,24 @@
       "view_cafe_map": "View Cafe Map",
       "register_new_cafe": "Register New Cafe"
     },
+    "my_beans": {
+      "title": "My Coffee Forest",
+      "subtitle": "Watch your beans grow at every cafe you visit",
+      "login_required_title": "Sign in to see your beans",
+      "login_required_description": "Track your coffee journey and watch your beans grow",
+      "sign_in": "Sign In",
+      "loading": "Loading your beans...",
+      "stats": {
+        "cafes": "Cafes",
+        "drops": "Total Drops",
+        "highest": "Highest Level"
+      },
+      "empty": {
+        "title": "No beans yet",
+        "description": "Start dropping beans at cafes near you to grow your coffee forest!",
+        "cta": "Drop Your First Bean"
+      }
+    },
     "landing": {
       "hero": {
         "title": "Your Coffee Journey Starts Here",
@@ -504,6 +522,7 @@
         "view_on_google_maps": "View on Google Maps",
         "average_rating": "Average Rating",
         "total_logs": "Total Logs",
+        "beans_dropped": "🫘 Beans Dropped",
         "logs": "logs",
         "coffee_logs": "Coffee Logs",
         "write_log": "Write Log",
