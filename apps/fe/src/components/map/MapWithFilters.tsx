@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import LoadingSpinner from '../ui/LoadingSpinner';
-
+import { LoadingSpinner, RefreshIcon, UserLocationIcon } from '@/shared/ui';
 const InteractiveMap = dynamic(() => import('./InteractiveMap'), {
   loading: () => <div className="h-full w-full flex items-center justify-center"><LoadingSpinner /></div>,
   ssr: false
@@ -13,8 +12,6 @@ import LocationPermissionOverlay from './LocationPermissionOverlay';
 import NearbyCafeAlert from '../visits/NearbyCafeAlert';
 import FranchiseFilterComponent from './FranchiseFilter';
 import CafeInfoModal from './CafeInfoModal';
-import { RefreshIcon } from '@/components/ui';
-import UserLocationIcon from '../ui/UserLocationIcon';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';

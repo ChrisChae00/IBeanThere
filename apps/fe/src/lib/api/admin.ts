@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/lib/supabase/client');
+  const { createClient } = await import('@/shared/lib/supabase/client');
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
   

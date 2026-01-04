@@ -60,7 +60,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
     if (diffDays === 0) return t('today');
     if (diffDays === 1) return t('yesterday');
     if (diffDays < 7) return t('days_ago', { count: diffDays });
-    return date.toLocaleDateString();
+    return date.toISOString().split('T')[0];
   };
 
   return (

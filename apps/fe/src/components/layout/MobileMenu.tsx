@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar } from '@/components/ui/Avatar';
-import Logo from '@/components/ui/Logo';
+import { Avatar } from '@/shared/ui';
+import { Logo } from '@/shared/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -123,22 +123,31 @@ export default function MobileMenu({ locale }: { locale: string }) {
 
             <div className="h-px bg-[var(--color-border)] mx-6" />
 
-            {/* Discover Section - Expandable */}
+            {/* Discover Section - Click text to navigate, chevron to expand */}
             <div>
-              <button
-                onClick={toggleDiscover}
-                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
-              >
-                <span className="truncate">{t('discover')}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] transition-colors font-medium min-h-[44px] min-w-0 group">
+                <Link 
+                  href={`/${locale}/discover/explore-map`}
+                  onClick={closeMenu}
+                  className="flex-1 truncate hover:text-[var(--color-primary)] transition-colors"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  {t('discover')}
+                </Link>
+                <button
+                  onClick={toggleDiscover}
+                  className="p-2 -mr-2 hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] rounded-lg transition-colors"
+                  aria-label="Toggle discover submenu"
+                >
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
               
               {isDiscoverExpanded && (
                 <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
@@ -148,6 +157,13 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
                     <span className="truncate">{t('explore_map')}</span>
+                  </Link>
+                  <Link 
+                    href={`/${locale}/discover/dropbean`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
+                  >
+                    <span className="truncate">{t('dropbean')}</span>
                   </Link>
                   <Link 
                     href={`/${locale}/discover/pending-spots`}
@@ -187,6 +203,13 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
                     <span className="truncate">{t('coffee_logs_item_1')}</span>
+                  </Link>
+                  <Link 
+                    href={`/${locale}/my-beans`}
+                    onClick={closeMenu}
+                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
+                  >
+                    <span className="truncate">{t('my_beans')}</span>
                   </Link>
                   <Link 
                     href={`/${locale}/my-coffee-logs/stats`}

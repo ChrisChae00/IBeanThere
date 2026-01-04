@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LogFormData, CoffeeLog } from '@/types/api';
-import ToggleButton from '@/components/ui/ToggleButton';
+import { ToggleButton } from '@/shared/ui';
 import { Button } from '@/components/ui';
 import BasicLoggingSection from './logging/BasicLoggingSection';
 import AdvancedCoffeeSection from './logging/AdvancedCoffeeSection';

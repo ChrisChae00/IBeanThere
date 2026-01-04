@@ -8,8 +8,8 @@ import { useLocation } from '@/hooks/useLocation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
 import RegisterCafeForm from '@/components/cafe/RegisterCafeForm';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import UserLocationIcon from '@/components/ui/UserLocationIcon';
+import { LoadingSpinner } from '@/shared/ui';
+import { UserLocationIcon } from '@/shared/ui';
 
 const InteractiveMap = dynamic(() => import('@/components/map/InteractiveMap'), {
   ssr: false,

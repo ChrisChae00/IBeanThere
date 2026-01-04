@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import { CafeDetailResponse } from '@/types/api';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
-import StarRating from '@/components/ui/StarRating';
+import DropBeanButton from '@/components/cafe/DropBeanButton';
+import { StarRating } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 
 interface CafeDetailClientProps {
@@ -35,24 +36,37 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <h1 className="text-3xl font-bold text-[var(--color-cardText)] mb-4">{cafe.name}</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-[var(--color-cardText)]">{cafe.name}</h1>
+          <DropBeanButton
+            cafeId={cafe.id}
+            cafeLat={cafe.latitude}
+            cafeLng={cafe.longitude}
+            size="md"
+            showGrowthInfo={true}
+          />
+        </div>
         <div className="h-px bg-[var(--color-border)] mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
 
       {/* Stats Card */}
-      {cafe.average_rating && (
+      {(cafe.average_rating || cafe.total_beans_dropped) && (
         <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('average_rating')}</p>
               <p className="text-2xl font-bold text-[var(--color-cardText)]">
-                {cafe.average_rating.toFixed(1)}/5
+                {cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-'}
               </p>
             </div>
             <div>
               <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('total_logs')}</p>
               <p className="text-2xl font-bold text-[var(--color-cardText)]">{cafe.log_count}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('beans_dropped') || '🫘 심긴 콩'}</p>
+              <p className="text-2xl font-bold text-[var(--color-primary)]">{cafe.total_beans_dropped || 0}</p>
             </div>
           </div>
         </div>

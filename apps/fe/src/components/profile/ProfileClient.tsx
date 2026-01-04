@@ -3,13 +3,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { UserResponse, TasteTag as TasteTagType } from '@/types/api';
-import { Avatar } from '@/components/ui/Avatar';
-import AchievementBadge from '@/components/ui/AchievementBadge';
-import TasteTag from '@/components/ui/TasteTag';
-import Button from '@/components/ui/Button';
-import EditIcon from '@/components/ui/EditIcon';
+import { Avatar } from '@/shared/ui';
+import { AchievementBadge } from '@/shared/ui';
+import { TasteTag } from '@/shared/ui';
+import { Button } from '@/shared/ui';
+import { EditIcon } from '@/shared/ui';
 import ProfileEditForm from './ProfileEditForm';
 
 export default function ProfileClient() {
@@ -177,7 +177,7 @@ export default function ProfileClient() {
               )}
               
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-                {t('member_since', { date: new Date(profile.created_at).toLocaleDateString() })}
+                {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
               </span>
             </div>
 

@@ -303,6 +303,14 @@ async def get_community_feed(
         # Build response items
         items = []
         for v in visits.data if visits.data else []:
+            # Safely get cafe and user data
+            cafe_data = v.get("cafes") or {}
+            user_data = v.get("users") or {}
+            
+            # Skip if essential data is missing
+            if not cafe_data or not user_data:
+                continue
+            
             # Get like count for this visit
             like_count_result = supabase.table("visit_likes").select("id", count="exact").eq("visit_id", v["id"]).execute()
             like_count = like_count_result.count if like_count_result.count is not None else 0
@@ -314,11 +322,11 @@ async def get_community_feed(
             items.append(CommunityFeedItem(
                 id=v["id"],
                 cafe_id=v["cafe_id"],
-                cafe_name=v["cafes"]["name"],
+                cafe_name=cafe_data.get("name", "Unknown Cafe"),
                 user_id=v["user_id"],
-                username=v["users"]["username"],
-                display_name=v["users"]["display_name"] or v["users"]["username"],
-                avatar_url=v["users"].get("avatar_url"),
+                username=user_data.get("username", "unknown"),
+                display_name=user_data.get("display_name") or user_data.get("username", "unknown"),
+                avatar_url=user_data.get("avatar_url"),
                 visited_at=v["visited_at"],
                 rating=v.get("rating"),
                 comment=v.get("comment"),

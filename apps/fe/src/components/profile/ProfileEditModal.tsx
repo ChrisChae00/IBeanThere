@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { UserResponse } from '@/types/api';
-import Modal from '@/components/ui/Modal';
+import { Modal } from '@/shared/ui';
 import ProfileEditForm from './ProfileEditForm';
 
 interface ProfileEditModalProps {

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import {
   ErrorAlert,
   Button,
@@ -16,7 +16,7 @@ interface CompleteProfileFormProps {
   returnUrl?: string; // Where to redirect after success
 }
 
-export default function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfileFormProps) {
+export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfileFormProps) {
   const t = useTranslations('auth'); // Reuse auth translations
   const tErrors = useTranslations('errors');
   const [formData, setFormData] = useState({

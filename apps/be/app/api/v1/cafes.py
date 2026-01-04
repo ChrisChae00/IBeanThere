@@ -529,6 +529,17 @@ async def get_cafe_details(cafe_identifier: str):
                     "author_display_name": author_display_name
                 })
         
+        # Get total beans dropped at this cafe
+        total_beans_dropped = 0
+        try:
+            beans_result = supabase.table("cafe_beans").select("drop_count").eq("cafe_id", cafe_id).execute()
+            print(f"[DEBUG] get_cafe_details cafe_id={cafe_id}, beans_result={beans_result.data}")
+            if beans_result.data:
+                total_beans_dropped = sum(bean.get("drop_count", 0) for bean in beans_result.data)
+        except Exception as e:
+            print(f"[DEBUG] beans query error: {e}")
+            pass  # Silently handle if table doesn't exist or query fails
+        
         response = {
             "id": cafe.get("id", ""),
             "name": cafe.get("name", ""),
@@ -551,7 +562,8 @@ async def get_cafe_details(cafe_identifier: str):
             "updated_at": updated_at,
             "average_rating": float(average_rating) if average_rating else None,
             "log_count": log_count,
-            "recent_logs": recent_logs
+            "recent_logs": recent_logs,
+            "total_beans_dropped": total_beans_dropped
         }
         
         # Populate Founding Crew details
@@ -1234,4 +1246,297 @@ async def admin_delete_cafe(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete cafe: {str(e)}"
+        )
+
+
+# =========================================================
+# Drop Bean Feature
+# =========================================================
+
+def calculate_growth_level(drop_count: int) -> int:
+    """Calculate growth level based on drop count."""
+    if drop_count >= 15:
+        return 5  # Fruiting Tree
+    elif drop_count >= 10:
+        return 4  # Sapling
+    elif drop_count >= 5:
+        return 3  # Growing
+    elif drop_count >= 3:
+        return 2  # Sprouting
+    return 1  # Sleeping Bean
+
+
+GROWTH_LEVEL_NAMES = {
+    1: "Sleeping Bean",
+    2: "Sprouting",
+    3: "Growing",
+    4: "Sapling",
+    5: "Fruiting Tree"
+}
+
+
+@router.post("/{cafe_id}/drop-bean")
+async def drop_bean(
+    cafe_id: str,
+    user_lat: float = Query(..., ge=-90, le=90, description="User's current latitude"),
+    user_lng: float = Query(..., ge=-180, le=180, description="User's current longitude"),
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Drop a bean at a cafe.
+    
+    - Requires user to be within 50m of the cafe
+    - Limited to once per day per cafe
+    - Updates growth level based on total drops
+    
+    Growth Levels:
+    - Lv 1: Sleeping Bean (1 drop)
+    - Lv 2: Sprouting (3 drops)
+    - Lv 3: Growing (5 drops)
+    - Lv 4: Sapling (10 drops)
+    - Lv 5: Fruiting Tree (15 drops)
+    """
+    try:
+        # 1. Check if cafe exists
+        cafe_result = supabase.table("cafes").select("id, name, latitude, longitude").eq("id", cafe_id).single().execute()
+        
+        if not cafe_result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        cafe = cafe_result.data
+        cafe_lat = float(cafe.get("latitude", 0))
+        cafe_lng = float(cafe.get("longitude", 0))
+        
+        # 2. Distance verification (50m limit)
+        distance = calculate_earth_distance(user_lat, user_lng, cafe_lat, cafe_lng)
+        max_distance = 50  # meters
+        
+        if distance > max_distance:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You must be within {max_distance}m of the cafe to drop a bean. Current distance: {distance:.0f}m"
+            )
+        
+        # 3. Check for existing bean record (user + cafe)
+        bean_result = supabase.table("cafe_beans").select("*").eq(
+            "cafe_id", cafe_id
+        ).eq(
+            "user_id", current_user.id
+        ).execute()
+        
+        existing_bean = bean_result.data[0] if bean_result.data else None
+        
+        # 4. Check daily limit - already dropped today?
+        today = datetime.now(timezone.utc).date().isoformat()
+        
+        if existing_bean:
+            # Check if dropped today
+            last_dropped = existing_bean.get("last_dropped_at")
+            if last_dropped:
+                last_dropped_date = date_parser.parse(last_dropped).date().isoformat()
+                if last_dropped_date == today:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="You have already dropped a bean here today. Come back tomorrow!"
+                    )
+        
+        # 5. Create or update bean record
+        if existing_bean:
+            # Update existing bean
+            new_drop_count = existing_bean.get("drop_count", 1) + 1
+            new_growth_level = calculate_growth_level(new_drop_count)
+            
+            supabase.table("cafe_beans").update({
+                "drop_count": new_drop_count,
+                "growth_level": new_growth_level,
+                "last_latitude": user_lat,
+                "last_longitude": user_lng,
+                "last_dropped_at": datetime.now(timezone.utc).isoformat()
+            }).eq("id", existing_bean["id"]).execute()
+            
+            bean_id = existing_bean["id"]
+            drop_count = new_drop_count
+            growth_level = new_growth_level
+            
+        else:
+            # Create new bean
+            new_bean = supabase.table("cafe_beans").insert({
+                "cafe_id": cafe_id,
+                "user_id": current_user.id,
+                "drop_count": 1,
+                "growth_level": 1,
+                "last_latitude": user_lat,
+                "last_longitude": user_lng,
+                "first_dropped_at": datetime.now(timezone.utc).isoformat(),
+                "last_dropped_at": datetime.now(timezone.utc).isoformat()
+            }).execute()
+            
+            bean_id = new_bean.data[0]["id"]
+            drop_count = 1
+            growth_level = 1
+        
+        # 6. Record the drop in cafe_bean_drops
+        supabase.table("cafe_bean_drops").insert({
+            "bean_id": bean_id,
+            "user_id": current_user.id,
+            "cafe_id": cafe_id,
+            "latitude": user_lat,
+            "longitude": user_lng,
+            "dropped_at": datetime.now(timezone.utc).isoformat()
+        }).execute()
+        
+        # 7. Check for level up
+        old_level = existing_bean.get("growth_level", 0) if existing_bean else 0
+        leveled_up = growth_level > old_level
+        
+        return {
+            "message": "Bean dropped successfully!",
+            "cafe_id": cafe_id,
+            "cafe_name": cafe.get("name"),
+            "drop_count": drop_count,
+            "growth_level": growth_level,
+            "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
+            "leveled_up": leveled_up,
+            "next_level_at": get_next_level_threshold(drop_count)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error dropping bean: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to drop bean: {str(e)}"
+        )
+
+
+def get_next_level_threshold(current_drops: int) -> Optional[int]:
+    """Get the drop count needed for next level."""
+    thresholds = [3, 5, 10, 15]
+    for threshold in thresholds:
+        if current_drops < threshold:
+            return threshold
+    return None  # Already max level
+
+
+@router.get("/{cafe_id}/my-bean")
+async def get_my_bean(
+    cafe_id: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get user's bean status for a specific cafe.
+    Returns drop count, growth level, and whether they can drop today.
+    """
+    try:
+        # Get bean record
+        bean_result = supabase.table("cafe_beans").select("*").eq(
+            "cafe_id", cafe_id
+        ).eq(
+            "user_id", current_user.id
+        ).execute()
+        
+        if not bean_result.data:
+            return {
+                "has_bean": False,
+                "drop_count": 0,
+                "growth_level": 0,
+                "growth_level_name": None,
+                "can_drop_today": True,
+                "next_level_at": 1
+            }
+        
+        bean = bean_result.data[0]
+        
+        # Check if can drop today
+        today = datetime.now(timezone.utc).date().isoformat()
+        last_dropped = bean.get("last_dropped_at")
+        can_drop_today = True
+        
+        if last_dropped:
+            last_dropped_date = date_parser.parse(last_dropped).date().isoformat()
+            can_drop_today = last_dropped_date != today
+        
+        growth_level = bean.get("growth_level", 1)
+        drop_count = bean.get("drop_count", 1)
+        
+        return {
+            "has_bean": True,
+            "drop_count": drop_count,
+            "growth_level": growth_level,
+            "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
+            "can_drop_today": can_drop_today,
+            "first_dropped_at": bean.get("first_dropped_at"),
+            "last_dropped_at": bean.get("last_dropped_at"),
+            "next_level_at": get_next_level_threshold(drop_count)
+        }
+        
+    except Exception as e:
+        print(f"Error getting bean: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get bean status: {str(e)}"
+        )
+
+
+@router.get("/user/beans")
+async def get_user_beans(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0)
+):
+    """
+    Get all beans for current user (for My Beans page / heatmap).
+    Includes cafe info and growth status.
+    """
+    try:
+        # Get user's beans with cafe info
+        beans_result = supabase.table("cafe_beans").select(
+            "*, cafes(id, name, slug, address, latitude, longitude)"
+        ).eq(
+            "user_id", current_user.id
+        ).order(
+            "last_dropped_at", desc=True
+        ).range(offset, offset + limit - 1).execute()
+        
+        beans = []
+        for bean in (beans_result.data or []):
+            cafe = bean.get("cafes", {})
+            growth_level = bean.get("growth_level", 1)
+            
+            beans.append({
+                "id": bean.get("id"),
+                "cafe_id": bean.get("cafe_id"),
+                "cafe_name": cafe.get("name"),
+                "cafe_slug": cafe.get("slug"),
+                "cafe_address": cafe.get("address"),
+                "latitude": cafe.get("latitude"),
+                "longitude": cafe.get("longitude"),
+                "drop_count": bean.get("drop_count"),
+                "growth_level": growth_level,
+                "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
+                "first_dropped_at": bean.get("first_dropped_at"),
+                "last_dropped_at": bean.get("last_dropped_at")
+            })
+        
+        return {
+            "beans": beans,
+            "total_count": len(beans),
+            "offset": offset,
+            "limit": limit
+        }
+        
+    except Exception as e:
+        print(f"Error getting user beans: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get user beans: {str(e)}"
         )

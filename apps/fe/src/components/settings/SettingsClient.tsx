@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import { createClient } from '@/lib/supabase/client';
+import { Card } from '@/shared/ui';
+import { Button } from '@/shared/ui';
+import { createClient } from '@/shared/lib/supabase/client';
 import { useTheme } from '@/contexts/ThemeContext';
 import PasswordChangeForm from './PasswordChangeForm';
 

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { CoffeeLog } from '@/types/api';
 import { getCafeLogs } from '@/lib/api/logs';
 import CoffeeLogCard from './CoffeeLogCard';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { LoadingSpinner } from '@/shared/ui';
 
 interface CoffeeLogFeedProps {
   cafeId: string;

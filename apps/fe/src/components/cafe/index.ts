@@ -7,3 +7,5 @@ export { default as CafeCardImage } from './CafeCardImage';
 export { default as TrendingCafeCard } from './TrendingCafeCard';
 export { default as CafeGridCard } from './CafeGridCard';
 export { default as TrendingCafesSection } from './TrendingCafesSection';
+export { default as DropBeanButton } from './DropBeanButton';
+export { GrowthIcon, GROWTH_THRESHOLDS, getGrowthLevel } from './GrowthIcon';

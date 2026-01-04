@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { LoadingSpinner } from '@/shared/ui';
 
 const MapWithFilters = dynamic(() => import('./MapWithFilters'), {
   ssr: false,

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { NearbyCafe } from '@/types/map';
 import { calculateDistance } from '@/lib/utils/checkIn';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import UserLocationIcon from '../ui/UserLocationIcon';
+import { LoadingSpinner } from '@/shared/ui';
+import { UserLocationIcon } from '@/shared/ui';
 
 interface NearbyCafeAlertProps {
   cafes: NearbyCafe[];

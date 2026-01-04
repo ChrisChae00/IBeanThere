@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/shared/lib/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { BadgeInfo, BadgeResponse } from '@/types/api';
 import BadgeCard from './BadgeCard';

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { TasteTag as TasteTagType } from '@/types/api';
-import TasteTag from '../ui/TasteTag';
+import { TasteTag } from '@/shared/ui';
 
 const ALL_TASTE_TAGS: TasteTagType[] = [
   'acidic',

@@ -6,8 +6,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
 import { Card } from '@/components/ui';
-import StarRating from '@/components/ui/StarRating';
-import { Avatar } from '@/components/ui/Avatar';
+import { StarRating } from '@/shared/ui';
+import { Avatar } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { getCafeDetail } from '@/lib/api/cafes';
 import { getCafePath } from '@/lib/utils/slug';
@@ -123,7 +123,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     } else if (diffDays < 7) {
       return t('days_ago', { count: diffDays });
     } else {
-      return date.toLocaleDateString();
+      return date.toISOString().split('T')[0];
     }
   };
 

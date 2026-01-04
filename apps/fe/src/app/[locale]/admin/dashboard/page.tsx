@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/shared/lib/supabase/server';
 import AdminDashboardClient from '@/components/admin/AdminDashboardClient';
 
 export default async function AdminDashboardPage({

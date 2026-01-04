@@ -82,6 +82,7 @@ class CafeResponse(BaseModel):
     average_rating: Optional[float] = None
     log_count: int = 0
     recent_logs: Optional[List[Dict[str, Any]]] = None
+    total_beans_dropped: int = 0
     
     class Config:
         from_attributes = True

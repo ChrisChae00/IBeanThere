@@ -8,12 +8,12 @@ import { searchCafes } from '@/lib/api/cafes';
 import { calculateDistance } from '@/lib/utils/checkIn';
 import { CafeMapData } from '@/types/map';
 import { CafeSearchResponse } from '@/types/api';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import ErrorAlert from '@/components/ui/ErrorAlert';
-import LocationIcon from '@/components/ui/LocationIcon';
-import SearchIcon from '@/components/ui/SearchIcon';
+import { LoadingSpinner } from '@/shared/ui';
+import { ErrorAlert } from '@/shared/ui';
+import { LocationIcon } from '@/shared/ui';
+import { SearchIcon } from '@/shared/ui';
 import { Modal, Input, Button } from '@/components/ui';
-import CoffeeIcon from '@/components/ui/CoffeeIcon';
+import { CoffeeIcon } from '@/shared/ui';
 
 interface CafeSearchModalProps {
   onClose: () => void;

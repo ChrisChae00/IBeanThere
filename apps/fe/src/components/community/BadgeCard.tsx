@@ -15,7 +15,7 @@ export default function BadgeCard({ badge, isUnlocked, awardedAt }: BadgeCardPro
   const t = useTranslations('community');
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toISOString().split('T')[0];
   };
 
   return (

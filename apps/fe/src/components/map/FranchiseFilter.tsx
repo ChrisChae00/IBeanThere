@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { FranchiseFilter } from '@/types/map';
-import SearchIcon from '@/components/ui/SearchIcon';
+import { SearchIcon } from '@/shared/ui';
 
 interface FranchiseFilterProps {
   filter: FranchiseFilter;

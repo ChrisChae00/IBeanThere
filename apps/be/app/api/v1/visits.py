@@ -187,6 +187,49 @@ async def record_cafe_visit(
         
         visit = result.data[0]
         
+        # Auto drop bean when logging a visit (log = proof of visit, no location check needed)
+        try:
+            from datetime import timedelta
+            
+            today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            # Check if already dropped today
+            existing_bean = supabase.table("cafe_beans").select("*").eq(
+                "cafe_id", cafe_id
+            ).eq(
+                "user_id", current_user.id
+            ).single().execute()
+            
+            if existing_bean.data:
+                # Check if already dropped today
+                last_dropped = existing_bean.data.get("last_dropped_at")
+                already_today = False
+                
+                if last_dropped:
+                    from dateutil import parser as date_parser
+                    last_dropped_dt = date_parser.parse(last_dropped)
+                    already_today = last_dropped_dt >= today_start
+                
+                if not already_today:
+                    # Update existing bean
+                    new_count = existing_bean.data.get("drop_count", 0) + 1
+                    supabase.table("cafe_beans").update({
+                        "drop_count": new_count,
+                        "last_dropped_at": datetime.now(timezone.utc).isoformat()
+                    }).eq("id", existing_bean.data["id"]).execute()
+            else:
+                # Create new bean entry
+                supabase.table("cafe_beans").insert({
+                    "cafe_id": cafe_id,
+                    "user_id": current_user.id,
+                    "drop_count": 1,
+                    "first_dropped_at": datetime.now(timezone.utc).isoformat(),
+                    "last_dropped_at": datetime.now(timezone.utc).isoformat()
+                }).execute()
+        except Exception as bean_error:
+            # Log but don't fail the main visit creation
+            print(f"Auto drop bean failed (non-critical): {bean_error}")
+        
         # Format response with all fields
         response_data = {
             "id": visit.get("id"),

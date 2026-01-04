@@ -8,8 +8,8 @@ import { getCafeDetail } from '@/lib/api/cafes';
 import { createLog } from '@/lib/api/logs';
 import { LogFormData, CafeDetailResponse } from '@/types/api';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import ErrorAlert from '@/components/ui/ErrorAlert';
+import { LoadingSpinner } from '@/shared/ui';
+import { ErrorAlert } from '@/shared/ui';
 
 export default function WriteLogPage() {
   const t = useTranslations('cafe.log');
