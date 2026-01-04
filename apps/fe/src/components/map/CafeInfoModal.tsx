@@ -8,6 +8,8 @@ import { CafeMapData } from '@/types/map';
 import { Badge } from '@/shared/ui';
 import { Button } from '@/shared/ui';
 
+import DropBeanButton from '../cafe/DropBeanButton';
+
 interface CafeInfoModalProps {
   cafe: CafeMapData;
   onClose: () => void;
@@ -59,11 +61,11 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
         className="relative bg-[var(--color-cardBackground)] rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-[var(--color-cardBackground)] border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[var(--color-cardText)]">{cafe.name}</h2>
+        <div className="sticky top-0 bg-[var(--color-cardBackground)] border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-xl font-bold text-[var(--color-cardText)] line-clamp-1 flex-1 pr-4">{cafe.name}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors flex-shrink-0"
             aria-label={t('close')}
           >
             <svg
@@ -78,19 +80,35 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
         </div>
 
         <div className="px-6 py-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge
-              variant={cafe.status === 'verified' ? 'success' : 'info'}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={cafe.status === 'verified' ? 'success' : 'info'}
+                size="sm"
+                className="border border-[var(--color-border)]"
+              >
+                {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
+              </Badge>
+              {cafe.status !== 'verified' && cafe.verification_count && (
+                <span className="text-sm text-[var(--color-cardTextSecondary)]">
+                  {t('verifications', { count: cafe.verification_count })}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Drop Bean Action */}
+          <div className="bg-[var(--color-surface)]/50 p-4 rounded-xl border border-[var(--color-border)] flex items-center justify-between gap-4">
+            <div className="text-sm font-medium text-[var(--color-cardText)]">
+              {t('visited_this_cafe')}
+            </div>
+            <DropBeanButton
+              cafeId={cafe.id}
+              cafeLat={cafe.latitude}
+              cafeLng={cafe.longitude}
               size="sm"
-              className="border border-[var(--color-border)]"
-            >
-              {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
-            </Badge>
-            {cafe.status !== 'verified' && cafe.verification_count && (
-              <span className="text-sm text-[var(--color-cardTextSecondary)]">
-                {t('verifications', { count: cafe.verification_count })}
-              </span>
-            )}
+              showGrowthInfo={true}
+            />
           </div>
 
           {/* Address + Google Maps Link */}

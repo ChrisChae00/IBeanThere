@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from '@/hooks/useLocation';
 import { Button } from '@/shared/ui';
-import { GrowthIcon } from '@/components/cafe/GrowthIcon';
+import LoadingSpinner from '@/shared/ui/LoadingSpinner';
+
+import confetti from 'canvas-confetti';
 
 interface DropBeanButtonProps {
   cafeId: string;
@@ -65,6 +67,33 @@ export default function DropBeanButton({
     return R * c;
   };
 
+  const triggerConfetti = () => {
+    const end = Date.now() + 1000;
+
+    const frame = () => {
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#8B4513', '#D2691E', '#CD853F'] // Coffee colors
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#8B4513', '#D2691E', '#CD853F']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+
+    frame();
+  };
+
   const handleDropBean = async () => {
     if (!user) {
       setError(t('login_required'));
@@ -76,7 +105,7 @@ export default function DropBeanButton({
     setSuccess(null);
 
     try {
-      // Get current location
+      // Use existing coords from hook if available, otherwise fetch fresh
       let userLat: number;
       let userLng: number;
 
@@ -91,7 +120,8 @@ export default function DropBeanButton({
 
       // Check distance client-side first
       const distance = calculateDistance(userLat, userLng, cafeLat, cafeLng);
-      if (distance > 50) {
+      // Allow slightly larger radius for better UX (75m instead of 50m strict)
+      if (distance > 75) {
         setError(t('too_far', { distance: Math.round(distance) }));
         setIsLoading(false);
         return;
@@ -134,13 +164,17 @@ export default function DropBeanButton({
         next_level_at: result.next_level_at
       });
       
+      triggerConfetti();
+
       if (onSuccess) {
         onSuccess(result);
       }
 
     } catch (err: any) {
       console.error('Error dropping bean:', err);
-      setError(locationError || t('error'));
+      // Prefer specific error message if available
+      const errorMessage = err.message || locationError || t('error');
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -158,69 +192,76 @@ export default function DropBeanButton({
   const dropCount = beanStatus?.drop_count || 0;
   const nextLevelAt = beanStatus?.next_level_at;
 
-  // Size classes
-  const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg'
-  };
-
-  if (success) {
-    return (
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex items-center gap-2">
-          <GrowthIcon level={success.growth_level} size={size === 'lg' ? 32 : 24} animate />
-          <span className="text-[var(--color-text)] font-medium">
-            {t('success')}
-          </span>
-        </div>
-        {success.leveled_up && (
-          <div className="text-[var(--color-primary)] font-semibold animate-pulse">
-            🎉 {t('level_up', { level: success.growth_level_name })}
-          </div>
-        )}
-        {showGrowthInfo && (
-          <div className="text-sm text-[var(--color-textSecondary)]">
-            {t('total_drops', { count: success.drop_count })}
-            {success.next_level_at && (
-              <span> • {t('next_level', { drops: success.next_level_at - success.drop_count })}</span>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col items-center gap-2">
-      {showGrowthInfo && beanStatus?.has_bean && (
-        <div className="flex items-center gap-2 mb-1">
-          <GrowthIcon level={growthLevel} size={20} />
-          <span className="text-sm text-[var(--color-textSecondary)]">
-            {beanStatus.growth_level_name} • {t('drops', { count: dropCount })}
-          </span>
+    <div className="relative flex flex-col items-center gap-2">
+      {success ? (
+        <div className="flex flex-col items-center gap-1 text-center animate-in fade-in zoom-in duration-300">
+          <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
+            <span className="font-semibold text-sm">
+              {t('success')}
+            </span>
+          </div>
+          {success.leveled_up && (
+            <div className="text-[var(--color-primary)] text-xs font-bold animate-pulse mt-1">
+              {t('level_up', { level: success.growth_level_name })}
+            </div>
+          )}
         </div>
-      )}
-      
-      <Button
-        onClick={handleDropBean}
-        disabled={!canDrop || isLoading || locationLoading}
-        loading={isLoading || locationLoading}
-        className={sizeClasses[size]}
-      >
-        {canDrop ? t('button') : t('already_today')}
-      </Button>
+      ) : (
+        <>
+          {showGrowthInfo && beanStatus?.has_bean && (
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-xs font-medium text-[var(--color-text-secondary)]">
+                {t('drops', { count: dropCount })}
+              </span>
+            </div>
+          )}
+          
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDropBean();
+            }}
+            disabled={!canDrop || isLoading || locationLoading}
+            size={size}
+            variant="primary"
+            className="whitespace-nowrap shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
+          >
+            {isLoading || locationLoading ? (
+              <div className="flex items-center gap-2">
+                 <LoadingSpinner size="sm" className="text-[var(--color-primaryText)]" />
+                 <span className="opacity-90">{t('button')}</span>
+              </div>
+            ) : (
+              canDrop ? t('button') : t('already_today')
+            )}
+          </Button>
 
-      {error && (
-        <div className="text-sm text-red-500 text-center mt-1">
-          {error}
-        </div>
-      )}
+          {error && (
+             <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 min-w-[200px] w-max max-w-[280px] z-[50]">
+              <div className="bg-red-50 text-red-600 text-xs px-3 py-2 rounded-lg border border-red-100 shadow-lg text-center font-medium animate-in fade-in slide-in-from-top-1">
+                {error}
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setError(null);
+                  }}
+                  className="ml-2 underline opacity-75 hover:opacity-100"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
 
-      {!canDrop && showGrowthInfo && nextLevelAt && (
-        <div className="text-xs text-[var(--color-textSecondary)] text-center">
-          {t('next_level', { drops: nextLevelAt - dropCount })}
-        </div>
+          {!canDrop && showGrowthInfo && nextLevelAt && !error && (
+            <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
+              {t('next_level', { drops: nextLevelAt - dropCount })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

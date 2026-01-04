@@ -527,9 +527,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         <NearbyCafeAlert
           cafes={nearbyCafes}
           userLocation={{ lat: coords.latitude, lng: coords.longitude }}
-          onCheckIn={handleCheckIn}
           onDismiss={handleDismissAlert}
-          isCheckingIn={isCheckingIn}
         />
       )}
 

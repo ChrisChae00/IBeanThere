@@ -516,13 +516,14 @@
         "founding_crew": "Founding Crew",
         "navigator": "Navigator",
         "vanguards": "Vanguards",
-        "first_discoverer": "First discoverer of this cafe"
+        "first_discoverer": "First discoverer of this cafe",
+        "visited_this_cafe": "Have you visited?"
       },
       "detail": {
         "view_on_google_maps": "View on Google Maps",
         "average_rating": "Average Rating",
         "total_logs": "Total Logs",
-        "beans_dropped": "🫘 Beans Dropped",
+        "beans_dropped": "Beans Dropped",
         "logs": "logs",
         "coffee_logs": "Coffee Logs",
         "write_log": "Write Log",

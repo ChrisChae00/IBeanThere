@@ -513,12 +513,13 @@
         "founding_crew": "개척 크루",
         "navigator": "개척자",
         "vanguards": "선봉대",
-        "first_discoverer": "이 카페의 첫 발견자"
+        "first_discoverer": "이 카페의 첫 발견자",
+        "visited_this_cafe": "방문해 보셨나요?"
       },
       "detail": {
         "average_rating": "평균 평점",
         "total_logs": "전체 로그",
-        "beans_dropped": "🫘 심긴 콩",
+        "beans_dropped": "심긴 콩",
         "logs": "개",
         "coffee_logs": "커피 로그",
         "write_log": "로그 작성",

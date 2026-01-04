@@ -27,9 +27,11 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
   return (
     <Link 
       href={cafePath}
-      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden hover:shadow-inset-primary transition-shadow cursor-pointer flex flex-col"
+      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl hover:shadow-inset-primary transition-shadow cursor-pointer flex flex-col relative"
     >
-      <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
+      <div className="overflow-hidden rounded-t-2xl">
+        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
+      </div>
       <div className="p-4">
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1.5 line-clamp-2" title={cafe.name}>
           {cafe.name}
