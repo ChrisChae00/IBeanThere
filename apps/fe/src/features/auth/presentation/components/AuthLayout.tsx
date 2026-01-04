@@ -30,54 +30,68 @@ export function AuthLayout({
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left Side - Branding & Visual (35%) */}
-      <div className="lg:w-1/3 bg-[var(--color-secondary)] relative overflow-hidden p-6 lg:p-8 flex flex-col justify-start pt-40 lg:pt-48 pl-8 lg:pl-16">
-        {/* Background Coffee Beans */}
-        <div className="absolute inset-0 opacity-30 z-0">
-          <div className="absolute top-16 left-16">
-            <CoffeeBean size="lg" className="text-[var(--color-background)] transform rotate-[20deg] scale-[2]" />
+    <div className="min-h-screen flex flex-col md:flex-row font-sans">
+      {/* Left Side - Branding & Visual (33%) */}
+      <div className="w-full md:w-1/3 md:flex-none bg-[var(--color-secondary)] relative overflow-hidden p-8 lg:p-12 flex flex-col justify-between min-h-[300px] md:min-h-screen transition-colors duration-300">
+        
+        {/* Background Coffee Beans - Decorative */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[8%] left-[10%] opacity-10">
+            <CoffeeBean size="lg" className="text-[var(--color-primaryText)] transform rotate-[25deg] scale-[4]" />
           </div>
-          <div className="absolute bottom-[200px] right-12">
-            <CoffeeBean size="lg" className="text-[var(--color-background)] transform scale-[2.5]" />
+          <div className="absolute bottom-[20%] right-[15%] opacity-15">
+            <CoffeeBean size="lg" className="text-[var(--color-primaryText)] transform rotate-[-15deg] scale-[5]" />
           </div>
-          <div className="absolute top-40 right-24">
-            <CoffeeBean size="lg" className="text-[var(--color-background)] transform rotate-[100deg] scale-[1.8]" />
+          <div className="absolute top-[40%] right-[10%] opacity-5">
+             <CoffeeBean size="lg" className="text-[var(--color-primaryText)] transform rotate-[120deg] scale-[2]" />
           </div>
         </div>
 
-        <div className="relative z-10 text-center lg:text-left">
-          {/* Logo */}
-          <div className="flex items-center justify-center lg:justify-start space-x-1 mb-6">
-            <Logo size="md" className="text-[var(--color-background)]" />
-            <span className="text-xl font-semibold text-[var(--color-authText)]">IBeanThere</span>
+        {/* Top: Logo */}
+        <div className="relative z-10">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="p-2 bg-[var(--color-primaryText)]/10 rounded-xl backdrop-blur-sm">
+               <Logo size="md" className="text-[var(--color-primaryText)]" />
+            </div>
+            <span className="text-2xl font-bold text-[var(--color-primaryText)] tracking-tight">IBeanThere</span>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-authText)] mb-3 leading-tight whitespace-pre-line">
+        {/* Middle: Hero Content */}
+        <div className="relative z-10 my-auto">
+          <h1 className="text-2xl lg:text-4xl font-bold text-[var(--color-primaryText)] mb-6 leading-[1.1] tracking-tight whitespace-pre-line drop-shadow-sm">
             {title}
           </h1>
-          <p className="text-base text-[var(--color-authText)] mb-6 max-w-sm mx-auto lg:mx-0 whitespace-pre-line">
+          <p className="text-lg text-[var(--color-primaryText)] mb-10 max-w-md leading-relaxed font-light whitespace-pre-line">
             {subtitle}
           </p>
 
-          {/* Features */}
-          <div className="hidden lg:block space-y-3 text-[var(--color-authText)]">
+          {/* Features List */}
+          <div className="flex flex-col space-y-3 mt-8 md:mt-0">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-[var(--color-authText)]/20 rounded-full flex items-center justify-center">
-                  {feature.icon}
+              <div key={index} className="flex items-center space-x-4 group">
+                <div className="w-10 h-10 bg-[var(--color-primaryText)]/10 rounded-full flex items-center justify-center group-hover:bg-[var(--color-primaryText)]/20 transition-all duration-300 backdrop-blur-sm">
+                  <div className="text-[var(--color-primaryText)]">
+                    {feature.icon}
+                  </div>
                 </div>
-                <span className="text-sm">{feature.text}</span>
+                <span className="text-[var(--color-primaryText)] font-medium text-lg tracking-wide">{feature.text}</span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Bottom space (Copyright removed per user request) */}
+        <div></div>
       </div>
 
-      {/* Right Side - Auth Form (65%) */}
-      <div className="lg:w-2/3 bg-[var(--color-background)] flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-lg">
+      {/* Right Side - Auth Form (66%) */}
+      <div className="w-full md:w-2/3 md:flex-none bg-[var(--color-surface)] flex items-center justify-center p-6 lg:p-16 relative">
+         {/* Decorative subtle gradient for the form area */}
+         <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-r from-transparent to-[var(--color-primary)]/10"></div>
+         
+        {/* Form Container - Widened to 85% */}
+        <div className="w-full md:w-[85%] max-w-4xl bg-[var(--color-cardBackground)]/50 p-8 lg:p-12 rounded-[2rem] shadow-none lg:shadow-xl backdrop-blur-md border border-[var(--color-border)]/20">
           {children}
         </div>
       </div>

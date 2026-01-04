@@ -70,7 +70,7 @@ export default async function Footer({ locale }: { locale: string }) {
 
           {/* Copyright */}
           <p className="text-[var(--color-primaryText)]/60 text-sm">
-            © 2025 {commonT('app_name')}. All rights reserved.
+            © 2026 {commonT('app_name')}. All rights reserved.
           </p>
         </div>
       </div>

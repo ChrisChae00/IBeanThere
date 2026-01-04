@@ -35,7 +35,7 @@ export default async function SignupPage({
         <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-text)] mb-3">
           {t('create_account')}
         </h2>
-        <p className="text-lg text-[var(--color-text-secondary)]">
+        <p className="text-lg text-[var(--color-accent)]">
           {t('create_account_subtitle')}
         </p>
       </div>
