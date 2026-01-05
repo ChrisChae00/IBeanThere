@@ -80,7 +80,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
         <div className="relative">
           {icon && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 text-[var(--color-cardTextSecondary)] ${
+              className={`absolute top-1/2 -translate-y-1/2 z-10 text-[var(--color-cardTextSecondary)] ${
                 iconPosition === 'left' ? 'left-4' : 'right-4'
               }`}
             >

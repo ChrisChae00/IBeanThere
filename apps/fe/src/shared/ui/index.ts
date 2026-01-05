@@ -36,3 +36,6 @@ export { default as Tooltip } from './Tooltip';
 export { default as AchievementBadge } from './AchievementBadge';
 export { default as TasteTag } from './TasteTag';
 export { default as AvatarUpload } from './AvatarUpload';
+export { ArrowLeftIcon } from './ArrowLeftIcon';
+export { CheckCircleIcon } from './CheckCircleIcon';
+

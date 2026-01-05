@@ -533,11 +533,9 @@ async def get_cafe_details(cafe_identifier: str):
         total_beans_dropped = 0
         try:
             beans_result = supabase.table("cafe_beans").select("drop_count").eq("cafe_id", cafe_id).execute()
-            print(f"[DEBUG] get_cafe_details cafe_id={cafe_id}, beans_result={beans_result.data}")
             if beans_result.data:
                 total_beans_dropped = sum(bean.get("drop_count", 0) for bean in beans_result.data)
-        except Exception as e:
-            print(f"[DEBUG] beans query error: {e}")
+        except Exception:
             pass  # Silently handle if table doesn't exist or query fails
         
         response = {

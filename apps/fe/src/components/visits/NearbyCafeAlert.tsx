@@ -3,31 +3,27 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { NearbyCafe } from '@/types/map';
+import DropBeanButton from '../cafe/DropBeanButton';
 import { calculateDistance } from '@/lib/utils/checkIn';
-import { LoadingSpinner } from '@/shared/ui';
 import { UserLocationIcon } from '@/shared/ui';
 
 interface NearbyCafeAlertProps {
   cafes: NearbyCafe[];
   userLocation: { lat: number; lng: number };
-  onCheckIn: (cafe: NearbyCafe) => void;
   onDismiss: () => void;
   autoHideAfter?: number;
-  isCheckingIn?: boolean;
 }
 
 export default function NearbyCafeAlert({
   cafes,
   userLocation,
-  onCheckIn,
   onDismiss,
   autoHideAfter = 120000,
-  isCheckingIn = false
 }: NearbyCafeAlertProps) {
   const t = useTranslations('visit');
+  const tDrop = useTranslations('drop_bean');
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [selectedCafe, setSelectedCafe] = useState<NearbyCafe | null>(null);
   
   const sortedCafes = [...cafes].sort((a, b) => {
     const distanceA = calculateDistance(
@@ -55,15 +51,6 @@ export default function NearbyCafeAlert({
     return () => clearTimeout(hideTimer);
   }, [autoHideAfter]);
 
-  const handleCheckIn = (cafe: NearbyCafe) => {
-    setSelectedCafe(cafe);
-    setIsAnimating(false);
-    setTimeout(() => {
-      setIsVisible(false);
-      onCheckIn(cafe);
-    }, 200);
-  };
-
   const handleDismiss = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -75,43 +62,43 @@ export default function NearbyCafeAlert({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-8 md:max-w-md">
+    <div className="fixed bottom-24 left-4 right-4 z-50 md:left-auto md:right-8 md:max-w-sm">
       <div
         className={`
-          transform transition-all duration-300 ease-out
-          ${isAnimating ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+          transform transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+          ${isAnimating ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
         `}
       >
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
           {/* Header with icon */}
-          <div className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] p-4 flex-shrink-0">
+          <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark,var(--color-secondary))] p-5 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner">
                   <UserLocationIcon size={24} color="white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white/90">
+                  <p className="text-sm font-bold text-white tracking-tight">
                     {t('nearby_cafes_found')}
                   </p>
-                  <p className="text-xs text-white/70">
+                  <p className="text-xs text-white/80 font-medium">
                     {sortedCafes.length} {sortedCafes.length === 1 ? 'cafe' : 'cafes'}
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleDismiss}
-                className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                className="flex-shrink-0 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors text-white"
                 aria-label={t('dismiss')}
               >
-                <span className="text-white text-lg">×</span>
+                <span className="text-xl leading-none">×</span>
               </button>
             </div>
           </div>
 
           {/* Cafe List */}
-          <div className="overflow-y-auto flex-1">
-            <div className="p-4 space-y-3">
+          <div className="max-h-[40vh] overflow-y-auto flex-1 custom-scrollbar">
+            <div className="p-4 space-y-4">
               {sortedCafes.map((cafe) => {
                 const distance = Math.round(
                   calculateDistance(
@@ -125,58 +112,42 @@ export default function NearbyCafeAlert({
                 return (
                   <div
                     key={cafe.id}
-                    className="bg-[var(--color-surface-2)] rounded-lg p-3 space-y-2"
+                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 transition-all hover:border-[var(--color-primary)]/30 shadow-sm"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0 pr-3">
-                        <h3 className="font-semibold text-[var(--color-text)] text-base mb-1 line-clamp-1">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-[var(--color-text)] text-base mb-1 line-clamp-1">
                           {cafe.name}
                         </h3>
-                        <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mb-2">
+                        <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mb-2 italic">
                           {cafe.address}
                         </p>
-                        <div className="flex items-center space-x-3 text-xs">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--color-surface-2)] rounded-full text-[10px] font-bold text-[var(--color-text-secondary)]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+                            {distance}{t('meters')}
+                          </div>
                           {cafe.rating && (
-                            <div className="flex items-center space-x-1">
-                              <span className="text-[var(--color-accent)]">⭐</span>
-                              <span className="text-[var(--color-text)]">
-                                {cafe.rating.toFixed(1)}
-                              </span>
+                            <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--color-accent)]">
+                              <span>⭐</span>
+                              <span>{cafe.rating.toFixed(1)}</span>
                             </div>
                           )}
-                          <div className="flex items-center space-x-1">
-                            <span className="text-[var(--color-text-secondary)]">
-                              {t('distance')}:
-                            </span>
-                            <span className="font-medium text-[var(--color-text)]">
-                              {distance}{t('meters')}
-                            </span>
-                          </div>
                         </div>
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => handleCheckIn(cafe)}
-                      disabled={selectedCafe !== null || isCheckingIn}
-                      className="
-                        w-full min-h-[44px] px-4 py-2.5
-                        bg-[var(--color-primary)] text-white
-                        rounded-lg font-medium
-                        hover:opacity-90 active:scale-95
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        transition-all duration-200
-                        focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2
-                        flex items-center justify-center gap-2
-                      "
-                    >
-                      {isCheckingIn && selectedCafe?.id === cafe.id ? (
-                        <LoadingSpinner size="sm" className="text-white" />
-                      ) : selectedCafe?.id === cafe.id ? (
-                        '✓ '
-                      ) : null}
-                      {t('check_in_button')}
-                    </button>
+                    <DropBeanButton
+                      cafeId={cafe.id}
+                      cafeLat={cafe.latitude}
+                      cafeLng={cafe.longitude}
+                      size="md"
+                      showGrowthInfo={false}
+                      onSuccess={() => {
+                        // Small delay before dismissing to show success state
+                        setTimeout(handleDismiss, 2000);
+                      }}
+                    />
                   </div>
                 );
               })}

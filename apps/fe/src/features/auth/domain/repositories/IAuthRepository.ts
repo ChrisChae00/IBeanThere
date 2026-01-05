@@ -31,4 +31,18 @@ export interface IAuthRepository {
   onAuthStateChange(
     callback: (session: AuthSession | null) => void
   ): () => void;
+
+  /**
+   * Send password reset email to the specified email address
+   * @param email - User's email address
+   * @param redirectUrl - URL to redirect after password reset
+   */
+  sendPasswordResetEmail(email: string, redirectUrl: string): Promise<Result<void>>;
+
+  /**
+   * Update the current user's password
+   * @param newPassword - The new password to set
+   */
+  updatePassword(newPassword: string): Promise<Result<void>>;
 }
+

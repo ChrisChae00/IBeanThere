@@ -89,67 +89,79 @@ export function LoginForm({ locale }: LoginFormProps) {
   const displayError = error || oauthError;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
       <ErrorAlert message={displayError} />
 
-      <Input
-        label={t('email_address')}
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={t('email_placeholder')}
-        icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
-        required
-      />
+      <div className="space-y-5">
+        <Input
+          label={t('email_address')}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={t('email_placeholder')}
+          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          required
+          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+        />
 
-      <Input
-        label={t('password')}
-        type={showPassword ? 'text' : 'password'}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder={t('password_placeholder')}
-        icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
-        required
-        endAdornment={
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition"
-          >
-            {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-          </button>
-        }
-      />
-
-      {/* Remember Me & Forgot Password */}
-      <div className="flex items-center justify-between">
-        <label className="flex items-center min-h-[44px]">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)]"
-          />
-          <span className="ml-2 text-sm text-[var(--color-text-secondary)]">{t('remember_me')}</span>
-        </label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="px-0 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-        >
-          {t('forgot_password')}
-        </Button>
+        <Input
+          label={t('password')}
+          type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={t('password_placeholder')}
+          icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          required
+          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          endAdornment={
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+            >
+              {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
+          }
+        />
       </div>
 
-      <Button type="submit" fullWidth size="lg" loading={isLoading}>
+      {/* Remember Me & Forgot Password */}
+      <div className="flex items-center justify-between pt-1">
+        <label className="flex items-center min-h-[24px] cursor-pointer group">
+          <div className="relative flex items-center">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] transition-all cursor-pointer accent-[var(--color-primary)] bg-[var(--color-surface)]"
+            />
+          </div>
+          <span className="ml-2 text-sm text-[var(--color-text-secondary)] group-hover:text-[var(--color-text)] transition-colors select-none font-medium">
+            {t('remember_me')}
+          </span>
+        </label>
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] font-medium transition-colors"
+        >
+          {t('forgot_password')}
+        </Link>
+      </div>
+
+      <Button 
+        type="submit" 
+        fullWidth 
+        size="lg" 
+        loading={isLoading} 
+        className="mt-2 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+      >
         {t('sign_in')}
       </Button>
 
       {/* Divider */}
-      <div className="flex items-center gap-4 my-6">
+      <div className="flex items-center gap-4 my-8">
         <div className="flex-1 border-t border-[var(--color-border)]"></div>
-        <span className="text-sm text-[var(--color-text-secondary)]">
+        <span className="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wider text-xs px-2">
           {t('or_continue_with')}
         </span>
         <div className="flex-1 border-t border-[var(--color-border)]"></div>
@@ -164,7 +176,7 @@ export function LoginForm({ locale }: LoginFormProps) {
           variant="outline"
           fullWidth
           leftIcon={<GoogleIcon size={20} />}
-          className="hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
+          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md font-medium h-[56px] hover:font-bold"
         >
           {t('google')}
         </Button>
@@ -172,11 +184,11 @@ export function LoginForm({ locale }: LoginFormProps) {
 
       {/* Sign Up Link */}
       <div className="text-center mt-8">
-        <p className="text-[var(--color-text-secondary)]">
+        <p className="text-[var(--color-text-secondary)] text-sm">
           {t('dont_have_account')}{' '}
           <Link
             href={`/${locale}/register`}
-            className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] font-semibold underline"
+            className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
           >
             {t('sign_up_link')}
           </Link>

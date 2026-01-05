@@ -65,7 +65,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
               <p className="text-2xl font-bold text-[var(--color-cardText)]">{cafe.log_count}</p>
             </div>
             <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('beans_dropped') || '🫘 심긴 콩'}</p>
+              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('beans_dropped') || '심긴 콩'}</p>
               <p className="text-2xl font-bold text-[var(--color-primary)]">{cafe.total_beans_dropped || 0}</p>
             </div>
           </div>

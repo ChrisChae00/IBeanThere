@@ -35,7 +35,7 @@ export default async function SigninPage({
         <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-text)] mb-3">
           {t('sign_in')}
         </h2>
-        <p className="text-lg text-[var(--color-text-secondary)]">
+        <p className="text-lg text-[var(--color-textSecondary)]">
           {t('sign_in_subtitle')}
         </p>
       </div>
