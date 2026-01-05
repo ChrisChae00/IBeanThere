@@ -140,14 +140,12 @@ export function LoginForm({ locale }: LoginFormProps) {
             {t('remember_me')}
           </span>
         </label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] font-medium transition-colors hover:bg-transparent"
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] font-medium transition-colors"
         >
           {t('forgot_password')}
-        </Button>
+        </Link>
       </div>
 
       <Button 

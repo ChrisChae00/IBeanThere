@@ -105,6 +105,44 @@ export class AuthRepository implements IAuthRepository {
 
     return () => subscription.unsubscribe();
   }
+
+  /**
+   * Send password reset email using Supabase Auth
+   */
+  async sendPasswordResetEmail(email: string, redirectUrl: string): Promise<Result<void>> {
+    try {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        return failure(new Error(error.message));
+      }
+
+      return success(undefined);
+    } catch (error) {
+      return failure(error instanceof Error ? error : new Error('Failed to send reset email'));
+    }
+  }
+
+  /**
+   * Update the current user's password
+   */
+  async updatePassword(newPassword: string): Promise<Result<void>> {
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        return failure(new Error(error.message));
+      }
+
+      return success(undefined);
+    } catch (error) {
+      return failure(error instanceof Error ? error : new Error('Failed to update password'));
+    }
+  }
 }
 
 // Singleton instance
@@ -116,3 +154,4 @@ export function getAuthRepository(): AuthRepository {
   }
   return authRepository;
 }
+

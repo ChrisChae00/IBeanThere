@@ -203,7 +203,31 @@
       "feature_experience": "Track Your Experience",
       "feature_security": "Secure Account",
       "checking_availability": "Checking availability...",
-      "username_available": "Username is available"
+      "username_available": "Username is available",
+      "forgot_password_title": "Reset Your Password",
+      "forgot_password_subtitle": "Enter your email and we'll send you a reset link",
+      "send_reset_link": "Send Reset Link",
+      "back_to_login": "Back to Login",
+      "reset_email_sent": "Check Your Email",
+      "reset_email_sent_subtitle": "We've sent a password reset link to {email}",
+      "reset_password_title": "Create New Password",
+      "reset_password_subtitle": "Enter your new password below",
+      "new_password": "New Password",
+      "new_password_placeholder": "Enter new password",
+      "confirm_new_password": "Confirm New Password",
+      "confirm_new_password_placeholder": "Confirm your new password",
+      "update_password": "Update Password",
+      "password_updated": "Password Updated!",
+      "password_updated_subtitle": "You can now sign in with your new password",
+      "didnt_receive_email": "Didn't receive the email?",
+      "resend_email": "Resend",
+      "check_spam_folder": "Check your spam folder if you don't see it",
+      "double_check_email": "Please double-check that you entered the correct email address",
+      "try_different_email": "Try a different email",
+      "email_may_take_time": "Email may take a few minutes to arrive",
+      "secure_password_reset": "Secure password reset",
+      "quick_recovery": "Quick account recovery",
+      "back_to_coffee": "Back to your coffee journey"
     },
     
     "map": {
@@ -310,7 +334,11 @@
       "username_reserved": "This username is reserved",
       "username_only_numbers": "Cannot be only numbers",
       "username_too_simple": "Username is too simple",
-      "username_taken": "This username is already taken"
+      "username_taken": "This username is already taken",
+      "password_too_short": "Password must be at least 8 characters",
+      "password_needs_letters": "Password must contain letters",
+      "password_needs_numbers": "Password must contain numbers",
+      "reset_link_expired": "Reset link has expired. Please request a new one"
     },
     
     "admin": {

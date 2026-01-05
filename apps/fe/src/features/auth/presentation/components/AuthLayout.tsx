@@ -91,7 +91,7 @@ export function AuthLayout({
          <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-r from-transparent to-[var(--color-primary)]/10"></div>
          
         {/* Form Container - Widened to 85% */}
-        <div className="w-full md:w-[85%] max-w-4xl bg-[var(--color-cardBackground)]/50 p-8 lg:p-12 rounded-[2rem] shadow-none lg:shadow-xl backdrop-blur-md border border-[var(--color-border)]/20">
+        <div className="w-full md:w-[85%] max-w-4xl bg-[var(--color-cardBackground)]/50 p-8 lg:p-12 rounded-[2rem] shadow-none lg:shadow-xl backdrop-blur-md border border-[var(--color-border)]">
           {children}
         </div>
       </div>
