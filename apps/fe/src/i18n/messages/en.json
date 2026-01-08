@@ -94,6 +94,23 @@
         "title": "No beans yet",
         "description": "Start dropping beans at cafes near you to grow your coffee forest!",
         "cta": "Drop Your First Bean"
+      },
+      "level_info": {
+        "title": "Bean Growth Levels",
+        "subtitle": "Visit the same cafe repeatedly to grow your bean!",
+        "how_to_level": "Drop beans at the same cafe to level up:",
+        "current_highest": "Your Highest Level",
+        "drops_required": "{count} drops"
+      },
+      "streak": {
+        "title": "Drop Streak",
+        "current": "Current Streak",
+        "best": "Best Streak",
+        "days": "{count} days",
+        "day": "1 day",
+        "active": "🔥 Streak Active!",
+        "keep_going": "Keep dropping beans to maintain your streak!",
+        "info": "Drop a bean at least once every 7 days to keep your streak going"
       }
     },
     "landing": {

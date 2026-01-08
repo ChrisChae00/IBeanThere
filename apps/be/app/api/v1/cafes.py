@@ -1391,6 +1391,9 @@ async def drop_bean(
         old_level = existing_bean.get("growth_level", 0) if existing_bean else 0
         leveled_up = growth_level > old_level
         
+        # 8. Calculate and update streak
+        streak_info = await calculate_user_streak(supabase, current_user.id)
+        
         return {
             "message": "Bean dropped successfully!",
             "cafe_id": cafe_id,
@@ -1399,7 +1402,8 @@ async def drop_bean(
             "growth_level": growth_level,
             "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
             "leveled_up": leveled_up,
-            "next_level_at": get_next_level_threshold(drop_count)
+            "next_level_at": get_next_level_threshold(drop_count),
+            "streak": streak_info
         }
         
     except HTTPException:
@@ -1412,6 +1416,97 @@ async def drop_bean(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to drop bean: {str(e)}"
         )
+
+
+async def calculate_user_streak(supabase: Client, user_id: str) -> dict:
+    """
+    Calculate user's drop streak based on their drop history.
+    
+    A streak is maintained if the user drops a bean within 7 days of their last drop.
+    The streak increases by 1 for each consecutive "active period" (days with at least one drop).
+    
+    Returns:
+        dict with current_streak, max_streak, last_drop_date
+    """
+    try:
+        from datetime import timedelta
+        
+        # Get user's last 30 drops ordered by date
+        drops_result = supabase.table("cafe_bean_drops").select(
+            "dropped_at"
+        ).eq(
+            "user_id", user_id
+        ).order(
+            "dropped_at", desc=True
+        ).limit(100).execute()
+        
+        if not drops_result.data:
+            return {
+                "current_streak": 1,  # This is their first drop
+                "max_streak": 1,
+                "last_drop_date": datetime.now(timezone.utc).date().isoformat(),
+                "streak_active": True
+            }
+        
+        # Parse dates and get unique drop dates
+        drop_dates = set()
+        for drop in drops_result.data:
+            dropped_at = drop.get("dropped_at")
+            if dropped_at:
+                drop_date = date_parser.parse(dropped_at).date()
+                drop_dates.add(drop_date)
+        
+        sorted_dates = sorted(drop_dates, reverse=True)
+        today = datetime.now(timezone.utc).date()
+        
+        # Add today since we just dropped
+        if today not in drop_dates:
+            sorted_dates.insert(0, today)
+        
+        # Calculate current streak (consecutive days with drops within 7-day gaps)
+        current_streak = 1
+        if len(sorted_dates) > 1:
+            for i in range(len(sorted_dates) - 1):
+                gap = (sorted_dates[i] - sorted_dates[i + 1]).days
+                if gap <= 7:  # Within 7-day window
+                    current_streak += 1
+                else:
+                    break
+        
+        # Get or update max streak from user profile
+        user_result = supabase.table("users").select(
+            "max_streak, current_streak"
+        ).eq("id", user_id).single().execute()
+        
+        stored_max_streak = 1
+        if user_result.data:
+            stored_max_streak = user_result.data.get("max_streak") or 1
+        
+        new_max_streak = max(current_streak, stored_max_streak)
+        
+        # Update user's streak in database
+        supabase.table("users").update({
+            "current_streak": current_streak,
+            "max_streak": new_max_streak,
+            "last_drop_date": today.isoformat()
+        }).eq("id", user_id).execute()
+        
+        return {
+            "current_streak": current_streak,
+            "max_streak": new_max_streak,
+            "last_drop_date": today.isoformat(),
+            "streak_active": True
+        }
+        
+    except Exception as e:
+        print(f"Error calculating streak: {e}")
+        # Return default if error
+        return {
+            "current_streak": 1,
+            "max_streak": 1,
+            "last_drop_date": datetime.now(timezone.utc).date().isoformat(),
+            "streak_active": True
+        }
 
 
 def get_next_level_threshold(current_drops: int) -> Optional[int]:

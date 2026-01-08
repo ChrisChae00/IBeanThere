@@ -94,6 +94,23 @@
         "title": "아직 커피콩이 없어요",
         "description": "근처 카페에서 커피콩을 심어 나만의 커피 숲을 가꿔보세요!",
         "cta": "첫 커피콩 심기"
+      },
+      "level_info": {
+        "title": "커피콩 성장 단계",
+        "subtitle": "같은 카페를 반복 방문하면 콩이 자라요!",
+        "how_to_level": "같은 카페에서 커피콩을 심으면 레벨이 올라갑니다:",
+        "current_highest": "현재 최고 레벨",
+        "drops_required": "{count}회 방문"
+      },
+      "streak": {
+        "title": "연속 심기",
+        "current": "현재 연속",
+        "best": "최고 기록",
+        "days": "{count}일 연속",
+        "day": "1일",
+        "active": "🔥 연속 심기 중!",
+        "keep_going": "연속 기록을 유지하려면 계속 심어주세요!",
+        "info": "7일 이내에 한 번씩 심으면 연속 기록이 유지됩니다"
       }
     },
     "landing": {
