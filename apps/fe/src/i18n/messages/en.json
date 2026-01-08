@@ -604,6 +604,8 @@
         "cancel": "Cancel",
         "submit": "Submit",
         "submitting": "Submitting...",
+        "bean_drop_note": "Tip: Writing a log automatically drops a bean at this cafe!",
+        "bean_dropped_success": "Bean dropped! Your coffee bean is now growing at this cafe.",
         "edit": "Edit",
         "delete": "Delete",
         "edit_log": "Edit Log",

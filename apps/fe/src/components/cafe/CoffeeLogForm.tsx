@@ -299,6 +299,15 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         </p>
       </div>
 
+      {/* Bean Drop Info Note */}
+      {!initialData && (
+        <div className="p-3 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20">
+          <p className="text-sm text-[var(--color-primary)]">
+            {t('bean_drop_note')}
+          </p>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-3">
         {onCancel && (
