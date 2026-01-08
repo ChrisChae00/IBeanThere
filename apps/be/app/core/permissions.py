@@ -75,6 +75,8 @@ ROLE_PERMISSIONS = {
         Permission.CREATE_USER_PROFILE,
         Permission.UPDATE_USER,
         Permission.REQUEST_ACCOUNT_DELETION,
+        Permission.CREATE_CAFE,
+        Permission.READ_CAFE,
         Permission.CREATE_REVIEW,
         Permission.READ_REVIEW,
         Permission.UPDATE_REVIEW,

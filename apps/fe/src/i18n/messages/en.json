@@ -111,6 +111,13 @@
         "active": "🔥 Streak Active!",
         "keep_going": "Keep dropping beans to maintain your streak!",
         "info": "Drop a bean at least once every 7 days to keep your streak going"
+      },
+      "heatmap": {
+        "title": "My Coffee Road",
+        "subtitle": "See your coffee journey on a map",
+        "show_map": "Show Map",
+        "hide_map": "Hide Map",
+        "drops": "{count} drops"
       }
     },
     "landing": {

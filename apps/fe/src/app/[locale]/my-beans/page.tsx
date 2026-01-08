@@ -8,6 +8,7 @@ import { GrowthIcon, getGrowthLevel, GROWTH_THRESHOLDS } from '@/components/cafe
 import { Sprout, Trees, MapPin, ChevronRight, Info, Flame } from 'lucide-react';
 import Modal from '@/shared/ui/Modal';
 
+
 interface BeanData {
   id: string;
   cafe_id: string;
@@ -50,6 +51,7 @@ export default function MyBeansPage({
   const [error, setError] = useState<string | null>(null);
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [streak, setStreak] = useState<StreakData | null>(null);
+
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -221,6 +223,7 @@ export default function MyBeansPage({
             )}
           </div>
         )}
+
 
         {/* Loading State */}
         {isLoading && (
