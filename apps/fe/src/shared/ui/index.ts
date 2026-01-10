@@ -38,4 +38,4 @@ export { default as TasteTag } from './TasteTag';
 export { default as AvatarUpload } from './AvatarUpload';
 export { ArrowLeftIcon } from './ArrowLeftIcon';
 export { CheckCircleIcon } from './CheckCircleIcon';
-
+export { default as BottomSheet } from '../../components/ui/BottomSheet';

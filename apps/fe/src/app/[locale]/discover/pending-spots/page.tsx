@@ -1,22 +1,34 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getPendingCafes } from '@/lib/api/cafes';
-import { CafeSearchResponse} from '@/types/api';
+import { CafeSearchResponse } from '@/types/api';
 import { LoadingSpinner } from '@/shared/ui';
 import { PlusIcon } from '@/components/ui';
+import { useLocation } from '@/hooks/useLocation';
+import { calculateDistance } from '@/lib/utils/checkIn';
+
+type SortMode = 'nearby' | 'newest' | 'verification';
+
+type CafeFromResponse = CafeSearchResponse['cafes'][0];
+
+type CafeWithDistance = CafeFromResponse & {
+  distance?: number;
+};
 
 export default function PendingSpotsPage() {
   const params = useParams();
   const pathname = usePathname();
   const locale = params.locale as string;
   const t = useTranslations('discover.pending_spots');
-  const [pendingCafes, setPendingCafes] = useState<CafeSearchResponse['cafes']>([]);
+  const { coords } = useLocation();
+  const [pendingCafes, setPendingCafes] = useState<CafeWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   const loadPendingCafes = useCallback(async () => {
     try {
@@ -50,6 +62,42 @@ export default function PendingSpotsPage() {
     };
   }, [loadPendingCafes]);
 
+  // Calculate distances and sort cafes
+  const sortedCafes = useMemo(() => {
+    let cafesWithDistance = pendingCafes.map(cafe => {
+      if (coords) {
+        const distance = calculateDistance(
+          coords.latitude,
+          coords.longitude,
+          cafe.latitude,
+          cafe.longitude
+        );
+        return { ...cafe, distance };
+      }
+      return { ...cafe, distance: undefined };
+    });
+
+    switch (sortMode) {
+      case 'nearby':
+        if (coords) {
+          cafesWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+        }
+        break;
+      case 'newest':
+        cafesWithDistance.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        break;
+      case 'verification':
+        cafesWithDistance.sort((a, b) => 
+          (b.verification_count || 0) - (a.verification_count || 0)
+        );
+        break;
+    }
+
+    return cafesWithDistance;
+  }, [pendingCafes, sortMode, coords]);
+
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -58,6 +106,14 @@ export default function PendingSpotsPage() {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const formatDistance = (distance: number | undefined) => {
+    if (distance === undefined) return null;
+    if (distance < 1000) {
+      return `${Math.round(distance)}m`;
+    }
+    return `${(distance / 1000).toFixed(1)}km`;
   };
 
   return (
@@ -85,8 +141,52 @@ export default function PendingSpotsPage() {
         </div>
       </section>
 
+      {/* Sort Tabs */}
+      <section className="py-4">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSortMode('nearby')}
+              disabled={!coords}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                sortMode === 'nearby'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
+                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+              } ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              📍 {locale === 'ko' ? '가까운 순' : 'Nearby'}
+            </button>
+            <button
+              onClick={() => setSortMode('newest')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                sortMode === 'newest'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
+                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+              }`}
+            >
+              🆕 {locale === 'ko' ? '최신순' : 'Newest'}
+            </button>
+            <button
+              onClick={() => setSortMode('verification')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                sortMode === 'verification'
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
+                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+              }`}
+            >
+              ✅ {locale === 'ko' ? '검증 필요' : 'Needs Verification'}
+            </button>
+          </div>
+          {sortMode === 'nearby' && !coords && (
+            <p className="text-sm text-[var(--color-text-secondary)] mt-2">
+              {locale === 'ko' ? '위치 권한을 허용하면 가까운 카페를 볼 수 있습니다' : 'Enable location to see cafes near you'}
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* Pending Cafes Grid Section */}
-      <section className="py-8">
+      <section className="py-4">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div 
             className="bg-[var(--color-surface)] rounded-xl p-8 border border-[var(--color-border)]"
@@ -110,14 +210,16 @@ export default function PendingSpotsPage() {
                   Retry
                 </button>
               </div>
-            ) : pendingCafes.length === 0 ? (
+            ) : sortedCafes.length === 0 ? (
               <div className="text-center py-16 space-y-6">
                 <div className="text-6xl">☕️</div>
                 <div className="text-2xl font-bold text-[var(--color-text)]">
                   {t('no_pending')}
                 </div>
                 <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
-                  Be the first to discover and register a new cafe in your neighborhood!
+                  {locale === 'ko' 
+                    ? '지역에서 새로운 카페를 발견하고 등록해보세요!' 
+                    : 'Be the first to discover and register a new cafe in your neighborhood!'}
                 </p>
                 <Link
                   href={`/${locale}/discover/register-cafe`}
@@ -129,19 +231,26 @@ export default function PendingSpotsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pendingCafes.map((cafe) => (
+                {sortedCafes.map((cafe) => (
                   <div
                     key={cafe.id}
                     className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer"
                   >
-                  {/* Cafe Icon */}
+                  {/* Cafe Icon & Distance */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 bg-[var(--color-primary)]/10 rounded-lg flex items-center justify-center">
                       <span className="text-3xl">☕️</span>
                     </div>
-                    <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-3 py-1 rounded-full text-xs font-semibold">
-                      {cafe.status === 'pending' ? 'Pending' : cafe.status}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-3 py-1 rounded-full text-xs font-semibold">
+                        {cafe.status === 'pending' ? (locale === 'ko' ? '대기중' : 'Pending') : cafe.status}
+                      </span>
+                      {cafe.distance !== undefined && (
+                        <span className="text-xs text-[var(--color-text-secondary)] font-medium">
+                          📍 {formatDistance(cafe.distance)}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Cafe Info */}
@@ -154,16 +263,6 @@ export default function PendingSpotsPage() {
 
                   {/* Metadata */}
                   <div className="space-y-2 mb-4 text-sm">
-                    {cafe.navigator_id && (
-                      <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span className="truncate">
-                          {t('registered_by')}: Navigator
-                        </span>
-                      </div>
-                    )}
                     {cafe.created_at && (
                       <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,21 +279,22 @@ export default function PendingSpotsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>
-                          {cafe.verification_count} {t('verification_count')}
+                          {cafe.verification_count}/3 {t('verification_count')}
                         </span>
                       </div>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <button
+                  <Link
+                    href={`/${locale}/discover/explore-map?lat=${cafe.latitude}&lng=${cafe.longitude}`}
                     className="w-full bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors min-h-[44px] flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
                     {t('view_on_map')}
-                  </button>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -205,4 +305,3 @@ export default function PendingSpotsPage() {
     </main>
   );
 }
-

@@ -14,16 +14,25 @@ export default function CafeCardImage({
   size = 'large' 
 }: CafeCardImageProps) {
   const [imageError, setImageError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const showImage = imageUrl && !imageError;
   
   if (size === 'small') {
     return (
-      <div className="w-full h-[120px] bg-[var(--color-primary)] rounded-lg flex items-center justify-center overflow-hidden mb-3 flex-shrink-0">
+      <div className="w-full h-[120px] bg-[var(--color-primary)] rounded-lg flex items-center justify-center overflow-hidden mb-3 flex-shrink-0 relative">
+        {/* Blur placeholder while loading */}
+        {showImage && !isLoaded && (
+          <div className="absolute inset-0 bg-[var(--color-surface)] animate-pulse" />
+        )}
         {showImage ? (
           <img 
             src={imageUrl} 
             alt={alt}
-            className="w-full h-full object-cover"
+            loading="lazy"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setIsLoaded(true)}
             onError={() => setImageError(true)}
           />
         ) : (
@@ -39,11 +48,19 @@ export default function CafeCardImage({
   
   return (
     <div className="w-full h-[200px] aspect-[4/3] bg-[var(--color-surface)]/50 flex items-center justify-center overflow-hidden relative flex-shrink-0">
+      {/* Blur placeholder while loading */}
+      {showImage && !isLoaded && (
+        <div className="absolute inset-0 bg-[var(--color-surface)] animate-pulse" />
+      )}
       {showImage ? (
         <img 
           src={imageUrl} 
           alt={alt}
-          className="w-full h-full object-cover"
+          loading="lazy"
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setIsLoaded(true)}
           onError={() => setImageError(true)}
         />
       ) : (
@@ -58,4 +75,3 @@ export default function CafeCardImage({
     </div>
   );
 }
-
