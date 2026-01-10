@@ -40,15 +40,13 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-2">
-          {/* Dynamic trending tag - only show if in top 10 */}
-          {cafe.trending_rank && cafe.trending_rank <= 10 ? (
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-              🔥 #{cafe.trending_rank}
+          {/* Trending tag - only show for top 3 */}
+          {cafe.trending_rank && cafe.trending_rank <= 3 ? (
+            <span className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+              🔥 {tMap('trending')}
             </span>
           ) : (
-            <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-              ☕ {tMap('popular')}
-            </span>
+            <span /> /* Empty span to maintain flex layout */
           )}
           <div onClick={(e) => e.preventDefault()}>
             <DropBeanButton

@@ -154,7 +154,7 @@ export default function PendingSpotsPage() {
                   : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
               } ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              📍 {locale === 'ko' ? '가까운 순' : 'Nearby'}
+              {locale === 'ko' ? '가까운 순' : 'Nearby'}
             </button>
             <button
               onClick={() => setSortMode('newest')}
@@ -164,7 +164,7 @@ export default function PendingSpotsPage() {
                   : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
               }`}
             >
-              🆕 {locale === 'ko' ? '최신순' : 'Newest'}
+              {locale === 'ko' ? '최신순' : 'Newest'}
             </button>
             <button
               onClick={() => setSortMode('verification')}
@@ -174,7 +174,7 @@ export default function PendingSpotsPage() {
                   : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
               }`}
             >
-              ✅ {locale === 'ko' ? '검증 필요' : 'Needs Verification'}
+              {locale === 'ko' ? '검증 필요' : 'Needs Verification'}
             </button>
           </div>
           {sortMode === 'nearby' && !coords && (
@@ -232,9 +232,10 @@ export default function PendingSpotsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedCafes.map((cafe) => (
-                  <div
+                  <Link
                     key={cafe.id}
-                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer"
+                    href={`/${locale}/cafes/${cafe.slug || cafe.id}`}
+                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer block"
                   >
                   {/* Cafe Icon & Distance */}
                   <div className="flex items-start justify-between mb-4">
@@ -284,18 +285,7 @@ export default function PendingSpotsPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Actions */}
-                  <Link
-                    href={`/${locale}/discover/explore-map?lat=${cafe.latitude}&lng=${cafe.longitude}`}
-                    className="w-full bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors min-h-[44px] flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    {t('view_on_map')}
-                  </Link>
-                </div>
+                </Link>
               ))}
             </div>
           )}

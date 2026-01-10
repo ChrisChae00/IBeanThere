@@ -514,28 +514,57 @@ async def update_visit(
 @router.get("/cafes/trending", response_model=List[TrendingCafeResponse])
 async def get_trending_cafes(
     limit: int = 10,
-    offset: int = 0
+    offset: int = 0,
+    lat: Optional[float] = Query(None, ge=-90, le=90, description="User latitude for location-based filtering"),
+    lng: Optional[float] = Query(None, ge=-180, le=180, description="User longitude for location-based filtering"),
+    radius: int = Query(default=50000, ge=1000, le=500000, description="Search radius in meters (default 50km for city-level)")
 ):
     """
     Get trending cafes based on recent activity (14 days).
     
     - Sorted by trending score (views, visits, reviews, rating)
-    - Cached and updated hourly
+    - Optional location filtering: when lat/lng provided, returns trending cafes in the area
+    - Without location: returns global trending cafes
     """
     try:
         supabase = get_supabase_client()
         
-        # Select all columns to avoid missing column errors
-        result = supabase.table("cafes").select("*").order(
-            "trending_score", desc=True
-        ).range(offset, offset + limit - 1).execute()
+        if lat is not None and lng is not None:
+            # Location-based filtering: get cafes within radius first, then sort by trending
+            import math
+            
+            # Calculate bounding box
+            lat_offset = radius / 111000
+            lng_offset = radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
+            
+            lat_min = lat - lat_offset
+            lat_max = lat + lat_offset
+            lng_min = lng - lng_offset
+            lng_max = lng + lng_offset
+            
+            result = supabase.table("cafes").select("*").gte(
+                "latitude", lat_min
+            ).lte(
+                "latitude", lat_max
+            ).gte(
+                "longitude", lng_min
+            ).lte(
+                "longitude", lng_max
+            ).order(
+                "trending_score", desc=True
+            ).range(offset, offset + limit - 1).execute()
+        else:
+            # Global trending: no location filter
+            result = supabase.table("cafes").select("*").order(
+                "trending_score", desc=True
+            ).range(offset, offset + limit - 1).execute()
         
         if not result.data:
             return []
         
         # Format response with default values for missing fields
         formatted_cafes = []
-        for cafe in result.data:
+        for idx, cafe in enumerate(result.data):
             formatted_cafes.append({
                 "id": cafe.get("id"),
                 "slug": cafe.get("slug"),
@@ -546,7 +575,9 @@ async def get_trending_cafes(
                 "view_count_14d": cafe.get("view_count_14d", 0),
                 "visit_count_14d": cafe.get("visit_count_14d", 0),
                 "trending_score": cafe.get("trending_score", 0.0),
-                "trending_rank": cafe.get("trending_rank")
+                "trending_rank": idx + 1 + offset,  # Calculate rank based on position
+                "image": cafe.get("image"),
+                "main_image": cafe.get("main_image")
             })
         
         return formatted_cafes
