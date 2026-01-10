@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from '@/hooks/useLocation';
+import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/shared/ui';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
@@ -48,11 +49,11 @@ export default function DropBeanButton({
 }: DropBeanButtonProps) {
   const t = useTranslations('drop_bean');
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { coords, getCurrentLocation, isLoading: locationLoading, error: locationError } = useLocation();
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<DropBeanResult | null>(null);
   const [beanStatus, setBeanStatus] = useState(initialBeanStatus);
 
   // Calculate distance to cafe
@@ -67,31 +68,88 @@ export default function DropBeanButton({
     return R * c;
   };
 
-  const triggerConfetti = () => {
-    const end = Date.now() + 1000;
+  const triggerConfetti = (leveledUp: boolean = false) => {
+    if (leveledUp) {
+      // Special level-up celebration - bigger and more colorful!
+      const duration = 2500;
+      const animationEnd = Date.now() + duration;
+      const colors = ['#FFD700', '#FFA500', '#8B4513', '#32CD32', '#FF6347'];
 
-    const frame = () => {
+      // Fire confetti from multiple angles
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          return;
+        }
+
+        // Star burst from center
+        confetti({
+          particleCount: 3,
+          angle: randomInRange(55, 125),
+          spread: randomInRange(50, 70),
+          origin: { y: 0.6 },
+          colors: colors,
+          shapes: ['star', 'circle'],
+          scalar: randomInRange(0.8, 1.2),
+        });
+
+        // Side bursts
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+          colors: ['#FFD700', '#FFA500'],
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+          colors: ['#FFD700', '#FFA500'],
+        });
+      }, 50);
+
+      // Initial big burst
       confetti({
-        particleCount: 2,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#8B4513', '#D2691E', '#CD853F'] // Coffee colors
+        particleCount: 100,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: colors,
+        shapes: ['star', 'circle'],
+        scalar: 1.2,
       });
-      confetti({
-        particleCount: 2,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#8B4513', '#D2691E', '#CD853F']
-      });
+    } else {
+      // Normal drop celebration
+      const end = Date.now() + 1000;
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
+      const frame = () => {
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#8B4513', '#D2691E', '#CD853F'] // Coffee colors
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#8B4513', '#D2691E', '#CD853F']
+        });
 
-    frame();
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+
+      frame();
+    }
   };
 
   const handleDropBean = async () => {
@@ -102,7 +160,6 @@ export default function DropBeanButton({
 
     setIsLoading(true);
     setError(null);
-    setSuccess(null);
 
     try {
       // Use existing coords from hook if available, otherwise fetch fresh
@@ -154,7 +211,6 @@ export default function DropBeanButton({
       }
 
       const result: DropBeanResult = await response.json();
-      setSuccess(result);
       setBeanStatus({
         has_bean: true,
         drop_count: result.drop_count,
@@ -164,7 +220,14 @@ export default function DropBeanButton({
         next_level_at: result.next_level_at
       });
       
-      triggerConfetti();
+      triggerConfetti(result.leveled_up);
+      
+      // Show toast notification
+      if (result.leveled_up) {
+        showToast(`🎉 ${t('level_up_title')} ${t('level_up', { level: result.growth_level_name })}`, 'success', 4000);
+      } else {
+        showToast(`☕ ${t('success')}`, 'success', 2000);
+      }
 
       if (onSuccess) {
         onSuccess(result);
@@ -194,74 +257,57 @@ export default function DropBeanButton({
 
   return (
     <div className="relative flex flex-col items-center gap-2">
-      {success ? (
-        <div className="flex flex-col items-center gap-1 text-center animate-in fade-in zoom-in duration-300">
-          <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
-            <span className="font-semibold text-sm">
-              {t('success')}
-            </span>
-          </div>
-          {success.leveled_up && (
-            <div className="text-[var(--color-primary)] text-xs font-bold animate-pulse mt-1">
-              {t('level_up', { level: success.growth_level_name })}
-            </div>
-          )}
+      {showGrowthInfo && beanStatus?.has_bean && (
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span className="text-xs font-medium text-[var(--color-text-secondary)]">
+            {t('drops', { count: dropCount })}
+          </span>
         </div>
-      ) : (
-        <>
-          {showGrowthInfo && beanStatus?.has_bean && (
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-xs font-medium text-[var(--color-text-secondary)]">
-                {t('drops', { count: dropCount })}
-              </span>
-            </div>
-          )}
-          
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDropBean();
-            }}
-            disabled={!canDrop || isLoading || locationLoading}
-            size={size}
-            variant="primary"
-            className="whitespace-nowrap shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
-          >
-            {isLoading || locationLoading ? (
-              <div className="flex items-center gap-2">
-                 <LoadingSpinner size="sm" className="text-[var(--color-primaryText)]" />
-                 <span className="opacity-90">{t('button')}</span>
-              </div>
-            ) : (
-              canDrop ? t('button') : t('already_today')
-            )}
-          </Button>
+      )}
+      
+      <Button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleDropBean();
+        }}
+        disabled={!canDrop || isLoading || locationLoading}
+        size={size}
+        variant="primary"
+        className="whitespace-nowrap shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
+      >
+        {isLoading || locationLoading ? (
+          <div className="flex items-center gap-2">
+             <LoadingSpinner size="sm" className="text-[var(--color-primaryText)]" />
+             <span className="opacity-90">{t('button')}</span>
+          </div>
+        ) : (
+          canDrop ? t('button') : t('already_today')
+        )}
+      </Button>
 
-          {error && (
-             <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 min-w-[200px] w-max max-w-[280px] z-[50]">
-              <div className="bg-red-50 text-red-600 text-xs px-3 py-2 rounded-lg border border-red-100 shadow-lg text-center font-medium animate-in fade-in slide-in-from-top-1">
-                {error}
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setError(null);
-                  }}
-                  className="ml-2 underline opacity-75 hover:opacity-100"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          )}
+      {error && (
+         <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 min-w-[200px] w-max max-w-[280px] z-[50]">
+          <div className="bg-red-50 text-red-600 text-xs px-3 py-2 rounded-lg border border-red-100 shadow-lg text-center font-medium animate-in fade-in slide-in-from-top-1">
+            {error}
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setError(null);
+              }}
+              className="ml-2 underline opacity-75 hover:opacity-100"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
-          {!canDrop && showGrowthInfo && nextLevelAt && !error && (
-            <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
-              {t('next_level', { drops: nextLevelAt - dropCount })}
-            </div>
-          )}
-        </>
+      {!canDrop && showGrowthInfo && nextLevelAt && !error && (
+        <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
+          {t('next_level', { drops: nextLevelAt - dropCount })}
+        </div>
       )}
     </div>
   );

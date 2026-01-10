@@ -832,3 +832,69 @@ async def get_trusting_users(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get trusting users"
         ) from e
+
+
+@router.get("/me/streak")
+async def get_my_streak(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get current user's drop streak information.
+    
+    Returns:
+        dict: current_streak, max_streak, last_drop_date, streak_active
+    """
+    try:
+        from datetime import datetime, timezone, timedelta
+        from dateutil import parser as date_parser
+        
+        # Get user's streak data from profile
+        user_result = supabase.table("users").select(
+            "current_streak, max_streak, last_drop_date"
+        ).eq("id", current_user.id).single().execute()
+        
+        if not user_result.data:
+            return {
+                "current_streak": 0,
+                "max_streak": 0,
+                "last_drop_date": None,
+                "streak_active": False,
+                "days_since_last_drop": None
+            }
+        
+        data = user_result.data
+        current_streak = data.get("current_streak") or 0
+        max_streak = data.get("max_streak") or 0
+        last_drop_date = data.get("last_drop_date")
+        
+        # Check if streak is still active (within 7 days)
+        streak_active = False
+        days_since_last_drop = None
+        
+        if last_drop_date:
+            try:
+                last_date = date_parser.parse(last_drop_date).date() if isinstance(last_drop_date, str) else last_drop_date
+                today = datetime.now(timezone.utc).date()
+                days_since_last_drop = (today - last_date).days
+                streak_active = days_since_last_drop <= 7
+            except Exception:
+                pass
+        
+        return {
+            "current_streak": current_streak,
+            "max_streak": max_streak,
+            "last_drop_date": last_drop_date,
+            "streak_active": streak_active,
+            "days_since_last_drop": days_since_last_drop
+        }
+        
+    except Exception as e:
+        print(f"Error getting streak: {e}")
+        return {
+            "current_streak": 0,
+            "max_streak": 0,
+            "last_drop_date": None,
+            "streak_active": False,
+            "days_since_last_drop": None
+        }

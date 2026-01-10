@@ -61,35 +61,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     // Check current session
     const initSession = async () => {
-      const session = await repository.getSession();
-      
-      if (!isMounted) return;
-      
-      if (session) {
-        // Create a minimal SupabaseUser-like object for backward compatibility
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          created_at: session.user.createdAt.toISOString(),
-          user_metadata: {
-            username: session.user.username,
-            display_name: session.user.displayName,
-            avatar_url: session.user.avatarUrl,
-            terms_accepted: session.user.termsAccepted,
-          },
-          app_metadata: {},
-          aud: 'authenticated',
-        } as SupabaseUser);
+      try {
+        const session = await repository.getSession();
         
-        await fetchProfile(session.accessToken);
-        checkNeedsSetup(session.user);
-      } else {
-        setUser(null);
-        setProfile(null);
-        setNeedsSetup(false);
+        if (!isMounted) return;
+        
+        if (session) {
+          // Create a minimal SupabaseUser-like object for backward compatibility
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            created_at: session.user.createdAt.toISOString(),
+            user_metadata: {
+              username: session.user.username,
+              display_name: session.user.displayName,
+              avatar_url: session.user.avatarUrl,
+              terms_accepted: session.user.termsAccepted,
+            },
+            app_metadata: {},
+            aud: 'authenticated',
+          } as SupabaseUser);
+          
+          await fetchProfile(session.accessToken);
+          checkNeedsSetup(session.user);
+        } else {
+          setUser(null);
+          setProfile(null);
+          setNeedsSetup(false);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initSession();

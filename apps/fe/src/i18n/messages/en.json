@@ -51,7 +51,8 @@
       "too_far": "Too far ({distance}m away, must be within 50m)",
       "error": "Failed to drop bean. Please try again.",
       "login_required": "Please sign in to drop a bean",
-      "level_up": "Level Up! Now {level}",
+      "level_up": "Now {level}!",
+      "level_up_title": "LEVEL UP!",
       "total_drops": "{count} drops total",
       "drops": "{count} drops",
       "next_level": "{drops} more to level up",
@@ -94,6 +95,30 @@
         "title": "No beans yet",
         "description": "Start dropping beans at cafes near you to grow your coffee forest!",
         "cta": "Drop Your First Bean"
+      },
+      "level_info": {
+        "title": "Bean Growth Levels",
+        "subtitle": "Visit the same cafe repeatedly to grow your bean!",
+        "how_to_level": "Drop beans at the same cafe to level up:",
+        "current_highest": "Your Highest Level",
+        "drops_required": "{count} drops"
+      },
+      "streak": {
+        "title": "Drop Streak",
+        "current": "Current Streak",
+        "best": "Best Streak",
+        "days": "{count} days",
+        "day": "1 day",
+        "active": "🔥 Streak Active!",
+        "keep_going": "Keep dropping beans to maintain your streak!",
+        "info": "Drop a bean at least once every 7 days to keep your streak going"
+      },
+      "heatmap": {
+        "title": "My Coffee Road",
+        "subtitle": "See your coffee journey on a map",
+        "show_map": "Show Map",
+        "hide_map": "Hide Map",
+        "drops": "{count} drops"
       }
     },
     "landing": {
@@ -587,6 +612,8 @@
         "cancel": "Cancel",
         "submit": "Submit",
         "submitting": "Submitting...",
+        "bean_drop_note": "Tip: Writing a log automatically drops a bean at this cafe!",
+        "bean_dropped_success": "Bean dropped! Your coffee bean is now growing at this cafe.",
         "edit": "Edit",
         "delete": "Delete",
         "edit_log": "Edit Log",

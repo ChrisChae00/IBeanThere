@@ -18,31 +18,45 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async getSession(): Promise<AuthSession | null> {
-    const { data: { session } } = await this.supabase.auth.getSession();
-    
-    if (!session?.user) {
+    try {
+      // Add timeout to prevent infinite hang
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('getSession timeout')), 5000)
+      );
+      
+      const sessionPromise = this.supabase.auth.getSession();
+      
+      const result = await Promise.race([sessionPromise, timeoutPromise]);
+      
+      const { data: { session } } = result as Awaited<typeof sessionPromise>;
+      
+      if (!session?.user) {
+        return null;
+      }
+
+      const metadata = session.user.user_metadata || {};
+      
+      return {
+        user: {
+          id: session.user.id,
+          email: session.user.email || '',
+          username: metadata.username || '',
+          displayName: metadata.display_name || metadata.username || '',
+          bio: metadata.bio,
+          avatarUrl: metadata.avatar_url,
+          role: metadata.role,
+          termsAccepted: !!metadata.terms_accepted,
+          createdAt: new Date(session.user.created_at),
+          updatedAt: session.user.updated_at ? new Date(session.user.updated_at) : undefined,
+        },
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+        expiresAt: session.expires_at ? new Date(session.expires_at * 1000) : undefined,
+      };
+    } catch (error) {
+      console.error('Auth getSession error:', error);
       return null;
     }
-
-    const metadata = session.user.user_metadata || {};
-    
-    return {
-      user: {
-        id: session.user.id,
-        email: session.user.email || '',
-        username: metadata.username || '',
-        displayName: metadata.display_name || metadata.username || '',
-        bio: metadata.bio,
-        avatarUrl: metadata.avatar_url,
-        role: metadata.role,
-        termsAccepted: !!metadata.terms_accepted,
-        createdAt: new Date(session.user.created_at),
-        updatedAt: session.user.updated_at ? new Date(session.user.updated_at) : undefined,
-      },
-      accessToken: session.access_token,
-      refreshToken: session.refresh_token,
-      expiresAt: session.expires_at ? new Date(session.expires_at * 1000) : undefined,
-    };
   }
 
   async getCurrentUserProfile(accessToken: string): Promise<Result<UserProfile>> {

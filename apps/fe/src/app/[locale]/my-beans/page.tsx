@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { GrowthIcon, getGrowthLevel } from '@/components/cafe/GrowthIcon';
-import { Sprout, Trees, MapPin, ChevronRight } from 'lucide-react';
+import { GrowthIcon, getGrowthLevel, GROWTH_THRESHOLDS } from '@/components/cafe/GrowthIcon';
+import { Sprout, Trees, MapPin, ChevronRight, Info, Flame } from 'lucide-react';
+import Modal from '@/shared/ui/Modal';
+
 
 interface BeanData {
   id: string;
@@ -27,6 +29,13 @@ interface UserBeansResponse {
   total_count: number;
 }
 
+interface StreakData {
+  current_streak: number;
+  max_streak: number;
+  last_drop_date: string | null;
+  streak_active: boolean;
+}
+
 export default function MyBeansPage({
   params,
 }: {
@@ -40,10 +49,14 @@ export default function MyBeansPage({
   const [beans, setBeans] = useState<BeanData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showLevelModal, setShowLevelModal] = useState(false);
+  const [streak, setStreak] = useState<StreakData | null>(null);
+
 
   useEffect(() => {
     if (!authLoading && user) {
       fetchUserBeans();
+      fetchUserStreak();
     } else if (!authLoading && !user) {
       setIsLoading(false);
     }
@@ -75,6 +88,29 @@ export default function MyBeansPage({
       setError('Failed to load your beans');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUserStreak = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      
+      const { createClient } = await import('@/shared/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(`${apiUrl}/api/v1/users/me/streak`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStreak(data);
+      }
+    } catch (err) {
+      console.error('Error fetching streak:', err);
     }
   };
 
@@ -139,13 +175,55 @@ export default function MyBeansPage({
             <div className="text-3xl font-bold text-[var(--color-accent)]">{totalDrops}</div>
             <div className="text-sm text-[var(--color-textSecondary)]">{t('stats.drops')}</div>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 text-center">
+          <button
+            onClick={() => setShowLevelModal(true)}
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]/80 transition-all cursor-pointer group relative"
+          >
+            <div className="absolute top-2 right-2 opacity-50 group-hover:opacity-100 transition-opacity">
+              <Info className="w-4 h-4 text-[var(--color-textSecondary)]" />
+            </div>
             <div className="flex justify-center mb-1">
               <GrowthIcon level={maxLevel} size={32} />
             </div>
             <div className="text-sm text-[var(--color-textSecondary)]">{t('stats.highest')}</div>
-          </div>
+          </button>
         </div>
+
+        {/* Streak Badge */}
+        {streak && streak.current_streak > 0 && (
+          <div className={`mb-8 p-4 rounded-xl border ${
+            streak.streak_active 
+              ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
+              : 'bg-[var(--color-surface)] border-[var(--color-border)]'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${streak.streak_active ? 'bg-orange-500/20' : 'bg-[var(--color-border)]'}`}>
+                  <Flame className={`w-6 h-6 ${streak.streak_active ? 'text-orange-500' : 'text-[var(--color-textSecondary)]'}`} />
+                </div>
+                <div>
+                  <div className="font-semibold text-[var(--color-text)]">
+                    {t('streak.current')}: {streak.current_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.current_streak })}
+                  </div>
+                  <div className="text-sm text-[var(--color-textSecondary)]">
+                    {t('streak.best')}: {streak.max_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.max_streak })}
+                  </div>
+                </div>
+              </div>
+              {streak.streak_active && (
+                <span className="text-sm font-medium text-orange-500">
+                  {t('streak.active')}
+                </span>
+              )}
+            </div>
+            {!streak.streak_active && streak.current_streak > 0 && (
+              <p className="mt-2 text-sm text-[var(--color-textSecondary)]">
+                {t('streak.info')}
+              </p>
+            )}
+          </div>
+        )}
+
 
         {/* Loading State */}
         {isLoading && (
@@ -235,6 +313,15 @@ export default function MyBeansPage({
             )}
           </div>
         )}
+
+        {/* Level Info Modal */}
+        <LevelInfoModal
+          isOpen={showLevelModal}
+          onClose={() => setShowLevelModal(false)}
+          currentLevel={maxLevel}
+          t={t}
+          tDropBean={tDropBean}
+        />
       </div>
     </main>
   );
@@ -292,5 +379,74 @@ function BeanLevelSection({
         ))}
       </div>
     </div>
+  );
+}
+
+// Level thresholds for display
+const LEVEL_DATA = [
+  { level: 1, threshold: 1 },
+  { level: 2, threshold: 3 },
+  { level: 3, threshold: 5 },
+  { level: 4, threshold: 10 },
+  { level: 5, threshold: 15 },
+];
+
+interface LevelInfoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentLevel: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tDropBean: any;
+}
+
+function LevelInfoModal({ isOpen, onClose, currentLevel, t, tDropBean }: LevelInfoModalProps) {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('level_info.title')}
+      description={t('level_info.subtitle')}
+      size="sm"
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-[var(--color-textSecondary)]">
+          {t('level_info.how_to_level')}
+        </p>
+        
+        <div className="space-y-2">
+          {LEVEL_DATA.map(({ level, threshold }) => (
+            <div
+              key={level}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                level === currentLevel
+                  ? 'bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30'
+                  : 'bg-[var(--color-surface)]'
+              }`}
+            >
+              <GrowthIcon level={level} size={28} />
+              <div className="flex-1">
+                <div className={`font-medium ${
+                  level === currentLevel ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'
+                }`}>
+                  {tDropBean(`levels.${level}`)}
+                </div>
+              </div>
+              <div className={`text-sm ${
+                level === currentLevel ? 'text-[var(--color-primary)]' : 'text-[var(--color-textSecondary)]'
+              }`}>
+                {t('level_info.drops_required', { count: threshold })}
+              </div>
+              {level === currentLevel && (
+                <span className="text-xs bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2 py-0.5 rounded-full">
+                  {t('level_info.current_highest')}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Modal>
   );
 }

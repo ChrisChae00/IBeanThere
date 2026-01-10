@@ -51,7 +51,8 @@
       "too_far": "너무 멀어요 ({distance}m, 50m 이내여야 함)",
       "error": "심기 실패. 다시 시도해주세요.",
       "login_required": "커피콩을 심으려면 로그인이 필요합니다",
-      "level_up": "레벨 업! 이제 {level}",
+      "level_up": "이제 {level}!",
+      "level_up_title": "레벨 업!",
       "total_drops": "총 {count}회 방문",
       "drops": "{count}회 방문",
       "next_level": "다음 레벨까지 {drops}회 남음",
@@ -94,6 +95,30 @@
         "title": "아직 커피콩이 없어요",
         "description": "근처 카페에서 커피콩을 심어 나만의 커피 숲을 가꿔보세요!",
         "cta": "첫 커피콩 심기"
+      },
+      "level_info": {
+        "title": "커피콩 성장 단계",
+        "subtitle": "같은 카페를 반복 방문하면 콩이 자라요!",
+        "how_to_level": "같은 카페에서 커피콩을 심으면 레벨이 올라갑니다:",
+        "current_highest": "현재 최고 레벨",
+        "drops_required": "{count}회 방문"
+      },
+      "streak": {
+        "title": "연속 심기",
+        "current": "현재 연속",
+        "best": "최고 기록",
+        "days": "{count}일 연속",
+        "day": "1일",
+        "active": "🔥 연속 심기 중!",
+        "keep_going": "연속 기록을 유지하려면 계속 심어주세요!",
+        "info": "7일 이내에 한 번씩 심으면 연속 기록이 유지됩니다"
+      },
+      "heatmap": {
+        "title": "나의 커피 로드",
+        "subtitle": "지도에서 나의 커피 여정을 확인하세요",
+        "show_map": "지도 보기",
+        "hide_map": "지도 숨기기",
+        "drops": "{count}회 방문"
       }
     },
     "landing": {
@@ -583,6 +608,8 @@
         "cancel": "취소",
         "submit": "제출",
         "submitting": "제출 중...",
+        "bean_drop_note": "팁: 로그를 작성하면 자동으로 이 카페에 커피콩이 심어집니다!",
+        "bean_dropped_success": "커피콩이 심어졌습니다! 이 카페에서 커피콩이 자라고 있어요.",
         "edit": "수정",
         "delete": "삭제",
         "edit_log": "로그 수정",
