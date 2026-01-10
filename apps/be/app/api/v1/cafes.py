@@ -20,6 +20,7 @@ from app.services.osm_service import OSMService
 from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
+from app.core.fraud_detection import check_location_consistency
 from supabase import Client
 from datetime import datetime, timezone
 from dateutil import parser as date_parser
@@ -1318,6 +1319,15 @@ async def drop_bean(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"You must be within {max_distance}m of the cafe to drop a bean. Current distance: {distance:.0f}m"
             )
+        
+        # 2.5 Fraud detection - check location consistency (Option A: log only)
+        check_location_consistency(
+            supabase=supabase,
+            user_id=current_user.id,
+            current_lat=user_lat,
+            current_lng=user_lng,
+            action_type="drop_bean"
+        )
         
         # 3. Check for existing bean record (user + cafe)
         bean_result = supabase.table("cafe_beans").select("*").eq(

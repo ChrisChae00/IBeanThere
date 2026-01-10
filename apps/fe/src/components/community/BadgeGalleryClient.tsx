@@ -49,13 +49,13 @@ export default function BadgeGalleryClient() {
         let username = user.user_metadata?.username;
         if (!username) {
             // Fallback: fetch profile
-            const profileRes = await supabase
+            const { data: profileData } = await supabase
                 .from('users')
                 .select('username')
                 .eq('id', user.id)
                 .single();
-            if (profileRes.data) {
-                username = profileRes.data.username;
+            if (profileData) {
+                username = (profileData as { username: string }).username;
             }
         }
 
