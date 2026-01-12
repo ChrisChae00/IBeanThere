@@ -79,11 +79,11 @@ export default function MobileMenu({ locale }: { locale: string }) {
 
       {/* Slide-out Menu */}
       <div 
-        className={`fixed top-0 right-0 h-screen w-[280px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[70] transform transition-transform duration-300 ease-in-out lg:hidden overflow-x-hidden ${
+        className={`fixed inset-y-0 right-0 w-[280px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[70] transform transition-transform duration-300 ease-in-out lg:hidden overflow-x-hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex flex-col h-screen bg-[var(--color-background)] overflow-x-hidden">
+        <div className="flex flex-col h-full bg-[var(--color-background)] overflow-x-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-background)] w-full overflow-x-hidden">
             <div className="flex items-center space-x-2 min-w-0 flex-1">
@@ -366,8 +366,8 @@ export default function MobileMenu({ locale }: { locale: string }) {
             )}
           </nav>
           
-          {/* Switchers - Fixed at bottom */}
-          <div className="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-background)] flex-shrink-0 w-full overflow-x-hidden">
+          {/* Switchers - Fixed at bottom with safe-area padding */}
+          <div className="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-background)] flex-shrink-0 w-full overflow-x-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-center gap-3 w-full min-w-0">
               <ThemeSwitcher />
               <LanguageSwitcher />
