@@ -248,7 +248,9 @@ async def search_cafes(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
     lng: float = Query(..., ge=-180, le=180, description="Longitude"),
     radius: int = Query(default=2000, ge=100, le=20000, description="Search radius in meters"),
-    status_filter: Optional[str] = Query(None, description="Filter by status: 'pending' | 'verified'")
+    status_filter: Optional[str] = Query(None, description="Filter by status: 'pending' | 'verified'"),
+    sort_by: str = Query(default="distance", description="Sort by: distance | trending | rating | newest"),
+    min_rating: Optional[float] = Query(None, ge=0, le=5, description="Minimum rating filter")
 ):
     """
     Search for cafes near a location using PostGIS.
@@ -256,6 +258,8 @@ async def search_cafes(
     - Uses earth_distance() for accurate distance calculation
     - Returns cafes within radius
     - Optional status filter
+    - Sort by distance, trending score, rating, or creation date
+    - Optional minimum rating filter
     """
     try:
         supabase = get_supabase_client()
@@ -293,7 +297,7 @@ async def search_cafes(
         if not result.data:
             return CafeSearchResponse(cafes=[], total_count=0)
         
-        # Filter by exact distance
+        # Filter by exact distance and calculate distances
         valid_cafes = []
         for cafe in result.data:
             distance = calculate_earth_distance(
@@ -302,7 +306,24 @@ async def search_cafes(
                 float(cafe.get("longitude", 0))
             )
             if distance <= radius:
+                # Filter by minimum rating if specified
+                cafe_rating = cafe.get("google_rating") or cafe.get("average_rating") or 0
+                if min_rating is not None and float(cafe_rating) < min_rating:
+                    continue
+                
+                # Store distance for sorting
+                cafe["_distance"] = distance
                 valid_cafes.append(cafe)
+        
+        # Sort cafes based on sort_by parameter
+        if sort_by == "distance":
+            valid_cafes.sort(key=lambda c: c.get("_distance", float("inf")))
+        elif sort_by == "trending":
+            valid_cafes.sort(key=lambda c: float(c.get("trending_score", 0) or 0), reverse=True)
+        elif sort_by == "rating":
+            valid_cafes.sort(key=lambda c: float(c.get("google_rating", 0) or c.get("average_rating", 0) or 0), reverse=True)
+        elif sort_by == "newest":
+            valid_cafes.sort(key=lambda c: c.get("created_at", ""), reverse=True)
         
         # Format response
         formatted_cafes = []

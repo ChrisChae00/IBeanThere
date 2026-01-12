@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CafeMapData } from '@/types/map';
 import { CafeDetailResponse } from '@/types/api';
+import FoundingCrewAvatars from './FoundingCrewAvatars';
 
 interface CafeInfoSectionProps {
   cafe: CafeMapData | CafeDetailResponse;
@@ -63,69 +64,10 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
     <div className="space-y-4">
       {/* Founding Crew Section */}
       {foundingCrew && (foundingCrew.navigator || (foundingCrew.vanguard && foundingCrew.vanguard.length > 0)) && (
-        <div className="p-4 bg-gradient-to-br from-[var(--color-primary)]/5 to-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20">
-          <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)] mb-3">
-            {t('founding_crew')}
-          </h3>
-          
-          {/* Navigator */}
-          {foundingCrew.navigator && (
-            <div className="mb-3 last:mb-0">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded text-xs font-medium">
-                      {t('navigator')}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-[var(--color-cardText)] truncate">
-                    {foundingCrew.navigator.username || tCommon('unknown')}
-                  </p>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
-                    {t('first_discoverer')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Vanguards */}
-          {foundingCrew.vanguard && foundingCrew.vanguard.length > 0 && (
-            <div className="pt-3 border-t border-[var(--color-border)]/50">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium text-[var(--color-cardTextSecondary)]">
-                  {t('vanguards')}
-                </span>
-              </div>
-              <div className="space-y-2">
-                {foundingCrew.vanguard.map((vanguard: { user_id: string; username?: string; role: 'vanguard_2nd' | 'vanguard_3rd' }, index: number) => (
-                  <div key={vanguard.user_id} className="flex items-center gap-2">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-accent)]/20 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-[var(--color-accent)]/20 text-[var(--color-accent)] rounded text-xs font-medium">
-                          {vanguard.role === 'vanguard_2nd' ? '2nd' : '3rd'}
-                        </span>
-                        <p className="text-sm text-[var(--color-cardText)] truncate">
-                          {vanguard.username || tCommon('unknown')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FoundingCrewAvatars
+          navigator={foundingCrew.navigator}
+          vanguard={foundingCrew.vanguard}
+        />
       )}
 
       {/* Status Badge + Verification Count (only show count when not verified and no founding crew) */}

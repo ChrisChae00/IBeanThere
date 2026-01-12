@@ -40,9 +40,14 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-2">
-          <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-            🔥 {tMap('trending')}
-          </span>
+          {/* Trending tag - only show for top 3 */}
+          {cafe.trending_rank && cafe.trending_rank <= 3 ? (
+            <span className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+              🔥 {tMap('trending')}
+            </span>
+          ) : (
+            <span /> /* Empty span to maintain flex layout */
+          )}
           <div onClick={(e) => e.preventDefault()}>
             <DropBeanButton
               cafeId={cafe.id}

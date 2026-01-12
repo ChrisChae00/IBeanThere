@@ -33,11 +33,14 @@ export default function ExploreMapPage({
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
+  // Load trending cafes - refetch when location becomes available
   useEffect(() => {
     async function loadTrendingCafes() {
       try {
         setIsLoading(true);
-        const cafes = await getTrendingCafes(12, 0);
+        // Pass location if available for city-based trending
+        const location = coords ? { lat: coords.latitude, lng: coords.longitude } : undefined;
+        const cafes = await getTrendingCafes(12, 0, location);
         setTrendingCafes(cafes);
         setFilteredCafes(cafes);
       } catch (err) {
@@ -48,7 +51,7 @@ export default function ExploreMapPage({
       }
     }
     loadTrendingCafes();
-  }, []);
+  }, [coords]); // Refetch when coords change
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
