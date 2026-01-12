@@ -53,7 +53,6 @@ export default function DropBeanButton({
   const { coords, getCurrentLocation, isLoading: locationLoading, error: locationError } = useLocation();
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [beanStatus, setBeanStatus] = useState(initialBeanStatus);
 
   // Calculate distance to cafe
@@ -154,12 +153,11 @@ export default function DropBeanButton({
 
   const handleDropBean = async () => {
     if (!user) {
-      setError(t('login_required'));
+      showToast(t('login_required'), 'error');
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       // Use existing coords from hook if available, otherwise fetch fresh
@@ -179,7 +177,7 @@ export default function DropBeanButton({
       const distance = calculateDistance(userLat, userLng, cafeLat, cafeLng);
       // Allow slightly larger radius for better UX (75m instead of 50m strict)
       if (distance > 75) {
-        setError(t('too_far', { distance: Math.round(distance) }));
+        showToast(t('too_far', { distance: Math.round(distance) }), 'error');
         setIsLoading(false);
         return;
       }
@@ -200,11 +198,11 @@ export default function DropBeanButton({
       if (!response.ok) {
         const data = await response.json();
         if (response.status === 409) {
-          setError(t('already_today'));
+          showToast(t('already_today'), 'error');
         } else if (response.status === 400) {
-          setError(data.detail || t('too_far'));
+          showToast(data.detail || t('too_far'), 'error');
         } else {
-          setError(data.detail || t('error'));
+          showToast(data.detail || t('error'), 'error');
         }
         setIsLoading(false);
         return;
@@ -235,9 +233,8 @@ export default function DropBeanButton({
 
     } catch (err: any) {
       console.error('Error dropping bean:', err);
-      // Prefer specific error message if available
       const errorMessage = err.message || locationError || t('error');
-      setError(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -286,25 +283,7 @@ export default function DropBeanButton({
         )}
       </Button>
 
-      {error && (
-         <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 min-w-[200px] w-max max-w-[280px] z-[50]">
-          <div className="bg-red-50 text-red-600 text-xs px-3 py-2 rounded-lg border border-red-100 shadow-lg text-center font-medium animate-in fade-in slide-in-from-top-1">
-            {error}
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setError(null);
-              }}
-              className="ml-2 underline opacity-75 hover:opacity-100"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!canDrop && showGrowthInfo && nextLevelAt && !error && (
+      {!canDrop && showGrowthInfo && nextLevelAt && (
         <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
           {t('next_level', { drops: nextLevelAt - dropCount })}
         </div>
