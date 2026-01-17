@@ -165,6 +165,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   >
                     <span className="truncate">{t('dropbean')}</span>
                   </Link>
+                  {/* MVP: Pending Spots hidden - verification now happens via Drop Bean
                   <Link 
                     href={`/${locale}/discover/pending-spots`}
                     onClick={closeMenu}
@@ -172,6 +173,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   >
                     <span className="truncate">{t('pending_spots')}</span>
                   </Link>
+                  */}
                 </div>
               )}
             </div>

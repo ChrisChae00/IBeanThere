@@ -45,6 +45,10 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
             <span className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
               🔥 {tMap('trending')}
             </span>
+          ) : cafe.status === 'pending' ? (
+            <span className="bg-[var(--color-surface-hover)] text-[var(--color-text-secondary)] border border-[var(--color-border)] px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              ⏳ {locale === 'ko' ? '검증 대기' : 'Pending'}
+            </span>
           ) : (
             <span /> /* Empty span to maintain flex layout */
           )}
