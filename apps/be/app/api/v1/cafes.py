@@ -7,6 +7,7 @@ Cafe API endpoints for UGC verification system.
 """
 
 from fastapi import APIRouter, Query, HTTPException, status, Depends, Body
+from pydantic import BaseModel
 from typing import Optional, List
 from decimal import Decimal
 import re
@@ -812,11 +813,35 @@ async def register_cafe(
             
             supabase.table("cafe_checkins").insert(checkin_data).execute()
             
+            # Auto-create first Drop Bean for Navigator (founding member)
+            first_bean = supabase.table("cafe_beans").insert({
+                "cafe_id": cafe_id,
+                "user_id": current_user.id,
+                "drop_count": 1,
+                "growth_level": 1,
+                "last_latitude": float(request.latitude),
+                "last_longitude": float(request.longitude),
+                "first_dropped_at": datetime.now(timezone.utc).isoformat(),
+                "last_dropped_at": datetime.now(timezone.utc).isoformat()
+            }).execute()
+            
+            if first_bean.data:
+                # Record the drop event
+                supabase.table("cafe_bean_drops").insert({
+                    "bean_id": first_bean.data[0]["id"],
+                    "user_id": current_user.id,
+                    "cafe_id": cafe_id,
+                    "latitude": float(request.latitude),
+                    "longitude": float(request.longitude),
+                    "dropped_at": datetime.now(timezone.utc).isoformat()
+                }).execute()
+            
             return {
                 "message": "Cafe registered successfully",
                 "cafe": new_cafe,
                 "check_in": checkin_data,
-                "triggered_verification": False
+                "triggered_verification": False,
+                "auto_bean_dropped": True
             }
         
     except HTTPException:
@@ -1270,6 +1295,96 @@ async def admin_delete_cafe(
 
 
 # =========================================================
+# Admin Update Cafe
+# =========================================================
+
+class AdminCafeUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+    business_hours: Optional[dict] = None  # JSON object with day-by-day hours
+
+@router.patch("/admin/{cafe_id}")
+async def admin_update_cafe(
+    cafe_id: str,
+    request: AdminCafeUpdateRequest = Body(...),
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Update a cafe's information (Admin only).
+    Only non-null fields will be updated.
+    
+    Args:
+        cafe_id: ID of the cafe to update
+        request: Fields to update
+        
+    Returns:
+        Updated cafe data
+    """
+    try:
+        # Check if cafe exists
+        cafe_result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        
+        if not cafe_result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        # Build update data (only include non-null fields)
+        update_data = {}
+        if request.name is not None:
+            update_data["name"] = request.name
+        if request.address is not None:
+            update_data["address"] = request.address
+        if request.phone is not None:
+            update_data["phone"] = request.phone
+        if request.website is not None:
+            update_data["website"] = request.website
+        if request.description is not None:
+            update_data["description"] = request.description
+        if request.business_hours is not None:
+            update_data["business_hours"] = request.business_hours
+        
+        if not update_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No fields to update"
+            )
+        
+        # Add updated_at timestamp
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Update the cafe
+        result = supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
+        
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update cafe"
+            )
+        
+        return {
+            "message": "Cafe updated successfully",
+            "cafe": result.data[0]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating cafe: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update cafe: {str(e)}"
+        )
+
+
+# =========================================================
 # Drop Bean Feature
 # =========================================================
 
@@ -1425,6 +1540,47 @@ async def drop_bean(
         # 8. Calculate and update streak
         streak_info = await calculate_user_streak(supabase, current_user.id)
         
+        # 9. Auto-verification: Check if 3 unique users have dropped beans
+        triggered_verification = False
+        cafe_status_result = supabase.table("cafes").select("status, navigator_id, vanguard_ids").eq("id", cafe_id).single().execute()
+        cafe_status = cafe_status_result.data.get("status") if cafe_status_result.data else "pending"
+        
+        if cafe_status == "pending":
+            # Count unique users who dropped beans at this cafe
+            unique_users_result = supabase.table("cafe_beans").select("user_id").eq("cafe_id", cafe_id).execute()
+            unique_user_ids = list(set([bean["user_id"] for bean in unique_users_result.data])) if unique_users_result.data else []
+            unique_user_count = len(unique_user_ids)
+            
+            if unique_user_count >= 3:
+                # Get the order of bean drops to determine founding crew
+                drops_result = supabase.table("cafe_beans").select(
+                    "user_id, first_dropped_at"
+                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
+                
+                founding_drops = drops_result.data if drops_result.data else []
+                navigator_id = cafe_status_result.data.get("navigator_id")
+                
+                # Build vanguard_ids (2nd and 3rd droppers)
+                vanguard_ids = []
+                for idx, drop in enumerate(founding_drops):
+                    if drop["user_id"] != navigator_id:
+                        role = f"vanguard_{idx + 1}"
+                        vanguard_ids.append({
+                            "user_id": drop["user_id"],
+                            "role": role,
+                            "verified_at": datetime.now(timezone.utc).isoformat()
+                        })
+                
+                # Update cafe to verified
+                supabase.table("cafes").update({
+                    "status": "verified",
+                    "verified_at": datetime.now(timezone.utc).isoformat(),
+                    "vanguard_ids": vanguard_ids
+                }).eq("id", cafe_id).execute()
+                
+                triggered_verification = True
+                logger.info(f"Cafe {cafe_id} auto-verified by 3 unique bean droppers")
+        
         return {
             "message": "Bean dropped successfully!",
             "cafe_id": cafe_id,
@@ -1434,7 +1590,8 @@ async def drop_bean(
             "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
             "leveled_up": leveled_up,
             "next_level_at": get_next_level_threshold(drop_count),
-            "streak": streak_info
+            "streak": streak_info,
+            "triggered_verification": triggered_verification
         }
         
     except HTTPException:

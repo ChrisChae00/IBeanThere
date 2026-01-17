@@ -111,7 +111,7 @@ export default function ExploreMapPage({
               </p>
             </div>
             <Link
-              href={`/${locale}/discover/pending-spots`}
+              href={`/${locale}/discover/register-cafe`}
               className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
               <PlusIcon className="text-xl font-bold" />

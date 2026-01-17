@@ -51,6 +51,7 @@ export interface TrendingCafeResponse {
   address: string;
   latitude: number;
   longitude: number;
+  status?: 'pending' | 'verified' | 'disputed';
   view_count_14d: number;
   visit_count_14d: number;
   trending_score: number;

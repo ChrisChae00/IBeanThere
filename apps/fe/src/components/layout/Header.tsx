@@ -80,17 +80,18 @@ export default function Header({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           )
-        },
-        {
-          labelKey: 'pending_spots',
-          descriptionKey: 'pending_spots_description',
-          href: `/${locale}/discover/pending-spots`,
-          icon: (
-            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )
         }
+        // MVP: Pending Spots hidden - verification now happens via Drop Bean
+        // {
+        //   labelKey: 'pending_spots',
+        //   descriptionKey: 'pending_spots_description',
+        //   href: `/${locale}/discover/pending-spots`,
+        //   icon: (
+        //     <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        //     </svg>
+        //   )
+        // }
       ]
     },
     // MVP: Community section hidden - uncomment when ready

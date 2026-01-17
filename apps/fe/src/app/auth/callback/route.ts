@@ -9,6 +9,9 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies();
     
+    // Store cookies to set later
+    const cookiesToSet: { name: string; value: string; options: any }[] = [];
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,14 +20,9 @@ export async function GET(request: Request) {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            } catch {
-              // Server Component context
-            }
+          setAll(cookies) {
+            // Collect cookies to set on the response
+            cookiesToSet.push(...cookies);
           },
         },
       }
@@ -33,8 +31,15 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      // Redirect to client-side page that reads locale from sessionStorage
-      return NextResponse.redirect(new URL('/auth/redirect', requestUrl.origin));
+      // Create redirect response
+      const response = NextResponse.redirect(new URL('/auth/redirect', requestUrl.origin));
+      
+      // Set all cookies on the response
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options);
+      });
+      
+      return response;
     }
   }
 

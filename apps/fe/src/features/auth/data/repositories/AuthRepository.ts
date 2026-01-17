@@ -8,6 +8,7 @@ import { createClient } from '@/shared/lib/supabase/client';
 import { IAuthRepository, AuthSession, UserProfile } from '../../domain';
 import { UserProfileDTO } from '../dto/UserDTO';
 import { Result, success, failure } from '@/shared/types';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export class AuthRepository implements IAuthRepository {
   private supabase = createClient();
@@ -89,7 +90,7 @@ export class AuthRepository implements IAuthRepository {
 
   onAuthStateChange(callback: (session: AuthSession | null) => void): () => void {
     const { data: { subscription } } = this.supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event: AuthChangeEvent, session: Session | null) => {
         if (!session?.user) {
           callback(null);
           return;

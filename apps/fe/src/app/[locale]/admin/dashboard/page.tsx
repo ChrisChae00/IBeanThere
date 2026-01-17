@@ -12,29 +12,21 @@ export default async function AdminDashboardPage({
   const t = await getTranslations({ locale, namespace: 'admin' });
 
   const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  
+  // Use getUser() instead of getSession() for security (verifies with Supabase Auth server)
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     redirect(`/${locale}/signin`);
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  const response = await fetch(`${apiUrl}/api/v1/users/me`, {
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    cache: 'no-store',
-  });
+  const { data: profile, error: profileError } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
 
-  if (!response.ok) {
-    redirect(`/${locale}/signin`);
-  }
-
-  const user = await response.json();
-
-  if (user.role !== 'admin') {
+  if (profileError || !profile || profile.role !== 'admin') {
     redirect(`/${locale}`);
   }
 
@@ -52,4 +44,3 @@ export default async function AdminDashboardPage({
     </div>
   );
 }
-
