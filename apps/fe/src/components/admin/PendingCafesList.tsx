@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { getPendingCafes, verifyCafe, deleteCafe, PendingCafe } from '@/lib/api/admin';
+import { getPendingCafes, verifyCafe, deleteCafe, updateCafe, PendingCafe, CafeUpdateData } from '@/lib/api/admin';
 import { ErrorAlert } from '@/shared/ui';
-import PendingCafeCard from './PendingCafeCard';
+import PendingCafeCard, { EditCafeData } from './PendingCafeCard';
 
 export default function PendingCafesList() {
   const t = useTranslations('admin');
@@ -14,6 +14,7 @@ export default function PendingCafesList() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCafeId, setSelectedCafeId] = useState<string | null>(null);
@@ -26,6 +27,7 @@ export default function PendingCafesList() {
       'FETCH_PENDING_CAFES_FAILED': t('error_fetching'),
       'VERIFY_CAFE_FAILED': t('error_verifying'),
       'DELETE_CAFE_FAILED': t('error_deleting'),
+      'UPDATE_CAFE_FAILED': t('error_updating'),
     };
     return errorMap[errorCode] || t('error_unknown');
   };
@@ -57,6 +59,21 @@ export default function PendingCafesList() {
   const handleDelete = async (cafeId: string) => {
     setShowDeleteModal(true);
     setSelectedCafeId(cafeId);
+  };
+
+  const handleEdit = async (cafeId: string, data: EditCafeData) => {
+    setEditingId(cafeId);
+    setActionError(null);
+    try {
+      await updateCafe(cafeId, data as CafeUpdateData);
+      await fetchPendingCafes();
+    } catch (err) {
+      console.error('Error updating cafe:', err);
+      const errorMessage = err instanceof Error ? err.message : 'UPDATE_CAFE_FAILED';
+      setActionError(translateError(errorMessage));
+    } finally {
+      setEditingId(null);
+    }
   };
 
   const confirmVerify = async () => {
@@ -151,8 +168,10 @@ export default function PendingCafesList() {
               cafe={cafe}
               onVerify={handleVerify}
               onDelete={handleDelete}
+              onEdit={handleEdit}
               isVerifying={verifyingId === cafe.id}
               isDeleting={deletingId === cafe.id}
+              isEditing={editingId === cafe.id}
             />
           ))}
         </div>

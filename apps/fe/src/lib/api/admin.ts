@@ -1,3 +1,5 @@
+import { BusinessHours } from '@/types/map';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(): Promise<HeadersInit> {
@@ -36,6 +38,7 @@ export interface PendingCafe {
   }>;
   created_at: string;
   updated_at: string | null;
+  business_hours?: BusinessHours;
 }
 
 export interface PendingCafesResponse {
@@ -122,3 +125,41 @@ export async function deleteCafe(cafeId: string): Promise<AdminDeleteResponse> {
   return response.json();
 }
 
+export interface CafeUpdateData {
+  name?: string;
+  address?: string;
+  phone?: string;
+  website?: string;
+  description?: string;
+  business_hours?: BusinessHours;
+}
+
+export interface AdminUpdateResponse {
+  message: string;
+  cafe: PendingCafe;
+}
+
+export async function updateCafe(cafeId: string, data: CafeUpdateData): Promise<AdminUpdateResponse> {
+  const headers = await getAuthHeaders();
+  
+  const response = await fetch(`${API_URL}/api/v1/cafes/admin/${cafeId}`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('ADMIN_ACCESS_REQUIRED');
+    }
+    if (response.status === 404) {
+      throw new Error('CAFE_NOT_FOUND');
+    }
+    if (response.status === 401) {
+      throw new Error('NOT_AUTHENTICATED');
+    }
+    throw new Error('UPDATE_CAFE_FAILED');
+  }
+  
+  return response.json();
+}

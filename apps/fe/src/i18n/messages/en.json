@@ -402,7 +402,13 @@
       "founding_crew": "Founding Crew",
       "navigator": "Navigator",
       "vanguards": "Vanguards",
-      "first_discoverer": "First discoverer of this cafe"
+      "first_discoverer": "First discoverer of this cafe",
+      "edit": "Edit",
+      "save": "Save",
+      "cafe_name": "Cafe Name",
+      "address": "Address",
+      "edit_cafe_title": "Edit Cafe Information",
+      "error_updating": "Failed to update cafe"
     },
 
     "settings": {

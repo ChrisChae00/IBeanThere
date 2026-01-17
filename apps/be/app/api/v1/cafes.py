@@ -7,6 +7,7 @@ Cafe API endpoints for UGC verification system.
 """
 
 from fastapi import APIRouter, Query, HTTPException, status, Depends, Body
+from pydantic import BaseModel
 from typing import Optional, List
 from decimal import Decimal
 import re
@@ -1290,6 +1291,96 @@ async def admin_delete_cafe(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete cafe: {str(e)}"
+        )
+
+
+# =========================================================
+# Admin Update Cafe
+# =========================================================
+
+class AdminCafeUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+    business_hours: Optional[dict] = None  # JSON object with day-by-day hours
+
+@router.patch("/admin/{cafe_id}")
+async def admin_update_cafe(
+    cafe_id: str,
+    request: AdminCafeUpdateRequest = Body(...),
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Update a cafe's information (Admin only).
+    Only non-null fields will be updated.
+    
+    Args:
+        cafe_id: ID of the cafe to update
+        request: Fields to update
+        
+    Returns:
+        Updated cafe data
+    """
+    try:
+        # Check if cafe exists
+        cafe_result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        
+        if not cafe_result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        # Build update data (only include non-null fields)
+        update_data = {}
+        if request.name is not None:
+            update_data["name"] = request.name
+        if request.address is not None:
+            update_data["address"] = request.address
+        if request.phone is not None:
+            update_data["phone"] = request.phone
+        if request.website is not None:
+            update_data["website"] = request.website
+        if request.description is not None:
+            update_data["description"] = request.description
+        if request.business_hours is not None:
+            update_data["business_hours"] = request.business_hours
+        
+        if not update_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No fields to update"
+            )
+        
+        # Add updated_at timestamp
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Update the cafe
+        result = supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
+        
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update cafe"
+            )
+        
+        return {
+            "message": "Cafe updated successfully",
+            "cafe": result.data[0]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating cafe: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update cafe: {str(e)}"
         )
 
 
