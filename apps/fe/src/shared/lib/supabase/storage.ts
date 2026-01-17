@@ -59,7 +59,7 @@ async function deleteExistingAvatars(userId: string): Promise<void> {
     }
     
     // Delete all existing files
-    const filesToDelete = files.map(file => `${userId}/${file.name}`);
+    const filesToDelete = files.map((file: { name: string }) => `${userId}/${file.name}`);
     await supabase.storage
       .from(AVATAR_BUCKET)
       .remove(filesToDelete);
