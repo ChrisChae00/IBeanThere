@@ -528,11 +528,16 @@ async def get_cafe_details(cafe_identifier: str):
             # Format recent logs
             for log in recent_logs_data:
                 author_display_name = None
+                author_username = None
+                author_avatar_url = None
+                
                 if not log.get("anonymous"):
                     try:
-                        user_result = supabase.table("users").select("username").eq("id", log["user_id"]).single().execute()
+                        user_result = supabase.table("users").select("username, display_name, avatar_url").eq("id", log["user_id"]).single().execute()
                         if user_result.data:
-                            author_display_name = user_result.data.get("username") or "User"
+                            author_display_name = user_result.data.get("display_name") or user_result.data.get("username") or "User"
+                            author_username = user_result.data.get("username")
+                            author_avatar_url = user_result.data.get("avatar_url")
                     except Exception:
                         author_display_name = "User"
                 else:
@@ -549,7 +554,9 @@ async def get_cafe_details(cafe_identifier: str):
                     "coffee_type": log.get("coffee_type"),
                     "is_public": True,
                     "anonymous": log.get("anonymous", False),
-                    "author_display_name": author_display_name
+                    "author_display_name": author_display_name,
+                    "author_username": author_username,
+                    "author_avatar_url": author_avatar_url
                 })
         
         # Get total beans dropped at this cafe
