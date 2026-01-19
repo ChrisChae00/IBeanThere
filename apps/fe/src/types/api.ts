@@ -144,6 +144,8 @@ export interface CoffeeLog {
   temperature_lighting?: string;
   facilities_info?: string;
   author_display_name?: string;
+  author_username?: string;
+  author_avatar_url?: string;
   updated_at?: string;
 }
 
