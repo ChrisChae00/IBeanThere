@@ -9,6 +9,8 @@ import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
 import { StarRating } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
+import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+
 
 interface CafeDetailClientProps {
   cafe: CafeDetailResponse;
@@ -16,10 +18,12 @@ interface CafeDetailClientProps {
 
 export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const t = useTranslations('cafe.detail');
+  const tReport = useTranslations('report');
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
   const { user } = useAuth();
+  const { modalState, openCafeReport, closeModal } = useReportModal();
 
   const handleWriteLog = (e: React.MouseEvent) => {
     if (!user) {
@@ -27,6 +31,14 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
       router.push(`/${locale}/signin`);
       return;
     }
+  };
+
+  const handleReportClick = () => {
+    if (!user) {
+      router.push(`/${locale}/signin`);
+      return;
+    }
+    openCafeReport(cafe.id, cafe.name);
   };
 
   const cafePath = cafe.slug || cafe.id;
@@ -38,20 +50,27 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-[var(--color-cardText)]">{cafe.name}</h1>
-          <DropBeanButton
-            cafeId={cafe.id}
-            cafeLat={cafe.latitude}
-            cafeLng={cafe.longitude}
-            size="md"
-            showGrowthInfo={true}
-          />
+          <div className="flex items-center gap-2">
+            <ReportButton
+              onClick={handleReportClick}
+              size="md"
+              label={tReport('report_issue')}
+            />
+            <DropBeanButton
+              cafeId={cafe.id}
+              cafeLat={cafe.latitude}
+              cafeLng={cafe.longitude}
+              size="md"
+              showGrowthInfo={true}
+            />
+          </div>
         </div>
         <div className="h-px bg-[var(--color-border)] mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
 
       {/* Stats Card */}
-      {(cafe.average_rating || cafe.total_beans_dropped) && (
+      {(cafe.average_rating !== undefined || (cafe.total_beans_dropped ?? 0) > 0 || (cafe.log_count ?? 0) > 0) && (
         <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -105,7 +124,17 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         </div>
         <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        targetType={modalState.targetType}
+        targetId={modalState.targetId}
+        targetUrl={modalState.targetUrl}
+      />
     </div>
   );
 }
+
 

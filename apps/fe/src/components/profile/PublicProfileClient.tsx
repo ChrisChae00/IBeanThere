@@ -11,6 +11,8 @@ import { TasteTag } from '@/shared/ui';
 import { Button } from '@/shared/ui';
 import { UserPlus, Check, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+
 
 interface PublicProfileClientProps {
   username: string;
@@ -19,8 +21,10 @@ interface PublicProfileClientProps {
 export default function PublicProfileClient({ username }: PublicProfileClientProps) {
   const t = useTranslations('profile');
   const tCommunity = useTranslations('community');
+  const tReport = useTranslations('report');
   const { user: currentUser } = useAuth();
   const router = useRouter();
+  const { modalState, openUserReport, closeModal } = useReportModal();
   
   const [profile, setProfile] = useState<UserPublicResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -194,18 +198,25 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
                     </div>
                 </div>
 
-                {/* Follow Button */}
+                {/* Action Buttons */}
                 {!isMe && (
-                    <Button
-                        variant={isTrusted ? "outline" : "primary"}
-                        size="md"
-                        onClick={handleTrust}
-                        loading={trustLoading}
-                        leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
-                        className={isTrusted ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100 hover:text-green-700" : ""}
-                    >
-                        {isTrusted ? tCommunity('following') : tCommunity('follow')}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <ReportButton
+                            onClick={() => profile && openUserReport(profile.username, username)}
+                            size="md"
+                            label={tReport('report_user')}
+                        />
+                        <Button
+                            variant={isTrusted ? "outline" : "primary"}
+                            size="md"
+                            onClick={handleTrust}
+                            loading={trustLoading}
+                            leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
+                            className={isTrusted ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100 hover:text-green-700" : ""}
+                        >
+                            {isTrusted ? tCommunity('following') : tCommunity('follow')}
+                        </Button>
+                    </div>
                 )}
             </div>
             
@@ -297,6 +308,15 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        targetType={modalState.targetType}
+        targetId={modalState.targetId}
+        targetUrl={modalState.targetUrl}
+      />
     </div>
   );
 }

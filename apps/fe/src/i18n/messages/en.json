@@ -1007,5 +1007,49 @@
           "content": "If you have questions about this Privacy Policy or our data practices, please contact our Data Privacy Officer at privacy@ibeanthere.app."
         }
       }
+    },
+    "report": {
+      "title_report": "Submit Report",
+      "title_report_user": "Report User",
+      "title_report_cafe": "Report Cafe Issue",
+      "title_report_review": "Report Review",
+      "title_feedback": "Submit Feedback",
+      "report_issue": "Report",
+      "report_user": "Report",
+      "select_type": "Report Type",
+      "select_type_placeholder": "Select a report type",
+      "description": "Description",
+      "description_placeholder": "Please describe the issue in detail (minimum 10 characters)",
+      "attach_images": "Attach Images (Optional)",
+      "drag_drop_or_click": "Drag & drop or click to upload",
+      "image_requirements": "Max {max} images, {maxSize}MB each (JPEG, PNG, WebP)",
+      "images_count": "{count}/{max} images",
+      "error_invalid_file_type": "Invalid file type. Please use JPEG, PNG, or WebP.",
+      "error_file_too_large": "File too large. Maximum size is {maxSize}MB.",
+      "error_max_images": "Maximum {max} images allowed.",
+      "error_login_required": "Please sign in to submit a report",
+      "error_select_type": "Please select a report type",
+      "error_description_too_short": "Description must be at least 10 characters",
+      "error_duplicate_report": "You have already reported this within the last 24 hours",
+      "error_submit_failed": "Failed to submit report. Please try again.",
+      "submitting": "Submitting...",
+      "submit": "Submit Report",
+      "success_title": "Report Submitted",
+      "success_message": "Thank you for your feedback. We will review it shortly.",
+      "types": {
+        "user_inappropriate_name": "Inappropriate username or display name",
+        "user_inappropriate_avatar": "Inappropriate profile image",
+        "user_inappropriate_bio": "Inappropriate bio content",
+        "user_spam": "Spam or suspicious activity",
+        "cafe_incorrect_info": "Incorrect cafe information",
+        "cafe_closed": "Cafe is permanently closed",
+        "cafe_duplicate": "Duplicate cafe listing",
+        "cafe_new_request": "Request to add new cafe",
+        "review_inappropriate": "Inappropriate review content",
+        "review_spam": "Spam or fake review",
+        "bug_report": "Bug or technical issue",
+        "feature_request": "Feature suggestion",
+        "other": "Other"
+      }
     }
   }
