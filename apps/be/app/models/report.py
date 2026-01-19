@@ -50,7 +50,7 @@ class ReportCreate(BaseModel):
     target_type: TargetType
     target_id: Optional[str] = Field(None, description="ID of the reported user/cafe/review")
     target_url: Optional[str] = Field(None, description="URL of the reported content")
-    description: str = Field(..., min_length=10, max_length=2000, description="Detailed description")
+    description: str = Field("", max_length=2000, description="Detailed description")
     image_urls: List[str] = Field(default_factory=list, max_length=3, description="URLs of attached images (max 3)")
 
 

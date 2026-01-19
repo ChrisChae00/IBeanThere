@@ -4,7 +4,7 @@ Handles report submissions for feedback, bug reports, and inappropriate content.
 """
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from supabase import Client
 
 from app.database.supabase import get_supabase_client
@@ -17,6 +17,7 @@ from app.models.report import (
     ReportStatus,
     TargetType
 )
+from app.services.email import send_new_report_notification
 
 router = APIRouter()
 
@@ -24,6 +25,7 @@ router = APIRouter()
 @router.post("/reports", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
 async def create_report(
     report_data: ReportCreate,
+    background_tasks: BackgroundTasks,
     current_user = Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ):
@@ -33,6 +35,7 @@ async def create_report(
     - Requires authentication
     - Prevents duplicate reports on the same target within 24 hours
     - Validates image URLs (max 3)
+    - Sends email notification to admin
     """
     user_id = current_user.id
     
@@ -84,6 +87,26 @@ async def create_report(
         )
     
     report = result.data[0]
+    
+    # Get reporter username for email
+    reporter_username = None
+    try:
+        user_result = supabase.table("users").select("username").eq("id", user_id).single().execute()
+        if user_result.data:
+            reporter_username = user_result.data.get("username")
+    except Exception:
+        pass
+    
+    # Send email notification in background
+    background_tasks.add_task(
+        send_new_report_notification,
+        report_id=report["id"],
+        report_type=report["report_type"],
+        target_type=report["target_type"],
+        description=report["description"],
+        reporter_username=reporter_username,
+        target_url=report.get("target_url")
+    )
     
     return ReportResponse(
         id=report["id"],
