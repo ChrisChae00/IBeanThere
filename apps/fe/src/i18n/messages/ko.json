@@ -195,7 +195,7 @@
       "confirm_password": "비밀번호 확인",
       "remember_me": "로그인 상태 유지",
       "forgot_password": "비밀번호를 잊으셨나요?",
-      "terms_agreement": "본인은 만 13세 이상이며",
+      "terms_agreement": "본인은 만 13세 이상이며, 다음 내용을 읽고 동의합니다. :",
       "terms_of_service": "이용약관",
       "sign_in_title": "다시 오신 것을 환영합니다",
       "sign_in_button": "로그인",
