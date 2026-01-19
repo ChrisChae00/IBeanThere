@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { BackButton } from '@/components/common/BackButton';
 
 export default async function PrivacyPage({
   params
@@ -12,24 +12,24 @@ export default async function PrivacyPage({
 
   const sections = [
     'intro',
+    'collection',
+    'public_info',
     'use',
     'sharing',
-    'retention',
-    'security',
-    'rights',
+    'third_party_info',
+    'anti_spam',
+    'children',
     'international',
+    'security',
+    'retention',
+    'rights',
+    'changes',
     'contact'
   ];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link 
-        href={`/${locale}`}
-        className="inline-flex items-center text-sm mb-6 text-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-        Back to Home
-      </Link>
+      <BackButton className="mb-6" />
       <h1 className="text-3xl font-bold mb-6">{t('title')}</h1>
       
       <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -60,7 +60,7 @@ export default async function PrivacyPage({
           </div>
 
           {/* Standard Sections */}
-          {sections.slice(1).map((section) => (
+          {sections.slice(2).map((section) => (
             <div key={section}>
               <h2 className="text-xl font-semibold mb-3">{t(`${section}.title`)}</h2>
               <p className="whitespace-pre-wrap">{t(`${section}.content`)}</p>
