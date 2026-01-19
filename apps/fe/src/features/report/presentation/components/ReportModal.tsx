@@ -64,10 +64,8 @@ export default function ReportModal({
       return;
     }
 
-    if (description.length < 10) {
-      setLocalError(t('error_description_too_short'));
-      return;
-    }
+    // Description is now optional
+    const finalDescription = description.trim();
 
     try {
       // Upload images first
@@ -80,7 +78,7 @@ export default function ReportModal({
       // Submit report
       const report = await submitReport({
         reportType: selectedType,
-        description,
+        description: finalDescription,
         imageUrls,
       });
 
@@ -182,14 +180,13 @@ export default function ReportModal({
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-                {t('description')} *
+                {t('description')}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isSubmitting}
                 rows={4}
-                minLength={10}
                 maxLength={2000}
                 placeholder={t('description_placeholder')}
                 className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
@@ -223,7 +220,7 @@ export default function ReportModal({
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isSubmitting || !selectedType || description.length < 10}
+              disabled={isSubmitting || !selectedType}
               variant="primary"
               fullWidth
               leftIcon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
