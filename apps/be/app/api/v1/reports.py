@@ -40,24 +40,31 @@ async def create_report(
     user_id = current_user.id
     
     # Check for duplicate report within 24 hours
+    # We allow up to 2 reports per target/type within 24 hours as requested
+    twenty_four_hours_ago = (datetime.utcnow() - timedelta(hours=24)).isoformat()
+    
+    query = supabase.table("reports").select("id").eq(
+        "reporter_id", user_id
+    ).eq(
+        "target_type", report_data.target_type.value
+    ).gte(
+        "created_at", twenty_four_hours_ago
+    )
+    
     if report_data.target_id:
-        twenty_four_hours_ago = (datetime.utcnow() - timedelta(hours=24)).isoformat()
+        query = query.eq("target_id", report_data.target_id)
+    else:
+        # If target_id is None (like website feedback), we check for any NULL target_id reports
+        query = query.is_("target_id", "null")
         
-        existing_report = supabase.table("reports").select("id").eq(
-            "reporter_id", user_id
-        ).eq(
-            "target_type", report_data.target_type.value
-        ).eq(
-            "target_id", report_data.target_id
-        ).gte(
-            "created_at", twenty_four_hours_ago
-        ).execute()
-        
-        if existing_report.data and len(existing_report.data) > 0:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="You have already reported this content within the last 24 hours"
-            )
+    existing_reports = query.execute()
+    
+    # Check if we already have 2 or more reports
+    if existing_reports.data and len(existing_reports.data) >= 2:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="You have reached the maximum of 2 reports for this content within 24 hours"
+        )
     
     # Validate image URLs count
     if len(report_data.image_urls) > 3:
