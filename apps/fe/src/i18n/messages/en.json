@@ -197,7 +197,7 @@
       "confirm_password": "Confirm Password",
       "remember_me": "Remember me",
       "forgot_password": "Forgot password?",
-      "terms_agreement": "I agree to the",
+      "terms_agreement": "I am at least 13 years old and I agree to the",
       "terms_of_service": "Terms of Service",
       "and": "and",
       "privacy_policy": "Privacy Policy",
@@ -950,86 +950,118 @@
     "legal": {
       "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",
       "last_updated": "Last Updated: {date}",
+      "contact": {
+        "title": "Contact Us",
+        "content": "We value your feedback and are here to help.\n\nFor any questions about our Terms of Service, Privacy Policy, or if you need assistance with the IBeanThere app, please do not hesitate to contact our support team.\n\nEmail: ibeanthere.app@gmail.com"
+      },
       "terms": {
         "title": "Terms of Service",
         "intro": {
           "title": "1. Introduction",
-          "content": "Welcome to IBeanThere. By accessing or using our mobile application and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services."
+          "content": "Welcome to IBeanThere. These Terms of Service (\"Terms\") constitute a legally binding agreement between you and IBeanThere (\"we,\" \"us,\" or \"our\"). By accessing or using our mobile application and services, you agree to be bound by these Terms. If you do not agree to these terms, pleaes do not use our services."
         },
         "account": {
-          "title": "2. User Accounts",
-          "content": "To access certain features, you must create an account. You agree to provide accurate, current, and complete information. You are strictly responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account."
+          "title": "2. User Accounts & Security",
+          "content": "To access certain features, you must create an account. You agree to provide accurate, current, and complete information. You are solely responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. We reserve the right to disable any user account if we believe you have violated these Terms."
         },
         "content": {
-          "title": "3. User Content",
-          "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content, but you grant IBeanThere a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content."
+          "title": "3. User Content & License",
+          "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content. However, by posting, you grant IBeanThere a perpetual, irrevocable, worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content in any media or distribution methods now known or later developed."
         },
         "conduct": {
-          "title": "4. Acceptable Use",
-          "content": "You agree not to modify, reverse engineer, or create derivative works of our service. You must not post content that is illegal, abusive, harassing, or violates any third-party rights."
+          "title": "4. Prohibited Conduct",
+          "content": "You agree not to: (i) use the service for any illegal purpose; (ii) harass, abuse, or harm another person; (iii) reverse engineer, decompile, or attempt to extract the source code of the software; (iv) use any robot, spider, or automated device to access the service; (v) interfere with the proper working of the service."
         },
         "location": {
           "title": "5. Location Services",
-          "content": "Some features of our app require access to your device's location. You can control these permissions through your device settings. We use location data to provide local cafe recommendations."
+          "content": "Some features of our app require access to your device's location. You can control these permissions through your device settings. We use location data to provide local cafe recommendations and verify visits. By using these features, you consent to such usage as described in our Privacy Policy."
         },
         "termination": {
           "title": "6. Termination",
-          "content": "We may suspend or terminate your access to the service at any time, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties, or for any other reason."
+          "content": "We may suspend or terminate your access to the service at any time, without prior notice or liability, for any reason whatsoever, including without limitation if you breach these Terms. Upon termination, your right to use the Service will immediately cease."
         },
         "liability": {
           "title": "7. Limitation of Liability",
-          "content": "To the maximum extent permitted by law, IBeanThere shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses."
+          "content": "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW (INCLUDING THE CONSUMER PROTECTION ACT OF ONTARIO), IBEANTHERE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID US, IF ANY, IN THE PAST SIX MONTHS OR 50 CAD, WHICHEVER IS GREATER."
+        },
+        "dispute": {
+            "title": "8. Dispute Resolution & Arbitration",
+            "content": "ANY DISPUTE, CLAIM OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION OR VALIDITY THEREOF SHALL BE DETERMINED BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. YOU AND IBEANTHERE WAIVE THE RIGHT TO A TRIAL BY JURY OR TO PARTICIPATE IN A CLASS ACTION."
         },
         "governing_law": {
-          "title": "8. Governing Law",
-          "content": "These Terms shall be governed by and construed in accordance with the laws of Canada and the province of British Columbia, without regard to its conflict of law provisions."
+          "title": "9. Governing Law",
+          "content": "These Terms shall be governed by and construed in accordance with the laws of the Province of Ontario and the federal laws of Canada applicable therein, without regard to its conflict of law provisions."
+        },
+        "changes": {
+            "title": "10. Changes to Terms",
+            "content": "We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
         },
         "contact": {
-          "title": "9. Contact Us",
-          "content": "If you have any questions about these Terms, please contact us at support@ibeanthere.app."
+          "title": "11. Contact Us",
+          "content": "If you have any questions about these Terms, please contact us at ibeanthere.app@gmail.com."
         }
       },
       "privacy": {
         "title": "Privacy Policy",
         "intro": {
           "title": "1. Introduction",
-          "content": "IBeanThere (\"we,\" \"our,\" or \"us\") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application."
+          "content": "IBeanThere respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website. Before registering, submitting any content, or otherwise engaging with us, please read and understand this Privacy Policy as well as our Terms of Service. In the course of engaging with us, you may also use third party's intellectual property, tools or resources (e.g., Supabase, Google Analytics), and such third party's privacy policy may also apply to you."
         },
         "collection": {
           "title": "2. Information We Collect",
           "sections": {
-            "personal": "<strong>Personal Information:</strong> We collect information you provide directly to us, such as your name, email address, and profile information when you register.",
-            "location": "<strong>Location Data:</strong> With your consent, we collect precise geolocation data to show you nearby cafes and verify check-ins.",
-            "usage": "<strong>Usage Data:</strong> We automatically collect information about how you interact with our services, including log data, device information, and interactions with content."
+            "personal": "<strong>Personal Information:</strong> We collect information you provide directly to us, such as your name, email address, username, password, and coffee preferences when you register or update your profile.",
+            "location": "<strong>Location Data:</strong> With your consent, we collect precise geolocation data to show you nearby cafes, verify 'Drop Bean' actions, and maintain your 'Navigator' status.",
+            "usage": "<strong>Automatic Information:</strong> When you use our Services, we collect certain information by automated means, such as through server log files, cookies, web beacons (also known as clear GIFs and pixel tags), and embedded scripts. This may include your IP address, device type and model, operating system version, browser type and version, time zone setting, unique device identifiers, and information on actions taken within the app."
           }
         },
+        "public_info": {
+          "title": "3. Public Information",
+          "content": "Certain information you provide is public by default. Your username is always publicly visible and searchable. Content you post, such as cafe reviews, ratings, photos, and comments, are available to the public by default. We recommend that you do not use your real name as your username if you wish to remain anonymous. Any information disclosed in public areas becomes public information, and you should exercise caution before sharing."
+        },
         "use": {
-          "title": "3. How We Use Your Information",
-          "content": "We use the information we collect to provide and improve our services, personalize your experience, process your requests, and communicate with you. We process your data based on your consent and our legitimate business interests."
+          "title": "4. How We Use Your Information",
+          "content": "We use the information we collect to: (i) provide, maintain, and improve our services; (ii) personalize your experience and coffee recommendations; (iii) process your transactions and manage your account; (iv) communicate with you about updates, security alerts, and support; (v) monitor and analyze trends and usage; (vi) send you periodic communications relating to our Services, subject to your communication preferences."
         },
         "sharing": {
-          "title": "4. Disclosure of Information",
-          "content": "We do not sell your personal information. We may share information with third-party service providers who help us operate our services (e.g., cloud hosting, analytics), subject to confidentiality obligations."
+          "title": "5. Disclosure of Information",
+          "content": "We do not sell your personal information. We may share information with: (i) service providers who perform services on our behalf (e.g., cloud hosting, analytics, email transmission), subject to confidentiality obligations; (ii) to comply with legal obligations; (iii) to protect and defend our rights and property; (iv) with your consent or at your direction. Notwithstanding any other sections of this Privacy Policy, Company shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with third parties' privacy policies."
         },
-        "retention": {
-          "title": "5. Data Retention",
-          "content": "We retain your personal information only for as long as necessary to fulfill the purposes for which we collected it, including for the purposes of satisfying any legal, accounting, or reporting requirements."
+        "third_party_info": {
+          "title": "6. Information About Others",
+          "content": "You can choose to provide us with information relating to third parties, including their names, email addresses, or other contact details. If you use any feature of the Services that allows you to communicate or share information with third parties, you acknowledge and agree that you have the authority to access and use the relevant data and that you have notified these third parties and informed them how their information is collected and used by Company to provide the Services."
         },
-        "security": {
-          "title": "6. Data Security",
-          "content": "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
+        "anti_spam": {
+          "title": "7. Anti-Spam (CASL Compliance)",
+          "content": "Where applicable, we will seek your express consent to contact you, including by way of commercial electronic messages. You can unsubscribe at any time from receiving commercial electronic messages by following the instructions in the message. Even if you have opted out of receiving marketing communications from us, please be aware that we may still contact you for other purposes, such as providing communications you have consented to receive, or regarding the products or services we provide to you."
         },
-        "rights": {
-          "title": "7. Your Rights (GDPR & PIPEDA)",
-          "content": "Depending on your location, you may have the right to access, correct, or delete your personal information, as well as the right to restrict or object to certain processing. To exercise these rights, please contact us."
+        "children": {
+          "title": "8. Children's Online Privacy Protection",
+          "content": "The Website and Services are not intended for use by persons under 13 years of age. We do not knowingly collect or use any Personal Information from any persons under 13 years of age. If we become aware that we have unknowingly collected Personal Information from a child under the age of 13, we will make commercially reasonable efforts to delete such Personal Information from our database."
         },
         "international": {
-          "title": "8. International Transfers",
-          "content": "Your information may be transferred to and processed in countries other than your country of residence, where data protection laws may differ. We ensure appropriate safeguards are in place for such transfers."
+          "title": "9. International Transfers",
+          "content": "Your Personal Information may be stored, processed or otherwise used by us, our affiliates or our service providers, both inside and outside of Canada (including the United States). As a result, that country's courts, governments or law enforcement agencies could obtain disclosure of your information in accordance with that country's laws. Whenever we hire other organizations to provide support services, they will be required to conform to our privacy standards and to allow us to audit them for compliance."
+        },
+        "security": {
+          "title": "10. Data Security",
+          "content": "We take all reasonable steps to protect the security and confidentiality of your Personal Information. We protect Personal Information within our custody or control with appropriate organizational, technological and physical safeguards. We store Personal Information in electronic and physical files that are secure, and our security measures include secure on-site and off-site storage, restricted access to records and data processing equipment, password protocols, and encryption and security software. However, no method of transmission over the Internet is 100% secure."
+        },
+        "retention": {
+          "title": "11. Data Retention",
+          "content": "We only retain Personal Information for as long as is necessary for the purpose for which it was collected. When we no longer are required to retain the information, we will destroy, erase, or de-identify the information. Legal requirements, however, may require us to retain some or all of the Personal Information we hold for a period of time that is longer than that for which we might otherwise hold."
+        },
+        "rights": {
+          "title": "12. Your Data Rights",
+          "content": "Depending on your location, you may have rights under laws like GDPR, CCPA, or PIPEDA. These may include the right to access, correct, delete, or port your personal data. You may update or correct your account information by editing your account settings or by sending a request to us. To exercise these rights, please contact us at ibeanthere.app@gmail.com."
+        },
+        "changes": {
+          "title": "13. Changes to Privacy Policy",
+          "content": "We may amend this Privacy Policy from time to time as we add new products and services, as we improve our current offerings, and as technologies change. If we make a change to this Privacy Policy, this will be reflected in the above Last Update date. We encourage you to check back periodically. If we make any material or substantive changes in this Privacy Policy, we will notify you by posting a clear and conspicuous notice of these changes on the Website and in this Privacy Policy."
         },
         "contact": {
-          "title": "9. Contact Us",
-          "content": "If you have questions about this Privacy Policy or our data practices, please contact our Data Privacy Officer at privacy@ibeanthere.app."
+          "title": "14. Contact Us",
+          "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: ibeanthere.app@gmail.com"
         }
       }
     },
