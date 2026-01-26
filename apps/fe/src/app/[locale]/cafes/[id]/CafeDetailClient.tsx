@@ -1,13 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { CafeDetailResponse } from '@/types/api';
+import { GalleryImage } from '@/types/gallery';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
-import { StarRating } from '@/shared/ui';
+import { StarRating, ImageGalleryPreview, ImageGalleryModal, ImageLightbox } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
 
@@ -24,6 +26,18 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const locale = params.locale as string;
   const { user } = useAuth();
   const { modalState, openCafeReport, closeModal } = useReportModal();
+  
+  // Gallery state
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  // Convert images to GalleryImage format
+  const galleryImages: GalleryImage[] = (cafe.images || []).map((url, index) => ({
+    url,
+    alt: `${cafe.name} photo ${index + 1}`,
+    source: 'log' as const
+  }));
 
   const handleWriteLog = (e: React.MouseEvent) => {
     if (!user) {
@@ -46,6 +60,22 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Image Gallery */}
+      {galleryImages.length > 0 && (
+        <div className="mb-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)] overflow-hidden">
+          <ImageGalleryPreview
+            images={galleryImages}
+            maxDisplay={5}
+            onImageClick={(index) => {
+              setLightboxIndex(index);
+              setLightboxOpen(true);
+            }}
+            onViewAllClick={() => setGalleryModalOpen(true)}
+            className="p-4"
+          />
+        </div>
+      )}
+
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
         <div className="flex items-center justify-between mb-4">
@@ -132,6 +162,22 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         targetType={modalState.targetType}
         targetId={modalState.targetId}
         targetUrl={modalState.targetUrl}
+      />
+
+      {/* Image Gallery Modal */}
+      <ImageGalleryModal
+        images={galleryImages}
+        isOpen={galleryModalOpen}
+        onClose={() => setGalleryModalOpen(false)}
+        title={cafe.name}
+      />
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={galleryImages}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
       />
     </div>
   );

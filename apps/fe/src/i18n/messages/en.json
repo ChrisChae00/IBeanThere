@@ -1108,5 +1108,13 @@
         "feature_request": "Feature suggestion",
         "other": "Other"
       }
+    },
+    "gallery": {
+      "all_photos": "All Photos",
+      "photo_count": "{count} photos",
+      "no_photos": "No photos yet",
+      "prev": "Previous",
+      "next": "Next",
+      "close": "Close"
     }
   }

@@ -568,6 +568,31 @@ async def get_cafe_details(cafe_identifier: str):
         except Exception:
             pass  # Silently handle if table doesn't exist or query fails
         
+        # Collect all images from logs (sorted by oldest first for main_image selection)
+        all_images = []
+        main_image = cafe.get("main_image")  # First priority: Navigator's image set during registration
+        
+        try:
+            # Get all logs with photos, ordered by oldest first (for main_image selection)
+            logs_with_photos = supabase.table("cafe_visits").select(
+                "photo_urls, visited_at"
+            ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("photo_urls", "null").order(
+                "visited_at", desc=False  # Oldest first
+            ).execute()
+            
+            if logs_with_photos.data:
+                for log in logs_with_photos.data:
+                    photo_urls = log.get("photo_urls", [])
+                    if photo_urls:
+                        all_images.extend(photo_urls)
+                
+                # If no main_image from registration, use first image from oldest log
+                if not main_image and all_images:
+                    main_image = all_images[0]
+        except Exception as img_err:
+            print(f"Error collecting images: {img_err}")
+            pass
+        
         response = {
             "id": cafe.get("id", ""),
             "name": cafe.get("name", ""),
@@ -591,7 +616,9 @@ async def get_cafe_details(cafe_identifier: str):
             "average_rating": float(average_rating) if average_rating else None,
             "log_count": log_count,
             "recent_logs": recent_logs,
-            "total_beans_dropped": total_beans_dropped
+            "total_beans_dropped": total_beans_dropped,
+            "main_image": main_image,
+            "images": all_images if all_images else None
         }
         
         # Populate Founding Crew details

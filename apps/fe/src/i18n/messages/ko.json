@@ -1104,5 +1104,13 @@
         "feature_request": "기능 제안",
         "other": "기타"
       }
+    },
+    "gallery": {
+      "all_photos": "전체 사진",
+      "photo_count": "{count}장의 사진",
+      "no_photos": "아직 사진이 없습니다",
+      "prev": "이전",
+      "next": "다음",
+      "close": "닫기"
     }
   }

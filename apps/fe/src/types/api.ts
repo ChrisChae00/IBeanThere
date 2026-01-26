@@ -185,6 +185,8 @@ export interface CafeDetailResponse {
   log_count: number;
   recent_logs?: CoffeeLog[];
   total_beans_dropped?: number;
+  main_image?: string;
+  images?: string[];
 }
 
 export interface CafeLogsResponse {
