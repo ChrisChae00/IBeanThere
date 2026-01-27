@@ -9,7 +9,7 @@ import { GalleryImage } from '@/types/gallery';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
-import { StarRating, ImageGalleryPreview, ImageGalleryModal, ImageLightbox } from '@/shared/ui';
+import { StarRating, ImageGalleryModal, ImageLightbox } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
 
@@ -60,22 +60,6 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
-      {/* Image Gallery */}
-      {galleryImages.length > 0 && (
-        <div className="mb-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)] overflow-hidden">
-          <ImageGalleryPreview
-            images={galleryImages}
-            maxDisplay={5}
-            onImageClick={(index) => {
-              setLightboxIndex(index);
-              setLightboxOpen(true);
-            }}
-            onViewAllClick={() => setGalleryModalOpen(true)}
-            className="p-4"
-          />
-        </div>
-      )}
-
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
         <div className="flex items-center justify-between mb-4">
@@ -98,6 +82,59 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         <div className="h-px bg-[var(--color-border)] mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
+
+      {/* Photos Section - Google Maps Style */}
+      {galleryImages.length > 0 && (
+        <div className="mb-6 p-4 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-[var(--color-cardText)]">
+              {t('photos')}
+            </h2>
+            {galleryImages.length > 1 && (
+              <button
+                onClick={() => setGalleryModalOpen(true)}
+                className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors"
+              >
+                {t('view_all')} ({galleryImages.length})
+              </button>
+            )}
+          </div>
+          {/* Compact horizontal scrollable gallery */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {galleryImages.slice(0, 6).map((image, index) => (
+              <div
+                key={index}
+                className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer group"
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setLightboxOpen(true);
+                }}
+              >
+                <img
+                  src={image.url}
+                  alt={image.alt || `Photo ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                  loading="lazy"
+                />
+                {/* Show remaining count on last visible image */}
+                {index === 5 && galleryImages.length > 6 && (
+                  <div
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGalleryModalOpen(true);
+                    }}
+                  >
+                    <span className="text-white text-sm font-semibold">
+                      +{galleryImages.length - 6}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats Card */}
       {(cafe.average_rating !== undefined || (cafe.total_beans_dropped ?? 0) > 0 || (cafe.log_count ?? 0) > 0) && (

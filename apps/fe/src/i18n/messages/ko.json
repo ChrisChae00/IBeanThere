@@ -608,7 +608,9 @@
         "logs": "개",
         "coffee_logs": "커피 로그",
         "write_log": "로그 작성",
-        "from": "에서"
+        "from": "에서",
+        "photos": "사진",
+        "view_all": "전체 보기"
       },
       "log": {
         "write_log_for": "로그 작성",

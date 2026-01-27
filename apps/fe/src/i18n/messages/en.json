@@ -6,7 +6,8 @@
   
   "common": {
       "app_name": "IBeanThere",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "back": "Back"
     },
     "home": {
       "title": "IBeanThere ☕️",
@@ -612,7 +613,9 @@
         "logs": "logs",
         "coffee_logs": "Coffee Logs",
         "write_log": "Write Log",
-        "from": "from"
+        "from": "from",
+        "photos": "Photos",
+        "view_all": "View All"
       },
       "log": {
         "write_log_for": "Write Log for",
