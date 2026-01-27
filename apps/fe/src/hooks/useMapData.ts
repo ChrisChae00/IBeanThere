@@ -67,7 +67,8 @@ export function useMapData() {
         foundingCrew: cafe.founding_crew ? {
           navigator: cafe.founding_crew.navigator,
           vanguard: cafe.founding_crew.vanguard || []
-        } : undefined
+        } : undefined,
+        main_image: cafe.main_image
       }));
 
       addCafes(cafes, { lat: params.lat, lng: params.lng }, params.radius);

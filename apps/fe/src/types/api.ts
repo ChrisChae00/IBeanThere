@@ -39,6 +39,7 @@ export interface CafeSearchResponse {
         role: 'vanguard_2nd' | 'vanguard_3rd';
       }>;
     };
+    main_image?: string;
   }>;
   total_count: number;
   cache_hit?: boolean;
