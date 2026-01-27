@@ -32,6 +32,7 @@ export interface CafeMapData {
       role: 'vanguard_2nd' | 'vanguard_3rd';
     }>;
   };
+  main_image?: string;
 }
 
 export type CafeMarkerState = 'pending-1' | 'pending-2' | 'verified';

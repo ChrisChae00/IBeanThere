@@ -170,6 +170,8 @@ class TrendingCafeResponse(BaseModel):
     visit_count_14d: int = 0
     trending_score: Decimal = Decimal('0.0')
     trending_rank: Optional[int] = None
+    image: Optional[str] = None
+    main_image: Optional[str] = None
 
 class CafeStatsResponse(BaseModel):
     """Response model for cafe statistics"""

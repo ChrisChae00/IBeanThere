@@ -562,9 +562,39 @@ async def get_trending_cafes(
         if not result.data:
             return []
         
+        # Get cafe IDs that don't have main_image set
+        cafe_ids_needing_image = [
+            cafe.get("id") for cafe in result.data 
+            if not cafe.get("main_image")
+        ]
+        
+        # Batch fetch first photo from logs for cafes without main_image
+        cafe_images = {}
+        if cafe_ids_needing_image:
+            try:
+                logs_with_photos = supabase.table("cafe_visits").select(
+                    "cafe_id, photo_urls"
+                ).in_("cafe_id", cafe_ids_needing_image).eq(
+                    "is_public", True
+                ).not_.is_("photo_urls", "null").order(
+                    "visited_at", desc=False
+                ).execute()
+                
+                if logs_with_photos.data:
+                    for log in logs_with_photos.data:
+                        cafe_id = log.get("cafe_id")
+                        photo_urls = log.get("photo_urls", [])
+                        if cafe_id not in cafe_images and photo_urls:
+                            cafe_images[cafe_id] = photo_urls[0]
+            except Exception as img_err:
+                print(f"Error fetching log images for trending: {img_err}")
+                pass
+        
         # Format response with default values for missing fields
         formatted_cafes = []
         for idx, cafe in enumerate(result.data):
+            main_image = cafe.get("main_image") or cafe_images.get(cafe.get("id"))
+            
             formatted_cafes.append({
                 "id": cafe.get("id"),
                 "slug": cafe.get("slug"),
@@ -577,7 +607,7 @@ async def get_trending_cafes(
                 "trending_score": cafe.get("trending_score", 0.0),
                 "trending_rank": idx + 1 + offset,  # Calculate rank based on position
                 "image": cafe.get("image"),
-                "main_image": cafe.get("main_image")
+                "main_image": main_image
             })
         
         return formatted_cafes

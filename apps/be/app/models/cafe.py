@@ -84,6 +84,10 @@ class CafeResponse(BaseModel):
     recent_logs: Optional[List[Dict[str, Any]]] = None
     total_beans_dropped: int = 0
     
+    # Images
+    main_image: Optional[str] = None
+    images: Optional[List[str]] = None
+    
     class Config:
         from_attributes = True
 

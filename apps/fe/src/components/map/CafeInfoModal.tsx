@@ -79,6 +79,18 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           </button>
         </div>
 
+        {/* Cafe Image */}
+        {cafe.main_image && (
+          <div className="w-full h-40 bg-[var(--color-surface)] overflow-hidden">
+            <img
+              src={cafe.main_image}
+              alt={cafe.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         <div className="px-6 py-4 space-y-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">

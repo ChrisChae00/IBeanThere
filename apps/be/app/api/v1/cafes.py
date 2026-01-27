@@ -326,9 +326,42 @@ async def search_cafes(
         elif sort_by == "newest":
             valid_cafes.sort(key=lambda c: c.get("created_at", ""), reverse=True)
         
+        # Get cafe IDs that don't have main_image set
+        cafe_ids_needing_image = [
+            cafe.get("id") for cafe in valid_cafes 
+            if not cafe.get("main_image")
+        ]
+        
+        # Batch fetch first photo from logs for cafes without main_image
+        cafe_images = {}
+        if cafe_ids_needing_image:
+            try:
+                # Get the oldest log with photo for each cafe
+                logs_with_photos = supabase.table("cafe_visits").select(
+                    "cafe_id, photo_urls"
+                ).in_("cafe_id", cafe_ids_needing_image).eq(
+                    "is_public", True
+                ).not_.is_("photo_urls", "null").order(
+                    "visited_at", desc=False
+                ).execute()
+                
+                if logs_with_photos.data:
+                    for log in logs_with_photos.data:
+                        cafe_id = log.get("cafe_id")
+                        photo_urls = log.get("photo_urls", [])
+                        # Only take the first image for each cafe
+                        if cafe_id not in cafe_images and photo_urls:
+                            cafe_images[cafe_id] = photo_urls[0]
+            except Exception as img_err:
+                print(f"Error fetching log images: {img_err}")
+                pass
+        
         # Format response
         formatted_cafes = []
         for cafe in valid_cafes:
+            # Use DB main_image or fallback to log image
+            main_image = cafe.get("main_image") or cafe_images.get(cafe.get("id"))
+            
             formatted_cafes.append({
                 "id": cafe.get("id", ""),
                 "name": cafe.get("name", ""),
@@ -348,7 +381,8 @@ async def search_cafes(
                 "navigator_id": cafe.get("navigator_id"),
                 "vanguard_ids": cafe.get("vanguard_ids", []),
                 "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
-                "updated_at": cafe.get("updated_at")
+                "updated_at": cafe.get("updated_at"),
+                "main_image": main_image
             })
         
         return CafeSearchResponse(
@@ -568,6 +602,31 @@ async def get_cafe_details(cafe_identifier: str):
         except Exception:
             pass  # Silently handle if table doesn't exist or query fails
         
+        # Collect all images from logs (sorted by oldest first for main_image selection)
+        all_images = []
+        main_image = cafe.get("main_image")  # First priority: Navigator's image set during registration
+        
+        try:
+            # Get all logs with photos, ordered by oldest first (for main_image selection)
+            logs_with_photos = supabase.table("cafe_visits").select(
+                "photo_urls, visited_at"
+            ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("photo_urls", "null").order(
+                "visited_at", desc=False  # Oldest first
+            ).execute()
+            
+            if logs_with_photos.data:
+                for log in logs_with_photos.data:
+                    photo_urls = log.get("photo_urls", [])
+                    if photo_urls:
+                        all_images.extend(photo_urls)
+                
+                # If no main_image from registration, use first image from oldest log
+                if not main_image and all_images:
+                    main_image = all_images[0]
+        except Exception as img_err:
+            print(f"Error collecting images: {img_err}")
+            pass
+        
         response = {
             "id": cafe.get("id", ""),
             "name": cafe.get("name", ""),
@@ -591,7 +650,9 @@ async def get_cafe_details(cafe_identifier: str):
             "average_rating": float(average_rating) if average_rating else None,
             "log_count": log_count,
             "recent_logs": recent_logs,
-            "total_beans_dropped": total_beans_dropped
+            "total_beans_dropped": total_beans_dropped,
+            "main_image": main_image,
+            "images": all_images if all_images else None
         }
         
         # Populate Founding Crew details

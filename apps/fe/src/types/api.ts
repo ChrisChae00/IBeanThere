@@ -39,6 +39,7 @@ export interface CafeSearchResponse {
         role: 'vanguard_2nd' | 'vanguard_3rd';
       }>;
     };
+    main_image?: string;
   }>;
   total_count: number;
   cache_hit?: boolean;
@@ -185,6 +186,8 @@ export interface CafeDetailResponse {
   log_count: number;
   recent_logs?: CoffeeLog[];
   total_beans_dropped?: number;
+  main_image?: string;
+  images?: string[];
 }
 
 export interface CafeLogsResponse {
