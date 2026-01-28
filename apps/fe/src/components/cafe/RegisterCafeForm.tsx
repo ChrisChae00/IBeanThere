@@ -9,6 +9,7 @@ import { CafeRegistrationRequest } from '@/types/api';
 import { BusinessHours } from '@/types/map';
 import { ErrorAlert, Button, Input } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
+import { PhotoUploadWithMain } from '@/shared/ui';
 import OpeningHoursInput from './OpeningHoursInput';
 
 interface RegisterCafeFormProps {
@@ -55,6 +56,8 @@ export default function RegisterCafeForm({
   const [addressFetched, setAddressFetched] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [isDetectingCountry, setIsDetectingCountry] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
   
   const userLocation = providedUserLocation || (coords ? { lat: coords.latitude, lng: coords.longitude } : null);
   
@@ -229,7 +232,9 @@ export default function RegisterCafeForm({
         source_url: formData.source_url || undefined,
         business_hours: businessHours,
         user_location: userLocation,
-        source_type: locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode'
+        source_type: locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode',
+        images: photos.length > 0 ? photos : undefined,
+        main_image_index: photos.length > 0 ? mainImageIndex : undefined
       };
       
       const response = await registerCafe(requestData);
@@ -437,6 +442,15 @@ export default function RegisterCafeForm({
             )}
             
           </div>
+          
+          {/* Photo Upload */}
+          <PhotoUploadWithMain
+            photos={photos}
+            onChange={setPhotos}
+            mainIndex={mainImageIndex}
+            onMainIndexChange={setMainImageIndex}
+            maxPhotos={5}
+          />
           
           <Input
             label={`${t('name_label')} *`}

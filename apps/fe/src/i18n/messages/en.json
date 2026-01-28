@@ -567,8 +567,13 @@
         "remove_hours": "Remove Hours",
         "apply_to_all_weekdays": "Apply to Weekdays",
         "apply_to_all_days": "Apply to All Days",
-        "clear_all_hours": "Clear All"
+        "clear_all_hours": "Clear All",
+        "photos_label": "Photos (Optional)",
+        "photos_hint": "Add up to 5 photos. Click the star to set main photo.",
+        "main_photo": "Main",
+        "set_as_main": "Set as main photo"
       },
+
       "modal": {
         "title": "Cafe Information",
         "name": "Name",

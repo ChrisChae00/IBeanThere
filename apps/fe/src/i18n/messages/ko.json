@@ -563,8 +563,13 @@
         "remove_hours": "영업시간 삭제",
         "apply_to_all_weekdays": "평일에 적용",
         "apply_to_all_days": "모든 요일에 적용",
-        "clear_all_hours": "모두 지우기"
+        "clear_all_hours": "모두 지우기",
+        "photos_label": "사진 (선택)",
+        "photos_hint": "최대 5장까지 추가 가능합니다. 별 아이콘을 클릭하여 대표 사진을 설정하세요.",
+        "main_photo": "대표",
+        "set_as_main": "대표 사진으로 설정"
       },
+
       "modal": {
         "title": "카페 정보",
         "name": "이름",
