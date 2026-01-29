@@ -19,7 +19,7 @@ export default function CafeCardImage({
   
   if (size === 'small') {
     return (
-      <div className="w-full h-[180px] bg-[var(--color-primary)] flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+      <div className={`w-full h-[180px] ${showImage ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-accent)]'} flex items-center justify-center overflow-hidden flex-shrink-0 relative`}>
         {/* Blur placeholder while loading */}
         {showImage && !isLoaded && (
           <div className="absolute inset-0 bg-[var(--color-surface)] animate-pulse" />
@@ -47,7 +47,7 @@ export default function CafeCardImage({
   }
   
   return (
-    <div className="w-full h-[200px] aspect-[4/3] bg-[var(--color-surface)]/50 flex items-center justify-center overflow-hidden relative flex-shrink-0">
+    <div className={`w-full h-[200px] aspect-[4/3] ${showImage ? 'bg-[var(--color-surface)]/50' : 'bg-[var(--color-accent)]'} flex items-center justify-center overflow-hidden relative flex-shrink-0`}>
       {/* Blur placeholder while loading */}
       {showImage && !isLoaded && (
         <div className="absolute inset-0 bg-[var(--color-surface)] animate-pulse" />

@@ -80,18 +80,17 @@ export default function Header({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           )
+        },
+        {
+          labelKey: 'register_cafe',
+          descriptionKey: 'register_cafe_description',
+          href: `/${locale}/discover/register-cafe`,
+          icon: (
+            <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          )
         }
-        // MVP: Pending Spots hidden - verification now happens via Drop Bean
-        // {
-        //   labelKey: 'pending_spots',
-        //   descriptionKey: 'pending_spots_description',
-        //   href: `/${locale}/discover/pending-spots`,
-        //   icon: (
-        //     <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        //     </svg>
-        //   )
-        // }
       ]
     },
     // MVP: Community section hidden - uncomment when ready
@@ -125,6 +124,7 @@ export default function Header({
       items: [
         {
           labelKey: 'coffee_logs_item_1',
+          descriptionKey: 'coffee_logs_item_1_description',
           href: `/${locale}/my-logs`,
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,6 +134,7 @@ export default function Header({
         },
         {
           labelKey: 'my_beans',
+          descriptionKey: 'my_beans_description',
           href: `/${locale}/my-beans`,
           icon: (
             <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,7 +373,7 @@ export default function Header({
                 } else if (category.id === 'community') {
                   adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
                 } else if (category.id === 'my_coffee_journey') {
-                  adjustedOffset = getDividerRight(divider2Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
+                  adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
                 } else if (category.id === 'shop') {
                   adjustedOffset = getDividerRight(divider3Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
                 }

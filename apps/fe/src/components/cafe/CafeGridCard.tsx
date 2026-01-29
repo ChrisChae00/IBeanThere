@@ -27,9 +27,12 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
   return (
     <Link 
       href={cafePath}
-      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl hover:shadow-inset-primary transition-shadow cursor-pointer flex flex-col relative"
+      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden transition-shadow cursor-pointer flex flex-col relative"
     >
-      <div className="overflow-hidden rounded-t-2xl bg-[var(--color-primary)]">
+      {/* Hover shadow overlay - renders on top of all content */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
+      
+      <div className="bg-[var(--color-primary)]">
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
       </div>
       <div className="p-4">
