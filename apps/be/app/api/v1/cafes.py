@@ -838,6 +838,18 @@ async def register_cafe(
             normalized_address = request.address.lower().strip() if request.address else ""
             slug = generate_unique_slug(request.name, supabase)
             
+            # Handle images - get main image from uploaded images
+            # NOTE: main_image column needs to be added to the cafes table in Supabase
+            # Once added, uncomment the main_image field in cafe_data below
+            main_image = None
+            if request.images and len(request.images) > 0:
+                main_index = request.main_image_index if request.main_image_index is not None else 0
+                # Ensure index is within bounds
+                if main_index >= len(request.images):
+                    main_index = 0
+                main_image = request.images[main_index]
+                logger.info(f"Main image selected at index {main_index}, storing for later use")
+            
             cafe_data = {
                 "name": request.name,
                 "address": request.address,
@@ -855,7 +867,8 @@ async def register_cafe(
                 "source_url": request.source_url,
                 "normalized_name": normalized_name,
                 "normalized_address": normalized_address,
-                "slug": slug
+                "slug": slug,
+                "main_image": main_image
             }
             
             # Insert cafe

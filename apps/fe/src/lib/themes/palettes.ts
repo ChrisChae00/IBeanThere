@@ -8,7 +8,7 @@ export const themes: Record<string, ThemePalette> = {
           primary: '#8C5A3A', // Medium brown for main elements
           primaryText: '#f5f0e8', // Light cream text on primary background
           secondary: '#AB7743', // Light brown/taupe for secondary elements
-          accent: '#c2ac93', // Medium beige for accents
+          accent: '#D9B896', // Medium beige for accents
           background: '#e9d6c0', // Light beige for background
           cardBackground: '#f5f0e8', // Very light warm cream for surfaces f5f0e8
           surface: '#f5f0e8', // Very light warm cream for surfaces f5f0e8
@@ -41,7 +41,7 @@ export const themes: Record<string, ThemePalette> = {
           primary: '#d4c7b8', // Light cream for better contrast on dark surface
           primaryText: '#1A120B', // Dark background color for text on light primary
           secondary: '#5e432d', // Dark brown
-          accent: '#8b7355', // Medium brown accent
+          accent: '#6B4F3A', // Medium brown accent 
           background: '#1A120B', // Very dark brown from image 2A1A13
           cardBackground: '#2A1A13', // Slightly lighter surface for dark mode cards
           surface: '#3C2A21', // Dark brown surface from image

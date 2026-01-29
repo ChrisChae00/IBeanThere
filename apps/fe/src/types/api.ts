@@ -77,7 +77,10 @@ export interface CafeRegistrationRequest {
     lng: number;
   };
   source_type?: 'google_url' | 'map_click' | 'manual' | 'postcode';
+  images?: string[];
+  main_image_index?: number;
 }
+
 
 export interface CafeRegistrationResponse {
   success: boolean;

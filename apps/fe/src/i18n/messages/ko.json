@@ -30,8 +30,12 @@
       "help_item_2": "문의하기",
       "my_coffee_journey": "내 커피 여정",
       "coffee_logs_item_1": "내 기록",
+      "coffee_logs_item_1_description": "커피 로그 기록 보기 및 관리",
       "coffee_logs_item_2": "통계",
       "my_beans": "내 커피콩",
+      "my_beans_description": "각 카페에서 심은 커피콩 성장 현황",
+      "register_cafe": "카페 등록",
+      "register_cafe_description": "새 카페를 지도에 추가하기",
       "shop": "공식몰",
       "shop_essentials": "노마드 에센셜",
       "shop_explorer": "탐험가 라인",
@@ -563,8 +567,13 @@
         "remove_hours": "영업시간 삭제",
         "apply_to_all_weekdays": "평일에 적용",
         "apply_to_all_days": "모든 요일에 적용",
-        "clear_all_hours": "모두 지우기"
+        "clear_all_hours": "모두 지우기",
+        "photos_label": "사진 (선택)",
+        "photos_hint": "최대 5장까지 추가 가능합니다. 별 아이콘을 클릭하여 대표 사진을 설정하세요.",
+        "main_photo": "대표",
+        "set_as_main": "대표 사진으로 설정"
       },
+
       "modal": {
         "title": "카페 정보",
         "name": "이름",
@@ -615,6 +624,7 @@
       "log": {
         "write_log_for": "로그 작성",
         "write_log_description": "이 카페에서의 커피 경험을 공유하세요",
+        "remove": "삭제",
         "my_logs": "내 커피 로그",
         "my_logs_description": "모든 커피 로그를 관리하세요",
         "write_log": "로그 작성",

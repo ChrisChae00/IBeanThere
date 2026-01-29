@@ -33,6 +33,10 @@ class CafeRegistrationRequest(BaseModel):
     # Source tracking
     source_type: Optional[str] = None  # 'google_url' | 'map_click' | 'manual'
     source_url: Optional[str] = None
+    
+    # Images
+    images: Optional[List[str]] = Field(None, max_length=5, description="Maximum 5 images (base64)")
+    main_image_index: Optional[int] = Field(None, ge=0, le=4, description="Index of main image")
 
 class CafeCreate(CafeBase):
     """Model for creating a new cafe entry (internal)."""

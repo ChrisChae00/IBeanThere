@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
 import { Card } from '@/components/ui';
-import { StarRating } from '@/shared/ui';
+import { StarRating, ImageLightbox } from '@/shared/ui';
 import { Avatar } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { getCafeDetail } from '@/lib/api/cafes';
@@ -31,6 +31,8 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
   );
   const [isLoadingCafe, setIsLoadingCafe] = useState(!cafeName);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   
   const hasAdvancedData = (() => {
     // Check if outlet_info has actual data (could be JSON string)
@@ -296,13 +298,21 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {log.photo_urls && log.photo_urls.length > 0 && (
         <div className="grid grid-cols-2 gap-2 mb-4">
           {log.photo_urls.map((url, index) => (
-            <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+            <button
+              key={index}
+              type="button"
+              onClick={() => {
+                setLightboxIndex(index);
+                setLightboxOpen(true);
+              }}
+              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            >
               <img
                 src={url}
                 alt={`${t('photo')} ${index + 1}`}
                 className="w-full h-full object-cover"
               />
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -501,7 +511,21 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
           )}
         </div>
       )}
+
+      {/* Photo Lightbox */}
+      {log.photo_urls && log.photo_urls.length > 0 && (
+        <ImageLightbox
+          images={log.photo_urls.map((url, index) => ({
+            url,
+            alt: `${t('photo')} ${index + 1}`
+          }))}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </Card>
   );
 }
+
 

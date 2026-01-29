@@ -28,6 +28,7 @@ export { default as Modal } from './Modal';
 export { default as Badge } from './Badge';
 export { default as Label } from './Label';
 export { default as PhotoUpload } from './PhotoUpload';
+export { default as PhotoUploadWithMain } from './PhotoUploadWithMain';
 export { default as Toast, type ToastType } from './Toast';
 export { default as IntensitySlider } from './IntensitySlider';
 export { default as InfoIcon } from './InfoIcon';

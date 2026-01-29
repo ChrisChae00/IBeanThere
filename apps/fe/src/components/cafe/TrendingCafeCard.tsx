@@ -27,8 +27,11 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
   return (
     <Link 
       href={cafePath}
-      className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl overflow-hidden hover:shadow-inset-primary transition-shadow flex flex-col h-full cursor-pointer relative"
+      className="group bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl overflow-hidden transition-shadow flex flex-col h-full cursor-pointer relative"
     >
+      {/* Hover shadow overlay - renders on top of all content */}
+      <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
+      
       <div className="overflow-hidden">
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" />
       </div>
