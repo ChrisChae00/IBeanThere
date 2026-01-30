@@ -1,4 +1,4 @@
-import { Hero, Features, Stats, Testimonials, CTA } from '@/components/landing';
+import { Hero, Features, CTA, GrowthJourney, UserPersonas } from '@/components/landing';
 
 export default async function HomePage({
   params
@@ -11,8 +11,8 @@ export default async function HomePage({
     <>
       <Hero locale={locale} />
       <Features locale={locale} />
-      <Stats locale={locale} />
-      <Testimonials locale={locale} />
+      <GrowthJourney locale={locale} />
+      <UserPersonas locale={locale} />
       <CTA locale={locale} />
     </>
   );

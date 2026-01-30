@@ -128,43 +128,69 @@
     },
     "landing": {
       "hero": {
-        "title": "Your Coffee Journey Starts Here",
-        "subtitle": "Discover cafes, record experiences, share your story",
+        "title": "Track Your Favorite Cafes, One Bean at a Time",
+        "subtitle": "Register your favorite cafes, drop beans to log visits, and watch your coffee forest grow",
         "cta_primary": "Start Your Journey",
+        "cta_primary_logged_in": "Drop Bean",
         "cta_secondary": "Explore Cafes"
       },
       "features": {
-        "title": "Everything You Need",
-        "subtitle": "Powerful tools to enhance your coffee journey",
+        "title": "Your Complete Coffee Companion",
+        "subtitle": "Everything you need to discover, record, and share your coffee journey",
         "discover": {
-          "title": "Discover",
-          "description": "Find amazing cafes near you with detailed reviews and ratings"
+          "title": "Discover Hidden Gems",
+          "description": "Find the best local cafes around you, from cozy corners to bustling roasteries."
         },
         "record": {
-          "title": "Record",
-          "description": "Capture moments with photos, notes, and ratings for your journal"
+          "title": "Log Your Moments",
+          "description": "Capture tasting notes, photos, and ratings to build your personal coffee archive."
         },
         "share": {
-          "title": "Share",
-          "description": "Connect with coffee lovers and discover new favorites together"
+          "title": "Connect & Share",
+          "description": "Share your favorite spots and reviews with a community of fellow coffee lovers."
         }
       },
-      "stats": {
-        "title": "Join Our Community",
-        "subtitle": "Thousands of coffee enthusiasts trust us",
-        "users": "Active Users",
-        "cafes": "Cafes Listed",
-        "reviews": "Reviews",
-        "photos": "Photos Shared"
+      "growth_journey": {
+        "title": "Your Visits Build a Forest",
+        "subtitle": "Watch your beans grow with every cup",
+        "seed": {
+          "title": "The Seed",
+          "description": "First Visit - A single bean planted in fertile soil."
+        },
+        "sprout": {
+          "title": "The Sprout",
+          "description": "Revisit - New life emerges as you return."
+        },
+        "tree": {
+          "title": "The Tree",
+          "description": "Regular - Roots run deep, branches reach high."
+        },
+        "harvest": {
+          "title": "The Harvest",
+          "description": "Loyalist - Bearing fruit, a testament to your journey."
+        }
       },
-      "testimonials": {
-        "title": "Join Thousands of Coffee Enthusiasts",
-        "subtitle": "See what our community is saying about their coffee journey"
+      "user_personas": {
+        "title": "What Kind of Explorer Are You?",
+        "subtitle": "Find your coffee identity",
+        "navigator": {
+          "title": "The Navigator",
+          "description": "The Pioneer. You venture where no one has been, marking new territories on the map."
+        },
+        "archivist": {
+          "title": "The Archivist",
+          "description": "The Historian. You capture the fleeting essence of every cup, preserving memories."
+        },
+        "curator": {
+          "title": "The Curator",
+          "description": "The Guide. You weave experiences into collections, sharing the best paths with others."
+        }
       },
       "cta": {
-        "title": "Ready to Start Your Coffee Journey?",
-        "subtitle": "Join thousands of coffee lovers and begin documenting your unique coffee experiences today",
+        "title": "Ready to Plant Your First Bean?",
+        "subtitle": "Start documenting your coffee adventures and watch your personal coffee forest grow",
         "button_primary": "Get Started",
+        "button_primary_logged_in": "Drop Bean",
         "disclaimer": "\"60 beans make a cup of coffee, and they give me 60 good ideas.\" - Beethoven"
       }
     },
