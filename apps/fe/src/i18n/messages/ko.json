@@ -127,8 +127,8 @@
     },
     "landing": {
       "hero": {
-        "title": "콩 하나로 기록하는 나만의 최애 카페",
-        "subtitle": "좋아하는 카페를 등록하고, 방문할 때마다 콩을 심어 나만의 커피 숲을 가꿔보세요",
+        "title": "우리 동네 로컬 카페,<mobileBr></mobileBr> 콩 하나로 기록하다",
+        "subtitle": "나만의 최애 스팟을 심고,<mediumBr></mediumBr> 모두가 함께 만드는<mobileBr></mobileBr> 로컬 카페 지도를 경험하세요.",
         "cta_primary": "여행 시작하기",
         "cta_primary_logged_in": "콩 심기",
         "cta_secondary": "카페 둘러보기"
@@ -145,8 +145,8 @@
           "description": "맛과 향, 그리고 사진을 남겨 나만의 커피 아카이브를 만드세요."
         },
         "share": {
-          "title": "연결하고 공유하기",
-          "description": "커피를 사랑하는 사람들과 최애 스팟을 공유하세요."
+          "title": "함께 만드는 카페 지도",
+          "description": "당신의 최애 로컬 카페를 공유하여, 우리 모두를 위한 지도를 완성해주세요."
         }
       },
       "growth_journey": {

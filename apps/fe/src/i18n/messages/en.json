@@ -128,8 +128,8 @@
     },
     "landing": {
       "hero": {
-        "title": "Track Your Favorite Cafes, One Bean at a Time",
-        "subtitle": "Register your favorite cafes, drop beans to log visits, and watch your coffee forest grow",
+        "title": "Track Your Local Cafes,<mobileBr></mobileBr> One Bean at a Time",
+        "subtitle": "Mark your favorite local spots<mediumBr></mediumBr> and help build a community<mobileBr></mobileBr> coffee map together.",
         "cta_primary": "Start Your Journey",
         "cta_primary_logged_in": "Drop Bean",
         "cta_secondary": "Explore Cafes"
@@ -146,8 +146,8 @@
           "description": "Capture tasting notes, photos, and ratings to build your personal coffee archive."
         },
         "share": {
-          "title": "Connect & Share",
-          "description": "Share your favorite spots and reviews with a community of fellow coffee lovers."
+          "title": "Build the Map Together",
+          "description": "Share your local favorites to help complete the cafe map for everyone."
         }
       },
       "growth_journey": {

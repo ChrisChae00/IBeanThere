@@ -26,12 +26,17 @@ export default async function Hero({ locale }: { locale: string }) {
 
       {/* Content */}
       <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-[30%] sm:pt-[25%] md:pt-[20%] lg:pt-[20%]">
-        <div className="max-w-3xl space-y-4 sm:space-y-6 motion-slide-up">
+        <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl space-y-4 sm:space-y-6 motion-slide-up">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-textHero)] leading-tight drop-shadow-lg break-keep">
-            {t('title')}
+            {t.rich('title', {
+              mobileBr: () => <br className="block" />
+            })}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--color-textHero)] leading-relaxed drop-shadow break-keep max-w-2xl">
-            {t('subtitle')}
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--color-textHero)] leading-relaxed drop-shadow break-keep max-w-2xl lg:max-w-4xl">
+            {t.rich('subtitle', {
+              mobileBr: () => <br className="block sm:hidden" />,
+              mediumBr: () => <br className="block xl:hidden" />
+            })}
           </p>
           <HeroClient locale={locale} />
         </div>
