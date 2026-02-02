@@ -160,9 +160,13 @@
           "title": "새싹",
           "description": "재방문 - 당신이 돌아오자 피어나는 새 생명."
         },
+        "growing": {
+          "title": "성장",
+          "description": "단골 - 잎이 펼쳐지고 힘을 얻습니다."
+        },
         "tree": {
           "title": "나무",
-          "description": "단골 - 깊게 내린 뿌리와 높게 뻗은 가지."
+          "description": "찐단골 - 깊게 내린 뿌리와 높게 뻗은 가지."
         },
         "harvest": {
           "title": "수확",

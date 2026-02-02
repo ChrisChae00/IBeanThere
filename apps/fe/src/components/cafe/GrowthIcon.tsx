@@ -7,16 +7,18 @@ interface GrowthIconProps {
   className?: string;
 }
 
+import { SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon } from '../landing/GrowthJourneyIcons';
+
 /**
  * GrowthIcon - Visual representation of bean growth level
  * 
  * Levels:
  * 0 - No bean (empty)
- * 1 - Sleeping Bean 🫘 (brown/dormant)
- * 2 - Sprouting 🌱 (green sprout)
- * 3 - Growing 🌿 (larger plant)
- * 4 - Sapling 🌳 (small tree)
- * 5 - Fruiting Tree 🍒 (tree with fruit)
+ * 1 - Sleeping Bean 🫘 (Seed)
+ * 2 - Sprouting 🌱 (Sprout)
+ * 3 - Growing 🌿 (Growing)
+ * 4 - Sapling 🌳 (Tree)
+ * 5 - Fruiting Tree 🍒 (Harvest)
  */
 export function GrowthIcon({ 
   level, 
@@ -24,44 +26,34 @@ export function GrowthIcon({
   animate = false,
   className = '' 
 }: GrowthIconProps) {
-  const getEmoji = () => {
-    switch (level) {
-      case 0: return '⚪';  // Empty/no bean
-      case 1: return '🫘';  // Sleeping Bean
-      case 2: return '🌱';  // Sprouting
-      case 3: return '🌿';  // Growing
-      case 4: return '🌳';  // Sapling
-      case 5: return '🍒';  // Fruiting Tree (coffee cherries)
-      default: return '🫘';
-    }
-  };
+  
+  // Empty state
+  if (level === 0) {
+    return (
+      <span 
+        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] ${className}`}
+        style={{ width: size, height: size }}
+        title="No bean"
+      />
+    );
+  }
 
-  const getColor = () => {
-    switch (level) {
-      case 0: return 'var(--color-border)';
-      case 1: return '#8B4513';  // Brown (Saddle Brown)
-      case 2: return '#90EE90';  // Light Green
-      case 3: return '#32CD32';  // Lime Green
-      case 4: return '#228B22';  // Forest Green
-      case 5: return '#DC143C';  // Crimson (coffee cherry red)
-      default: return 'var(--color-text)';
-    }
-  };
+  const iconClass = `w-full h-full ${animate ? 'animate-bounce' : ''}`;
 
   return (
-    <span 
-      className={`inline-flex items-center justify-center ${animate ? 'animate-bounce' : ''} ${className}`}
-      style={{ 
-        fontSize: size,
-        lineHeight: 1,
-        filter: level === 0 ? 'grayscale(1) opacity(0.5)' : 'none'
-      }}
+    <div 
+      className={`inline-flex items-center justify-center ${className}`}
+      style={{ width: size, height: size }}
       title={getLevelName(level)}
       role="img"
       aria-label={getLevelName(level)}
     >
-      {getEmoji()}
-    </span>
+      {level === 1 && <SeedIcon className={iconClass} />}
+      {level === 2 && <SproutIcon className={iconClass} />}
+      {level === 3 && <GrowingIcon className={iconClass} />}
+      {level === 4 && <TreeIcon className={iconClass} />}
+      {level >= 5 && <HarvestIcon className={iconClass} />}
+    </div>
   );
 }
 

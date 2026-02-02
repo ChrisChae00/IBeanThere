@@ -161,6 +161,10 @@
           "title": "The Sprout",
           "description": "Revisit - New life emerges as you return."
         },
+        "growing": {
+          "title": "Growing",
+          "description": "Frequent - Leaves unfold, gaining strength."
+        },
         "tree": {
           "title": "The Tree",
           "description": "Regular - Roots run deep, branches reach high."

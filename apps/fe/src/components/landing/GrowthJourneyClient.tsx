@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { SeedIcon, SproutIcon, TreeIcon, HarvestIcon } from './GrowthJourneyIcons';
+import { SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon } from './GrowthJourneyIcons';
 
-type Step = 'seed' | 'sprout' | 'tree' | 'harvest';
+type Step = 'seed' | 'sprout' | 'growing' | 'tree' | 'harvest';
 
 type GrowthJourneyClientProps = {
   messages: {
@@ -13,6 +13,7 @@ type GrowthJourneyClientProps = {
     steps: {
       seed: { title: string; description: string };
       sprout: { title: string; description: string };
+      growing: { title: string; description: string };
       tree: { title: string; description: string };
       harvest: { title: string; description: string };
     };
@@ -23,7 +24,7 @@ export default function GrowthJourneyClient({ messages }: GrowthJourneyClientPro
   const [currentStep, setCurrentStep] = useState<Step>('seed');
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const steps: Step[] = ['seed', 'sprout', 'tree', 'harvest'];
+  const steps: Step[] = ['seed', 'sprout', 'growing', 'tree', 'harvest'];
 
   const handleNextStep = () => {
     if (isAnimating) return;
@@ -60,6 +61,10 @@ export default function GrowthJourneyClient({ messages }: GrowthJourneyClientPro
         
         <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'sprout' ? 'scale-100 opacity-100 translate-y-0' : 'scale-75 opacity-0 translate-y-10'}`}>
           <SproutIcon className="w-28 h-28" />
+        </div>
+
+        <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'growing' ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
+          <GrowingIcon className="w-32 h-32" />
         </div>
 
         <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'tree' ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>

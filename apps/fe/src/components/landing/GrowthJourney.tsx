@@ -14,6 +14,7 @@ export default async function GrowthJourney({ locale }: GrowthJourneyProps) {
     steps: {
       seed: { title: t('seed.title'), description: t('seed.description') },
       sprout: { title: t('sprout.title'), description: t('sprout.description') },
+      growing: { title: t('growing.title'), description: t('growing.description') },
       tree: { title: t('tree.title'), description: t('tree.description') },
       harvest: { title: t('harvest.title'), description: t('harvest.description') },
     },
