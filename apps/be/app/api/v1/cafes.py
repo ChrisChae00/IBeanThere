@@ -606,6 +606,10 @@ async def get_cafe_details(cafe_identifier: str):
         all_images = []
         main_image = cafe.get("main_image")  # First priority: Navigator's image set during registration
         
+        # If main_image exists, add it to the list first
+        if main_image:
+            all_images.append(main_image)
+        
         try:
             # Get all logs with photos, ordered by oldest first (for main_image selection)
             logs_with_photos = supabase.table("cafe_visits").select(
@@ -618,9 +622,12 @@ async def get_cafe_details(cafe_identifier: str):
                 for log in logs_with_photos.data:
                     photo_urls = log.get("photo_urls", [])
                     if photo_urls:
-                        all_images.extend(photo_urls)
+                        # Add images if they are not already in the list (avoid duplicates with main_image)
+                        for url in photo_urls:
+                            if url not in all_images:
+                                all_images.append(url)
                 
-                # If no main_image from registration, use first image from oldest log
+                # If no main_image from registration (and none set above), use first image from oldest log
                 if not main_image and all_images:
                     main_image = all_images[0]
         except Exception as img_err:

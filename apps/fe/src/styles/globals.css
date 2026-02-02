@@ -7,14 +7,14 @@
 
 /* Base styles */
 :root {
-  --ibean-space-xs: 1rem;        /* 16px */
-  --ibean-space-sm: 1.5rem;      /* 24px */
-  --ibean-space-md: 2rem;        /* 32px */
-  --ibean-space-lg: 3rem;        /* 48px */
-  --ibean-radius-sm: 0.5rem;     /* 8px */
-  --ibean-radius-md: 0.75rem;    /* 12px */
-  --ibean-radius-lg: 1rem;       /* 16px */
-  --ibean-radius-xl: 1.5rem;     /* 24px */
+  --ibean-space-xs: 1rem; /* 16px */
+  --ibean-space-sm: 1.5rem; /* 24px */
+  --ibean-space-md: 2rem; /* 32px */
+  --ibean-space-lg: 3rem; /* 48px */
+  --ibean-radius-sm: 0.5rem; /* 8px */
+  --ibean-radius-md: 0.75rem; /* 12px */
+  --ibean-radius-lg: 1rem; /* 16px */
+  --ibean-radius-xl: 1.5rem; /* 24px */
   --ibean-shadow-warm-sm: 0 12px 30px rgba(26, 18, 11, 0.12);
   --ibean-shadow-warm-md: 0 20px 45px rgba(26, 18, 11, 0.16);
   --ibean-shadow-warm-lg: 0 32px 70px rgba(26, 18, 11, 0.2);
@@ -27,16 +27,27 @@
   padding: 0;
 }
 
+html {
+  overflow-y: auto;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", sans-serif;
   line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-feature-settings: 'liga' on, 'calt' on;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  font-feature-settings:
+    "liga" on,
+    "calt" on;
 }
 
-h1, .type-display {
+h1,
+.type-display {
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1.2;
   letter-spacing: -0.03em;
@@ -264,7 +275,9 @@ select {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .palette-card:hover {

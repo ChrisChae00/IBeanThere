@@ -29,5 +29,19 @@ export interface ThemePalette {
     white: string;
     userMarkerMap: string;
     cafeMarker: string;
-};
+    // Growth Journey Icons
+    growthSeedBg: string;
+    growthSproutBg: string;
+    growthTreeBg: string;
+    growthSoil: string;
+    growthBean: string;
+    growthBeanStroke: string;
+    growthStem: string;
+    growthLeaf: string;
+    growthLeafFill: string;
+    growthTrunk: string;
+    growthCanopy: string;
+    growthCanopyDark: string;
+    growthFruit: string;
+  };
 }

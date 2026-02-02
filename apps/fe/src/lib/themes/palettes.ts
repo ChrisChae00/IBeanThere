@@ -32,6 +32,21 @@ export const themes: Record<string, ThemePalette> = {
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#D24C28', // Secondary color for user marker
           cafeMarker: '#8C5A3A', // Same as primary for visibility on map
+          
+          // Growth Journey
+          growthSeedBg: '#F5F5F0',
+          growthSproutBg: '#F1F8E9',
+          growthTreeBg: '#E8F5E9',
+          growthSoil: '#bb8f81ff',
+          growthBean: '#8D6E63',
+          growthBeanStroke: '#5D4037',
+          growthStem: '#78BD7B',
+          growthLeaf: '#5CAF60',
+          growthLeafFill: '#4CAF50',
+          growthTrunk: '#795548',
+          growthCanopy: '#2E7D32',
+          growthCanopyDark: '#1B5E20',
+          growthFruit: '#FF5252',
         },   
       },
     espresso: {
@@ -65,6 +80,21 @@ export const themes: Record<string, ThemePalette> = {
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#D24C28', // Secondary color for user marker
           cafeMarker: '#1A120B', // Dark color for visibility on map (same as primaryText)
+          
+          // Growth Journey - Dark Mode
+          growthSeedBg: '#2C2520', // Darker background for seed
+          growthSproutBg: '#252C22', // Darker background for sprout
+          growthTreeBg: '#1E2C22', // Darker background for tree
+          growthSoil: '#bb8f81ff', // Lighter soil for visibility
+          growthBean: '#A1887F', // Lighter bean
+          growthBeanStroke: '#8D6E63', // Lighter stroke
+          growthStem: '#A5D6A7', // Lighter stem
+          growthLeaf: '#81C784', // Lighter leaf
+          growthLeafFill: '#66BB6A', // Lighter leaf fill
+          growthTrunk: '#8D6E63', // Lighter trunk
+          growthCanopy: '#43A047', // Lighter canopy
+          growthCanopyDark: '#2E7D32', // Lighter dark canopy
+          growthFruit: '#FF8A80', // Lighter fruit
         },
       },
       matchaLatte: {
@@ -98,6 +128,21 @@ export const themes: Record<string, ThemePalette> = {
           white: '#FFFFFF', // White for contrast
           userMarkerMap: '#E78E17', // Secondary color for user marker
           cafeMarker: '#85a035', // Same as primary for visibility on map
+          
+          // Growth Journey
+          growthSeedBg: '#F5F5F0',
+          growthSproutBg: '#F1F8E9',
+          growthTreeBg: '#E8F5E9',
+          growthSoil: '#bb8f81ff',
+          growthBean: '#8D6E63',
+          growthBeanStroke: '#5D4037',
+          growthStem: '#78BD7B',
+          growthLeaf: '#5CAF60',
+          growthLeafFill: '#4CAF50',
+          growthTrunk: '#795548',
+          growthCanopy: '#2E7D32',
+          growthCanopyDark: '#1B5E20',
+          growthFruit: '#FF5252',
         },
       },
   vanillaLatte: {
@@ -131,6 +176,21 @@ export const themes: Record<string, ThemePalette> = {
       white: '#FFFFFF', // White for contrast
       userMarkerMap: '#E78E17', // Secondary color for user marker
       cafeMarker: '#362C1D', // Same as primary for visibility on map
+      
+      // Growth Journey
+      growthSeedBg: '#F5F5F0',
+      growthSproutBg: '#F1F8E9',
+      growthTreeBg: '#E8F5E9',
+      growthSoil: '#bb8f81ff',
+      growthBean: '#8D6E63',
+      growthBeanStroke: '#5D4037',
+      growthStem: '#78BD7B',
+      growthLeaf: '#5CAF60',
+      growthLeafFill: '#4CAF50',
+      growthTrunk: '#795548',
+      growthCanopy: '#2E7D32',
+      growthCanopyDark: '#1B5E20',
+      growthFruit: '#FF5252',
     },
   },
 };

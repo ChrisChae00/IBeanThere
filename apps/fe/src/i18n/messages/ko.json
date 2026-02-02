@@ -127,43 +127,73 @@
     },
     "landing": {
       "hero": {
-        "title": "당신의 커피 여행이 여기서 시작됩니다",
-        "subtitle": "카페를 발견하고, 경험을 기록하며, 이야기를 나누세요",
+        "title": "우리 동네 로컬 카페,<mobileBr></mobileBr> 콩 하나로 기록하다",
+        "subtitle": "나만의 최애 스팟을 심고,<mediumBr></mediumBr> 모두가 함께 만드는<mobileBr></mobileBr> 로컬 카페 지도를 경험하세요.",
         "cta_primary": "여행 시작하기",
+        "cta_primary_logged_in": "콩 심기",
         "cta_secondary": "카페 둘러보기"
       },
       "features": {
-        "title": "당신이 필요한 모든 것",
-        "subtitle": "커피 여행을 더욱 풍성하게 만드는 강력한 도구들",
+        "title": "완벽한 커피 여정의 동반자",
+        "subtitle": "당신의 커피 여정을 발견하고, 기록하고, 공유하는 데 필요한 모든 것",
         "discover": {
-          "title": "카페 찾기",
-          "description": "상세한 리뷰와 평점으로 근처의 멋진 카페를 찾아보세요"
+          "title": "숨은 명소 발견",
+          "description": "코지한 골목 카페부터 힙한 로스터리까지 내 주변 최고의 카페를 찾으세요."
         },
         "record": {
-          "title": "기록하기",
-          "description": "사진, 메모, 평점으로 순간을 기록하여 나만의 일기를 만들어보세요"
+          "title": "순간을 기록하기",
+          "description": "맛과 향, 그리고 사진을 남겨 나만의 커피 아카이브를 만드세요."
         },
         "share": {
-          "title": "공유하기",
-          "description": "커피 애호가들과 연결되어 함께 새로운 즐겨찾기를 발견하세요"
+          "title": "함께 만드는 카페 지도",
+          "description": "당신의 최애 로컬 카페를 공유하여, 우리 모두를 위한 지도를 완성해주세요."
         }
       },
-      "stats": {
-        "title": "우리 커뮤니티에 참여하세요",
-        "subtitle": "수천 명의 커피 애호가들이 신뢰하는 서비스",
-        "users": "활성 사용자",
-        "cafes": "등록된 카페",
-        "reviews": "리뷰",
-        "photos": "공유된 사진"
+      "growth_journey": {
+        "title": "방문이 모여 숲이 됩니다",
+        "subtitle": "한 잔의 커피마다 자라나는 커피 콩",
+        "seed": {
+          "title": "씨앗",
+          "description": "첫 방문 - 흙 속에 심어진 작은 콩 하나."
+        },
+        "sprout": {
+          "title": "새싹",
+          "description": "재방문 - 당신이 돌아오자 피어나는 새 생명."
+        },
+        "growing": {
+          "title": "성장",
+          "description": "단골 - 잎이 펼쳐지고 힘을 얻습니다."
+        },
+        "tree": {
+          "title": "나무",
+          "description": "찐단골 - 깊게 내린 뿌리와 높게 뻗은 가지."
+        },
+        "harvest": {
+          "title": "수확",
+          "description": "찐단골 - 여정의 결실인 붉은 열매."
+        }
       },
-      "testimonials": {
-        "title": "수천 명의 커피 애호가들과 함께하세요",
-        "subtitle": "커뮤니티가 말하는 커피 여행 이야기를 들어보세요"
+      "user_personas": {
+        "title": "당신은 어떤 탐험가인가요?",
+        "subtitle": "나만의 커피 정체성 찾기",
+        "navigator": {
+          "title": "개척자",
+          "description": "아무도 가보지 않은 곳을 찾아 지도에 새로운 영역을 표시합니다."
+        },
+        "archivist": {
+          "title": "기록가",
+          "description": "잊혀질 수 있는 커피의 맛과 향을 기록하여 추억을 보존합니다."
+        },
+        "curator": {
+          "title": "큐레이터",
+          "description": "경험을 엮어 컬렉션을 만들고, 다른 이들에게 최고의 길을 안내합니다."
+        }
       },
       "cta": {
-        "title": "커피 여행을 시작할 준비가 되셨나요?",
-        "subtitle": "수천 명의 커피 애호가들과 함께 나만의 특별한 커피 경험을 기록해보세요",
+        "title": "첫 번째 콩을 심을 준비가 되셨나요?",
+        "subtitle": "커피 여행을 기록하고 나만의 커피 숲이 자라는 것을 지켜보세요",
         "button_primary": "시작하기",
+        "button_primary_logged_in": "콩 심기",
         "disclaimer": "\"한잔의 커피를 만드는 60개의 원두는 나에게 60가지의 좋은 아이디어를 준다.\" - 베토벤"
       }
     },

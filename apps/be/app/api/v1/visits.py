@@ -32,14 +32,52 @@ async def record_cafe_view(
     
     - Anonymous users supported
     - Tracks IP and user agent for spam prevention
+    - Rate limited by IP to prevent spam attacks
     """
     try:
+        import re
+        # Validate cafe_id format (UUID)
+        uuid_pattern = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+        if not uuid_pattern.match(cafe_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid cafe ID format"
+            )
+        
         supabase = get_supabase_client()
+        
+        # Verify cafe exists
+        cafe_check = supabase.table("cafes").select("id").eq("id", cafe_id).limit(1).execute()
+        if not cafe_check.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cafe not found"
+            )
+        
+        ip_address = request.client.host if request.client else None
+        
+        # Rate limiting: Check for recent views from same IP (max 10 per minute per cafe)
+        if ip_address:
+            from datetime import timedelta
+            one_minute_ago = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+            recent_views = supabase.table("cafe_views").select("id", count="exact").eq(
+                "cafe_id", cafe_id
+            ).eq(
+                "ip_address", ip_address
+            ).gte(
+                "viewed_at", one_minute_ago
+            ).execute()
+            
+            if recent_views.count and recent_views.count >= 10:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Too many requests. Please try again later."
+                )
         
         view_data = {
             "cafe_id": cafe_id,
             "user_id": user_id,
-            "ip_address": request.client.host if request.client else None,
+            "ip_address": ip_address,
             "user_agent": request.headers.get("user-agent"),
             "viewed_at": datetime.now(timezone.utc).isoformat()
         }
@@ -57,6 +95,8 @@ async def record_cafe_view(
             "cafe_id": cafe_id
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error recording cafe view: {e}")
         raise HTTPException(
@@ -665,17 +705,22 @@ async def get_cafe_visits(
     current_user = Depends(get_current_user)
 ):
     """
-    Get all visits for a specific cafe.
+    Get visits for a specific cafe.
     
     - Requires authentication
-    - Returns paginated list of visits
+    - Returns only the current user's own visits for privacy protection
+    - For public logs, use GET /cafes/{cafe_id}/logs instead
     - Ordered by visited_at (most recent first)
     """
     try:
         supabase = get_supabase_client()
         
+        # Security: Only return the current user's own visits to protect privacy
+        # Other users' visits are private data that should not be exposed
         result = supabase.table("cafe_visits").select("*").eq(
             "cafe_id", cafe_id
+        ).eq(
+            "user_id", current_user.id  # Filter by current user only
         ).order(
             "visited_at", desc=True
         ).range(offset, offset + limit - 1).execute()

@@ -179,6 +179,7 @@ export default function MyLogsPage() {
                 log={log}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                hideUserInfo={true}
               />
             )
           ))}
