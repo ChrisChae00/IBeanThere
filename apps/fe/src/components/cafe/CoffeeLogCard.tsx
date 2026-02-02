@@ -18,9 +18,10 @@ interface CoffeeLogCardProps {
   onDelete?: (logId: string) => void;
   cafeName?: string;
   hideCafeName?: boolean;
+  hideUserInfo?: boolean;
 }
 
-export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCafeName = false }: CoffeeLogCardProps) {
+export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCafeName = false, hideUserInfo = false }: CoffeeLogCardProps) {
   const t = useTranslations('cafe.log');
   const params = useParams();
   const locale = params.locale as string;
@@ -198,46 +199,52 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {log.anonymous || !log.author_username ? (
-            <>
-              <Avatar
-                alt={log.anonymous ? 'Anonymous' : (log.author_display_name || 'User')}
-                size="sm"
-              />
-              <div>
-                <p className="text-sm font-medium text-[var(--color-cardText)]">
-                  {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
-                </p>
-                <p className="text-xs text-[var(--color-cardTextSecondary)]">
-                  {formatRelativeDate(log.visited_at)}
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link href={`/${locale}/profile/${log.author_username}`}>
+          {!hideUserInfo && (
+            log.anonymous || !log.author_username ? (
+              <>
                 <Avatar
-                  src={log.author_avatar_url}
-                  alt={log.author_display_name || 'User'}
+                  alt={log.anonymous ? 'Anonymous' : (log.author_display_name || 'User')}
                   size="sm"
-                  className="cursor-pointer hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
                 />
-              </Link>
-              <div>
-                <Link 
-                  href={`/${locale}/profile/${log.author_username}`}
-                  className="text-sm font-medium text-[var(--color-cardText)] hover:text-[var(--color-primary)] transition-colors"
-                >
-                  {log.author_display_name || 'User'}
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-cardText)]">
+                    {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
+                  </p>
+                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                    {formatRelativeDate(log.visited_at)}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link href={`/${locale}/profile/${log.author_username}`}>
+                  <Avatar
+                    src={log.author_avatar_url}
+                    alt={log.author_display_name || 'User'}
+                    size="sm"
+                    className="cursor-pointer hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
+                  />
                 </Link>
-                <p className="text-xs text-[var(--color-cardTextSecondary)]">
-                  {formatRelativeDate(log.visited_at)}
-                </p>
-              </div>
-            </>
+                <div>
+                  <Link 
+                    href={`/${locale}/profile/${log.author_username}`}
+                    className="text-sm font-medium text-[var(--color-cardText)] hover:text-[var(--color-primary)] transition-colors"
+                  >
+                    {log.author_display_name || 'User'}
+                  </Link>
+                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                    {formatRelativeDate(log.visited_at)}
+                  </p>
+                </div>
+              </>
+            )
           )}
-        </div>
-        {isOwner && (onEdit || onDelete) && (
+          {hideUserInfo && (
+            <p className="text-xs text-[var(--color-cardTextSecondary)]">
+              {formatRelativeDate(log.visited_at)}
+            </p>
+          )}
+        </div>        {isOwner && (onEdit || onDelete) && (
           <div className="flex items-center gap-2">
             {onEdit && (
               <button
