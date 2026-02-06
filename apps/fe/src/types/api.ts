@@ -329,3 +329,81 @@ export interface UserBadge {
 
 export type BadgeResponse = UserBadge;
 
+// =========================================================
+// Collection Types
+// =========================================================
+
+export type CollectionIconType = 'favourite' | 'save_later' | 'custom';
+
+export interface CafePreview {
+  id: string;
+  name: string;
+  main_image?: string;
+}
+
+export interface Collection {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  icon_type: CollectionIconType;
+  color?: string;
+  is_public: boolean;
+  share_token?: string;
+  position: number;
+  item_count: number;
+  preview_cafes?: CafePreview[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CollectionItem {
+  id: string;
+  collection_id: string;
+  cafe_id: string;
+  cafe_name: string;
+  cafe_address?: string;
+  cafe_main_image?: string;
+  cafe_latitude?: number;
+  cafe_longitude?: number;
+  note?: string;
+  added_at: string;
+}
+
+export interface CollectionDetail extends Collection {
+  items: CollectionItem[];
+}
+
+export interface CollectionCreateRequest {
+  name: string;
+  description?: string;
+  icon_type?: CollectionIconType;
+  color?: string;
+  is_public?: boolean;
+}
+
+export interface CollectionUpdateRequest {
+  name?: string;
+  description?: string;
+  icon_type?: CollectionIconType;
+  color?: string;
+  is_public?: boolean;
+}
+
+export interface CafeSaveStatus {
+  is_favourited: boolean;
+  is_saved: boolean;
+  saved_collection_ids: string[];
+}
+
+export interface QuickSaveResponse {
+  action: 'added' | 'removed';
+  collection_id: string;
+}
+
+export interface ShareTokenResponse {
+  share_token: string;
+  share_url: string;
+}
+
+
