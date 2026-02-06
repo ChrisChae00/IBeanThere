@@ -1180,5 +1180,10 @@
       "delete": "삭제",
       "delete_confirm": "이 컬렉션을 삭제하시겠습니까?",
       "share_link_copied": "공유 링크가 복사되었습니다"
+    },
+    "share": {
+      "title": "공유하기",
+      "copy_link": "링크 복사",
+      "copied": "복사되었습니다!"
     }
   }

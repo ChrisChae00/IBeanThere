@@ -1185,5 +1185,10 @@
       "delete": "Delete",
       "delete_confirm": "Delete this collection?",
       "share_link_copied": "Share link copied"
+    },
+    "share": {
+      "title": "Share",
+      "copy_link": "Copy Link",
+      "copied": "Copied!"
     }
   }

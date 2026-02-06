@@ -240,3 +240,8 @@ export async function toggleFavourite(cafeId: string): Promise<QuickSaveResponse
 export async function toggleSaveForLater(cafeId: string): Promise<QuickSaveResponse> {
   return quickSaveCafe(cafeId, 'save_later');
 }
+
+/**
+ * Alias for generateShareToken for consistent naming.
+ */
+export const generateShareLink = generateShareToken;
