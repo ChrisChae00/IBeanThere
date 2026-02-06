@@ -198,48 +198,6 @@ export default function ProfileClient() {
         </div>
       </div>
 
-      {/* Achievement Summary Cards - Simplified */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Navigator Stats */}
-        <div className="bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent rounded-xl p-4 border border-[var(--color-primary)]/20">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🧭</span>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-[var(--color-primary)]">
-                  {navigatorCount}
-                </span>
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  {t('cafes_discovered')}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                {t('navigator_title')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Vanguard Stats */}
-        <div className="bg-gradient-to-br from-[var(--color-accent)]/5 to-transparent rounded-xl p-4 border border-[var(--color-accent)]/20">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🛡️</span>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-[var(--color-accent)]">
-                  {vanguardCount}
-                </span>
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  {t('cafes_verified')}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                {t('vanguard_title')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
