@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { HeartIcon, BookmarkIcon, AddToCollectionIcon } from '@/shared/ui';
 import { toggleFavourite, toggleSaveForLater, getCafeSaveStatus } from '@/lib/api/collections';
@@ -17,6 +17,7 @@ interface SaveButtonsProps {
 /**
  * SaveButtons component for cafe detail page.
  * Contains Favourite, Save for Later, and Add to Collection buttons.
+ * Fetches save status on mount if initialStatus is not provided.
  */
 export default function SaveButtons({
   cafeId,
@@ -30,7 +31,33 @@ export default function SaveButtons({
   const [isFavourited, setIsFavourited] = useState(initialStatus?.is_favourited ?? false);
   const [isSaved, setIsSaved] = useState(initialStatus?.is_saved ?? false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!initialStatus);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch save status on mount if initialStatus is not provided
+  useEffect(() => {
+    if (initialStatus) {
+      setIsFetching(false);
+      return;
+    }
+
+    const fetchStatus = async () => {
+      try {
+        const status = await getCafeSaveStatus(cafeId);
+        setIsFavourited(status.is_favourited);
+        setIsSaved(status.is_saved);
+      } catch (err) {
+        // Silently fail - user may not be authenticated
+        if (err instanceof Error && err.message !== 'NOT_AUTHENTICATED') {
+          console.error('Failed to fetch save status:', err);
+        }
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchStatus();
+  }, [cafeId, initialStatus]);
 
   const iconSize = size === 'sm' ? 18 : size === 'lg' ? 28 : 24;
   

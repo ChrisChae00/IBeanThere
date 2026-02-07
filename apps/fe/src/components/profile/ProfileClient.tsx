@@ -11,6 +11,7 @@ import { TasteTag } from '@/shared/ui';
 import { Button } from '@/shared/ui';
 import { EditIcon } from '@/shared/ui';
 import ProfileEditForm from './ProfileEditForm';
+import MyCollectionsSection from './MyCollectionsSection';
 
 export default function ProfileClient() {
   const t = useTranslations('profile');
@@ -198,6 +199,8 @@ export default function ProfileClient() {
         </div>
       </div>
 
+      {/* My Collections */}
+      <MyCollectionsSection isOwnProfile={true} />
     </div>
   );
 }

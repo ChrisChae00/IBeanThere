@@ -45,9 +45,7 @@ export default function SharedCollectionPage() {
       return <BookmarkIcon filled size={28} color="#3b82f6" />;
     }
     return (
-      <div className="w-7 h-7 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white">
-        📁
-      </div>
+      <div className="w-7 h-7 rounded-full bg-[var(--color-primary)]" />
     );
   };
 
@@ -174,7 +172,7 @@ export default function SharedCollectionPage() {
           Create your own coffee collection!
         </p>
         <Link
-          href={`/${locale}/collections`}
+          href={`/${locale}/profile`}
           className="inline-block px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-secondary)] transition-colors font-medium"
         >
           {t('my_collections')}

@@ -859,7 +859,9 @@
         "cozy": "Cozy",
         "roastery": "Roastery Fan",
         "specialty": "Specialty"
-      }
+      },
+      "my_collections": "My Collections",
+      "public_collections": "Public Collections"
     },
     "shop": {
       "hero_badge": "Official Store",
@@ -1184,7 +1186,13 @@
       "edit": "Edit",
       "delete": "Delete",
       "delete_confirm": "Delete this collection?",
-      "share_link_copied": "Share link copied"
+      "share_link_copied": "Share link copied",
+      "visibility_public": "Public",
+      "visibility_private": "Private",
+      "visibility_hint": "Public collections are visible on your profile",
+      "empty_hint": "Save cafes to see them here",
+      "remove": "Remove",
+      "save": "Save"
     },
     "share": {
       "title": "Share",
