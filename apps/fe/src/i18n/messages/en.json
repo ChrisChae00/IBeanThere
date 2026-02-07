@@ -859,7 +859,9 @@
         "cozy": "Cozy",
         "roastery": "Roastery Fan",
         "specialty": "Specialty"
-      }
+      },
+      "my_collections": "My Collections",
+      "public_collections": "Public Collections"
     },
     "shop": {
       "hero_badge": "Official Store",
@@ -1159,5 +1161,42 @@
       "prev": "Previous",
       "next": "Next",
       "close": "Close"
+    },
+    "collections": {
+      "add_favourite": "Add to Favourites",
+      "remove_favourite": "Remove from Favourites",
+      "save_later": "Save for Later",
+      "remove_save": "Remove from Saved",
+      "add_to_collection": "Add to Collection",
+      "save_to": "Save to",
+      "favourite": "Favourites",
+      "saved_label": "Saved",
+      "login_required": "Please sign in",
+      "save_failed": "Failed to save",
+      "load_failed": "Failed to load",
+      "create_failed": "Failed to create collection",
+      "create": "Create",
+      "cancel": "Cancel",
+      "create_new": "Create New Collection",
+      "collection_name_placeholder": "Collection name...",
+      "my_collections": "My Collections",
+      "no_collections": "No collections yet",
+      "items": "{count} items",
+      "share": "Share",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete this collection?",
+      "share_link_copied": "Share link copied",
+      "visibility_public": "Public",
+      "visibility_private": "Private",
+      "visibility_hint": "Public collections are visible on your profile",
+      "empty_hint": "Save cafes to see them here",
+      "remove": "Remove",
+      "save": "Save"
+    },
+    "share": {
+      "title": "Share",
+      "copy_link": "Copy Link",
+      "copied": "Copied!"
     }
   }

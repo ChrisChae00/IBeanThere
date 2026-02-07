@@ -9,6 +9,8 @@ import { GalleryImage } from '@/types/gallery';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
+import SaveButtons from '@/components/cafe/SaveButtons';
+import CollectionSelectorModal from '@/components/cafe/CollectionSelectorModal';
 import { StarRating, ImageGalleryModal, ImageLightbox } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
@@ -31,6 +33,9 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  // Collection modal state
+  const [collectionModalOpen, setCollectionModalOpen] = useState(false);
   
   // Convert images to GalleryImage format
   const galleryImages: GalleryImage[] = (cafe.images || []).map((url, index) => ({
@@ -65,6 +70,11 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-[var(--color-cardText)]">{cafe.name}</h1>
           <div className="flex items-center gap-2">
+            {/* Collection Save Buttons */}
+            <SaveButtons
+              cafeId={cafe.id}
+              onOpenCollectionSelector={() => setCollectionModalOpen(true)}
+            />
             <ReportButton
               onClick={handleReportClick}
               size="md"
@@ -215,6 +225,14 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         initialIndex={lightboxIndex}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
+      />
+
+      {/* Collection Selector Modal */}
+      <CollectionSelectorModal
+        isOpen={collectionModalOpen}
+        onClose={() => setCollectionModalOpen(false)}
+        cafeId={cafe.id}
+        cafeName={cafe.name}
       />
     </div>
   );

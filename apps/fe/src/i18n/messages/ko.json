@@ -854,7 +854,9 @@
         "cozy": "분위기좋은",
         "roastery": "로스터리",
         "specialty": "스페셜티"
-      }
+      },
+      "my_collections": "내 컬렉션",
+      "public_collections": "공개 컬렉션"
     },
     "shop": {
       "hero_badge": "공식 스토어",
@@ -1154,5 +1156,42 @@
       "prev": "이전",
       "next": "다음",
       "close": "닫기"
+    },
+    "collections": {
+      "add_favourite": "즐겨찾기에 추가",
+      "remove_favourite": "즐겨찾기에서 제거",
+      "save_later": "나중에 저장",
+      "remove_save": "저장 해제",
+      "add_to_collection": "컬렉션에 추가",
+      "save_to": "저장 위치 선택",
+      "favourite": "즐겨찾기",
+      "saved_label": "나중에",
+      "login_required": "로그인이 필요합니다",
+      "save_failed": "저장에 실패했습니다",
+      "load_failed": "불러오기에 실패했습니다",
+      "create_failed": "컬렉션 생성에 실패했습니다",
+      "create": "만들기",
+      "cancel": "취소",
+      "create_new": "새 컬렉션 만들기",
+      "collection_name_placeholder": "컬렉션 이름...",
+      "my_collections": "내 컬렉션",
+      "no_collections": "컬렉션이 없습니다",
+      "items": "{count}개 항목",
+      "share": "공유",
+      "edit": "수정",
+      "delete": "삭제",
+      "delete_confirm": "이 컬렉션을 삭제하시겠습니까?",
+      "share_link_copied": "공유 링크가 복사되었습니다",
+      "visibility_public": "공개",
+      "visibility_private": "비공개",
+      "visibility_hint": "공개하면 프로필 방문자가 볼 수 있습니다",
+      "empty_hint": "카페를 저장하면 여기에 표시됩니다",
+      "remove": "제거",
+      "save": "저장"
+    },
+    "share": {
+      "title": "공유하기",
+      "copy_link": "링크 복사",
+      "copied": "복사되었습니다!"
     }
   }
