@@ -7,7 +7,7 @@ import { Modal, LoadingSpinner } from '@/shared/ui';
 interface CollectionCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, isPublic: boolean) => Promise<void>;
+  onCreate: (name: string) => Promise<void>;
 }
 
 /**
@@ -19,32 +19,29 @@ export default function CollectionCreateModal({
   onCreate,
 }: CollectionCreateModalProps) {
   const t = useTranslations('collections');
-  
+
   const [name, setName] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleCreate = useCallback(async () => {
     if (!name.trim() || isCreating) return;
-    
+
     setIsCreating(true);
     setError(null);
-    
+
     try {
-      await onCreate(name.trim(), isPublic);
+      await onCreate(name.trim());
       setName('');
-      setIsPublic(false);
     } catch (err) {
       setError(t('create_failed'));
     } finally {
       setIsCreating(false);
     }
-  }, [name, isPublic, isCreating, onCreate, t]);
+  }, [name, isCreating, onCreate, t]);
 
   const handleClose = useCallback(() => {
     setName('');
-    setIsPublic(false);
     setError(null);
     onClose();
   }, [onClose]);
@@ -69,33 +66,6 @@ export default function CollectionCreateModal({
               if (e.key === 'Escape') handleClose();
             }}
           />
-        </div>
-
-        {/* Visibility Toggle */}
-        <div className="p-3 bg-[var(--color-background)] rounded-lg">
-          <label className="flex items-center justify-between cursor-pointer">
-            <div>
-              <span className="font-medium text-[var(--color-cardText)]">
-                {isPublic ? t('visibility_public') : t('visibility_private')}
-              </span>
-              <p className="text-sm text-[var(--color-textSecondary)]">
-                {t('visibility_hint')}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsPublic(!isPublic)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                isPublic ? 'bg-[var(--color-primary)]' : 'bg-gray-300'
-              }`}
-            >
-              <span 
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                  isPublic ? 'translate-x-6' : ''
-                }`}
-              />
-            </button>
-          </label>
         </div>
 
         {/* Error */}

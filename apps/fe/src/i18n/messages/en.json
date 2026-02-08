@@ -861,7 +861,9 @@
         "specialty": "Specialty"
       },
       "my_collections": "My Collections",
-      "public_collections": "Public Collections"
+      "public_collections": "Public Collections",
+      "collections_public_label": "Show on Profile",
+      "collections_public_hint": "Others can see your collections"
     },
     "shop": {
       "hero_badge": "Official Store",

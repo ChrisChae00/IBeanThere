@@ -14,7 +14,7 @@ interface CollectionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete?: (collectionId: string) => Promise<void>;
-  onUpdate?: (collectionId: string, data: { name?: string; is_public?: boolean }) => Promise<void>;
+  onUpdate?: (collectionId: string, data: { name?: string }) => Promise<void>;
   onShare?: (collectionId: string) => Promise<string>;
   isOwnProfile?: boolean;
 }
@@ -42,7 +42,6 @@ export default function CollectionDetailModal({
   // Edit states
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(collection.name);
-  const [editIsPublic, setEditIsPublic] = useState(collection.is_public);
   const [isSaving, setIsSaving] = useState(false);
   
   // Share state
@@ -76,7 +75,6 @@ export default function CollectionDetailModal({
   // Reset edit state when collection changes
   useEffect(() => {
     setEditName(collection.name);
-    setEditIsPublic(collection.is_public);
     setIsEditing(false);
   }, [collection]);
 
@@ -85,17 +83,14 @@ export default function CollectionDetailModal({
     
     setIsSaving(true);
     try {
-      await onUpdate(collection.id, { 
-        name: editName.trim(), 
-        is_public: editIsPublic 
-      });
+      await onUpdate(collection.id, { name: editName.trim() });
       setIsEditing(false);
     } catch (err) {
       setError(t('save_failed'));
     } finally {
       setIsSaving(false);
     }
-  }, [collection.id, editName, editIsPublic, onUpdate, isSaving, t]);
+  }, [collection.id, editName, onUpdate, isSaving, t]);
 
   const handleShare = useCallback(async () => {
     if (!onShare || shareLoading) return;
@@ -184,34 +179,6 @@ export default function CollectionDetailModal({
           )}
         </div>
         
-        {/* Visibility Toggle (for custom collections in edit mode) */}
-        {isEditing && !isSystemCollection && (
-          <div className="mb-4 p-3 bg-[var(--color-background)] rounded-lg">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <span className="font-medium text-[var(--color-cardText)]">
-                  {editIsPublic ? t('visibility_public') : t('visibility_private')}
-                </span>
-                <p className="text-sm text-[var(--color-textSecondary)]">
-                  {t('visibility_hint')}
-                </p>
-              </div>
-              <button
-                onClick={() => setEditIsPublic(!editIsPublic)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${
-                  editIsPublic ? 'bg-[var(--color-primary)]' : 'bg-gray-300'
-                }`}
-              >
-                <span 
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                    editIsPublic ? 'translate-x-6' : ''
-                  }`}
-                />
-              </button>
-            </label>
-          </div>
-        )}
-
         {/* Content */}
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -298,7 +265,6 @@ export default function CollectionDetailModal({
                   onClick={() => {
                     setIsEditing(false);
                     setEditName(collection.name);
-                    setEditIsPublic(collection.is_public);
                   }}
                   className="px-4 py-2 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
                 >

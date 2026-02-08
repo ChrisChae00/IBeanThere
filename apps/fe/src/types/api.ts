@@ -262,6 +262,7 @@ export interface UserResponse {
   taste_tags?: TasteTag[];
   trust_count?: number;
   is_trusted_by_me?: boolean;
+  collections_public?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -274,6 +275,7 @@ export interface UserPublicResponse {
   founding_stats?: FoundingStats;
   taste_tags?: TasteTag[];
   trust_count?: number;
+  collections_public?: boolean;
   created_at: string;
 }
 

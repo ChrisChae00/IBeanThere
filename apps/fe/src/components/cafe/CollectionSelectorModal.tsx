@@ -146,13 +146,9 @@ export default function CollectionSelectorModal({
       return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
     }
     return (
-      <div 
-        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-          isSelected ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-200 text-gray-600'
-        }`}
-      >
-        📁
-      </div>
+      <div className={`w-5 h-5 rounded-full bg-[var(--color-primary)] ${
+        isSelected ? '' : 'opacity-40'
+      }`} />
     );
   };
 

@@ -856,7 +856,9 @@
         "specialty": "스페셜티"
       },
       "my_collections": "내 컬렉션",
-      "public_collections": "공개 컬렉션"
+      "public_collections": "공개 컬렉션",
+      "collections_public_label": "프로필에 공개",
+      "collections_public_hint": "다른 사용자가 컬렉션을 볼 수 있습니다"
     },
     "shop": {
       "hero_badge": "공식 스토어",

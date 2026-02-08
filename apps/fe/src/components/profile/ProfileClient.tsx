@@ -12,6 +12,7 @@ import { Button } from '@/shared/ui';
 import { EditIcon } from '@/shared/ui';
 import ProfileEditForm from './ProfileEditForm';
 import MyCollectionsSection from './MyCollectionsSection';
+import { updateCollectionsPublic } from '@/lib/api/collections';
 
 export default function ProfileClient() {
   const t = useTranslations('profile');
@@ -200,7 +201,18 @@ export default function ProfileClient() {
       </div>
 
       {/* My Collections */}
-      <MyCollectionsSection isOwnProfile={true} />
+      <MyCollectionsSection
+        isOwnProfile={true}
+        collectionsPublic={profile.collections_public ?? false}
+        onToggleCollectionsPublic={async (isPublic) => {
+          setProfile(prev => prev ? { ...prev, collections_public: isPublic } : null);
+          try {
+            await updateCollectionsPublic(isPublic);
+          } catch {
+            setProfile(prev => prev ? { ...prev, collections_public: !isPublic } : null);
+          }
+        }}
+      />
     </div>
   );
 }

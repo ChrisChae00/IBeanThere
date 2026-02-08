@@ -40,6 +40,7 @@ class UserUpdate(BaseModel):
     avatar_url: Optional[str] = None
     bio: Optional[str] = Field(None, max_length=500, description="Public bio")
     taste_tags: Optional[List[str]] = Field(None, max_length=5, description="User taste preference tags (max 5)")
+    collections_public: Optional[bool] = None
 
 class User(UserBase):
     """Complete user model with all fields."""
@@ -68,6 +69,7 @@ class UserResponse(BaseModel):
     taste_tags: Optional[List[str]] = None
     trust_count: int = 0
     is_trusted_by_me: bool = False
+    collections_public: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -80,6 +82,7 @@ class UserPublicResponse(BaseModel):
     founding_stats: Optional[FoundingStats] = None
     taste_tags: Optional[List[str]] = None
     trust_count: int = 0
+    collections_public: bool = False
     created_at: datetime
 
 class UserRegistrationResponse(BaseModel):
