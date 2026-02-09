@@ -78,6 +78,7 @@ class CollectionItemResponse(BaseModel):
     collection_id: str
     cafe_id: str
     cafe_name: str
+    cafe_slug: Optional[str] = None
     cafe_address: Optional[str] = None
     cafe_main_image: Optional[str] = None
     cafe_latitude: Optional[float] = None

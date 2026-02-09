@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Modal, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+
 import { getCollectionDetail, removeCafeFromCollection } from '@/lib/api/collections';
+import { getCafePath } from '@/lib/utils/slug';
 import type { Collection, CollectionDetail } from '@/types/api';
 
 interface CollectionDetailModalProps {
@@ -16,6 +16,7 @@ interface CollectionDetailModalProps {
   onDelete?: (collectionId: string) => Promise<void>;
   onUpdate?: (collectionId: string, data: { name?: string }) => Promise<void>;
   onShare?: (collectionId: string) => Promise<string>;
+  onNavigateToCafe?: (path: string) => void;
   isOwnProfile?: boolean;
 }
 
@@ -29,6 +30,7 @@ export default function CollectionDetailModal({
   onDelete,
   onUpdate,
   onShare,
+  onNavigateToCafe,
   isOwnProfile = true,
 }: CollectionDetailModalProps) {
   const t = useTranslations('collections');
@@ -51,6 +53,14 @@ export default function CollectionDetailModal({
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = original; };
+  }, [isOpen]);
 
   // Fetch collection details
   useEffect(() => {
@@ -152,9 +162,27 @@ export default function CollectionDetailModal({
 
   const isSystemCollection = collection.icon_type === 'favourite' || collection.icon_type === 'save_later';
 
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
-      <div className="min-h-[300px]">
+    <div
+      className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-[var(--color-cardBackground)] rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surface)]/80 transition"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        <div className="p-6 sm:p-8 min-h-[300px]">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[var(--color-border)]">
           {getCollectionIcon(collection.icon_type)}
@@ -197,19 +225,23 @@ export default function CollectionDetailModal({
                 key={item.id}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-background)] group"
               >
-                <Link
-                  href={`/${locale}/cafes/${item.cafe_id}`}
-                  className="flex items-center gap-3 flex-1 min-w-0"
-                  onClick={onClose}
+                <div
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                  onClick={() => {
+                    const path = getCafePath({ id: item.cafe_id, slug: item.cafe_slug }, locale);
+                    if (onNavigateToCafe) {
+                      onNavigateToCafe(path);
+                    } else {
+                      window.location.href = path;
+                    }
+                  }}
                 >
                   {/* Cafe Image */}
                   <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-[var(--color-background)]">
                     {item.cafe_main_image ? (
-                      <Image
+                      <img
                         src={item.cafe_main_image}
                         alt={item.cafe_name}
-                        width={48}
-                        height={48}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -218,7 +250,7 @@ export default function CollectionDetailModal({
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Cafe Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-[var(--color-cardText)] truncate">
@@ -230,7 +262,7 @@ export default function CollectionDetailModal({
                       </p>
                     )}
                   </div>
-                </Link>
+                </div>
                 
                 {/* Remove button */}
                 {isOwnProfile && (
@@ -329,7 +361,8 @@ export default function CollectionDetailModal({
             )}
           </div>
         )}
+        </div>
       </div>
-    </Modal>
+    </div>
   );
 }

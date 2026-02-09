@@ -364,6 +364,7 @@ export interface CollectionItem {
   collection_id: string;
   cafe_id: string;
   cafe_name: string;
+  cafe_slug?: string;
   cafe_address?: string;
   cafe_main_image?: string;
   cafe_latitude?: number;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 import { getMyCollections, createCollection, deleteCollection, updateCollection, generateShareLink } from '@/lib/api/collections';
 import type { Collection } from '@/types/api';
@@ -21,11 +22,12 @@ interface MyCollectionsSectionProps {
 export default function MyCollectionsSection({ isOwnProfile = true, collectionsPublic = false, onToggleCollectionsPublic }: MyCollectionsSectionProps) {
   const t = useTranslations('collections');
   const tProfile = useTranslations('profile');
-  
+  const router = useRouter();
+
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Modal states
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -93,6 +95,11 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
     await navigator.clipboard.writeText(fullUrl);
     return fullUrl;
   }, []);
+
+  const handleNavigateToCafe = useCallback((path: string) => {
+    setSelectedCollection(null);
+    router.push(path);
+  }, [router]);
 
   const getCollectionIcon = (iconType: string) => {
     if (iconType === 'favourite') {
@@ -243,6 +250,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
           onDelete={isOwnProfile ? handleDeleteCollection : undefined}
           onUpdate={isOwnProfile ? handleUpdateCollection : undefined}
           onShare={handleShare}
+          onNavigateToCafe={handleNavigateToCafe}
           isOwnProfile={isOwnProfile}
         />
       )}

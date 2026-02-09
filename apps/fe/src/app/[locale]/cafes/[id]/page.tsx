@@ -89,7 +89,12 @@ export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
         <CafeDetailClient cafe={cafe} />
       </>
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    // Re-throw redirect errors - Next.js redirect() works by throwing a special error
+    if (error instanceof Error && 'digest' in error && typeof (error as { digest?: string }).digest === 'string' && (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 import { getSharedCollection } from '@/lib/api/collections';
+import { getCafePath } from '@/lib/utils/slug';
 import type { CollectionDetail } from '@/types/api';
 
 export default function SharedCollectionPage() {
@@ -125,17 +125,15 @@ export default function SharedCollectionPage() {
           {collection.items.map(item => (
             <Link
               key={item.id}
-              href={`/${locale}/cafes/${item.cafe_id}`}
+              href={getCafePath({ id: item.cafe_id, slug: item.cafe_slug }, locale)}
               className="flex items-center gap-4 p-4 bg-[var(--color-cardBackground)] rounded-lg shadow-sm hover:shadow-md transition-shadow"
             >
               {/* Cafe Image */}
               <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-[var(--color-background)]">
                 {item.cafe_main_image ? (
-                  <Image
+                  <img
                     src={item.cafe_main_image}
                     alt={item.cafe_name}
-                    width={64}
-                    height={64}
                     className="w-full h-full object-cover"
                   />
                 ) : (
