@@ -103,7 +103,7 @@ export default function SharedCollectionPage() {
               {getCollectionName()}
             </h1>
             <p className="text-[var(--color-textSecondary)]">
-              {t('items', { count: collection.item_count })}
+              {t('cafes', { count: collection.item_count })}
             </p>
           </div>
         </div>

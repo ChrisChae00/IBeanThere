@@ -17,6 +17,7 @@ export interface ModalProps {
   align?: ModalAlign;
   children: ReactNode;
   closeButton?: boolean;
+  zIndex?: number;
 }
 
 const sizeClasses: Record<ModalSize, string> = {
@@ -39,7 +40,8 @@ export default function Modal({
   size = 'md',
   align = 'center',
   children,
-  closeButton = true
+  closeButton = true,
+  zIndex = 1000
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -66,7 +68,8 @@ export default function Modal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[1000] flex ${alignClasses[align]} justify-center px-4 sm:px-6 lg:px-8 backdrop-blur-sm bg-black/40`}
+      style={{ zIndex }}
+      className={`fixed inset-0 flex ${alignClasses[align]} justify-center px-4 sm:px-6 lg:px-8 backdrop-blur-sm bg-black/40`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"

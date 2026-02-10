@@ -89,6 +89,12 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
     }
   }, [selectedCollection]);
 
+  const handleItemCountChange = useCallback((collectionId: string, delta: number) => {
+    setCollections(prev => prev.map(c =>
+      c.id === collectionId ? { ...c, item_count: Math.max(0, (c.item_count || 0) + delta) } : c
+    ));
+  }, []);
+
   const handleShare = useCallback(async (collectionId: string) => {
     const { share_url } = await generateShareLink(collectionId);
     const fullUrl = `${window.location.origin}${share_url}`;
@@ -221,7 +227,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                       </span>
                     </div>
                     <span className="text-sm text-[var(--color-text-secondary)]">
-                      {t('items', { count: collection.item_count || 0 })}
+                      {t('cafes', { count: collection.item_count || 0 })}
                     </span>
                   </div>
                   
@@ -252,6 +258,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
           onShare={handleShare}
           onNavigateToCafe={handleNavigateToCafe}
           isOwnProfile={isOwnProfile}
+          onItemCountChange={handleItemCountChange}
         />
       )}
 

@@ -18,7 +18,7 @@ interface CafeMoveToModalProps {
   cafeId: string;
   cafeName: string;
   currentCollectionId: string;
-  onMoveComplete: () => void;
+  onMoveComplete: (targetCollectionIds: string[]) => void;
 }
 
 export default function CafeMoveToModal({
@@ -90,14 +90,16 @@ export default function CafeMoveToModal({
 
     try {
       // Add to all newly selected collections
+      const newlyAdded: string[] = [];
       for (const id of selectedIds) {
         if (!savedCollectionIds.has(id)) {
           await addCafeToCollection(id, cafeId);
+          newlyAdded.push(id);
         }
       }
       // Remove from current collection
       await removeCafeFromCollection(currentCollectionId, cafeId);
-      onMoveComplete();
+      onMoveComplete(newlyAdded);
       onClose();
     } catch {
       setError(t('move_failed'));
@@ -162,7 +164,7 @@ export default function CafeMoveToModal({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('move_to')} size="sm" footer={footer}>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('move_to')} size="sm" footer={footer} zIndex={1002}>
       <div className="min-h-[200px]">
         <p className="text-sm text-[var(--color-textSecondary)] mb-4 truncate">
           {cafeName}

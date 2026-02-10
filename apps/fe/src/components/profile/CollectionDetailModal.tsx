@@ -19,6 +19,7 @@ interface CollectionDetailModalProps {
   onShare?: (collectionId: string) => Promise<string>;
   onNavigateToCafe?: (path: string) => void;
   isOwnProfile?: boolean;
+  onItemCountChange?: (collectionId: string, delta: number) => void;
 }
 
 /**
@@ -33,6 +34,7 @@ export default function CollectionDetailModal({
   onShare,
   onNavigateToCafe,
   isOwnProfile = true,
+  onItemCountChange,
 }: CollectionDetailModalProps) {
   const t = useTranslations('collections');
   const params = useParams();
@@ -164,10 +166,11 @@ export default function CollectionDetailModal({
         items: prev.items.filter(item => item.cafe_id !== cafeId),
         item_count: prev.item_count - 1,
       } : null);
+      onItemCountChange?.(collection.id, -1);
     } catch (err) {
       setError(t('load_failed'));
     }
-  }, [collection.id, t]);
+  }, [collection.id, t, onItemCountChange]);
 
   const getCollectionIcon = (iconType: string) => {
     if (iconType === 'favourite') {
@@ -228,7 +231,7 @@ export default function CollectionDetailModal({
                 {getCollectionName()}
               </h2>
               <p className="text-sm text-[var(--color-textSecondary)]">
-                {t('items', { count: detail?.item_count ?? collection.item_count ?? 0 })}
+                {t('cafes', { count: detail?.item_count ?? collection.item_count ?? 0 })}
               </p>
             </div>
           )}
@@ -429,12 +432,14 @@ export default function CollectionDetailModal({
           cafeId={moveModalItem.cafe_id}
           cafeName={moveModalItem.cafe_name}
           currentCollectionId={collection.id}
-          onMoveComplete={() => {
+          onMoveComplete={(targetCollectionIds) => {
             setDetail(prev => prev ? {
               ...prev,
               items: prev.items.filter(i => i.cafe_id !== moveModalItem.cafe_id),
               item_count: prev.item_count - 1,
             } : null);
+            onItemCountChange?.(collection.id, -1);
+            targetCollectionIds.forEach(id => onItemCountChange?.(id, 1));
             setMoveModalItem(null);
           }}
         />
