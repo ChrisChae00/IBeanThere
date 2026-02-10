@@ -1194,7 +1194,11 @@
       "visibility_hint": "Public collections are visible on your profile",
       "empty_hint": "Save cafes to see them here",
       "remove": "Remove",
-      "save": "Save"
+      "save": "Save",
+      "move_to": "Move to",
+      "move": "Move",
+      "move_failed": "Failed to move",
+      "more_options": "More options"
     },
     "share": {
       "title": "Share",

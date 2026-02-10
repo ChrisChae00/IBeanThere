@@ -1189,7 +1189,11 @@
       "visibility_hint": "공개하면 프로필 방문자가 볼 수 있습니다",
       "empty_hint": "카페를 저장하면 여기에 표시됩니다",
       "remove": "제거",
-      "save": "저장"
+      "save": "저장",
+      "move_to": "이동",
+      "move": "이동하기",
+      "move_failed": "이동에 실패했습니다",
+      "more_options": "더보기"
     },
     "share": {
       "title": "공유하기",

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 
 import { getCollectionDetail, removeCafeFromCollection } from '@/lib/api/collections';
 import { getCafePath } from '@/lib/utils/slug';
-import type { Collection, CollectionDetail } from '@/types/api';
+import type { Collection, CollectionDetail, CollectionItem } from '@/types/api';
+import CafeMoveToModal from './CafeMoveToModal';
 
 interface CollectionDetailModalProps {
   collection: Collection;
@@ -54,6 +55,11 @@ export default function CollectionDetailModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Dropdown & move states
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [moveModalItem, setMoveModalItem] = useState<CollectionItem | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return;
@@ -61,6 +67,27 @@ export default function CollectionDetailModal({
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = original; };
   }, [isOpen]);
+
+  // Close dropdown on click-outside or Escape
+  useEffect(() => {
+    if (!activeDropdownId) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setActiveDropdownId(null);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveDropdownId(null);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [activeDropdownId]);
 
   // Fetch collection details
   useEffect(() => {
@@ -264,17 +291,47 @@ export default function CollectionDetailModal({
                   </div>
                 </div>
                 
-                {/* Remove button */}
+                {/* More options dropdown */}
                 {isOwnProfile && (
-                  <button
-                    onClick={() => handleRemoveCafe(item.cafe_id)}
-                    className="p-1.5 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all"
-                    title={t('remove')}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <div className="relative" ref={activeDropdownId === item.id ? dropdownRef : undefined}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdownId(prev => prev === item.id ? null : item.id);
+                      }}
+                      className="p-1.5 text-[var(--color-textSecondary)] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[var(--color-surface)] rounded transition-all"
+                      aria-label={t('more_options')}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
+
+                    {activeDropdownId === item.id && (
+                      <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-[var(--color-cardBackground)] border border-[var(--color-border)] rounded-lg shadow-lg overflow-hidden">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMoveModalItem(item);
+                            setActiveDropdownId(null);
+                          }}
+                          className="w-full px-3 py-2 text-sm text-left text-[var(--color-cardText)] hover:bg-[var(--color-background)] transition-colors"
+                        >
+                          {t('move_to')}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCafe(item.cafe_id);
+                            setActiveDropdownId(null);
+                          }}
+                          className="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-[var(--color-background)] transition-colors"
+                        >
+                          {t('delete')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ))}
@@ -363,6 +420,25 @@ export default function CollectionDetailModal({
         )}
         </div>
       </div>
+
+      {/* Move to modal */}
+      {moveModalItem && (
+        <CafeMoveToModal
+          isOpen={!!moveModalItem}
+          onClose={() => setMoveModalItem(null)}
+          cafeId={moveModalItem.cafe_id}
+          cafeName={moveModalItem.cafe_name}
+          currentCollectionId={collection.id}
+          onMoveComplete={() => {
+            setDetail(prev => prev ? {
+              ...prev,
+              items: prev.items.filter(i => i.cafe_id !== moveModalItem.cafe_id),
+              item_count: prev.item_count - 1,
+            } : null);
+            setMoveModalItem(null);
+          }}
+        />
+      )}
     </div>
   );
 }
