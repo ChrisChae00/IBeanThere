@@ -49,6 +49,7 @@ htmlcov/
 build/
 dist/
 coverage/
+*.tsbuildinfo
 
 # Editors/IDEs
 .idea/

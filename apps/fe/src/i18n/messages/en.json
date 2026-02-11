@@ -861,7 +861,9 @@
         "specialty": "Specialty"
       },
       "my_collections": "My Collections",
-      "public_collections": "Public Collections"
+      "public_collections": "Public Collections",
+      "collections_public_label": "Show on Profile",
+      "collections_public_hint": "Others can see your collections"
     },
     "shop": {
       "hero_badge": "Official Store",
@@ -1181,7 +1183,7 @@
       "collection_name_placeholder": "Collection name...",
       "my_collections": "My Collections",
       "no_collections": "No collections yet",
-      "items": "{count} items",
+      "cafes": "{count} cafes",
       "share": "Share",
       "edit": "Edit",
       "delete": "Delete",
@@ -1192,7 +1194,11 @@
       "visibility_hint": "Public collections are visible on your profile",
       "empty_hint": "Save cafes to see them here",
       "remove": "Remove",
-      "save": "Save"
+      "save": "Save",
+      "move_to": "Move to",
+      "move": "Move",
+      "move_failed": "Failed to move",
+      "more_options": "More options"
     },
     "share": {
       "title": "Share",

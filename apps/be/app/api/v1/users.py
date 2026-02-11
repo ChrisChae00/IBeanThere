@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from typing import List
 from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
+from app.models.collection import CollectionResponse
 from app.api.deps import get_supabase_client, get_current_user
 from app.core.permissions import require_permission, Permission
 
@@ -75,7 +76,7 @@ async def get_user_profile_by_username(username: str, supabase: Client = Depends
         UserPublicResponse: The user profile.
     """
     try:
-        user = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").eq("username", username).single().execute()
+        user = supabase.table("users").select("""username, display_name, avatar_url, bio, collections_public, created_at""").eq("username", username).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -122,6 +123,65 @@ async def get_user_profile_by_username(username: str, supabase: Client = Depends
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while fetching user profile"
         ) from e
+
+@router.get("/{username}/collections", response_model=List[CollectionResponse])
+async def get_user_public_collections(
+    username: str,
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Public endpoint to get a user's collections if they have enabled collections_public.
+    Returns empty list if collections are not public.
+    """
+    try:
+        # Fetch user and check collections_public flag
+        user = supabase.table("users").select("id, collections_public").eq("username", username).single().execute()
+        if not user or not user.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        if not user.data.get("collections_public", False):
+            return []
+
+        user_id = user.data["id"]
+
+        # Reuse get_my_collections pattern
+        result = supabase.table("cafe_collections").select("*").eq(
+            "user_id", user_id
+        ).order("position").order("created_at").execute()
+
+        collections = result.data or []
+
+        for collection in collections:
+            count_result = supabase.table("collection_items").select(
+                "id", count="exact"
+            ).eq("collection_id", collection["id"]).execute()
+            collection["item_count"] = count_result.count or 0
+
+            preview_result = supabase.table("collection_items").select(
+                "cafe_id"
+            ).eq("collection_id", collection["id"]).limit(3).execute()
+
+            if preview_result.data:
+                cafe_ids = [item["cafe_id"] for item in preview_result.data]
+                cafes = supabase.table("cafes").select(
+                    "id, name, main_image"
+                ).in_("id", cafe_ids).execute()
+                collection["preview_cafes"] = cafes.data or []
+            else:
+                collection["preview_cafes"] = []
+
+        return collections
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while fetching user collections"
+        ) from e
+
 
 @router.get("/check-username/{username}")
 async def check_username_availability(
@@ -320,6 +380,7 @@ async def get_my_profile(
             taste_tags=await _get_user_taste_tags(supabase, current_user.id),
             trust_count=await _get_user_trust_count(supabase, current_user.id),
             is_trusted_by_me=False,  # Can't trust yourself
+            collections_public=user_data.get('collections_public', False),
             created_at=user_data['created_at'],
             updated_at=user_data.get('updated_at')
         )
@@ -531,7 +592,9 @@ async def update_my_profile(
             update_data["avatar_url"] = profile.avatar_url
         if profile.bio is not None:
             update_data["bio"] = profile.bio
-        
+        if profile.collections_public is not None:
+            update_data["collections_public"] = profile.collections_public
+
         # Add updated_at timestamp
         from datetime import datetime, timezone
         update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -592,6 +655,7 @@ async def update_my_profile(
             taste_tags=taste_tags,
             trust_count=trust_count,
             is_trusted_by_me=False,  # Can't trust yourself
+            collections_public=profile_data.get("collections_public", False),
             created_at=profile_data["created_at"],
             updated_at=profile_data.get("updated_at")
         )

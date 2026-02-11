@@ -262,6 +262,7 @@ export interface UserResponse {
   taste_tags?: TasteTag[];
   trust_count?: number;
   is_trusted_by_me?: boolean;
+  collections_public?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -274,6 +275,7 @@ export interface UserPublicResponse {
   founding_stats?: FoundingStats;
   taste_tags?: TasteTag[];
   trust_count?: number;
+  collections_public?: boolean;
   created_at: string;
 }
 
@@ -362,6 +364,7 @@ export interface CollectionItem {
   collection_id: string;
   cafe_id: string;
   cafe_name: string;
+  cafe_slug?: string;
   cafe_address?: string;
   cafe_main_image?: string;
   cafe_latitude?: number;

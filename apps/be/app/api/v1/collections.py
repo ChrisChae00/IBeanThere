@@ -16,6 +16,7 @@ import secrets
 import logging
 
 from app.database.supabase import get_supabase_client
+from app.api.v1.cafes import generate_unique_slug
 from app.api.deps import get_current_user, security
 from app.models.collection import (
     CollectionIconType,
@@ -85,50 +86,88 @@ def generate_share_token() -> str:
 
 async def get_collection_with_items(collection_id: str, supabase: Client) -> dict:
     """Get collection with all its items and cafe details."""
-    
+
     # Get collection
     collection_result = supabase.table("cafe_collections").select("*").eq(
         "id", collection_id
     ).execute()
-    
+
     if not collection_result.data:
         return None
-    
+
     collection = collection_result.data[0]
-    
+
     # Get items with cafe info
     items_result = supabase.table("collection_items").select(
         "id, collection_id, cafe_id, note, added_at"
     ).eq("collection_id", collection_id).order("added_at", desc=True).execute()
-    
+
     items = []
     if items_result.data:
         # Get cafe details for each item
         cafe_ids = [item["cafe_id"] for item in items_result.data]
         cafes_result = supabase.table("cafes").select(
-            "id, name, address, main_image, latitude, longitude"
+            "id, name, slug, address, main_image, latitude, longitude"
         ).in_("id", cafe_ids).execute()
-        
+
         cafe_map = {cafe["id"]: cafe for cafe in (cafes_result.data or [])}
-        
+
+        # Auto-generate slugs for cafes that don't have one
+        for cafe_id, cafe in cafe_map.items():
+            if not cafe.get("slug") and cafe.get("name"):
+                try:
+                    new_slug = generate_unique_slug(cafe["name"], supabase, cafe_id)
+                    supabase.table("cafes").update({"slug": new_slug}).eq("id", cafe_id).execute()
+                    cafe["slug"] = new_slug
+                except Exception as e:
+                    logger.warning(f"Error generating slug for cafe {cafe_id}: {e}")
+
+        # Fetch fallback images from cafe_visits for cafes without main_image
+        cafes_without_image = [
+            cafe_id for cafe_id in cafe_ids
+            if not cafe_map.get(cafe_id, {}).get("main_image")
+        ]
+        cafe_log_images = {}
+        if cafes_without_image:
+            try:
+                logs_result = supabase.table("cafe_visits").select(
+                    "cafe_id, photo_urls"
+                ).in_(
+                    "cafe_id", cafes_without_image
+                ).eq(
+                    "is_public", True
+                ).not_.is_(
+                    "photo_urls", "null"
+                ).order("visited_at", desc=False).execute()
+
+                for log in (logs_result.data or []):
+                    cafe_id = log.get("cafe_id")
+                    photo_urls = log.get("photo_urls") or []
+                    if cafe_id not in cafe_log_images and photo_urls:
+                        cafe_log_images[cafe_id] = photo_urls[0]
+            except Exception as e:
+                logger.warning(f"Error fetching fallback images for collections: {e}")
+
         for item in items_result.data:
             cafe = cafe_map.get(item["cafe_id"], {})
+            main_image = cafe.get("main_image") or cafe_log_images.get(item["cafe_id"])
             items.append({
                 "id": item["id"],
                 "collection_id": item["collection_id"],
                 "cafe_id": item["cafe_id"],
                 "cafe_name": cafe.get("name", "Unknown"),
+                "cafe_slug": cafe.get("slug"),
                 "cafe_address": cafe.get("address"),
-                "cafe_main_image": cafe.get("main_image"),
+                "cafe_main_image": main_image,
                 "cafe_latitude": cafe.get("latitude"),
                 "cafe_longitude": cafe.get("longitude"),
                 "note": item.get("note"),
                 "added_at": item["added_at"],
             })
-    
+
     collection["items"] = items
     collection["item_count"] = len(items)
-    
+
     return collection
 
 
@@ -405,7 +444,7 @@ async def add_cafe_to_collection(
         )
     
     # Check if cafe exists
-    cafe = supabase.table("cafes").select("id, name, address, main_image").eq(
+    cafe = supabase.table("cafes").select("id, name, slug, address, main_image").eq(
         "id", data.cafe_id
     ).execute()
     
@@ -443,14 +482,31 @@ async def add_cafe_to_collection(
     
     item = result.data[0]
     cafe_data = cafe.data[0]
-    
+
+    # Fallback image from cafe_visits if main_image is not set
+    main_image = cafe_data.get("main_image")
+    if not main_image:
+        try:
+            log_result = supabase.table("cafe_visits").select(
+                "photo_urls"
+            ).eq("cafe_id", data.cafe_id).eq(
+                "is_public", True
+            ).not_.is_(
+                "photo_urls", "null"
+            ).order("visited_at", desc=False).limit(1).execute()
+            if log_result.data and log_result.data[0].get("photo_urls"):
+                main_image = log_result.data[0]["photo_urls"][0]
+        except Exception as e:
+            logger.warning(f"Error fetching fallback image: {e}")
+
     return {
         "id": item["id"],
         "collection_id": item["collection_id"],
         "cafe_id": item["cafe_id"],
         "cafe_name": cafe_data["name"],
+        "cafe_slug": cafe_data.get("slug"),
         "cafe_address": cafe_data.get("address"),
-        "cafe_main_image": cafe_data.get("main_image"),
+        "cafe_main_image": main_image,
         "note": item.get("note"),
         "added_at": item["added_at"],
     }

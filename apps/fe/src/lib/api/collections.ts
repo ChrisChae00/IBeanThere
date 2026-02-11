@@ -245,3 +245,32 @@ export async function toggleSaveForLater(cafeId: string): Promise<QuickSaveRespo
  * Alias for generateShareToken for consistent naming.
  */
 export const generateShareLink = generateShareToken;
+
+// =========================================================
+// Public Collections
+// =========================================================
+
+/**
+ * Get a user's public collections (no auth required).
+ */
+export async function getUserPublicCollections(
+  username: string
+): Promise<Collection[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/${username}/collections`, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return handleResponse<Collection[]>(response);
+}
+
+/**
+ * Update the collections_public flag on the current user's profile.
+ */
+export async function updateCollectionsPublic(isPublic: boolean): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify({ collections_public: isPublic }),
+  });
+  await handleResponse(response);
+}

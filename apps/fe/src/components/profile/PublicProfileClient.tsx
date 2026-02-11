@@ -4,14 +4,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/shared/lib/supabase/client';
-import { UserPublicResponse, TrustedUser } from '@/types/api';
+import { UserPublicResponse, TrustedUser, Collection } from '@/types/api';
 import { Avatar } from '@/shared/ui';
 import { AchievementBadge } from '@/shared/ui';
 import { TasteTag } from '@/shared/ui';
 import { Button } from '@/shared/ui';
+import { HeartIcon, BookmarkIcon } from '@/shared/ui';
 import { UserPlus, Check, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+import { getUserPublicCollections } from '@/lib/api/collections';
+import CollectionDetailModal from './CollectionDetailModal';
 
 
 interface PublicProfileClientProps {
@@ -22,14 +25,18 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   const t = useTranslations('profile');
   const tCommunity = useTranslations('community');
   const tReport = useTranslations('report');
+  const tCollections = useTranslations('collections');
   const { user: currentUser } = useAuth();
   const router = useRouter();
   const { modalState, openUserReport, closeModal } = useReportModal();
-  
+
   const [profile, setProfile] = useState<UserPublicResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTrusted, setIsTrusted] = useState(false);
   const [trustLoading, setTrustLoading] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collectionsLoading, setCollectionsLoading] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
 
   const supabase = createClient();
 
@@ -87,6 +94,25 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
       checkTrustStatus();
     }
   }, [profile, currentUser, checkTrustStatus]);
+
+  // Fetch public collections
+  useEffect(() => {
+    if (!profile || !profile.collections_public) return;
+
+    const fetchCollections = async () => {
+      setCollectionsLoading(true);
+      try {
+        const data = await getUserPublicCollections(username);
+        setCollections(data);
+      } catch {
+        // Silently fail
+      } finally {
+        setCollectionsLoading(false);
+      }
+    };
+
+    fetchCollections();
+  }, [profile, username]);
 
   const handleTrust = async () => {
     if (!currentUser) {
@@ -266,6 +292,67 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         </div>
       </div>
 
+      {/* Public Collections */}
+      {profile.collections_public && collections.length > 0 && (
+        <div className="bg-[var(--color-surface)] rounded-xl p-4 sm:p-6 border border-[var(--color-border)] shadow-sm">
+          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+            {t('public_collections')}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...collections].sort((a, b) => {
+              if (a.icon_type === 'favourite') return -1;
+              if (b.icon_type === 'favourite') return 1;
+              if (a.icon_type === 'save_later') return -1;
+              if (b.icon_type === 'save_later') return 1;
+              return a.position - b.position;
+            }).map(collection => (
+              <button
+                key={collection.id}
+                onClick={() => setSelectedCollection(collection)}
+                className="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg hover:bg-[var(--color-cardBackground)] transition-colors text-left group"
+              >
+                <div className="flex-shrink-0">
+                  {collection.icon_type === 'favourite' ? (
+                    <HeartIcon filled size={20} color="#ef4444" />
+                  ) : collection.icon_type === 'save_later' ? (
+                    <BookmarkIcon filled size={20} color="#3b82f6" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-medium text-[var(--color-text)] truncate block">
+                    {collection.icon_type === 'favourite' ? tCollections('favourite')
+                      : collection.icon_type === 'save_later' ? tCollections('save_later')
+                      : collection.name}
+                  </span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">
+                    {tCollections('items', { count: collection.item_count || 0 })}
+                  </span>
+                </div>
+                <svg
+                  className="w-4 h-4 text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Collection Detail Modal */}
+      {selectedCollection && (
+        <CollectionDetailModal
+          collection={selectedCollection}
+          isOpen={!!selectedCollection}
+          onClose={() => setSelectedCollection(null)}
+          isOwnProfile={false}
+        />
+      )}
     </div>
   );
 }

@@ -1,22 +1,25 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Modal, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+
 import { getCollectionDetail, removeCafeFromCollection } from '@/lib/api/collections';
-import type { Collection, CollectionDetail } from '@/types/api';
+import { getCafePath } from '@/lib/utils/slug';
+import type { Collection, CollectionDetail, CollectionItem } from '@/types/api';
+import CafeMoveToModal from './CafeMoveToModal';
 
 interface CollectionDetailModalProps {
   collection: Collection;
   isOpen: boolean;
   onClose: () => void;
   onDelete?: (collectionId: string) => Promise<void>;
-  onUpdate?: (collectionId: string, data: { name?: string; is_public?: boolean }) => Promise<void>;
+  onUpdate?: (collectionId: string, data: { name?: string }) => Promise<void>;
   onShare?: (collectionId: string) => Promise<string>;
+  onNavigateToCafe?: (path: string) => void;
   isOwnProfile?: boolean;
+  onItemCountChange?: (collectionId: string, delta: number) => void;
 }
 
 /**
@@ -29,7 +32,9 @@ export default function CollectionDetailModal({
   onDelete,
   onUpdate,
   onShare,
+  onNavigateToCafe,
   isOwnProfile = true,
+  onItemCountChange,
 }: CollectionDetailModalProps) {
   const t = useTranslations('collections');
   const params = useParams();
@@ -42,7 +47,6 @@ export default function CollectionDetailModal({
   // Edit states
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(collection.name);
-  const [editIsPublic, setEditIsPublic] = useState(collection.is_public);
   const [isSaving, setIsSaving] = useState(false);
   
   // Share state
@@ -52,6 +56,40 @@ export default function CollectionDetailModal({
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Dropdown & move states
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [moveModalItem, setMoveModalItem] = useState<CollectionItem | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = original; };
+  }, [isOpen]);
+
+  // Close dropdown on click-outside or Escape
+  useEffect(() => {
+    if (!activeDropdownId) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setActiveDropdownId(null);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveDropdownId(null);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [activeDropdownId]);
 
   // Fetch collection details
   useEffect(() => {
@@ -76,7 +114,6 @@ export default function CollectionDetailModal({
   // Reset edit state when collection changes
   useEffect(() => {
     setEditName(collection.name);
-    setEditIsPublic(collection.is_public);
     setIsEditing(false);
   }, [collection]);
 
@@ -85,17 +122,14 @@ export default function CollectionDetailModal({
     
     setIsSaving(true);
     try {
-      await onUpdate(collection.id, { 
-        name: editName.trim(), 
-        is_public: editIsPublic 
-      });
+      await onUpdate(collection.id, { name: editName.trim() });
       setIsEditing(false);
     } catch (err) {
       setError(t('save_failed'));
     } finally {
       setIsSaving(false);
     }
-  }, [collection.id, editName, editIsPublic, onUpdate, isSaving, t]);
+  }, [collection.id, editName, onUpdate, isSaving, t]);
 
   const handleShare = useCallback(async () => {
     if (!onShare || shareLoading) return;
@@ -132,10 +166,11 @@ export default function CollectionDetailModal({
         items: prev.items.filter(item => item.cafe_id !== cafeId),
         item_count: prev.item_count - 1,
       } : null);
+      onItemCountChange?.(collection.id, -1);
     } catch (err) {
       setError(t('load_failed'));
     }
-  }, [collection.id, t]);
+  }, [collection.id, t, onItemCountChange]);
 
   const getCollectionIcon = (iconType: string) => {
     if (iconType === 'favourite') {
@@ -157,9 +192,27 @@ export default function CollectionDetailModal({
 
   const isSystemCollection = collection.icon_type === 'favourite' || collection.icon_type === 'save_later';
 
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
-      <div className="min-h-[300px]">
+    <div
+      className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-[var(--color-cardBackground)] rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surface)]/80 transition"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        <div className="p-6 sm:p-8 min-h-[300px]">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[var(--color-border)]">
           {getCollectionIcon(collection.icon_type)}
@@ -178,40 +231,12 @@ export default function CollectionDetailModal({
                 {getCollectionName()}
               </h2>
               <p className="text-sm text-[var(--color-textSecondary)]">
-                {t('items', { count: detail?.item_count ?? collection.item_count ?? 0 })}
+                {t('cafes', { count: detail?.item_count ?? collection.item_count ?? 0 })}
               </p>
             </div>
           )}
         </div>
         
-        {/* Visibility Toggle (for custom collections in edit mode) */}
-        {isEditing && !isSystemCollection && (
-          <div className="mb-4 p-3 bg-[var(--color-background)] rounded-lg">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <span className="font-medium text-[var(--color-cardText)]">
-                  {editIsPublic ? t('visibility_public') : t('visibility_private')}
-                </span>
-                <p className="text-sm text-[var(--color-textSecondary)]">
-                  {t('visibility_hint')}
-                </p>
-              </div>
-              <button
-                onClick={() => setEditIsPublic(!editIsPublic)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${
-                  editIsPublic ? 'bg-[var(--color-primary)]' : 'bg-gray-300'
-                }`}
-              >
-                <span 
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                    editIsPublic ? 'translate-x-6' : ''
-                  }`}
-                />
-              </button>
-            </label>
-          </div>
-        )}
-
         {/* Content */}
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -230,19 +255,23 @@ export default function CollectionDetailModal({
                 key={item.id}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-background)] group"
               >
-                <Link
-                  href={`/${locale}/cafes/${item.cafe_id}`}
-                  className="flex items-center gap-3 flex-1 min-w-0"
-                  onClick={onClose}
+                <div
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                  onClick={() => {
+                    const path = getCafePath({ id: item.cafe_id, slug: item.cafe_slug }, locale);
+                    if (onNavigateToCafe) {
+                      onNavigateToCafe(path);
+                    } else {
+                      window.location.href = path;
+                    }
+                  }}
                 >
                   {/* Cafe Image */}
                   <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-[var(--color-background)]">
                     {item.cafe_main_image ? (
-                      <Image
+                      <img
                         src={item.cafe_main_image}
                         alt={item.cafe_name}
-                        width={48}
-                        height={48}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -251,7 +280,7 @@ export default function CollectionDetailModal({
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Cafe Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-[var(--color-cardText)] truncate">
@@ -263,19 +292,49 @@ export default function CollectionDetailModal({
                       </p>
                     )}
                   </div>
-                </Link>
+                </div>
                 
-                {/* Remove button */}
+                {/* More options dropdown */}
                 {isOwnProfile && (
-                  <button
-                    onClick={() => handleRemoveCafe(item.cafe_id)}
-                    className="p-1.5 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all"
-                    title={t('remove')}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <div className="relative" ref={activeDropdownId === item.id ? dropdownRef : undefined}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdownId(prev => prev === item.id ? null : item.id);
+                      }}
+                      className="p-1.5 text-[var(--color-textSecondary)] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[var(--color-surface)] rounded transition-all"
+                      aria-label={t('more_options')}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
+
+                    {activeDropdownId === item.id && (
+                      <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-[var(--color-cardBackground)] border border-[var(--color-border)] rounded-lg shadow-lg overflow-hidden">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMoveModalItem(item);
+                            setActiveDropdownId(null);
+                          }}
+                          className="w-full px-3 py-2 text-sm text-left text-[var(--color-cardText)] hover:bg-[var(--color-background)] transition-colors"
+                        >
+                          {t('move_to')}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCafe(item.cafe_id);
+                            setActiveDropdownId(null);
+                          }}
+                          className="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-[var(--color-background)] transition-colors"
+                        >
+                          {t('delete')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ))}
@@ -298,7 +357,6 @@ export default function CollectionDetailModal({
                   onClick={() => {
                     setIsEditing(false);
                     setEditName(collection.name);
-                    setEditIsPublic(collection.is_public);
                   }}
                   className="px-4 py-2 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
                 >
@@ -363,7 +421,29 @@ export default function CollectionDetailModal({
             )}
           </div>
         )}
+        </div>
       </div>
-    </Modal>
+
+      {/* Move to modal */}
+      {moveModalItem && (
+        <CafeMoveToModal
+          isOpen={!!moveModalItem}
+          onClose={() => setMoveModalItem(null)}
+          cafeId={moveModalItem.cafe_id}
+          cafeName={moveModalItem.cafe_name}
+          currentCollectionId={collection.id}
+          onMoveComplete={(targetCollectionIds) => {
+            setDetail(prev => prev ? {
+              ...prev,
+              items: prev.items.filter(i => i.cafe_id !== moveModalItem.cafe_id),
+              item_count: prev.item_count - 1,
+            } : null);
+            onItemCountChange?.(collection.id, -1);
+            targetCollectionIds.forEach(id => onItemCountChange?.(id, 1));
+            setMoveModalItem(null);
+          }}
+        />
+      )}
+    </div>
   );
 }

@@ -30,7 +30,7 @@ export default function SaveButtons({
   
   const [isFavourited, setIsFavourited] = useState(initialStatus?.is_favourited ?? false);
   const [isSaved, setIsSaved] = useState(initialStatus?.is_saved ?? false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isQuickSaving, setIsQuickSaving] = useState(false);
   const [isFetching, setIsFetching] = useState(!initialStatus);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,14 +74,14 @@ export default function SaveButtons({
     : 'p-2';
 
   const handleFavouriteClick = useCallback(async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
+    if (isQuickSaving) return;
+
+    setIsQuickSaving(true);
     setError(null);
-    
+
     // Optimistic update
     setIsFavourited(prev => !prev);
-    
+
     try {
       await toggleFavourite(cafeId);
     } catch (err) {
@@ -93,19 +93,19 @@ export default function SaveButtons({
         setError('save_failed');
       }
     } finally {
-      setIsLoading(false);
+      setIsQuickSaving(false);
     }
-  }, [cafeId, isLoading]);
+  }, [cafeId, isQuickSaving]);
 
   const handleSaveClick = useCallback(async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
+    if (isQuickSaving) return;
+
+    setIsQuickSaving(true);
     setError(null);
-    
+
     // Optimistic update
     setIsSaved(prev => !prev);
-    
+
     try {
       await toggleSaveForLater(cafeId);
     } catch (err) {
@@ -117,9 +117,9 @@ export default function SaveButtons({
         setError('save_failed');
       }
     } finally {
-      setIsLoading(false);
+      setIsQuickSaving(false);
     }
-  }, [cafeId, isLoading]);
+  }, [cafeId, isQuickSaving]);
 
   const handleAddToCollection = useCallback(() => {
     if (onOpenCollectionSelector) {
@@ -132,7 +132,7 @@ export default function SaveButtons({
       {/* Favourite Button */}
       <button
         onClick={handleFavouriteClick}
-        disabled={isLoading}
+        disabled={isQuickSaving}
         className={`${buttonBaseClass} ${buttonSizeClass} ${
           isFavourited 
             ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
@@ -151,7 +151,7 @@ export default function SaveButtons({
       {/* Save for Later Button */}
       <button
         onClick={handleSaveClick}
-        disabled={isLoading}
+        disabled={isQuickSaving}
         className={`${buttonBaseClass} ${buttonSizeClass} ${
           isSaved 
             ? 'text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100' 
@@ -171,7 +171,6 @@ export default function SaveButtons({
       {onOpenCollectionSelector && (
         <button
           onClick={handleAddToCollection}
-          disabled={isLoading}
           className={`${buttonBaseClass} ${buttonSizeClass} text-[var(--color-textSecondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10`}
           title={t('add_to_collection')}
           aria-label={t('add_to_collection')}
