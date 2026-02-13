@@ -338,13 +338,10 @@ export default function Header({
                     <Link
                       key={index}
                       href={item.href}
-                      className="w-full block px-4 py-3 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/10 transition-colors text-left"
+                      className="w-full block px-4 py-3 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/10 hover:shadow-inset-background rounded-lg transition-all text-left"
                       onClick={() => setActiveCategory(null)}
                     >
                       <div className="flex items-center space-x-3 text-left">
-                        <div className="flex-shrink-0 bg-[var(--color-primaryText)]/10 p-2 rounded-lg text-[var(--color-primaryText)]">
-                          {item.icon}
-                        </div>
                         <div className="text-left">
                           <span className="font-semibold text-sm block leading-tight text-left">{t(item.labelKey)}</span>
                           {item.descriptionKey && (
