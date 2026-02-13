@@ -27,16 +27,6 @@ const TAILWIND_BREAKPOINTS = {
   lg: 1024,
 } as const;
 
-const TAILWIND_PADDING = {
-  px4: 16,
-  px6: 24,
-  px8: 32,
-} as const;
-
-const MEGA_MENU_OFFSETS = {
-  dividerToMenu: 10,
-} as const;
-
 export default function Header({
   locale
 }: {
@@ -221,37 +211,6 @@ export default function Header({
     }
   }, [activeCategory]);
   
-  const getNavItemLeft = (ref: React.RefObject<HTMLElement>) => {
-    if (!ref.current) return 0;
-    const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
-    if (!container) return 0;
-    return rect.left - container.left;
-  };
-  
-  const getNavItemRight = (ref: React.RefObject<HTMLElement>) => {
-    if (!ref.current) return 0;
-    const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
-    if (!container) return 0;
-    return rect.right - container.left;
-  };
-  
-  const getDividerRight = (ref: React.RefObject<HTMLElement>) => {
-    if (!ref.current) return 0;
-    const rect = ref.current.getBoundingClientRect();
-    const container = ref.current.closest('.max-w-8xl')?.getBoundingClientRect();
-    if (!container) return 0;
-    return rect.right - container.left;
-  };
-  
-  const getMegaMenuPadding = () => {
-    if (typeof window === 'undefined') return TAILWIND_PADDING.px4;
-    const width = window.innerWidth;
-    if (width >= TAILWIND_BREAKPOINTS.lg) return TAILWIND_PADDING.px8;
-    if (width >= TAILWIND_BREAKPOINTS.sm) return TAILWIND_PADDING.px6;
-    return TAILWIND_PADDING.px4;
-  };
   
   return (
     <>
@@ -351,59 +310,52 @@ export default function Header({
         </div>
       </header>
 
-      {/* Mega Menu */}
+      {/* Dropdown Menu */}
       {activeCategory && (
         <div 
           ref={megaMenuRef}
-          className="fixed top-16 left-0 right-0 z-40 bg-[var(--color-primary)] border-t border-[var(--color-border)]/70"
+          className="fixed z-40 bg-[var(--color-primary)] border-2 border-[var(--color-secondary)] shadow-[var(--ibean-shadow-warm-md)] rounded-xl overflow-hidden motion-slide-up"
+          style={{ 
+            top: '64px',
+            left: (() => {
+              if (activeCategory === 'discover') return discoverRef.current?.getBoundingClientRect().left;
+              if (activeCategory === 'my_coffee_journey') return myCoffeeJourneyRef.current?.getBoundingClientRect().left;
+              return 0;
+            })(),
+            minWidth: '240px'
+          }}
           onMouseEnter={() => setActiveCategory(activeCategory)}
           onMouseLeave={() => setActiveCategory(null)}
         >
-          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="py-3">
-              {(() => {
-                const category = getCategoryById(activeCategory);
-                if (!category) return null;
-                
-                let adjustedOffset = 0;
-                const megaMenuPadding = getMegaMenuPadding();
-                
-                if (category.id === 'discover') {
-                  adjustedOffset = getNavItemLeft(navRef as React.RefObject<HTMLElement>) - megaMenuPadding;
-                } else if (category.id === 'community') {
-                  adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
-                } else if (category.id === 'my_coffee_journey') {
-                  adjustedOffset = getDividerRight(divider1Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
-                } else if (category.id === 'shop') {
-                  adjustedOffset = getDividerRight(divider3Ref as React.RefObject<HTMLElement>) + MEGA_MENU_OFFSETS.dividerToMenu - megaMenuPadding;
-                }
-                
-                return (
-                  <div 
-                    className="flex-shrink-0"
-                    style={{ paddingLeft: adjustedOffset }}
-                  >
-                    <div className="space-y-3">
-                      {category.items.map((item, index) => (
-                        <Link
-                          key={index}
-                          href={item.href}
-                          className="block px-3 py-2 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/10 rounded-lg transition-colors"
-                          onClick={() => setActiveCategory(null)}
-                        >
-                          <span className="font-semibold text-base block">{t(item.labelKey)}</span>
+          <div className="py-2">
+            {(() => {
+              const category = getCategoryById(activeCategory);
+              if (!category) return null;
+              
+              return (
+                <div className="flex flex-col items-start text-left">
+                  {category.items.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className="w-full block px-4 py-3 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/10 hover:shadow-inset-background rounded-lg transition-all text-left"
+                      onClick={() => setActiveCategory(null)}
+                    >
+                      <div className="flex items-center space-x-3 text-left">
+                        <div className="text-left">
+                          <span className="font-semibold text-sm block leading-tight text-left">{t(item.labelKey)}</span>
                           {item.descriptionKey && (
-                            <p className="text-xs text-[var(--color-primaryText)]/50 mt-0.5">
+                            <p className="text-[10px] text-[var(--color-primaryText)]/60 mt-0.5 leading-tight text-left">
                               {t(item.descriptionKey)}
                             </p>
                           )}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

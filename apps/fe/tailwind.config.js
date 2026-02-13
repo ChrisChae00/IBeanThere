@@ -17,6 +17,7 @@ module.exports = {
         'primary-lg': '0 10px 15px -3px var(--color-primary), 0 4px 6px -2px var(--color-primary)',
         'primary-xl': '0 12px 16px -4px var(--color-primary), 0 4px 8px -2px var(--color-primary)',
         'inset-primary': 'inset -5px -10px 10px -3px color-mix(in srgb, var(--color-cardShadow) 40%, transparent),inset 5px 6px 10px -3px color-mix(in srgb, var(--color-cardShadow) 40%, transparent), inset 0px 0px 12px color-mix(in srgb, var(--color-cardShadow) 50%, transparent)',
+        'inset-background': 'inset 0 0 8px var(--color-background)',
       },
       colors: {
         primary: 'var(--color-primary)',

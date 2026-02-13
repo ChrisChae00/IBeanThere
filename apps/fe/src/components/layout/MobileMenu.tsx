@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,9 +16,14 @@ export default function MobileMenu({ locale }: { locale: string }) {
   const [isCoffeeLogsExpanded, setIsCoffeeLogsExpanded] = useState(false);
   const [isShopExpanded, setIsShopExpanded] = useState(false);
   const [isUserMenuExpanded, setIsUserMenuExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
   const { user, profile, isLoading, signOut } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -69,17 +75,20 @@ export default function MobileMenu({ locale }: { locale: string }) {
         </svg>
       </button>
 
-      {/* Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
-          onClick={closeMenu}
-        />
-      )}
+      {/* Overlay + Slide-out Menu rendered via Portal to escape Header stacking context */}
+      {mounted && createPortal(
+        <>
+          {/* Overlay */}
+          {isOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 z-[9998] lg:hidden"
+              onClick={closeMenu}
+            />
+          )}
 
-      {/* Slide-out Menu */}
-      <div 
-        className={`fixed inset-y-0 right-0 w-[280px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[70] transform transition-transform duration-300 ease-in-out lg:hidden overflow-x-hidden ${
+          {/* Slide-out Menu */}
+          <div 
+            className={`fixed inset-y-0 right-0 w-[280px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[9999] transform transition-transform duration-300 ease-in-out lg:hidden overflow-x-hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -123,31 +132,22 @@ export default function MobileMenu({ locale }: { locale: string }) {
 
             <div className="h-px bg-[var(--color-border)] mx-6" />
 
-            {/* Discover Section - Click text to navigate, chevron to expand */}
+            {/* Discover Section - Expand/Collapse only */}
             <div>
-              <div className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] transition-colors font-medium min-h-[44px] min-w-0 group">
-                <Link 
-                  href={`/${locale}/discover/explore-map`}
-                  onClick={closeMenu}
-                  className="flex-1 truncate hover:text-[var(--color-primary)] transition-colors"
+              <button
+                onClick={toggleDiscover}
+                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
+              >
+                <span className="truncate">{t('discover')}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {t('discover')}
-                </Link>
-                <button
-                  onClick={toggleDiscover}
-                  className="p-2 -mr-2 hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] rounded-lg transition-colors"
-                  aria-label="Toggle discover submenu"
-                >
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
               
               {isDiscoverExpanded && (
                 <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
@@ -158,6 +158,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   >
                     <span className="truncate">{t('explore_map')}</span>
                   </Link>
+                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
                   <Link 
                     href={`/${locale}/discover/dropbean`}
                     onClick={closeMenu}
@@ -165,15 +166,14 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   >
                     <span className="truncate">{t('dropbean')}</span>
                   </Link>
-                  {/* MVP: Pending Spots hidden - verification now happens via Drop Bean
+                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
                   <Link 
-                    href={`/${locale}/discover/pending-spots`}
+                    href={`/${locale}/discover/register-cafe`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
-                    <span className="truncate">{t('pending_spots')}</span>
+                    <span className="truncate">{t('register_cafe')}</span>
                   </Link>
-                  */}
                 </div>
               )}
             </div>
@@ -206,19 +206,13 @@ export default function MobileMenu({ locale }: { locale: string }) {
                   >
                     <span className="truncate">{t('coffee_logs_item_1')}</span>
                   </Link>
+                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
                   <Link 
                     href={`/${locale}/my-beans`}
                     onClick={closeMenu}
                     className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
                   >
                     <span className="truncate">{t('my_beans')}</span>
-                  </Link>
-                  <Link 
-                    href={`/${locale}/my-coffee-logs/stats`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('coffee_logs_item_2')}</span>
                   </Link>
                 </div>
               )}
@@ -276,7 +270,11 @@ export default function MobileMenu({ locale }: { locale: string }) {
                 </div>
               )}
             </div> */}
-            
+
+            <div className="pb-2">
+              <div className="h-px bg-[var(--color-border)] mx-6" />
+            </div>
+
             {/* Conditional rendering based on authentication status */}
             {isLoading ? (
               <div className="px-6 py-2">
@@ -285,7 +283,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
             ) : user ? (
               <>
                 {/* User information - Expandable */}
-                <div className={isUserMenuExpanded ? '' : 'border-b border-[var(--color-border)]'}>
+                <div>
                   <button
                     onClick={toggleUserMenu}
                     className="w-full flex items-center justify-between px-6 py-2 hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-w-0 group"
@@ -322,6 +320,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                       >
                         <span className="truncate">{t('profile')}</span>
                       </Link>
+                      <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
                       <Link 
                         href={`/${locale}/settings`}
                         onClick={closeMenu}
@@ -377,6 +376,9 @@ export default function MobileMenu({ locale }: { locale: string }) {
           </div>
         </div>
       </div>
+        </>,
+        document.body
+      )}
     </>
   );
 }
