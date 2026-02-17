@@ -1,28 +1,13 @@
 import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse } from '@/types/api';
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/shared/lib/supabase/client');
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('NOT_AUTHENTICATED');
-  }
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`,
-  };
-}
+import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
 
 export async function registerCafe(
   data: CafeRegistrationRequest
 ): Promise<CafeRegistrationResponse> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const headers = await getAuthHeaders();
     
-    const response = await fetch(`${apiUrl}/api/v1/cafes/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/cafes/register`, {
       method: 'POST',
       headers,
       body: JSON.stringify(data)
@@ -78,8 +63,7 @@ export async function searchLocationByPostcode(
   countryCode?: string
 ): Promise<LocationSearchResult | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    let url = `${apiUrl}/api/v1/cafes/osm/search?q=${encodeURIComponent(postcode)}`;
+    let url = `${API_BASE_URL}/api/v1/cafes/osm/search?q=${encodeURIComponent(postcode)}`;
     
     // Add user location if provided to prioritize nearby results
     if (userLocation) {
@@ -93,9 +77,7 @@ export async function searchLocationByPostcode(
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
     
     if (!response.ok) {
@@ -119,14 +101,11 @@ export async function reverseGeocodeLocation(
   lng: number
 ): Promise<{ display_name: string; country_code?: string } | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const url = `${apiUrl}/api/v1/cafes/osm/reverse?lat=${lat}&lng=${lng}`;
+    const url = `${API_BASE_URL}/api/v1/cafes/osm/reverse?lat=${lat}&lng=${lng}`;
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
     
     if (!response.ok) {
@@ -150,8 +129,7 @@ export async function getTrendingCafes(
   location?: { lat: number; lng: number }
 ): Promise<TrendingCafeResponse[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    let url = `${apiUrl}/api/v1/cafes/trending?limit=${limit}&offset=${offset}`;
+    let url = `${API_BASE_URL}/api/v1/cafes/trending?limit=${limit}&offset=${offset}`;
     
     // Add location parameters for city-based filtering
     if (location) {
@@ -160,17 +138,14 @@ export async function getTrendingCafes(
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
     
     if (!response.ok) {
       throw new Error(`Failed to fetch trending cafes: ${response.status} ${response.statusText}`);
     }
     
-    const data: TrendingCafeResponse[] = await response.json();
-    return data;
+    return response.json();
   } catch (error) {
     console.error('Error fetching trending cafes:', error);
     return [];
@@ -178,57 +153,26 @@ export async function getTrendingCafes(
 }
 
 export async function getPendingCafes(): Promise<CafeSearchResponse> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const url = `${apiUrl}/api/v1/cafes/pending`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to fetch pending cafes: ${response.status} ${response.statusText}`, errorText);
-      throw new Error(`Failed to fetch pending cafes: ${response.status} ${response.statusText}`);
-    }
-    
-    const data: CafeSearchResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching pending cafes:', error);
-    throw error;
-  }
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/pending`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  return handleResponse<CafeSearchResponse>(response);
 }
 
 export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const url = `${apiUrl}/api/v1/cafes/${cafeId}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      cache: 'no-store', // Disable caching to ensure fresh data
-    });
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Cafe not found');
-      }
-      throw new Error(`Failed to fetch cafe detail: ${response.status} ${response.statusText}`);
-    }
-    
-    const data: CafeDetailResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching cafe detail:', error);
-    throw error;
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store', // Disable caching to ensure fresh data
+  });
+
+  if (!response.ok && response.status === 404) {
+    throw new Error('Cafe not found');
   }
+
+  return handleResponse<CafeDetailResponse>(response);
 }
 
 export async function searchCafes(
@@ -236,26 +180,14 @@ export async function searchCafes(
   lng: number,
   radius: number = 2000
 ): Promise<CafeSearchResponse> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const url = `${apiUrl}/api/v1/cafes/search?lat=${lat}&lng=${lng}&radius=${radius}`;
-    
-    const response = await fetch(url, {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/cafes/search?lat=${lat}&lng=${lng}&radius=${radius}`,
+    {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to search cafes: ${response.status} ${response.statusText}`);
+      headers: { 'Content-Type': 'application/json' }
     }
-    
-    const data: CafeSearchResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error searching cafes:', error);
-    throw error;
-  }
+  );
+
+  return handleResponse<CafeSearchResponse>(response);
 }
 

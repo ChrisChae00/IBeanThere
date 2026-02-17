@@ -1,19 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/shared/lib/supabase/client');
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('NOT_AUTHENTICATED');
-  }
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`,
-  };
-}
+import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
 
 export interface UserResponse {
   id: string;
@@ -30,18 +15,11 @@ export interface UserResponse {
 export async function getCurrentUser(): Promise<UserResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_URL}/api/v1/users/me`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
     method: 'GET',
     headers,
   });
   
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    throw new Error('FETCH_USER_FAILED');
-  }
-  
-  return response.json();
+  return handleResponse<UserResponse>(response);
 }
 

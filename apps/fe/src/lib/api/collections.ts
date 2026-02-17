@@ -15,44 +15,7 @@ import type {
   QuickSaveResponse,
   ShareTokenResponse,
 } from '@/types/api';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-// =========================================================
-// Helper Functions
-// =========================================================
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/shared/lib/supabase/client');
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('NOT_AUTHENTICATED');
-  }
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`,
-  };
-}
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-    throw new Error(error.detail || `HTTP error ${response.status}`);
-  }
-  
-  // Handle 204 No Content
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  
-  return response.json();
-}
+import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
 
 // =========================================================
 // Collection CRUD

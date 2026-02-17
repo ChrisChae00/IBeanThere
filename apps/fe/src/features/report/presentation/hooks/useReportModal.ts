@@ -128,13 +128,6 @@ export function useReportModal(): UseReportModalReturn {
     setError(null);
 
     try {
-      const accessToken = await repository.getAccessToken();
-      if (!accessToken) {
-        setError('login_required');
-        setIsSubmitting(false);
-        return null;
-      }
-
       const fullData: ReportCreateData = {
         ...data,
         targetType: modalState.targetType,
@@ -142,7 +135,7 @@ export function useReportModal(): UseReportModalReturn {
         targetUrl: modalState.targetUrl || (typeof window !== 'undefined' ? window.location.href : undefined),
       };
 
-      const report = await repository.submitReport(fullData, accessToken);
+      const report = await repository.submitReport(fullData);
       setSuccess(true);
       return report;
     } catch (err) {

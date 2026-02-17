@@ -4,9 +4,8 @@
  */
 
 import { createClient } from '@/shared/lib/supabase/client';
+import { API_BASE_URL, getAuthHeaders } from '@/lib/api/client';
 import type { ReportCreateData, Report, ReportType, TargetType } from '../domain';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const REPORTS_BUCKET = 'reports';
 
 // API request/response types (snake_case for API compatibility)
@@ -60,7 +59,8 @@ export class ReportRepository {
   /**
    * Submit a new report
    */
-  async submitReport(data: ReportCreateData, accessToken: string): Promise<Report> {
+  async submitReport(data: ReportCreateData): Promise<Report> {
+    const headers = await getAuthHeaders();
     const requestBody: ReportCreateRequest = {
       report_type: data.reportType,
       target_type: data.targetType,
@@ -72,10 +72,7 @@ export class ReportRepository {
 
     const response = await fetch(`${API_BASE_URL}/api/v1/reports`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers,
       body: JSON.stringify(requestBody),
     });
 
@@ -135,14 +132,6 @@ export class ReportRepository {
     return urlData.publicUrl;
   }
 
-  /**
-   * Get current access token from Supabase
-   */
-  async getAccessToken(): Promise<string | null> {
-    const supabase = createClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-    return sessionData?.session?.access_token || null;
-  }
 }
 
 // Singleton instance

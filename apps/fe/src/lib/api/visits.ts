@@ -1,5 +1,6 @@
 import { CafeMapData, CheckInResult } from '@/types/map';
 import { recordVisit as recordVisitUtil, checkDuplicateVisit as checkDuplicateUtil } from '@/lib/utils/checkIn';
+import { API_BASE_URL } from './client';
 
 export async function checkIn(
   cafe: CafeMapData,
@@ -38,8 +39,7 @@ export async function getVisitsByCafe(
   date?: string
 ): Promise<VisitRecord[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    let url = `${apiUrl}/api/v1/cafes/${cafeId}/visits`;
+    let url = `${API_BASE_URL}/api/v1/cafes/${cafeId}/visits`;
     
     const params = new URLSearchParams();
     if (userId) params.append('user_id', userId);
@@ -51,9 +51,7 @@ export async function getVisitsByCafe(
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
     
     if (!response.ok) {

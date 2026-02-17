@@ -13,6 +13,7 @@ import {
   TargetType,
   ReportCreateRequest 
 } from '@/lib/api/reports';
+// Note: createClient is still needed for uploadReportImage
 import ImageUploader from './ImageUploader';
 
 interface ReportModalProps {
@@ -85,17 +86,7 @@ export default function ReportModal({
     setError(null);
 
     try {
-      // Get session from Supabase for access token
       const supabase = createClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      if (!sessionData?.session?.access_token) {
-        setError(t('error_login_required'));
-        setIsSubmitting(false);
-        return;
-      }
-
-      const accessToken = sessionData.session.access_token;
       
       // Upload images first
       const imageUrls: string[] = [];
@@ -105,7 +96,7 @@ export default function ReportModal({
         imageUrls.push(url);
       }
 
-      // Submit report
+      // Submit report (auth handled internally by submitReport)
       const reportData: ReportCreateRequest = {
         report_type: selectedType,
         target_type: targetType,
@@ -115,7 +106,7 @@ export default function ReportModal({
         image_urls: imageUrls,
       };
 
-      await submitReport(reportData, accessToken);
+      await submitReport(reportData);
       
       setSuccess(true);
       
