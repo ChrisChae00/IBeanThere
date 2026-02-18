@@ -102,7 +102,14 @@ export interface CafeRegistrationResponse {
   };
   message?: string;
   error?: string;
-  existingCafe?: any;
+  existingCafe?: {
+    id: string;
+    name: string;
+    slug?: string;
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
 }
 
 export interface LocationSearchResult {

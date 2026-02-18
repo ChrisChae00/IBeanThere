@@ -1,16 +1,8 @@
 import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
+import { UserResponse } from '@/types/api';
 
-export interface UserResponse {
-  id: string;
-  email: string;
-  username: string;
-  display_name: string;
-  bio?: string | null;
-  avatar_url?: string | null;
-  role?: string;
-  created_at: string;
-  updated_at?: string | null;
-}
+// Re-export for consumers that import from this module
+export type { UserResponse } from '@/types/api';
 
 export async function getCurrentUser(): Promise<UserResponse> {
   const headers = await getAuthHeaders();

@@ -3,6 +3,9 @@
  */
 
 import { API_BASE_URL, getAuthHeaders } from './client';
+import { createClient } from '@/shared/lib/supabase/client';
+
+type SupabaseClient = ReturnType<typeof createClient>;
 
 // Report types matching backend
 export type ReportType =
@@ -81,7 +84,7 @@ export async function submitReport(
 export async function uploadReportImage(
   file: File,
   userId: string,
-  supabaseClient: any
+  supabaseClient: SupabaseClient
 ): Promise<string> {
   const REPORTS_BUCKET = 'reports';
   
