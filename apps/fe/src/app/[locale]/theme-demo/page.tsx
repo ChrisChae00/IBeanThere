@@ -1,6 +1,7 @@
 'use client';
 import { useTheme } from '@/contexts/ThemeContext';
 import { themes } from '@/lib/themes/palettes';
+import './theme-demo.css';
 
 export default function ThemeDemoPage() {
   const { currentTheme } = useTheme();
