@@ -15,7 +15,7 @@ import type {
   QuickSaveResponse,
   ShareTokenResponse,
 } from '@/types/api';
-import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
+import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch } from './client';
 
 // =========================================================
 // Collection CRUD
@@ -26,7 +26,7 @@ import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
  */
 export async function getMyCollections(): Promise<Collection[]> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections`, { headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections`, { headers });
   return handleResponse<Collection[]>(response);
 }
 
@@ -37,7 +37,7 @@ export async function createCollection(
   data: CollectionCreateRequest
 ): Promise<Collection> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections`, {
     method: 'POST',
     headers,
     body: JSON.stringify(data),
@@ -52,7 +52,7 @@ export async function getCollectionDetail(
   collectionId: string
 ): Promise<CollectionDetail> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, { headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, { headers });
   return handleResponse<CollectionDetail>(response);
 }
 
@@ -64,7 +64,7 @@ export async function updateCollection(
   data: CollectionUpdateRequest
 ): Promise<Collection> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, {
     method: 'PATCH',
     headers,
     body: JSON.stringify(data),
@@ -78,7 +78,7 @@ export async function updateCollection(
  */
 export async function deleteCollection(collectionId: string): Promise<void> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, {
     method: 'DELETE',
     headers,
   });
@@ -98,7 +98,7 @@ export async function addCafeToCollection(
   note?: string
 ): Promise<CollectionItem> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/${collectionId}/items`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}/items`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ cafe_id: cafeId, note }),
@@ -114,7 +114,7 @@ export async function removeCafeFromCollection(
   cafeId: string
 ): Promise<void> {
   const headers = await getAuthHeaders();
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/v1/collections/${collectionId}/items/${cafeId}`,
     { method: 'DELETE', headers }
   );
@@ -132,7 +132,7 @@ export async function generateShareToken(
   collectionId: string
 ): Promise<ShareTokenResponse> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/${collectionId}/share`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}/share`, {
     method: 'POST',
     headers,
   });
@@ -146,7 +146,7 @@ export async function getSharedCollection(
   token: string
 ): Promise<CollectionDetail> {
   // This is a public endpoint, no auth needed
-  const response = await fetch(`${API_BASE_URL}/api/v1/collections/shared/${token}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/shared/${token}`, {
     headers: { 'Content-Type': 'application/json' },
   });
   return handleResponse<CollectionDetail>(response);
@@ -163,7 +163,7 @@ export async function getCafeSaveStatus(
   cafeId: string
 ): Promise<CafeSaveStatus> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/save-status`, { headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/save-status`, { headers });
   return handleResponse<CafeSaveStatus>(response);
 }
 
@@ -180,7 +180,7 @@ export async function quickSaveCafe(
   type: 'favourite' | 'save_later'
 ): Promise<QuickSaveResponse> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/quick-save`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/quick-save`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ save_type: type }),
@@ -219,7 +219,7 @@ export const generateShareLink = generateShareToken;
 export async function getUserPublicCollections(
   username: string
 ): Promise<Collection[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/users/${username}/collections`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/users/${username}/collections`, {
     headers: { 'Content-Type': 'application/json' },
   });
   return handleResponse<Collection[]>(response);
@@ -230,7 +230,7 @@ export async function getUserPublicCollections(
  */
 export async function updateCollectionsPublic(isPublic: boolean): Promise<void> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/users/me`, {
     method: 'PATCH',
     headers,
     body: JSON.stringify({ collections_public: isPublic }),

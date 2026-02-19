@@ -4,7 +4,7 @@
  */
 
 import { createClient } from '@/shared/lib/supabase/client';
-import { API_BASE_URL, getAuthHeaders } from '@/lib/api/client';
+import { API_BASE_URL, getAuthHeaders, apiFetch, handleResponse } from '@/lib/api/client';
 import type { ReportCreateData, Report, ReportType, TargetType } from '../domain';
 const REPORTS_BUCKET = 'reports';
 
@@ -70,21 +70,15 @@ export class ReportRepository {
       image_urls: data.imageUrls,
     };
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/reports`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/reports`, {
       method: 'POST',
       headers,
       body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      if (response.status === 429) {
-        throw new Error('duplicate_report');
-      }
-      throw new Error(error.detail || 'Failed to submit report');
-    }
-
-    const apiResponse: ReportApiResponse = await response.json();
+    const apiResponse = await handleResponse<ReportApiResponse>(response, {
+      429: 'duplicate_report',
+    });
     return toDomainReport(apiResponse);
   }
 

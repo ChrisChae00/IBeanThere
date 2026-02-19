@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 import { getMyCollections, addCafeToCollection, removeCafeFromCollection, createCollection, getCafeSaveStatus } from '@/lib/api/collections';
+import { isAuthError } from '@/lib/api/client';
 import type { Collection, CafeSaveStatus } from '@/types/api';
 
 interface CollectionSelectorModalProps {
@@ -55,7 +56,7 @@ export default function CollectionSelectorModal({
         setCollections(collectionsData);
         setSavedCollectionIds(new Set(saveStatus.saved_collection_ids));
       } catch (err) {
-        if (err instanceof Error && err.message === 'NOT_AUTHENTICATED') {
+        if (isAuthError(err)) {
           setError(t('login_required'));
         } else {
           setError(t('load_failed'));

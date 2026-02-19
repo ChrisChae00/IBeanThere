@@ -3,6 +3,7 @@
  * Repository for admin reports operations.
  */
 
+import { API_BASE_URL, apiFetch, handleResponse, ApiError } from '@/lib/api/client';
 import { createClient } from '@/shared/lib/supabase/client';
 import type {
   AdminReport,
@@ -12,8 +13,6 @@ import type {
   ReportStatus,
   TargetType,
 } from '../domain';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // API response types (snake_case)
 interface ReportApiResponse {
@@ -41,6 +40,12 @@ interface ReportsListApiResponse {
   has_more: boolean;
 }
 
+/** Shared error mapping for admin report endpoints */
+const ADMIN_REPORT_ERROR_MAP = {
+  403: 'ADMIN_ACCESS_REQUIRED',
+  404: 'REPORT_NOT_FOUND',
+} as const;
+
 // Transform API response to domain entity
 function toDomainReport(response: ReportApiResponse): AdminReport {
   return {
@@ -63,22 +68,28 @@ function toDomainReport(response: ReportApiResponse): AdminReport {
 
 export class AdminReportsRepository {
   /**
-   * Get current access token from Supabase
+   * Get auth headers with Bearer token from Supabase
    */
-  private async getAccessToken(): Promise<string | null> {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
     const supabase = createClient();
     const { data: sessionData } = await supabase.auth.getSession();
-    return sessionData?.session?.access_token || null;
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      throw new ApiError('Authentication required', 401, 'NOT_AUTHENTICATED');
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    };
   }
 
   /**
    * Fetch reports list with filters (admin only)
    */
   async fetchReports(filter: ReportsFilter): Promise<ReportsListResult> {
-    const accessToken = await this.getAccessToken();
-    if (!accessToken) {
-      throw new Error('Authentication required');
-    }
+    const headers = await this.getAuthHeaders();
 
     const params = new URLSearchParams();
     params.set('page', filter.page.toString());
@@ -90,18 +101,11 @@ export class AdminReportsRepository {
       params.set('target_type', filter.targetType);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/reports?${params}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/reports?${params}`, {
+      headers,
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || 'Failed to fetch reports');
-    }
-
-    const data: ReportsListApiResponse = await response.json();
+    const data = await handleResponse<ReportsListApiResponse>(response, ADMIN_REPORT_ERROR_MAP);
 
     return {
       reports: data.reports.map(toDomainReport),
@@ -116,23 +120,13 @@ export class AdminReportsRepository {
    * Get a single report by ID (admin only)
    */
   async getReport(reportId: string): Promise<AdminReport> {
-    const accessToken = await this.getAccessToken();
-    if (!accessToken) {
-      throw new Error('Authentication required');
-    }
+    const headers = await this.getAuthHeaders();
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/reports/${reportId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/reports/${reportId}`, {
+      headers,
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || 'Failed to fetch report');
-    }
-
-    const data: ReportApiResponse = await response.json();
+    const data = await handleResponse<ReportApiResponse>(response, ADMIN_REPORT_ERROR_MAP);
     return toDomainReport(data);
   }
 
@@ -140,10 +134,7 @@ export class AdminReportsRepository {
    * Update report status and/or admin notes (admin only)
    */
   async updateReport(reportId: string, updateData: UpdateReportData): Promise<AdminReport> {
-    const accessToken = await this.getAccessToken();
-    if (!accessToken) {
-      throw new Error('Authentication required');
-    }
+    const headers = await this.getAuthHeaders();
 
     const requestBody: Record<string, unknown> = {};
     if (updateData.status !== undefined) {
@@ -153,21 +144,13 @@ export class AdminReportsRepository {
       requestBody.admin_notes = updateData.adminNotes;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/reports/${reportId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/reports/${reportId}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers,
       body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || 'Failed to update report');
-    }
-
-    const data: ReportApiResponse = await response.json();
+    const data = await handleResponse<ReportApiResponse>(response, ADMIN_REPORT_ERROR_MAP);
     return toDomainReport(data);
   }
 

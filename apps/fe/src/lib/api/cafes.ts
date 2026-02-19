@@ -1,5 +1,5 @@
 import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse } from '@/types/api';
-import { API_BASE_URL, getAuthHeaders, handleResponse } from './client';
+import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
   data: CafeRegistrationRequest
@@ -7,7 +7,7 @@ export async function registerCafe(
   try {
     const headers = await getAuthHeaders();
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/cafes/register`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/register`, {
       method: 'POST',
       headers,
       body: JSON.stringify(data)
@@ -15,14 +15,14 @@ export async function registerCafe(
     
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('NOT_AUTHENTICATED');
+        throw new ApiError('Authentication required', 401, 'NOT_AUTHENTICATED');
       }
       if (response.status === 409) {
         const errorData = await response.json();
         return {
           success: false,
           error: 'DUPLICATE_CAFE',
-          message: errorData.detail || 'A cafe already exists at this location',
+          message: errorData.detail || errorData.message || 'A cafe already exists at this location',
           existingCafe: errorData.cafe
         };
       }
@@ -31,10 +31,10 @@ export async function registerCafe(
         return {
           success: false,
           error: 'DISTANCE_TOO_FAR',
-          message: errorData.detail || 'You must be within 50m of the cafe'
+          message: errorData.detail || errorData.message || 'You must be within 50m of the cafe'
         };
       }
-      throw new Error('REGISTER_CAFE_FAILED');
+      throw new ApiError('Failed to register cafe', response.status, 'REGISTER_CAFE_FAILED');
     }
     
     const result = await response.json();
@@ -46,8 +46,15 @@ export async function registerCafe(
     };
   } catch (error) {
     console.error('Error registering cafe:', error);
-    if (error instanceof Error && error.message === 'NOT_AUTHENTICATED') {
+    if (error instanceof ApiError && error.isAuthError) {
       throw error;
+    }
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.code || 'NETWORK_ERROR',
+        message: error.message
+      };
     }
     return {
       success: false,
@@ -65,17 +72,15 @@ export async function searchLocationByPostcode(
   try {
     let url = `${API_BASE_URL}/api/v1/cafes/osm/search?q=${encodeURIComponent(postcode)}`;
     
-    // Add user location if provided to prioritize nearby results
     if (userLocation) {
       url += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
     }
     
-    // Add country code if provided
     if (countryCode) {
       url += `&countrycode=${encodeURIComponent(countryCode)}`;
     }
     
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -103,7 +108,7 @@ export async function reverseGeocodeLocation(
   try {
     const url = `${API_BASE_URL}/api/v1/cafes/osm/reverse?lat=${lat}&lng=${lng}`;
     
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -131,21 +136,16 @@ export async function getTrendingCafes(
   try {
     let url = `${API_BASE_URL}/api/v1/cafes/trending?limit=${limit}&offset=${offset}`;
     
-    // Add location parameters for city-based filtering
     if (location) {
       url += `&lat=${location.lat}&lng=${location.lng}&radius=50000`;
     }
     
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch trending cafes: ${response.status} ${response.statusText}`);
-    }
-    
-    return response.json();
+    return await handleResponse<TrendingCafeResponse[]>(response);
   } catch (error) {
     console.error('Error fetching trending cafes:', error);
     return [];
@@ -153,7 +153,7 @@ export async function getTrendingCafes(
 }
 
 export async function getPendingCafes(): Promise<CafeSearchResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/pending`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/pending`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -162,14 +162,14 @@ export async function getPendingCafes(): Promise<CafeSearchResponse> {
 }
 
 export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     cache: 'no-store', // Disable caching to ensure fresh data
   });
 
   if (!response.ok && response.status === 404) {
-    throw new Error('Cafe not found');
+    throw new ApiError('Cafe not found', 404, 'CAFE_NOT_FOUND');
   }
 
   return handleResponse<CafeDetailResponse>(response);
@@ -180,7 +180,7 @@ export async function searchCafes(
   lng: number,
   radius: number = 2000
 ): Promise<CafeSearchResponse> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/api/v1/cafes/search?lat=${lat}&lng=${lng}&radius=${radius}`,
     {
       method: 'GET',
@@ -190,4 +190,3 @@ export async function searchCafes(
 
   return handleResponse<CafeSearchResponse>(response);
 }
-

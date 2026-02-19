@@ -1,6 +1,6 @@
 import { CafeMapData, CheckInResult } from '@/types/map';
 import { recordVisit as recordVisitUtil, checkDuplicateVisit as checkDuplicateUtil } from '@/lib/utils/checkIn';
-import { API_BASE_URL } from './client';
+import { API_BASE_URL, handleResponse, apiFetch } from './client';
 
 export async function checkIn(
   cafe: CafeMapData,
@@ -49,19 +49,14 @@ export async function getVisitsByCafe(
       url += `?${params.toString()}`;
     }
     
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch visits');
-    }
-    
-    return await response.json();
+    return await handleResponse<VisitRecord[]>(response);
   } catch (error) {
     console.error('Error fetching visits:', error);
     return [];
   }
 }
-

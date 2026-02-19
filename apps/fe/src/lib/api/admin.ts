@@ -1,5 +1,5 @@
 import { BusinessHours } from '@/types/map';
-import { API_BASE_URL, getAuthHeaders } from './client';
+import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch } from './client';
 
 export interface PendingCafe {
   id: string;
@@ -40,73 +40,43 @@ export interface AdminDeleteResponse {
   cafe_id: string;
 }
 
+/** Shared error mapping for admin endpoints */
+const ADMIN_ERROR_MAP = {
+  403: 'ADMIN_ACCESS_REQUIRED',
+  404: 'CAFE_NOT_FOUND',
+} as const;
+
 export async function getPendingCafes(): Promise<PendingCafesResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/pending`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/admin/pending`, {
     method: 'GET',
     headers,
   });
   
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('ADMIN_ACCESS_REQUIRED');
-    }
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    throw new Error('FETCH_PENDING_CAFES_FAILED');
-  }
-  
-  return response.json();
+  return handleResponse<PendingCafesResponse>(response, ADMIN_ERROR_MAP);
 }
 
 export async function verifyCafe(cafeId: string): Promise<AdminVerifyResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}/verify`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}/verify`, {
     method: 'POST',
     headers,
   });
   
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('ADMIN_ACCESS_REQUIRED');
-    }
-    if (response.status === 404) {
-      throw new Error('CAFE_NOT_FOUND');
-    }
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    throw new Error('VERIFY_CAFE_FAILED');
-  }
-  
-  return response.json();
+  return handleResponse<AdminVerifyResponse>(response, ADMIN_ERROR_MAP);
 }
 
 export async function deleteCafe(cafeId: string): Promise<AdminDeleteResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
     method: 'DELETE',
     headers,
   });
   
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('ADMIN_ACCESS_REQUIRED');
-    }
-    if (response.status === 404) {
-      throw new Error('CAFE_NOT_FOUND');
-    }
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    throw new Error('DELETE_CAFE_FAILED');
-  }
-  
-  return response.json();
+  return handleResponse<AdminDeleteResponse>(response, ADMIN_ERROR_MAP);
 }
 
 export interface CafeUpdateData {
@@ -126,24 +96,11 @@ export interface AdminUpdateResponse {
 export async function updateCafe(cafeId: string, data: CafeUpdateData): Promise<AdminUpdateResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
     method: 'PATCH',
     headers,
     body: JSON.stringify(data),
   });
   
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('ADMIN_ACCESS_REQUIRED');
-    }
-    if (response.status === 404) {
-      throw new Error('CAFE_NOT_FOUND');
-    }
-    if (response.status === 401) {
-      throw new Error('NOT_AUTHENTICATED');
-    }
-    throw new Error('UPDATE_CAFE_FAILED');
-  }
-  
-  return response.json();
+  return handleResponse<AdminUpdateResponse>(response, ADMIN_ERROR_MAP);
 }

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 import { getMyCollections, createCollection, deleteCollection, updateCollection, generateShareLink } from '@/lib/api/collections';
+import { isAuthError } from '@/lib/api/client';
 import type { Collection } from '@/types/api';
 import CollectionDetailModal from './CollectionDetailModal';
 import CollectionCreateModal from './CollectionCreateModal';
@@ -40,7 +41,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
         const data = await getMyCollections();
         setCollections(data);
       } catch (err) {
-        if (err instanceof Error && err.message === 'NOT_AUTHENTICATED') {
+        if (isAuthError(err)) {
           // Not logged in, no collections to show
           setCollections([]);
         } else {

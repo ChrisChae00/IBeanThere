@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getPendingCafes, verifyCafe, deleteCafe, updateCafe, PendingCafe, CafeUpdateData } from '@/lib/api/admin';
+import { getErrorCode } from '@/lib/api/client';
 import { ErrorAlert } from '@/shared/ui';
 import PendingCafeCard, { EditCafeData } from './PendingCafeCard';
 
@@ -40,7 +41,7 @@ export default function PendingCafesList() {
       setCafes(response.cafes);
     } catch (err) {
       console.error('Error fetching pending cafes:', err);
-      const errorMessage = err instanceof Error ? err.message : 'FETCH_PENDING_CAFES_FAILED';
+      const errorMessage = getErrorCode(err);
       setError(translateError(errorMessage));
     } finally {
       setIsLoading(false);
@@ -69,7 +70,7 @@ export default function PendingCafesList() {
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error updating cafe:', err);
-      const errorMessage = err instanceof Error ? err.message : 'UPDATE_CAFE_FAILED';
+      const errorMessage = getErrorCode(err);
       setActionError(translateError(errorMessage));
     } finally {
       setEditingId(null);
@@ -88,7 +89,7 @@ export default function PendingCafesList() {
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error verifying cafe:', err);
-      const errorMessage = err instanceof Error ? err.message : 'VERIFY_CAFE_FAILED';
+      const errorMessage = getErrorCode(err);
       setActionError(translateError(errorMessage));
     } finally {
       setVerifyingId(null);
@@ -108,7 +109,7 @@ export default function PendingCafesList() {
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error deleting cafe:', err);
-      const errorMessage = err instanceof Error ? err.message : 'DELETE_CAFE_FAILED';
+      const errorMessage = getErrorCode(err);
       setActionError(translateError(errorMessage));
     } finally {
       setDeletingId(null);
