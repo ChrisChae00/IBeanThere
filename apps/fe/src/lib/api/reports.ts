@@ -2,6 +2,11 @@
  * Reports API functions for frontend.
  */
 
+import { API_BASE_URL, getAuthHeaders } from './client';
+import { createClient } from '@/shared/lib/supabase/client';
+
+type SupabaseClient = ReturnType<typeof createClient>;
+
 // Report types matching backend
 export type ReportType =
   | 'user_inappropriate_name'
@@ -48,21 +53,17 @@ export interface ReportResponse {
   reporter_display_name?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 /**
  * Submit a new report
  */
 export async function submitReport(
-  data: ReportCreateRequest,
-  accessToken: string
+  data: ReportCreateRequest
 ): Promise<ReportResponse> {
+  const headers = await getAuthHeaders();
+
   const response = await fetch(`${API_BASE_URL}/api/v1/reports`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers,
     body: JSON.stringify(data),
   });
 
@@ -83,7 +84,7 @@ export async function submitReport(
 export async function uploadReportImage(
   file: File,
   userId: string,
-  supabaseClient: any
+  supabaseClient: SupabaseClient
 ): Promise<string> {
   const REPORTS_BUCKET = 'reports';
   

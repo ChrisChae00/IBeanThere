@@ -1,21 +1,5 @@
 import { BusinessHours } from '@/types/map';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const { createClient } = await import('@/shared/lib/supabase/client');
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('NOT_AUTHENTICATED');
-  }
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`,
-  };
-}
+import { API_BASE_URL, getAuthHeaders } from './client';
 
 export interface PendingCafe {
   id: string;
@@ -59,7 +43,7 @@ export interface AdminDeleteResponse {
 export async function getPendingCafes(): Promise<PendingCafesResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_URL}/api/v1/cafes/admin/pending`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/pending`, {
     method: 'GET',
     headers,
   });
@@ -80,7 +64,7 @@ export async function getPendingCafes(): Promise<PendingCafesResponse> {
 export async function verifyCafe(cafeId: string): Promise<AdminVerifyResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_URL}/api/v1/cafes/admin/${cafeId}/verify`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}/verify`, {
     method: 'POST',
     headers,
   });
@@ -104,7 +88,7 @@ export async function verifyCafe(cafeId: string): Promise<AdminVerifyResponse> {
 export async function deleteCafe(cafeId: string): Promise<AdminDeleteResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_URL}/api/v1/cafes/admin/${cafeId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
     method: 'DELETE',
     headers,
   });
@@ -142,7 +126,7 @@ export interface AdminUpdateResponse {
 export async function updateCafe(cafeId: string, data: CafeUpdateData): Promise<AdminUpdateResponse> {
   const headers = await getAuthHeaders();
   
-  const response = await fetch(`${API_URL}/api/v1/cafes/admin/${cafeId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cafes/admin/${cafeId}`, {
     method: 'PATCH',
     headers,
     body: JSON.stringify(data),

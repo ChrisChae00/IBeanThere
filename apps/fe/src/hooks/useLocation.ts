@@ -82,7 +82,7 @@ export function useLocation() {
         timeout: 15000, 
         maximumAge: 10000 
       });
-    } catch (error: any) {
+    } catch (_firstError: unknown) {
       // If timed out or failed, try again with low accuracy
       try {
         return await fetchLocation({
@@ -90,21 +90,23 @@ export function useLocation() {
           timeout: 15000, 
           maximumAge: 60000 
         });
-      } catch (secondError: any) {
+      } catch (secondError: unknown) {
         let errorMessage = 'Location error';
         let shouldClearCoords = false;
 
-        switch (secondError.code) {
-          case secondError.PERMISSION_DENIED:
-            errorMessage = 'Location permission denied';
-            shouldClearCoords = true;
-            break;
-          case secondError.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information unavailable';
-            break;
-          case secondError.TIMEOUT:
-            errorMessage = 'Location request timeout';
-            break;
+        if (secondError instanceof GeolocationPositionError) {
+          switch (secondError.code) {
+            case secondError.PERMISSION_DENIED:
+              errorMessage = 'Location permission denied';
+              shouldClearCoords = true;
+              break;
+            case secondError.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable';
+              break;
+            case secondError.TIMEOUT:
+              errorMessage = 'Location request timeout';
+              break;
+          }
         }
 
         setLocation(prev => ({
