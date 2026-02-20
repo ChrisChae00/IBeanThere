@@ -21,6 +21,7 @@ import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
 import { checkIn } from '@/lib/api/visits';
 import { calculateDistance } from '@/lib/utils/checkIn';
+import { API_BASE_URL } from '@/lib/api/client';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
@@ -349,12 +350,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     }
   );
 
-  const handleCafeClick = async (cafe: CafeMapData) => {
+  const handleCafeClick = useCallback(async (cafe: CafeMapData) => {
     setSelectedCafe(cafe);
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      await fetch(`${apiUrl}/api/v1/cafes/${cafe.id}/view`, {
+      await fetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -363,9 +363,9 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     } catch (error) {
       console.error('Failed to record cafe view:', error);
     }
-  };
+  }, []);
 
-  const handleCheckIn = async (cafe: NearbyCafe) => {
+  const handleCheckIn = useCallback(async (cafe: NearbyCafe) => {
     if (isCheckingIn) return;
     
     if (!user) {
@@ -399,13 +399,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     } finally {
       setIsCheckingIn(false);
     }
-  };
+  }, [isCheckingIn, user, coords, showToast, tVisit]);
 
-  const handleDismissAlert = () => {
+  const handleDismissAlert = useCallback(() => {
     setNearbyCafes([]);
-  };
+  }, []);
 
-  const handleRefreshCafes = async () => {
+  const handleRefreshCafes = useCallback(async () => {
     clearCache();
     lastSearchRef.current = null;
     if (center) {
@@ -416,7 +416,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       }, true);
       showToast(t('cafes_refreshed'), 'success');
     }
-  };
+  }, [center, clearCache, searchCafes, showToast, t]);
   
 
   return (
