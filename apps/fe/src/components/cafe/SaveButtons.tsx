@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { HeartIcon, BookmarkIcon, AddToCollectionIcon } from '@/shared/ui';
 import { toggleFavourite, toggleSaveForLater, getCafeSaveStatus } from '@/lib/api/collections';
+import { isAuthError } from '@/lib/api/client';
 import type { CafeSaveStatus } from '@/types/api';
 
 interface SaveButtonsProps {
@@ -48,7 +49,7 @@ export default function SaveButtons({
         setIsSaved(status.is_saved);
       } catch (err) {
         // Silently fail - user may not be authenticated
-        if (err instanceof Error && err.message !== 'NOT_AUTHENTICATED') {
+        if (!isAuthError(err)) {
           console.error('Failed to fetch save status:', err);
         }
       } finally {
@@ -87,7 +88,7 @@ export default function SaveButtons({
     } catch (err) {
       // Revert on error
       setIsFavourited(prev => !prev);
-      if (err instanceof Error && err.message === 'NOT_AUTHENTICATED') {
+      if (isAuthError(err)) {
         setError('login_required');
       } else {
         setError('save_failed');
@@ -111,7 +112,7 @@ export default function SaveButtons({
     } catch (err) {
       // Revert on error
       setIsSaved(prev => !prev);
-      if (err instanceof Error && err.message === 'NOT_AUTHENTICATED') {
+      if (isAuthError(err)) {
         setError('login_required');
       } else {
         setError('save_failed');

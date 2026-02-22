@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/shared/lib/supabase/client';
+import { API_BASE_URL, apiFetch } from '@/lib/api/client';
 import { IAuthRepository, AuthSession, UserProfile } from '../../domain';
 import { UserProfileDTO } from '../dto/UserDTO';
 import { Result, success, failure } from '@/shared/types';
@@ -12,11 +13,6 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export class AuthRepository implements IAuthRepository {
   private supabase = createClient();
-  private apiUrl: string;
-
-  constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  }
 
   async getSession(): Promise<AuthSession | null> {
     try {
@@ -62,7 +58,7 @@ export class AuthRepository implements IAuthRepository {
 
   async getCurrentUserProfile(accessToken: string): Promise<Result<UserProfile>> {
     try {
-      const response = await fetch(`${this.apiUrl}/api/v1/users/me`, {
+      const response = await apiFetch(`${API_BASE_URL}/api/v1/users/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation } from '@/lib/api/cafes';
+import { isAuthError } from '@/lib/api/client';
 import { useLocation } from '@/hooks/useLocation';
 import { validateInitialDistance } from '@/lib/utils/checkIn';
 import { CafeRegistrationRequest } from '@/types/api';
@@ -256,7 +257,7 @@ export default function RegisterCafeForm({
       }
     } catch (error) {
       console.error('Registration error:', error);
-      if (error instanceof Error && error.message === 'NOT_AUTHENTICATED') {
+      if (isAuthError(error)) {
         setError(tErrors('not_authenticated'));
       } else {
         setError(t('registration_failed'));

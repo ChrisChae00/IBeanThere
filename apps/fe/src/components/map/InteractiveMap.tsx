@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -12,6 +12,82 @@ import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
 import { createCustomMarkerIcon, createUserLocationIcon, createSelectedLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
 import { useTheme } from '@/contexts/ThemeContext';
 import { UserLocationIcon } from '@/shared/ui';
+
+// ─── Map Resize Handler ─────────────────────────────────────
+
+/** Tailwind `lg` breakpoint — matches the 2-column grid in explore-map */
+const LG_BREAKPOINT = '(min-width: 1024px)';
+
+/**
+ * Watches the map container for size changes and calls
+ * `map.invalidateSize()` so Leaflet re-renders tiles to fill
+ * the new container dimensions.
+ *
+ * - **lg+ (2-column layout)**: Uses `ResizeObserver` because
+ *   the TrendingCafesSection can change the map container height.
+ * - **< lg (single-column)**: The map has a fixed height so
+ *   continuous observation is skipped. Only the initial
+ *   invalidateSize fires to handle dynamic-import timing.
+ */
+function MapResizeHandler() {
+  const map = useMap();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const invalidate = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      map.invalidateSize({ animate: false, pan: false });
+    }, 150);
+  }, [map]);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container) return;
+
+    // Initial invalidateSize after dynamic import settles (all screen sizes)
+    const initialTimer = setTimeout(() => {
+      map.invalidateSize({ animate: false, pan: false });
+    }, 300);
+
+    // Only observe continuous resizes on lg+ (2-column layout)
+    const mql = window.matchMedia(LG_BREAKPOINT);
+    let observer: ResizeObserver | null = null;
+
+    const startObserving = () => {
+      if (observer) return;
+      observer = new ResizeObserver(() => invalidate());
+      observer.observe(container);
+    };
+
+    const stopObserving = () => {
+      observer?.disconnect();
+      observer = null;
+    };
+
+    // React to viewport crossing the lg breakpoint
+    const handleBreakpointChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) {
+        startObserving();
+      } else {
+        stopObserving();
+      }
+    };
+
+    handleBreakpointChange(mql);
+    mql.addEventListener('change', handleBreakpointChange);
+
+    return () => {
+      clearTimeout(initialTimer);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      stopObserving();
+      mql.removeEventListener('change', handleBreakpointChange);
+    };
+  }, [map, invalidate]);
+
+  return null;
+}
+
+// ─── Utilities ──────────────────────────────────────────────
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
@@ -342,6 +418,7 @@ function MapContent({
   
   return (
     <>
+      <MapResizeHandler />
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}

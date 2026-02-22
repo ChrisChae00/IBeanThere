@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { CafeMapData, MapSearchParams } from '@/types/map';
 import { CafeSearchResponse } from '@/types/api';
 import { useSpatialCafeCache } from './useSpatialCafeCache';
+import { apiFetch, API_BASE_URL } from '@/lib/api/client';
 
 interface MapDataState {
   cafes: CafeMapData[];
@@ -38,10 +39,9 @@ export function useMapData() {
         }
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const url = `${apiUrl}/api/v1/cafes/search?lat=${params.lat}&lng=${params.lng}&radius=${params.radius}`;
+      const url = `${API_BASE_URL}/api/v1/cafes/search?lat=${params.lat}&lng=${params.lng}&radius=${params.radius}`;
       
-      const response = await fetch(url);
+      const response = await apiFetch(url);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch cafes: ${response.status} ${response.statusText}`);
