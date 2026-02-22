@@ -112,6 +112,24 @@ export interface CafeRegistrationResponse {
   };
 }
 
+export interface GooglePlacesLookupData {
+  name?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  phone?: string;
+  website?: string;
+  business_hours?: BusinessHoursData;
+  google_maps_url?: string;
+}
+
+export interface GooglePlacesLookupResult {
+  success: boolean;
+  data?: GooglePlacesLookupData;
+  error?: string;
+  message?: string;
+}
+
 export interface LocationSearchResult {
   lat: number;
   lng: number;

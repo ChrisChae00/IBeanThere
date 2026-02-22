@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation } from '@/lib/api/cafes';
+import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation, lookupGoogleMapsUrl } from '@/lib/api/cafes';
 import { isAuthError } from '@/lib/api/client';
 import { useLocation } from '@/hooks/useLocation';
 import { validateInitialDistance } from '@/lib/utils/checkIn';
@@ -59,6 +59,7 @@ export default function RegisterCafeForm({
   const [isDetectingCountry, setIsDetectingCountry] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [isLookingUp, setIsLookingUp] = useState(false);
   
   const userLocation = providedUserLocation || (coords ? { lat: coords.latitude, lng: coords.longitude } : null);
   
@@ -193,6 +194,61 @@ export default function RegisterCafeForm({
     }
   };
   
+  const handleGooglePlacesLookup = async () => {
+    if (!formData.source_url.trim()) {
+      setError(t('google_maps_auto_fill_invalid_url'));
+      return;
+    }
+
+    setIsLookingUp(true);
+    setError('');
+
+    try {
+      const result = await lookupGoogleMapsUrl(formData.source_url.trim());
+
+      if (result.success && result.data) {
+        setFormData(prev => ({
+          ...prev,
+          name: result.data!.name || prev.name,
+          address: result.data!.address || prev.address,
+          phone: result.data!.phone || prev.phone,
+          website: result.data!.website || prev.website,
+          source_url: result.data!.google_maps_url || prev.source_url,
+        }));
+
+        if (result.data.latitude != null && result.data.longitude != null) {
+          setCafeLocation({ lat: result.data.latitude, lng: result.data.longitude });
+          setAddressFetched(true);
+        }
+
+        if (result.data.business_hours) {
+          setBusinessHours(result.data.business_hours as BusinessHours);
+        }
+
+        showToast(t('google_maps_auto_fill_success'), 'success');
+      } else {
+        if (result.error === 'NOT_CONFIGURED') {
+          setError(t('google_maps_auto_fill_not_configured'));
+        } else if (result.error === 'PLACE_NOT_FOUND') {
+          setError(t('google_maps_auto_fill_not_found'));
+        } else if (result.error === 'INVALID_URL') {
+          setError(t('google_maps_auto_fill_invalid_url'));
+        } else {
+          setError(t('google_maps_auto_fill_failed'));
+        }
+      }
+    } catch (error) {
+      console.error('Google Places lookup error:', error);
+      if (isAuthError(error)) {
+        setError(tErrors('not_authenticated'));
+      } else {
+        setError(t('google_maps_auto_fill_failed'));
+      }
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -233,7 +289,7 @@ export default function RegisterCafeForm({
         source_url: formData.source_url || undefined,
         business_hours: businessHours,
         user_location: userLocation,
-        source_type: locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode',
+        source_type: formData.source_url ? 'google_url' : locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode',
         images: photos.length > 0 ? photos : undefined,
         main_image_index: photos.length > 0 ? mainImageIndex : undefined
       };
@@ -501,14 +557,28 @@ export default function RegisterCafeForm({
           />
           
           <div>
-            <Input
-              label={t('google_maps_url_label')}
-              type="url"
-              name="source_url"
-              value={formData.source_url}
-              onChange={handleInputChange}
-              placeholder={t('google_maps_url_placeholder')}
-            />
+            <label className="block text-sm font-medium text-[var(--color-cardText)] mb-2">
+              {t('google_maps_url_label')}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                name="source_url"
+                value={formData.source_url}
+                onChange={handleInputChange}
+                className="flex-1 px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
+                placeholder={t('google_maps_url_placeholder')}
+              />
+              <Button
+                type="button"
+                onClick={handleGooglePlacesLookup}
+                disabled={!formData.source_url.trim()}
+                loading={isLookingUp}
+                className="whitespace-nowrap"
+              >
+                {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
+              </Button>
+            </div>
             <p className="text-xs text-[var(--color-text-secondary)] mt-1">
               {t('google_maps_url_hint')}
             </p>

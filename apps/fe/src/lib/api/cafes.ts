@@ -1,4 +1,4 @@
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
@@ -60,6 +60,49 @@ export async function registerCafe(
       success: false,
       error: 'NETWORK_ERROR',
       message: 'Failed to register cafe. Please try again.'
+    };
+  }
+}
+
+export async function lookupGoogleMapsUrl(
+  url: string
+): Promise<GooglePlacesLookupResult> {
+  try {
+    const headers = await getAuthHeaders();
+
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/google-places/lookup`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new ApiError('Authentication required', 401, 'NOT_AUTHENTICATED');
+      }
+      if (response.status === 501) {
+        return { success: false, error: 'NOT_CONFIGURED' };
+      }
+      if (response.status === 400) {
+        return { success: false, error: 'INVALID_URL' };
+      }
+      if (response.status === 404) {
+        return { success: false, error: 'PLACE_NOT_FOUND' };
+      }
+      return { success: false, error: 'LOOKUP_FAILED' };
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error looking up Google Maps URL:', error);
+    if (error instanceof ApiError && error.isAuthError) {
+      throw error;
+    }
+    return {
+      success: false,
+      error: 'NETWORK_ERROR',
+      message: 'Failed to look up place information. Please try again.',
     };
   }
 }
