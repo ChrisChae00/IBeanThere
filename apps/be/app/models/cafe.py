@@ -106,3 +106,24 @@ class CafeSearchResponse(BaseModel):
     """Response model for cafe search."""
     cafes: List[CafeResponse]
     total_count: int
+
+
+# =========================================================
+# Google Places Lookup Models
+# =========================================================
+
+class GooglePlacesLookupRequest(BaseModel):
+    """Request model for Google Maps URL lookup."""
+    url: str = Field(..., description="Google Maps URL to extract cafe info from")
+
+class GooglePlacesLookupResponse(BaseModel):
+    """Response model for Google Maps URL lookup."""
+    name: Optional[str] = None
+    address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    business_hours: Optional[Dict[str, Any]] = None
+    google_maps_url: Optional[str] = None
+

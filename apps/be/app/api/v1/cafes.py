@@ -15,7 +15,9 @@ from app.models.cafe import (
     CafeSearchParams,
     CafeSearchResponse,
     CafeResponse,
-    CafeRegistrationRequest
+    CafeRegistrationRequest,
+    GooglePlacesLookupRequest,
+    GooglePlacesLookupResponse
 )
 from app.services.osm_service import OSMService
 from app.database.supabase import get_supabase_client
@@ -941,6 +943,75 @@ async def register_cafe(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to register cafe: {str(e)}"
+        )
+
+# =========================================================
+# Google Places Lookup
+# =========================================================
+
+@router.post("/google-places/lookup")
+async def lookup_google_maps_url(
+    request: GooglePlacesLookupRequest = Body(...),
+    current_user = Depends(get_current_user),
+):
+    """
+    Look up cafe information from a Google Maps URL.
+    
+    Uses Google Places API (New) to extract:
+    - Name, address, coordinates
+    - Phone number, website
+    - Business hours
+    
+    Requires authentication to prevent API cost abuse.
+    Returns 501 if Google Places API key is not configured.
+    """
+    from app.config import settings
+    
+    if not settings.google_places_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google Places API is not configured. Please enter cafe information manually."
+        )
+    
+    # Validate URL format
+    url = request.url.strip()
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="URL is required"
+        )
+    
+    # Basic URL validation
+    if not any(domain in url.lower() for domain in [
+        "google.com/maps", "maps.google", "maps.app.goo.gl", 
+        "goo.gl/maps", "g.co/maps"
+    ]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid Google Maps URL"
+        )
+    
+    try:
+        from app.services.google_places_service import GooglePlacesService
+        
+        service = GooglePlacesService(api_key=settings.google_places_api_key)
+        result = await service.lookup_from_url(url)
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Could not find place information for this URL"
+            )
+        
+        return GooglePlacesLookupResponse(**result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google Places lookup error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to look up place information. Please try again or enter manually."
         )
 
 @router.get("/osm/search")
