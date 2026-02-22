@@ -21,7 +21,7 @@ import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
 import { checkIn } from '@/lib/api/visits';
 import { calculateDistance } from '@/lib/utils/checkIn';
-import { API_BASE_URL } from '@/lib/api/client';
+import { API_BASE_URL, apiFetch } from '@/lib/api/client';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
   if (typeof window !== 'undefined') {
@@ -354,7 +354,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     setSelectedCafe(cafe);
     
     try {
-      await fetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
+      await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

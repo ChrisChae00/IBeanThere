@@ -168,11 +168,7 @@ export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse>
     cache: 'no-store', // Disable caching to ensure fresh data
   });
 
-  if (!response.ok && response.status === 404) {
-    throw new ApiError('Cafe not found', 404, 'CAFE_NOT_FOUND');
-  }
-
-  return handleResponse<CafeDetailResponse>(response);
+  return handleResponse<CafeDetailResponse>(response, { 404: 'CAFE_NOT_FOUND' });
 }
 
 export async function searchCafes(
