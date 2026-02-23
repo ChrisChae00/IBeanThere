@@ -9,3 +9,4 @@ export { default as CafeGridCard } from './CafeGridCard';
 export { default as TrendingCafesSection } from './TrendingCafesSection';
 export { default as DropBeanButton } from './DropBeanButton';
 export { GrowthIcon, GROWTH_THRESHOLDS, getGrowthLevel } from './GrowthIcon';
+export { default as NavigationButton } from './NavigationButton';

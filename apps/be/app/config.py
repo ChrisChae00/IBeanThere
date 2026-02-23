@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     resend_api_key: Optional[str] = None
     admin_email: str = "ibeanthere.app@gmail.com"
     
+    # Google Places API
+    google_places_api_key: Optional[str] = None
+    
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins string into a list, handling wildcard"""

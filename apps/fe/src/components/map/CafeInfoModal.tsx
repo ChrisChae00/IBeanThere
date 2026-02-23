@@ -9,6 +9,7 @@ import { Badge } from '@/shared/ui';
 import { Button } from '@/shared/ui';
 
 import DropBeanButton from '../cafe/DropBeanButton';
+import NavigationButton from '../cafe/NavigationButton';
 
 interface CafeInfoModalProps {
   cafe: CafeMapData;
@@ -128,19 +129,24 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
               <p className="text-[var(--color-cardText)]">{cafe.address}</p>
-              {cafe.source_url && (
-                <a
-                  href={cafe.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[var(--color-cardText)] hover:underline"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                  </svg>
-                  <span>{t('google_maps')}</span>
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {cafe.source_url && (
+                  <a
+                    href={cafe.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg text-xs font-medium text-[var(--color-cardText)] transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span>{t('google_maps')}</span>
+                  </a>
+                )}
+                {cafe.latitude && cafe.longitude && (
+                  <NavigationButton latitude={cafe.latitude} longitude={cafe.longitude} size="sm" />
+                )}
+              </div>
             </div>
           )}
 
