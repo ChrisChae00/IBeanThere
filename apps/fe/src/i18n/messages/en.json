@@ -554,7 +554,7 @@
         "name_label": "Cafe Name",
         "name_placeholder": "Enter cafe name",
         "name_required": "Cafe name is required",
-        "address_label": "Address (Optional)",
+        "address_label": "Address",
         "address_placeholder": "Will be auto-filled from location",
         "phone_label": "Phone (Optional)",
         "phone_placeholder": "Enter phone number",

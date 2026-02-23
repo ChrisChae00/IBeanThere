@@ -550,7 +550,7 @@
         "name_label": "카페 이름",
         "name_placeholder": "카페 이름을 입력하세요",
         "name_required": "카페 이름은 필수입니다",
-        "address_label": "주소 (선택)",
+        "address_label": "주소",
         "address_placeholder": "위치에서 자동으로 입력됩니다",
         "phone_label": "전화번호 (선택)",
         "phone_placeholder": "전화번호를 입력하세요",

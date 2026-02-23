@@ -73,7 +73,14 @@ class GooglePlacesService:
                 if place_id:
                     return await self._get_place_details(place_id)
             
-            logger.warning(f"Could not extract place info from URL: {url}")
+            # Step 4: Try CID-based lookup as last resort
+            cid = self._extract_cid(resolved_url)
+            if cid:
+                place_id = await self._search_place_by_cid(cid)
+                if place_id:
+                    return await self._get_place_details(place_id)
+            
+            logger.warning(f"Could not extract place info from URL: {resolved_url}")
             return None
             
         except Exception as e:
@@ -81,13 +88,22 @@ class GooglePlacesService:
             return None
     
     async def _resolve_short_link(self, url: str) -> str:
-        """Follow redirects for short URLs like maps.app.goo.gl or goo.gl/maps."""
+        """Follow redirects for short URLs like maps.app.goo.gl or goo.gl/maps.
+        
+        Uses GET instead of HEAD because Google returns different redirect
+        chains for HEAD requests — HEAD sometimes resolves to unusable
+        CID-based URLs instead of the full /place/ URL with name and coords.
+        """
         parsed = urlparse(url)
         
         if parsed.hostname in ("maps.app.goo.gl", "goo.gl"):
             try:
-                async with httpx.AsyncClient(follow_redirects=True, timeout=10.0) as client:
-                    response = await client.head(url)
+                async with httpx.AsyncClient(
+                    follow_redirects=True,
+                    timeout=10.0,
+                    headers={"User-Agent": "Mozilla/5.0"}
+                ) as client:
+                    response = await client.get(url)
                     return str(response.url)
             except Exception as e:
                 logger.warning(f"Failed to resolve short link: {e}")
@@ -108,12 +124,71 @@ class GooglePlacesService:
         if match:
             return match.group(1)
         
-        # Pattern: ftid=0x...:0x...
+        # Pattern: ftid=0x...:0x... (explicit query param)
         match = re.search(r'ftid=(0x[a-f0-9]+:0x[a-f0-9]+)', url)
         if match:
             return match.group(1)
         
         return None
+    
+    def _extract_cid(self, url: str) -> Optional[str]:
+        """Extract CID (Customer ID) from Google Maps URL.
+        
+        CID URLs look like: https://maps.google.com/?cid=6024271707753344746
+        These appear when Google redirects short links via HEAD requests.
+        """
+        match = re.search(r'[?&]cid=(\d+)', url)
+        if match:
+            return match.group(1)
+        return None
+    
+    async def _search_place_by_cid(self, cid: str) -> Optional[str]:
+        """Search for a place using its CID by querying the CID URL.
+        
+        Google CID is a unique numeric identifier. We use it as a text
+        query in the Places API to find the corresponding place.
+        """
+        try:
+            # First, try to resolve the CID to a full URL with place info
+            cid_url = f"https://maps.google.com/?cid={cid}"
+            try:
+                async with httpx.AsyncClient(
+                    follow_redirects=True,
+                    timeout=10.0,
+                    headers={"User-Agent": "Mozilla/5.0"}
+                ) as client:
+                    response = await client.get(cid_url)
+                    resolved = str(response.url)
+                    
+                    # Try to extract name and coords from the resolved URL
+                    name, lat, lng = self._extract_name_and_coords(resolved)
+                    if name or (lat and lng):
+                        return await self._search_place(name, lat, lng)
+            except Exception as e:
+                logger.warning(f"Failed to resolve CID URL: {e}")
+            
+            # Fallback: use CID as a direct text search query
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.PLACES_API_BASE}:searchText",
+                    headers={
+                        "Content-Type": "application/json",
+                        "X-Goog-Api-Key": self.api_key,
+                        "X-Goog-FieldMask": "places.id",
+                    },
+                    json={"textQuery": f"cid:{cid}"},
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    places = data.get("places", [])
+                    if places:
+                        return places[0]["id"]
+            
+            return None
+        except Exception as e:
+            logger.error(f"CID search error: {e}")
+            return None
     
     def _extract_name_and_coords(self, url: str) -> tuple:
         """Extract place name and coordinates from Google Maps URL."""
@@ -192,6 +267,7 @@ class GooglePlacesService:
     async def _get_place_details(self, place_id: str) -> Optional[Dict[str, Any]]:
         """Get place details from Google Places API and return standardized format."""
         try:
+            logger.info(f"Getting place details for place_id: {place_id}")
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
                     f"{self.PLACES_API_BASE}/{place_id}",

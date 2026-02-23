@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation, lookupGoogleMapsUrl } from '@/lib/api/cafes';
 import { isAuthError } from '@/lib/api/client';
@@ -60,6 +60,7 @@ export default function RegisterCafeForm({
   const [photos, setPhotos] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const lookupCacheRef = useRef<Record<string, import('@/types/api').GooglePlacesLookupResult>>({});
   
   const userLocation = providedUserLocation || (coords ? { lat: coords.latitude, lng: coords.longitude } : null);
   
@@ -195,8 +196,22 @@ export default function RegisterCafeForm({
   };
   
   const handleGooglePlacesLookup = async () => {
-    if (!formData.source_url.trim()) {
+    const trimmedUrl = formData.source_url.trim();
+    if (!trimmedUrl) {
       setError(t('google_maps_auto_fill_invalid_url'));
+      return;
+    }
+
+    // Prevent duplicate concurrent requests
+    if (isLookingUp) return;
+
+    // Check cache first — skip API call if same URL was already looked up
+    const cached = lookupCacheRef.current[trimmedUrl];
+    if (cached) {
+      if (cached.success && cached.data) {
+        applyLookupData(cached);
+        showToast(t('google_maps_auto_fill_success'), 'success');
+      }
       return;
     }
 
@@ -204,27 +219,13 @@ export default function RegisterCafeForm({
     setError('');
 
     try {
-      const result = await lookupGoogleMapsUrl(formData.source_url.trim());
+      const result = await lookupGoogleMapsUrl(trimmedUrl);
+
+      // Cache the result
+      lookupCacheRef.current[trimmedUrl] = result;
 
       if (result.success && result.data) {
-        setFormData(prev => ({
-          ...prev,
-          name: result.data!.name || prev.name,
-          address: result.data!.address || prev.address,
-          phone: result.data!.phone || prev.phone,
-          website: result.data!.website || prev.website,
-          source_url: result.data!.google_maps_url || prev.source_url,
-        }));
-
-        if (result.data.latitude != null && result.data.longitude != null) {
-          setCafeLocation({ lat: result.data.latitude, lng: result.data.longitude });
-          setAddressFetched(true);
-        }
-
-        if (result.data.business_hours) {
-          setBusinessHours(result.data.business_hours as BusinessHours);
-        }
-
+        applyLookupData(result);
         showToast(t('google_maps_auto_fill_success'), 'success');
       } else {
         if (result.error === 'NOT_CONFIGURED') {
@@ -246,6 +247,28 @@ export default function RegisterCafeForm({
       }
     } finally {
       setIsLookingUp(false);
+    }
+  };
+
+  const applyLookupData = (result: import('@/types/api').GooglePlacesLookupResult) => {
+    if (!result.data) return;
+
+    setFormData(prev => ({
+      ...prev,
+      name: result.data!.name || prev.name,
+      address: result.data!.address || prev.address,
+      phone: result.data!.phone || prev.phone,
+      website: result.data!.website || prev.website,
+      source_url: result.data!.google_maps_url || prev.source_url,
+    }));
+
+    if (result.data.latitude != null && result.data.longitude != null) {
+      setCafeLocation({ lat: result.data.latitude, lng: result.data.longitude });
+      setAddressFetched(true);
+    }
+
+    if (result.data.business_hours) {
+      setBusinessHours(result.data.business_hours as BusinessHours);
     }
   };
 
@@ -398,117 +421,118 @@ export default function RegisterCafeForm({
       <form onSubmit={handleSubmit} className="space-y-6">
           <ErrorAlert message={error} />
           
-          {/* Location Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-text)] mb-3">
-              {t('location_select')}
+          {/* Google Maps Auto Fill */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-sm mb-6">
+            <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+              {t('google_maps_url_label')}
             </label>
-            
-            <div className="flex gap-2 mb-4">
-              <Button
-                type="button"
-                onClick={handleCurrentLocationClick}
-                className={`flex-1 border-2 ${
-                  locationMode === 'current'
-                    ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]'
-                    : 'border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-primary)]'
-                }`}
-                variant="outline"
-                loading={locationLoading}
-              >
-                {t('use_current_location')}
-              </Button>
-            </div>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-4">
-              {t('select_on_map_hint')}
-            </p>
-            
-            {/* Postcode Search */}
             <div className="flex gap-2">
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="px-3 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] min-h-[44px] text-sm appearance-none cursor-pointer pr-8 w-32"
-                disabled={isDetectingCountry}
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '12px 12px',
-                  backgroundClip: 'padding-box'
-                }}
-              >
-                <option value="">{t('country_select')}</option>
-                {countries.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
               <input
-                type="text"
-                name="postcode"
-                value={formData.postcode}
+                type="url"
+                name="source_url"
+                value={formData.source_url}
                 onChange={handleInputChange}
                 className="flex-1 px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
-                placeholder={t('postcode_placeholder')}
+                placeholder={t('google_maps_url_placeholder')}
               />
               <Button
                 type="button"
-                onClick={handlePostcodeSearch}
-                disabled={!formData.postcode.trim()}
-                loading={isSearchingPostcode}
+                onClick={handleGooglePlacesLookup}
+                disabled={!formData.source_url.trim()}
+                loading={isLookingUp}
                 className="whitespace-nowrap"
               >
-                {t('search_postcode')}
+                {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
               </Button>
             </div>
-            
-            {/* Distance Indicator */}
-            {distance !== null && (
-              <div className={`mt-3 px-4 py-2 rounded-lg ${
-                isValidDistance
-                  ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-                  : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
-              }`}>
-                <p className="text-sm font-medium">
-                  {t('distance')}: {Math.round(distance)}m
-                  {isValidDistance ? ` ${t('within_range')}` : ` ${t('out_of_range')}`}
-                </p>
-              </div>
-            )}
-            
-            {/* GPS Accuracy Indicator */}
-            {locationMode === 'current' && coords && coords.accuracy && (
-              <div className={`mt-3 px-4 py-2 rounded-lg ${
-                coords.accuracy > 50
-                  ? 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
-                  : coords.accuracy > 20
-                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
-                  : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-              }`}>
-                <p className="text-sm font-medium">
-                  {t('location_accuracy')}: {t('location_accuracy_meters', { accuracy: Math.round(coords.accuracy) })}
-                </p>
-                {coords.accuracy > 50 && (
-                  <p className="text-xs mt-1 opacity-90">
-                    {t('location_accuracy_low_warning')}
-                  </p>
-                )}
-              </div>
-            )}
-            
+            <p className="text-xs text-[var(--color-text-secondary)] mt-2">
+              {t('google_maps_url_hint')}
+            </p>
           </div>
           
-          {/* Photo Upload */}
-          <PhotoUploadWithMain
-            photos={photos}
-            onChange={setPhotos}
-            mainIndex={mainImageIndex}
-            onMainIndexChange={setMainImageIndex}
-            maxPhotos={5}
-          />
+          {/* Location Selection */}
+          <div className="flex flex-col gap-3">
+            <div>
+              <label className="block text-sm font-semibold text-[var(--color-text)] mb-1">
+                {t('location_select')}
+              </label>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                {t('select_on_map_hint')}
+              </p>
+              
+              <div className="flex flex-col gap-1.5 mt-2">
+
+                {/* GPS Accuracy Indicator */}
+                {locationMode === 'current' && coords && coords.accuracy && (
+                  <div className={`text-xs font-medium px-2.5 py-1.5 rounded-md flex flex-col justify-center ${
+                    coords.accuracy > 50
+                      ? 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+                      : coords.accuracy > 20
+                      ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                      : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                  }`}>
+                    <div>{t('location_accuracy')}: {t('location_accuracy_meters', { accuracy: Math.round(coords.accuracy) })}</div>
+                    {coords.accuracy > 50 && (
+                      <div className="opacity-80 mt-0.5">{t('location_accuracy_low_warning')}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Postcode Search Fallback */}
+            <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-sm">
+              <summary className="text-sm font-medium cursor-pointer p-3 text-[var(--color-text)] hover:bg-[var(--color-border)]/30 transition-colors list-none flex items-center justify-between">
+                <span>{t('postcode_label')}</span>
+                <span className="opacity-60 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="p-3 pt-1 border-t border-[var(--color-border)]">
+                <div className="flex gap-2 mt-2">
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
+                    disabled={isDetectingCountry}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 8px center',
+                      backgroundSize: '12px 12px',
+                      backgroundClip: 'padding-box'
+                    }}
+                  >
+                    <option value="">{t('country_select')}</option>
+                    {countries.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    name="postcode"
+                    value={formData.postcode}
+                    onChange={handleInputChange}
+                    className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 h-[40px] text-sm"
+                    placeholder={t('postcode_placeholder')}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handlePostcodeSearch}
+                    disabled={!formData.postcode.trim()}
+                    loading={isSearchingPostcode}
+                    className="whitespace-nowrap h-[40px] px-4 text-sm"
+                  >
+                    {t('search_postcode')}
+                  </Button>
+                </div>
+              </div>
+            </details>
+            
+
+          </div>
           
+
           <Input
             label={`${t('name_label')} *`}
             name="name"
@@ -536,6 +560,18 @@ export default function RegisterCafeForm({
                 {t('address_edit_hint')}
               </p>
             )}
+
+            {/* Distance Indicator */}
+            {distance !== null && (
+              <div className={`mt-2 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center gap-1.5 ${
+                isValidDistance
+                  ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                  : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+              }`}>
+                <span className="shrink-0">{t('distance')}: {Math.round(distance)}m</span>
+                <span className="opacity-90">{isValidDistance ? `(${t('within_range')})` : `(${t('out_of_range')})`}</span>
+              </div>
+            )}
           </div>
           
           <Input
@@ -555,39 +591,20 @@ export default function RegisterCafeForm({
             onChange={handleInputChange}
             placeholder={t('website_placeholder')}
           />
-          
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-cardText)] mb-2">
-              {t('google_maps_url_label')}
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                name="source_url"
-                value={formData.source_url}
-                onChange={handleInputChange}
-                className="flex-1 px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
-                placeholder={t('google_maps_url_placeholder')}
-              />
-              <Button
-                type="button"
-                onClick={handleGooglePlacesLookup}
-                disabled={!formData.source_url.trim()}
-                loading={isLookingUp}
-                className="whitespace-nowrap"
-              >
-                {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
-              </Button>
-            </div>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-              {t('google_maps_url_hint')}
-            </p>
-          </div>
-          
+
           {/* Opening Hours */}
           <OpeningHoursInput
             value={businessHours}
             onChange={setBusinessHours}
+          />
+          
+          {/* Photo Upload */}
+          <PhotoUploadWithMain
+            photos={photos}
+            onChange={setPhotos}
+            mainIndex={mainImageIndex}
+            onMainIndexChange={setMainImageIndex}
+            maxPhotos={5}
           />
           
           {/* Action Buttons */}

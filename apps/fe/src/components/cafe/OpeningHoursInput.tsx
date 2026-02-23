@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { BusinessHours } from '@/types/map';
 
@@ -14,6 +14,13 @@ const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
 export default function OpeningHoursInput({ value, onChange }: OpeningHoursInputProps) {
   const t = useTranslations('cafe.register');
   const [showHours, setShowHours] = useState(!!value && Object.keys(value).length > 0);
+
+  // Sync showHours when value is set externally (e.g. Google Maps auto-fill)
+  useEffect(() => {
+    if (value && Object.keys(value).length > 0) {
+      setShowHours(true);
+    }
+  }, [value]);
 
   const handleToggle = () => {
     if (showHours) {
