@@ -647,6 +647,12 @@
         "first_discoverer": "이 카페의 첫 발견자",
         "visited_this_cafe": "방문해 보셨나요?"
       },
+      "navigation": {
+        "get_directions": "길찾기",
+        "google_maps": "Google 지도",
+        "apple_maps": "Apple 지도",
+        "waze": "Waze"
+      },
       "detail": {
         "average_rating": "평균 평점",
         "total_logs": "전체 로그",

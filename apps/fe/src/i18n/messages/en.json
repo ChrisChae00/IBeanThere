@@ -651,6 +651,12 @@
         "first_discoverer": "First discoverer of this cafe",
         "visited_this_cafe": "Have you visited?"
       },
+      "navigation": {
+        "get_directions": "Get Directions",
+        "google_maps": "Google Maps",
+        "apple_maps": "Apple Maps",
+        "waze": "Waze"
+      },
       "detail": {
         "view_on_google_maps": "View on Google Maps",
         "average_rating": "Average Rating",
