@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { BackButton } from '@/components/common/BackButton';
 
+export const revalidate = 86400;
+
 export default async function TermsPage({
   params
 }: {
