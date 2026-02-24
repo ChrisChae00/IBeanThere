@@ -7,11 +7,24 @@ const intlMiddleware = createIntlMiddleware({
   defaultLocale: 'en'
 });
 
+// Pages that don't need a Supabase session refresh on every request.
+// i18n routing still runs for all paths.
+const PUBLIC_PATHS = ['/terms', '/privacy', '/contact'];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some(p => pathname.includes(p));
+}
+
 export async function middleware(request: NextRequest) {
-  // First, run the intl middleware
-  let response = intlMiddleware(request);
-  
-  // Create a Supabase client with the request/response
+  // i18n middleware always runs for locale routing
+  const response = intlMiddleware(request);
+
+  // Skip Supabase session refresh for static public pages
+  if (isPublicPath(request.nextUrl.pathname)) {
+    return response;
+  }
+
+  // Refresh the session for all other routes
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,7 +43,6 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // This will refresh the session if needed
   await supabase.auth.getUser();
 
   return response;
@@ -39,6 +51,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all paths except static files, _next, and auth routes
-    '/((?!_next|_vercel|auth/callback|auth/redirect|.*\\..*).*)' 
+    '/((?!_next|_vercel|auth/callback|auth/redirect|.*\\..*).*)'
   ]
 };
