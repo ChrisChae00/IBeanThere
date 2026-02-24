@@ -6,8 +6,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
 import { Card } from '@/components/ui';
-import { StarRating, ImageLightbox } from '@/shared/ui';
+import dynamic from 'next/dynamic';
+import { StarRating } from '@/shared/ui';
 import { Avatar } from '@/shared/ui';
+
+const ImageLightbox = dynamic(() => import('@/shared/ui/ImageLightbox'), { ssr: false });
 import { useAuth } from '@/hooks/useAuth';
 import { getCafeDetail } from '@/lib/api/cafes';
 import { getCafePath } from '@/lib/utils/slug';
