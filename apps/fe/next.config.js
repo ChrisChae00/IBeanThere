@@ -3,7 +3,11 @@ const withNextIntl = require('next-intl/plugin')(
   './src/i18n/request.ts'
 );
 
-module.exports = withNextIntl({
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer(withNextIntl({
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -20,5 +24,6 @@ module.exports = withNextIntl({
         pathname: '/storage/**',
       },
     ],
+    minimumCacheTTL: 2592000,
   },
-});
+}));

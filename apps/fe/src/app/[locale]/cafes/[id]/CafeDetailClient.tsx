@@ -11,9 +11,13 @@ import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
 import SaveButtons from '@/components/cafe/SaveButtons';
 import CollectionSelectorModal from '@/components/cafe/CollectionSelectorModal';
-import { StarRating, ImageGalleryModal, ImageLightbox } from '@/shared/ui';
+import dynamic from 'next/dynamic';
+import { StarRating } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+
+const ImageGalleryModal = dynamic(() => import('@/shared/ui/ImageGalleryModal'), { ssr: false });
+const ImageLightbox = dynamic(() => import('@/shared/ui/ImageLightbox'), { ssr: false });
 
 
 interface CafeDetailClientProps {

@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
@@ -185,9 +186,10 @@ export async function getTrendingCafes(
     
     const response = await apiFetch(url, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: 14400, tags: ['trending-cafes'] },
     });
-    
+
     return await handleResponse<TrendingCafeResponse[]>(response);
   } catch (error) {
     console.error('Error fetching trending cafes:', error);
@@ -204,15 +206,19 @@ export async function getPendingCafes(): Promise<CafeSearchResponse> {
   return handleResponse<CafeSearchResponse>(response);
 }
 
-export async function getCafeDetail(cafeId: string): Promise<CafeDetailResponse> {
+async function _getCafeDetail(cafeId: string): Promise<CafeDetailResponse> {
   const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
-    cache: 'no-store', // Disable caching to ensure fresh data
+    next: { revalidate: 120, tags: ['cafe', `cafe-${cafeId}`] },
   });
 
   return handleResponse<CafeDetailResponse>(response, { 404: 'CAFE_NOT_FOUND' });
 }
+
+// React.cache() memoizes per render cycle — generateMetadata and the page
+// component both call this, but only one network request is made per render.
+export const getCafeDetail = cache(_getCafeDetail);
 
 export async function searchCafes(
   lat: number,
