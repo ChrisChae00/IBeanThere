@@ -187,7 +187,7 @@ export async function getTrendingCafes(
     const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: 300, tags: ['trending-cafes'] },
+      next: { revalidate: 14400, tags: ['trending-cafes'] },
     });
 
     return await handleResponse<TrendingCafeResponse[]>(response);
