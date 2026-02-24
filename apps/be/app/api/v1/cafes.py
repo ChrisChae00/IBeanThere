@@ -926,6 +926,24 @@ async def register_cafe(
                     "dropped_at": datetime.now(timezone.utc).isoformat()
                 }).execute()
             
+            # Save uploaded photos to cafe_visits for gallery display
+            if request.images and len(request.images) > 0:
+                try:
+                    visit_data = {
+                        "cafe_id": cafe_id,
+                        "user_id": current_user.id,
+                        "visited_at": datetime.now(timezone.utc).isoformat(),
+                        "photo_urls": request.images,
+                        "is_public": True,
+                        "anonymous": False,
+                        "comment": "Founding Crew - Cafe Registration",
+                        "has_photos": True
+                    }
+                    supabase.table("cafe_visits").insert(visit_data).execute()
+                    logger.info(f"Created initial cafe_visit with {len(request.images)} photos for registration")
+                except Exception as img_err:
+                    print(f"Error saving registration photos to cafe_visits: {img_err}")
+            
             return {
                 "message": "Cafe registered successfully",
                 "cafe": new_cafe,
