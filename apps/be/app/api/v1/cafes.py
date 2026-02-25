@@ -242,8 +242,8 @@ async def check_nearby_cafes(
         
         return None
         
-    except Exception as e:
-        print(f"Error checking nearby cafes: {e}")
+    except Exception:
+        logger.error("Error checking nearby cafes", exc_info=True)
         return None
 
 @router.get("/search", response_model=CafeSearchResponse)
@@ -354,9 +354,8 @@ async def search_cafes(
                         # Only take the first image for each cafe
                         if cafe_id not in cafe_images and photo_urls:
                             cafe_images[cafe_id] = photo_urls[0]
-            except Exception as img_err:
-                print(f"Error fetching log images: {img_err}")
-                pass
+            except Exception:
+                logger.warning("Error fetching log images", exc_info=True)
         
         # Format response
         formatted_cafes = []
@@ -393,12 +392,10 @@ async def search_cafes(
         )
         
     except Exception as e:
-        print(f"Error in search_cafes: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error in search_cafes")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to search cafes: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/pending", response_model=CafeSearchResponse)
@@ -473,25 +470,19 @@ async def get_pending_cafes_public(
                     updated_at=updated_at
                 )
                 cafes.append(cafe_response)
-                logger.info(f"  Successfully processed cafe: {cafe.get('name')}")
-            except Exception as e:
-                logger.error(f"Error processing cafe {cafe.get('name')}: {e}")
-                import traceback
-                logger.error(traceback.format_exc())
+                logger.info("  Successfully processed cafe: %s", cafe.get('name'))
+            except Exception:
+                logger.exception("Error processing cafe %s", cafe.get('name'))
                 raise
-        
-        logger.info(f"Returning {len(cafes)} cafes")
+
+        logger.info("Returning %d cafes", len(cafes))
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
-        
+
     except Exception as e:
-        logger.error(f"======== ERROR GETTING PENDING CAFES ========")
-        logger.error(f"Error: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        error_detail = f"Failed to get pending cafes: {str(e)}"
+        logger.exception("Error getting pending cafes")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=error_detail
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/{cafe_identifier}", response_model=CafeResponse)
@@ -632,9 +623,8 @@ async def get_cafe_details(cafe_identifier: str):
                 # If no main_image from registration (and none set above), use first image from oldest log
                 if not main_image and all_images:
                     main_image = all_images[0]
-        except Exception as img_err:
-            print(f"Error collecting images: {img_err}")
-            pass
+        except Exception:
+            logger.warning("Error collecting images", exc_info=True)
         
         response = {
             "id": cafe.get("id", ""),
@@ -699,11 +689,10 @@ async def get_cafe_details(cafe_identifier: str):
     except HTTPException:
         raise
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error getting cafe details")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get cafe details: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.post("/register")
@@ -940,9 +929,9 @@ async def register_cafe(
                         "has_photos": True
                     }
                     supabase.table("cafe_visits").insert(visit_data).execute()
-                    logger.info(f"Created initial cafe_visit with {len(request.images)} photos for registration")
-                except Exception as img_err:
-                    print(f"Error saving registration photos to cafe_visits: {img_err}")
+                    logger.info("Created initial cafe_visit with %d photos for registration", len(request.images))
+                except Exception:
+                    logger.warning("Error saving registration photos to cafe_visits", exc_info=True)
             
             return {
                 "message": "Cafe registered successfully",
@@ -955,12 +944,10 @@ async def register_cafe(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error registering cafe: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error registering cafe")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to register cafe: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 # =========================================================
@@ -1224,12 +1211,10 @@ async def search_osm_location(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error searching location: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error searching location")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to search location: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/osm/reverse")
@@ -1268,12 +1253,10 @@ async def reverse_geocode_location(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error reverse geocoding location: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error reverse geocoding location")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to reverse geocode location: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/admin/pending", response_model=CafeSearchResponse)
@@ -1335,12 +1318,10 @@ async def get_pending_cafes(
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
         
     except Exception as e:
-        print(f"Error getting pending cafes: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error getting pending cafes")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get pending cafes: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.post("/admin/{cafe_id}/verify")
@@ -1417,12 +1398,10 @@ async def admin_verify_cafe(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error verifying cafe: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error verifying cafe")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to verify cafe: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.delete("/admin/{cafe_id}")
@@ -1462,12 +1441,10 @@ async def admin_delete_cafe(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error deleting cafe: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error deleting cafe")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete cafe: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 
@@ -1552,12 +1529,10 @@ async def admin_update_cafe(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error updating cafe: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error updating cafe")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update cafe: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 
@@ -1756,7 +1731,7 @@ async def drop_bean(
                 }).eq("id", cafe_id).execute()
                 
                 triggered_verification = True
-                logger.info(f"Cafe {cafe_id} auto-verified by 3 unique bean droppers")
+                logger.info("Cafe %s auto-verified by 3 unique bean droppers", cafe_id)
         
         return {
             "message": "Bean dropped successfully!",
@@ -1774,12 +1749,10 @@ async def drop_bean(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error dropping bean: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error dropping bean")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to drop bean: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 
@@ -1863,8 +1836,8 @@ async def calculate_user_streak(supabase: Client, user_id: str) -> dict:
             "streak_active": True
         }
         
-    except Exception as e:
-        print(f"Error calculating streak: {e}")
+    except Exception:
+        logger.error("Error calculating streak", exc_info=True)
         # Return default if error
         return {
             "current_streak": 1,
@@ -1937,10 +1910,10 @@ async def get_my_bean(
         }
         
     except Exception as e:
-        print(f"Error getting bean: {e}")
+        logger.exception("Error getting bean status")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get bean status: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 
@@ -1993,8 +1966,8 @@ async def get_user_beans(
         }
         
     except Exception as e:
-        print(f"Error getting user beans: {e}")
+        logger.exception("Error getting user beans")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get user beans: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )

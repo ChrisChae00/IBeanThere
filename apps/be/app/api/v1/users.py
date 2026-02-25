@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from typing import List
+import logging
 from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
 from app.models.collection import CollectionResponse
 from app.api.deps import get_supabase_client, get_current_user
 from app.core.permissions import require_permission, Permission
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -303,7 +306,7 @@ async def get_my_profile(
         except Exception:
             # Self-Healing: If user profile is missing in public.users but Auth is valid (which it is to get here),
             # recreate the profile using metadata from the Auth User (current_user).
-            print(f"User profile missing for {current_user.id}. Attempting self-healing.")
+            logger.warning("User profile missing for %s. Attempting self-healing.", current_user.id)
             
             user_meta = current_user.user_metadata or {}
             
@@ -334,7 +337,7 @@ async def get_my_profile(
                 new_user = supabase.table("users").upsert(new_profile_data).select("*").single().execute()
                 user_data = new_user.data
             except Exception as insert_error:
-                print(f"Self-healing failed: {insert_error}")
+                logger.error("Self-healing failed for user %s", current_user.id, exc_info=True)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="User data corrupted and failed to restore."
@@ -522,9 +525,9 @@ async def register_user_profile(
                     current_user.id,
                     {"user_metadata": auth_update_data}
                 )
-        except Exception as auth_error:
+        except Exception:
             # Non-blocking error, just log it
-            print(f"Warning: Failed to sync consent to auth metadata: {auth_error}")
+            logger.warning("Failed to sync consent to auth metadata", exc_info=True)
 
         return UserRegistrationResponse(
             id=profile_data["id"],
@@ -535,13 +538,10 @@ async def register_user_profile(
     except HTTPException:
         raise
     except Exception as e:
-        # Log the actual error for debugging
-        import traceback
-        print(f"Error registering user profile: {e}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logger.exception("Error registering user profile")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to register user profile: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         ) from e
 
 @router.patch("/me", response_model=UserResponse)
@@ -728,8 +728,8 @@ async def _increment_daily_trust_count(supabase: Client, user_id: str) -> None:
                 "trust_date": today,
                 "trust_count": 1
             }).execute()
-    except Exception as e:
-        print(f"Warning: Failed to increment daily trust count: {e}")
+    except Exception:
+        logger.warning("Failed to increment daily trust count", exc_info=True)
 
 
 # =========================================================
@@ -953,8 +953,8 @@ async def get_my_streak(
             "days_since_last_drop": days_since_last_drop
         }
         
-    except Exception as e:
-        print(f"Error getting streak: {e}")
+    except Exception:
+        logger.error("Error getting streak", exc_info=True)
         return {
             "current_streak": 0,
             "max_streak": 0,
