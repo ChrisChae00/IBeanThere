@@ -6,7 +6,6 @@ export function useErrorTranslator() {
   const translateError = (errorMessage: string): string => {
     const errorMap: Record<string, string> = {
       'Invalid login credentials': t('invalid_credentials'),
-      'Email not confirmed': t('email_not_confirmed'),
       'Too many requests': t('too_many_requests'),
       'User not found': t('user_not_found'),
       'Invalid email': t('invalid_email'),

@@ -383,7 +383,6 @@
       "invalid_credentials": "Invalid email or password",
       "email_already_exists": "An account with this email already exists",
       "weak_password": "Password is too weak. Please choose a stronger password",
-      "email_not_confirmed": "Email verification is required",
       "too_many_requests": "Too many requests. Please try again later",
       "user_not_found": "User not found",
       "invalid_email": "Please enter a valid email address",
