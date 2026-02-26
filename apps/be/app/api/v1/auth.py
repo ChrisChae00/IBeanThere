@@ -61,15 +61,6 @@ async def refresh_token(current_user = Depends(require_permission(Permission.REA
         "message": "Token refresh initiated"
     }
 
-@router.get("/email-verified")
-async def check_email_verification(current_user = Depends(require_permission(Permission.READ_MY_USER))):
-    """
-    Check if user's email is verified
-    """
-    return {
-        "email_verified": current_user.email_confirmed_at is not None
-    }
-
 @router.post("/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest):
     """
