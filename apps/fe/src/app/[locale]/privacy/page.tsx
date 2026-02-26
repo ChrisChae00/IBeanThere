@@ -55,9 +55,18 @@ export default async function PrivacyPage({
           <div>
             <h2 className="text-xl font-semibold mb-3">{t('collection.title')}</h2>
             <ul className="list-disc pl-5 space-y-2">
-              <li dangerouslySetInnerHTML={{ __html: t.raw('collection.sections.personal') }} />
-              <li dangerouslySetInnerHTML={{ __html: t.raw('collection.sections.location') }} />
-              <li dangerouslySetInnerHTML={{ __html: t.raw('collection.sections.usage') }} />
+              <li>
+                <strong>{t('collection.sections.personal_label')}</strong>{' '}
+                {t('collection.sections.personal_text')}
+              </li>
+              <li>
+                <strong>{t('collection.sections.location_label')}</strong>{' '}
+                {t('collection.sections.location_text')}
+              </li>
+              <li>
+                <strong>{t('collection.sections.usage_label')}</strong>{' '}
+                {t('collection.sections.usage_text')}
+              </li>
             </ul>
           </div>
 

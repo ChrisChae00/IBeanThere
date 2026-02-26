@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from typing import List, Optional
+import hashlib
 import json
 import logging
 from app.models.visit import (
@@ -57,8 +58,9 @@ async def record_cafe_view(
                 detail="Cafe not found"
             )
         
-        ip_address = request.client.host if request.client else None
-        
+        raw_ip = request.client.host if request.client else None
+        ip_address = hashlib.sha256(raw_ip.encode()).hexdigest() if raw_ip else None
+
         # Rate limiting: Check for recent views from same IP (max 10 per minute per cafe)
         if ip_address:
             from datetime import timedelta

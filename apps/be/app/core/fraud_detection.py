@@ -10,6 +10,9 @@ from typing import Optional, Dict, Any
 from math import radians, cos, sin, asin, sqrt
 from supabase import Client
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -111,12 +114,12 @@ def log_suspicious_activity(
         }
         
         supabase.table("fraud_logs").insert(log_record).execute()
-        print(f"[FRAUD LOG] {severity.upper()}: User {user_id} - {reason or 'Speed anomaly'}")
+        logger.warning("Suspicious activity logged: severity=%s user=%s", severity, user_id)
         return True
-        
+
     except Exception as e:
         # Log error but don't fail the main operation
-        print(f"[FRAUD LOG ERROR] Failed to log suspicious activity: {e}")
+        logger.error("Failed to log suspicious activity", exc_info=True)
         return False
 
 
@@ -159,7 +162,7 @@ def get_last_drop_location(supabase: Client, user_id: str) -> Optional[Dict[str,
         }
         
     except Exception as e:
-        print(f"[FRAUD] Error getting last drop location: {e}")
+        logger.error("Error getting last drop location", exc_info=True)
         return None
 
 

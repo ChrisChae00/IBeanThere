@@ -1070,9 +1070,12 @@
         "collection": {
           "title": "2. Information We Collect",
           "sections": {
-            "personal": "<strong>Personal Information:</strong> We collect information you provide directly to us, such as your name, email address, username, password, and coffee preferences when you register or update your profile.",
-            "location": "<strong>Location Data:</strong> With your consent, we collect precise geolocation data to show you nearby cafes, verify 'Drop Bean' actions, and maintain your 'Navigator' status.",
-            "usage": "<strong>Automatic Information:</strong> When you use our Services, we collect certain information by automated means, such as through server log files, cookies, web beacons (also known as clear GIFs and pixel tags), and embedded scripts. This may include your IP address, device type and model, operating system version, browser type and version, time zone setting, unique device identifiers, and information on actions taken within the app."
+            "personal_label": "Personal Information:",
+            "personal_text": "We collect information you provide directly to us, such as your name, email address, username, password, and coffee preferences when you register or update your profile.",
+            "location_label": "Location Data:",
+            "location_text": "With your consent, we collect precise geolocation data to show you nearby cafes, verify 'Drop Bean' actions, and maintain your 'Navigator' status.",
+            "usage_label": "Automatic Information:",
+            "usage_text": "When you use our Services, we collect certain information by automated means, such as through server log files, cookies, web beacons (also known as clear GIFs and pixel tags), and embedded scripts. This may include your IP address, device type and model, operating system version, browser type and version, time zone setting, unique device identifiers, and information on actions taken within the app."
           }
         },
         "public_info": {
