@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from typing import List, Optional
+import hashlib
 import json
+import logging
 from app.models.visit import (
     CafeViewCreate,
     CafeViewResponse,
@@ -18,6 +20,8 @@ from app.database.supabase import get_supabase_client
 from supabase import Client
 from datetime import datetime, timezone
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -54,8 +58,9 @@ async def record_cafe_view(
                 detail="Cafe not found"
             )
         
-        ip_address = request.client.host if request.client else None
-        
+        raw_ip = request.client.host if request.client else None
+        ip_address = hashlib.sha256(raw_ip.encode()).hexdigest() if raw_ip else None
+
         # Rate limiting: Check for recent views from same IP (max 10 per minute per cafe)
         if ip_address:
             from datetime import timedelta
@@ -98,10 +103,10 @@ async def record_cafe_view(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error recording cafe view: {e}")
+        logger.exception("Error recording cafe view")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to record view: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.post("/cafes/{cafe_id}/visit", response_model=CafeVisitResponse, status_code=status.HTTP_201_CREATED)
@@ -266,9 +271,9 @@ async def record_cafe_visit(
                     "first_dropped_at": datetime.now(timezone.utc).isoformat(),
                     "last_dropped_at": datetime.now(timezone.utc).isoformat()
                 }).execute()
-        except Exception as bean_error:
+        except Exception:
             # Log but don't fail the main visit creation
-            print(f"Auto drop bean failed (non-critical): {bean_error}")
+            logger.warning("Auto drop bean failed (non-critical)", exc_info=True)
         
         # Format response with all fields
         response_data = {
@@ -323,12 +328,10 @@ async def record_cafe_visit(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error recording cafe visit: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error recording cafe visit")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to record visit: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.patch("/visits/{visit_id}", response_model=CafeVisitResponse)
@@ -545,10 +548,10 @@ async def update_visit(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error updating visit: {e}")
+        logger.exception("Error updating visit")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update visit: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/cafes/trending", response_model=List[TrendingCafeResponse])
@@ -626,9 +629,8 @@ async def get_trending_cafes(
                         photo_urls = log.get("photo_urls", [])
                         if cafe_id not in cafe_images and photo_urls:
                             cafe_images[cafe_id] = photo_urls[0]
-            except Exception as img_err:
-                print(f"Error fetching log images for trending: {img_err}")
-                pass
+            except Exception:
+                logger.warning("Error fetching log images for trending", exc_info=True)
         
         # Format response with default values for missing fields
         formatted_cafes = []
@@ -653,12 +655,10 @@ async def get_trending_cafes(
         return formatted_cafes
         
     except Exception as e:
-        print(f"Error getting trending cafes: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error getting trending cafes")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get trending cafes: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/cafes/{cafe_id}/stats", response_model=CafeStatsResponse)
@@ -691,10 +691,10 @@ async def get_cafe_stats(cafe_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error getting cafe stats: {e}")
+        logger.exception("Error getting cafe stats")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get cafe stats: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/cafes/{cafe_id}/visits", response_model=List[CafeVisitResponse])
@@ -731,10 +731,10 @@ async def get_cafe_visits(
         return result.data
         
     except Exception as e:
-        print(f"Error getting cafe visits: {e}")
+        logger.exception("Error getting cafe visits")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get cafe visits: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/cafes/{cafe_id}/visits/check-duplicate")
@@ -779,10 +779,10 @@ async def check_duplicate_visit(
             }
         
     except Exception as e:
-        print(f"Error checking duplicate visit: {e}")
+        logger.exception("Error checking duplicate visit")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check duplicate visit: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.post("/admin/update-trending-scores")
@@ -808,10 +808,10 @@ async def update_trending_scores(
         }
         
     except Exception as e:
-        print(f"Error updating trending scores: {e}")
+        logger.exception("Error updating trending scores")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update trending scores: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/cafes/{cafe_id}/logs", response_model=CafeLogsResponse)
@@ -920,12 +920,10 @@ async def get_cafe_logs(
         )
         
     except Exception as e:
-        print(f"Error getting cafe logs: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error getting cafe logs")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get cafe logs: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.get("/users/me/logs", response_model=List[CafeVisitResponse])
@@ -1007,10 +1005,10 @@ async def get_my_logs(
         return formatted_logs
         
     except Exception as e:
-        print(f"Error getting my logs: {e}")
+        logger.exception("Error getting my logs")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get my logs: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 
 @router.delete("/visits/{visit_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -1053,9 +1051,9 @@ async def delete_visit(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error deleting visit: {e}")
+        logger.exception("Error deleting visit")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete visit: {str(e)}"
+            detail="An unexpected error occurred. Please try again."
         )
 

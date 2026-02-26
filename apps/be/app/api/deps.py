@@ -29,13 +29,12 @@ async def get_current_user(
                 detail="Invalid or expired token"
             )
         
-        # Check if user email is verified (optional check - can be disabled for testing)
-        # Uncomment the following lines if email verification is required
-        # if not auth_user.user.email_confirmed_at:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_401_UNAUTHORIZED,
-        #         detail="Email not verified"
-        #     )
+        # Require email verification
+        if not auth_user.user.email_confirmed_at:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Email not verified"
+            )
         
         # Get user role from public.users table
         user_id = auth_user.user.id

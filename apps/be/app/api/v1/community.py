@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List
+import logging
 from supabase import Client
 from app.api.deps import get_supabase_client, get_current_user
 from app.models.social import (
@@ -11,6 +12,8 @@ from app.models.social import (
     CommunityFeedResponse,
     TrustedUserResponse
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/community", tags=["community"])
 
@@ -164,11 +167,10 @@ async def get_user_badges(
     except HTTPException:
         raise
     except Exception as e:
-        import traceback
-        print(f"User badges error: {traceback.format_exc()}")
+        logger.exception("Error getting user badges")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get user badges"
+            detail="An unexpected error occurred. Please try again."
         ) from e
 
 
@@ -344,11 +346,10 @@ async def get_community_feed(
             has_more=(offset + page_size) < total_count
         )
     except Exception as e:
-        import traceback
-        print(f"Feed error: {traceback.format_exc()}")
+        logger.exception("Error getting community feed")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get community feed"
+            detail="An unexpected error occurred. Please try again."
         ) from e
 
 

@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /*/admin/
+Disallow: /auth/
+Disallow: /*/complete-profile/
+Disallow: /*/reset-password/
+Disallow: /*/forgot-password/
+Disallow: /*/settings/
+Disallow: /*/my-beans/
+Disallow: /*/my-logs/
+Disallow: /*/theme-demo/
+Disallow: /*/cafes/*/log
