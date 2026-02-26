@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Path
 from typing import List
 import logging
 from supabase import Client
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/profile/{display_name}", response_model=List[UserPublicResponse])
-async def get_user_profiles(display_name: str, supabase: Client = Depends(get_supabase_client)):
+async def get_user_profiles(display_name: str = Path(..., max_length=30), supabase: Client = Depends(get_supabase_client)):
     """
     Public endpoint to get user profiles by display name. (No authentication required)
     - Returns list of users with same display_name (allows duplicates)
@@ -65,7 +65,7 @@ async def get_user_profiles(display_name: str, supabase: Client = Depends(get_su
         ) from e
 
 @router.get("/profile-by-username/{username}", response_model=UserPublicResponse)
-async def get_user_profile_by_username(username: str, supabase: Client = Depends(get_supabase_client)):
+async def get_user_profile_by_username(username: str = Path(..., max_length=20), supabase: Client = Depends(get_supabase_client)):
     """
     Public endpoint to get user profile by username. (No authentication required)
     - Username is unique, so returns single user
@@ -188,7 +188,7 @@ async def get_user_public_collections(
 
 @router.get("/check-username/{username}")
 async def check_username_availability(
-    username: str,
+    username: str = Path(..., max_length=20),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
