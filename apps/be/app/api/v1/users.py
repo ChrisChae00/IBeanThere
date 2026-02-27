@@ -637,10 +637,27 @@ async def update_my_profile(
                 ]
                 supabase.table("user_taste_tags").insert(tags_to_insert).execute()
         
+        # Sync updated fields to Supabase Auth metadata
+        try:
+            auth_update = {}
+            if profile.display_name is not None:
+                auth_update["display_name"] = profile.display_name
+            if profile.avatar_url is not None:
+                auth_update["avatar_url"] = profile.avatar_url
+            if profile.username is not None:
+                auth_update["username"] = profile.username
+            if auth_update:
+                supabase.auth.admin.update_user_by_id(
+                    current_user.id,
+                    {"user_metadata": auth_update}
+                )
+        except Exception:
+            logger.warning("Failed to sync profile to auth metadata", exc_info=True)
+
         profile_data = updated_profile.data[0]
         # Use username as default if display_name is not provided
         display_name = profile_data.get("display_name") or profile_data["username"]
-        
+
         # Fetch updated taste tags
         taste_tags = await _get_user_taste_tags(supabase, current_user.id)
         trust_count = await _get_user_trust_count(supabase, current_user.id)

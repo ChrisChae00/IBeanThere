@@ -9,6 +9,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const supabaseHost = 'fzejqetlgfckydwpywdv.supabase.co';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+let apiOrigin = '';
+try { apiOrigin = new URL(apiUrl).origin; } catch {}
+
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -21,7 +25,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https://storage.googleapis.com https://${supabaseHost}`,
-      `connect-src 'self' https://${supabaseHost} https://*.supabase.co`,
+      `connect-src 'self' ${apiOrigin} https://${supabaseHost} https://*.supabase.co`,
       "font-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",

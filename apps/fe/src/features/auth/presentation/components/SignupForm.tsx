@@ -188,6 +188,7 @@ export function SignupForm({ locale }: SignupFormProps) {
         options: {
           data: {
             username: formData.username,
+            display_name: formData.username,
             // Optimistically set terms_accepted true for local check
             terms_accepted: true,
             privacy_accepted: true
