@@ -1,5 +1,3 @@
-.cursor/
-
 # macOS
 .DS_Store
 .AppleDouble
@@ -18,6 +16,7 @@ out/
 # Env files
 .env
 .env.*
+!.env.example
 *.env
 *.env.*
 
@@ -54,6 +53,7 @@ coverage/
 # Editors/IDEs
 .idea/
 .vscode/
+.cursor/
 *.swp
 
 # Misc
@@ -69,15 +69,13 @@ apps/be/scripts/
 # Temporary/Development files
 *.tmp
 *.temp
-.DS_Store
 
 # TestSprite
-testsprite_tests
-.testsprite_tests
+testsprite_tests/
+.testsprite_tests/
+.testsprite/
 
-# Claude Code
+# AI Assistants
 CLAUDE.md
+.claude/
 memory/
-
-
-

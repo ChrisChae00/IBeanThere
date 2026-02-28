@@ -1,246 +1,179 @@
-# IBeanThere
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/IBeanThere/assets/main/logo.png" alt="IBeanThere Logo" width="120" style="vertical-align: middle; margin-right: 10px;" onerror="this.style.display='none'"/>
+  IBeanThere ☕
+</h1>
 
-> **"I Bean There"** = "I've been there"  
-> A community-driven coffee journaling platform where users discover, verify, and record their cafe visits together.
+<p align="center">
+  <em>"I Bean There" (I've been there) — A community-driven coffee journaling platform where coffee lovers discover, verify, and record their cafe visits together.</em>
+</p>
 
-## About
+<p align="center">
+  <a href="#about">About</a> •
+  <a href="#key-features">Key Features</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#architecture--project-structure">Architecture</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#api-reference">API Overview</a>
+</p>
 
-IBeanThere is fundamentally a **logging app** where users discover and record their cafe visits. Unlike apps that provide pre-populated cafe databases, IBeanThere users create and verify the map together through community participation.
+<hr>
+
+## 📖 About
+
+**IBeanThere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, IBeanThere relies on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
 
 ### Core Philosophy
 
-- **User-Generated Content (UGC)**: Users discover and register cafes themselves, building a community-verified database
-- **Zero-Cost Mapping**: OpenStreetMap + Leaflet (no monthly fees, unlike Google Maps)
-- **Community Verification**: 3 independent users must check in to verify a cafe
-- **Founding Crew Gamification**: Navigator (1st pioneer) and Vanguard (2nd, 3rd pioneers) system encourages participation
-- **Location-Based Discovery**: Real-time location tracking for automatic visit detection
+- **User-Generated Map:** Build a community-verified coffee map from the ground up.
+- **Pioneer System (Gamification):** The first to check-in becomes the **Navigator**. The 2nd and 3rd become **Vanguards**. Get permanently recorded in the cafe's history!
+- **Community Verification:** A registered cafe only becomes strictly "verified" once 3 independent users visit and review it.
+- **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Maps API required).
 
-## Key Features
+---
+
+## ✨ Key Features
 
 ### 🗺️ Community-Driven Cafe Discovery
-- **User Registration**: Users register new cafes with location verification (must be within 50m)
-- **3-User Verification**: Cafes are verified when 3 independent users check in
-- **Founding Crew System**: Navigator (1st pioneer) and Vanguard (2nd, 3rd pioneers) are permanently recorded
-- **Duplicate Detection**: 25m radius check prevents duplicate registrations
-- **Admin Dashboard**: Admins can review and verify pending cafe registrations
 
-### 📍 OpenStreetMap Integration
-- **Zero Monthly Cost**: OpenStreetMap + Leaflet (vs $100-200/month for Google Maps)
-- **OSM Nominatim Geocoding**: Free reverse/forward geocoding (1 req/sec rate limit)
-- **Custom Markers**: Status-based marker styles (pending/verified)
-- **Marker Clustering**: Efficient rendering for 10+ cafes
-- **Interactive Maps**: Explore cafes on an interactive map with filters
+- **Register New Spots:** Pin new cafes directly on the map (requires user physical proximity within 50m).
+- **Anti-Duplicate System:** 25m radius conflict detection prevents spamming the same location.
+- **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins can also manually review pending cafes.
+- **Interactive OpenStreetMap:** Built using Leaflet with custom clustering and status-based markers.
 
-### ☕ Coffee Journaling
-- **Visit Tracking**: Automatic visit detection when within 100m of a cafe
-- **Coffee Logs**: Record your experience with ratings and comments
-- **Public/Private Logs**: Share your experiences or keep them private
-- **Trending Cafes**: 14-day trending algorithm based on views, visits, and reviews
-- **My Logs**: Personal journal of all your cafe visits and experiences
+### ☕ Advanced Coffee Journaling
 
-### 🎮 Gamification
-- **Founding Crew Badges**: Navigator and Vanguard badges for pioneers
-- **Verification Status**: Visual indicators for pending vs verified cafes
-- **Visit Statistics**: Track your coffee journey and discover patterns
+- **Geo-fenced Check-ins:** Visit tracking activates when your location is within 100m.
+- **Rich Coffee Logs:** Rate beans, atmospheric vibes, drop comments, and upload photo galleries.
+- **Collections & Trending:** 14-day trending algorithm surfaces hot cafes. Users can build their own curated collections.
+- **Community & Follows:** See what cafes your friends or community members are exploring.
 
-### 🌐 Internationalization & Theming
-- **Multi-language Support**: English and Korean (en/ko)
-- **Locale-based Routing**: `/en/` and `/ko/` routes with automatic detection
-- **Theme System**: 4 beautiful themes (Morning Coffee, Vanilla Latte, Matcha Latte, Night Espresso)
-- **User Preferences**: Customizable theme and language settings
+### 🔒 Enterprise-Grade Security
 
-## Tech Stack
+- **Role-based Access Control (RBAC):** Strict JWT verifications for Admin/User endpoints natively tied with Supabase metadata.
+- **Rate Limiting & Hardened CORS:** API endpoints are protected against brute-force and DDoS via advanced proxy rate-limiters and security headers.
+- **Input Sanitization:** URL parameters and payloads are strictly typed (`max_length` constraints, rigorous Pydantic models).
 
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **Maps**: Leaflet + OpenStreetMap + React Leaflet
-- **i18n**: next-intl
-- **Authentication**: Supabase Auth
-- **State Management**: React Context (Theme, Toast)
+### 🌍 Global & Accessible
 
-### Backend
-- **Framework**: FastAPI
-- **Language**: Python 3.11+
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: JWT tokens via Supabase
-- **Geocoding**: OSM Nominatim API
-- **API Versioning**: `/api/v1/`
+- **Internationalization (i18n):** Native support for English (`/en`) and Korean (`/ko`).
+- **Dynamic Theming:** Switch between curated coffee aesthetics: _Morning Coffee_, _Vanilla Latte_, _Matcha Latte_, or _Night Espresso_.
 
-### Infrastructure
-- **Frontend Hosting**: Vercel
-- **Backend Hosting**: Render
-- **Database & Auth**: Supabase
-- **Storage**: Supabase Storage (for future photo uploads)
+---
 
-## Project Structure
+## 🛠 Tech Stack
 
-```
+### Frontend (Next.js)
+
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + PostCSS
+- **Mapping:** `leaflet`, `react-leaflet`, `leaflet.markercluster`
+- **State & i18n:** React Context API, `next-intl`
+- **Authentication:** `@supabase/ssr`
+
+### Backend (FastAPI)
+
+- **Framework:** FastAPI
+- **Language:** Python 3.11+
+- **Security & Validation:** Pydantic `v2`, `slowapi` (Rate Limiting)
+- **Database & Auth:** Supabase (PostgreSQL), `supabase-py`
+- **Geocoding:** OSM Nominatim API
+
+---
+
+## 🏗 Architecture & Project Structure
+
+This repository uses a monorepo-style structure separating the React frontend and Python backend, ensuring a clear boundary of concerns.
+
+```text
 IBeanThere/
 ├── apps/
-│   ├── fe/                    # Next.js frontend
-│   │   ├── src/
-│   │   │   ├── app/          # App Router pages
-│   │   │   │   └── [locale]/ # Localized routes
-│   │   │   ├── components/   # React components
-│   │   │   ├── lib/          # Utilities & API clients
-│   │   │   ├── hooks/        # Custom React hooks
-│   │   │   ├── types/        # TypeScript types
-│   │   │   └── i18n/         # Translation files
-│   │   └── public/           # Static assets
+│   ├── fe/                    # Next.js 14 Frontend App
+│   │   ├── src/app/           # Localized App Router ([locale]/...)
+│   │   ├── src/shared/ui/     # Reusable UI component library
+│   │   ├── src/components/    # Feature-specific components
+│   │   └── tailwind.config.js # Thematic configurations
 │   │
-│   └── be/                    # FastAPI backend
-│       ├── app/
-│       │   ├── api/v1/       # API endpoints
-│       │   ├── core/         # Core config & permissions
-│       │   ├── database/     # Database client
-│       │   ├── models/       # Pydantic models
-│       │   ├── services/     # Business logic
-│       │   └── main.py       # FastAPI app entry
-│       └── scripts/          # Database migration scripts
-│
-├── docs/                      # Project documentation
-│   ├── architecture/         # Architecture docs
-│   └── development/          # Development guides
-│
-└── packages/
-    └── shared/               # Shared types (future)
+│   └── be/                    # FastAPI Backend Service
+│       ├── app/api/v1/        # Endpoints (auth, cafes, users, collections, etc.)
+│       ├── app/core/          # Configs, Security, deps.py (RBAC)
+│       └── scripts/           # DB Migrations / Utilities
+├── docs/                      # Architecture & Implementation Plans
+└── package.json               # Monorepo/Root tools
 ```
 
-## Quick Start
+> **For detailed system designs, see the `/docs/` folder.** (Includes routing strategy, module separation rules, and the UGC verification flow diagrams).
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** 18+ (for frontend)
-- **Python** 3.11+ (for backend)
-- **Supabase account** (for database and authentication)
 
-### Frontend Setup
+- Node.js 18+
+- Python 3.11+
+- A Supabase Project (Database & Authentication set up)
+
+### 1. Backend Setup
+
+```bash
+cd apps/be
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your SUPABASE_URL and SUPABASE_SERVICE_KEY
+```
+
+Run the API:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+> API Docs available at: `http://localhost:8000/docs`
+
+### 2. Frontend Setup
 
 ```bash
 cd apps/fe
 npm install
+
+# Create environment file
 cp .env.local.example .env.local
-# Edit .env.local with your Supabase credentials
+# Edit .env.local with NEXT_PUBLIC_SUPABASE variables
+```
+
+Run the Client:
+
+```bash
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`
+> App available at: `http://localhost:3000`
 
-### Backend Setup
+---
 
-```bash
-cd apps/be
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your Supabase credentials
-uvicorn app.main:app --reload
-```
+## 🔗 Key API Reference (`/api/v1`)
 
-The backend API will be available at `http://localhost:8000`
-- API docs: `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/health`
+| Module            | Purpose                              | Key Endpoints                                                    |
+| ----------------- | ------------------------------------ | ---------------------------------------------------------------- |
+| **Auth**          | User session and profile metadata    | `/auth/me`, `/auth/verify`                                       |
+| **Cafes**         | Discovery, Geocoding, Verification   | `GET /cafes`, `POST /cafes/register`, `GET /cafes/admin/pending` |
+| **Visits & Logs** | Journaling and physical check-ins    | `POST /cafes/{id}/visit`, `POST /cafes/{id}/log`                 |
+| **Users**         | Public profiles, badges              | `GET /users/profile/{name}`                                      |
+| **Collections**   | Custom groupings of cafes (My Beans) | `GET /collections`, `POST /collections`                          |
+| **Reports**       | Security & moderation flagging       | `POST /reports`                                                  |
+| **Community**     | Social feeds, trending algorithms    | `GET /community/trending`                                        |
 
-## Environment Variables
+---
 
-### Frontend (.env.local)
+## 🤝 Contributing
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
+This is currently a private/personal project shaping the future of coffee mapping, but feedback and feature requests are highly welcome. Feel free to open issues or discussions in the repository.
 
-### Backend (.env)
+## 📄 License
 
-```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
-CORS_ORIGINS=http://localhost:3000
-```
-
-**Note**: For production, update `CORS_ORIGINS` with your frontend domain (comma-separated for multiple origins).
-
-## API Endpoints
-
-### Authentication (`/api/v1/auth`)
-- `GET /api/v1/auth/me` - Get current user info
-- `POST /api/v1/auth/verify` - Verify JWT token
-- `POST /api/v1/auth/logout` - Logout user
-
-### Cafes (`/api/v1/cafes`)
-- `GET /api/v1/cafes` - Search cafes by location
-- `GET /api/v1/cafes/{id}` - Get cafe details
-- `POST /api/v1/cafes/register` - Register new cafe
-- `GET /api/v1/cafes/trending` - Get trending cafes
-- `GET /api/v1/cafes/admin/pending` - Get pending cafes (admin only)
-- `POST /api/v1/cafes/admin/{id}/verify` - Verify cafe (admin only)
-
-### Visits (`/api/v1/visits`)
-- `POST /api/v1/cafes/{id}/visit` - Record a visit
-- `POST /api/v1/cafes/{id}/view` - Record a view
-
-### Users (`/api/v1/users`)
-- `GET /api/v1/users/profile/{display_name}` - Get user profile
-
-## Frontend Routes
-
-### Public Routes
-- `/` or `/en/` or `/ko/` - Landing page
-- `/signin` - Login page
-- `/register` - Signup page
-- `/discover/explore-map` - Interactive map view
-- `/discover/pending-spots` - View pending cafes
-- `/discover/register-cafe` - Register new cafe
-- `/cafes/[id]` - Cafe detail page
-- `/cafes/[id]/log` - Create coffee log
-
-### Protected Routes (Requires Authentication)
-- `/profile` - User profile
-- `/my-logs` - Personal coffee logs
-- `/settings` - User settings
-- `/admin/dashboard` - Admin dashboard (admin only)
-
-## Development
-
-### Running Both Services
-
-1. **Start Backend** (Terminal 1)
-   ```bash
-   cd apps/be
-   source venv/bin/activate
-   uvicorn app.main:app --reload
-   ```
-
-2. **Start Frontend** (Terminal 2)
-   ```bash
-   cd apps/fe
-   npm run dev
-   ```
-
-### Code Quality
-
-- **Frontend**: TypeScript strict mode enabled
-- **Backend**: Pydantic models for type validation
-- **Linting**: ESLint (frontend), flake8 (backend - recommended)
-
-### Database Migrations
-
-Database migration scripts are located in `apps/be/scripts/`. Run them directly in Supabase SQL editor or via CLI.
-
-## Documentation
-
-- [Architecture Documentation](docs/architecture/) - Project structure and design decisions
-- [UGC Verification System](docs/development/IBeanThere-UGC-Verification-System-Plan.md) - Detailed system design
-- [Backend Structure](docs/architecture/backend-structure.md) - Backend architecture
-- [Frontend Structure](docs/architecture/frontend-structure.md) - Frontend architecture
-
-## Contributing
-
-This is a personal project, but suggestions and feedback are welcome!
-
-## License
-
-MIT
+This project is licensed under the [MIT License](LICENSE).
