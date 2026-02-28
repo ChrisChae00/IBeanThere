@@ -3,6 +3,7 @@ from typing import List, Optional
 import hashlib
 import json
 import logging
+import time
 from app.models.visit import (
     CafeViewCreate,
     CafeViewResponse,
@@ -22,6 +23,41 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# In-memory TTL cache for trending cafes
+# ---------------------------------------------------------------------------
+_trending_cache: dict[tuple, tuple[list, float]] = {}
+_TRENDING_CACHE_TTL = 300  # 5 minutes
+
+
+def _trending_cache_key(lat, lng, radius, limit, offset):
+    """Quantize lat/lng to ~1.1 km grid so nearby requests share cache."""
+    lat_q = round(lat, 2) if lat is not None else None
+    lng_q = round(lng, 2) if lng is not None else None
+    return (lat_q, lng_q, radius, limit, offset)
+
+
+def _get_trending_cached(key):
+    """Return cached data if still fresh, else None."""
+    entry = _trending_cache.get(key)
+    if entry is None:
+        return None
+    data, cached_at = entry
+    if time.monotonic() - cached_at > _TRENDING_CACHE_TTL:
+        _trending_cache.pop(key, None)
+        return None
+    return data
+
+
+def _set_trending_cache(key, data):
+    """Store result in cache. Evict stale entries when cache grows large."""
+    now = time.monotonic()
+    if len(_trending_cache) > 200:
+        stale_keys = [k for k, (_, t) in _trending_cache.items() if now - t > _TRENDING_CACHE_TTL]
+        for k in stale_keys:
+            _trending_cache.pop(k, None)
+    _trending_cache[key] = (data, now)
 
 router = APIRouter()
 
@@ -564,27 +600,34 @@ async def get_trending_cafes(
 ):
     """
     Get trending cafes based on recent activity (14 days).
-    
+
     - Sorted by trending score (views, visits, reviews, rating)
     - Optional location filtering: when lat/lng provided, returns trending cafes in the area
     - Without location: returns global trending cafes
+    - Results are cached in-memory for 5 minutes (quantized by ~1.1 km grid)
     """
+    # Check cache first
+    cache_key = _trending_cache_key(lat, lng, radius, limit, offset)
+    cached = _get_trending_cached(cache_key)
+    if cached is not None:
+        return cached
+
     try:
         supabase = get_supabase_client()
-        
+
         if lat is not None and lng is not None:
             # Location-based filtering: get cafes within radius first, then sort by trending
             import math
-            
+
             # Calculate bounding box
             lat_offset = radius / 111000
             lng_offset = radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
-            
+
             lat_min = lat - lat_offset
             lat_max = lat + lat_offset
             lng_min = lng - lng_offset
             lng_max = lng + lng_offset
-            
+
             result = supabase.table("cafes").select("*").gte(
                 "latitude", lat_min
             ).lte(
@@ -601,16 +644,17 @@ async def get_trending_cafes(
             result = supabase.table("cafes").select("*").order(
                 "trending_score", desc=True
             ).range(offset, offset + limit - 1).execute()
-        
+
         if not result.data:
+            _set_trending_cache(cache_key, [])
             return []
-        
+
         # Get cafe IDs that don't have main_image set
         cafe_ids_needing_image = [
-            cafe.get("id") for cafe in result.data 
+            cafe.get("id") for cafe in result.data
             if not cafe.get("main_image")
         ]
-        
+
         # Batch fetch first photo from logs for cafes without main_image
         cafe_images = {}
         if cafe_ids_needing_image:
@@ -621,8 +665,8 @@ async def get_trending_cafes(
                     "is_public", True
                 ).not_.is_("photo_urls", "null").order(
                     "visited_at", desc=True
-                ).execute()
-                
+                ).limit(len(cafe_ids_needing_image)).execute()
+
                 if logs_with_photos.data:
                     for log in logs_with_photos.data:
                         cafe_id = log.get("cafe_id")
@@ -631,12 +675,12 @@ async def get_trending_cafes(
                             cafe_images[cafe_id] = photo_urls[0]
             except Exception:
                 logger.warning("Error fetching log images for trending", exc_info=True)
-        
+
         # Format response with default values for missing fields
         formatted_cafes = []
         for idx, cafe in enumerate(result.data):
             main_image = cafe.get("main_image") or cafe_images.get(cafe.get("id"))
-            
+
             formatted_cafes.append({
                 "id": cafe.get("id"),
                 "slug": cafe.get("slug"),
@@ -651,9 +695,10 @@ async def get_trending_cafes(
                 "image": cafe.get("image"),
                 "main_image": main_image
             })
-        
+
+        _set_trending_cache(cache_key, formatted_cafes)
         return formatted_cafes
-        
+
     except Exception as e:
         logger.exception("Error getting trending cafes")
         raise HTTPException(
@@ -813,6 +858,84 @@ async def update_trending_scores(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
         )
+
+
+@router.post("/admin/backfill-cafe-images")
+async def backfill_cafe_images(
+    current_user=Depends(require_admin_role),
+    batch_size: int = Query(default=100, ge=1, le=500, description="Number of cafes to process per batch")
+):
+    """
+    Backfill main_image for cafes that don't have one yet.
+
+    - Scans cafes where main_image is NULL
+    - Picks the most recent public visit photo for each cafe
+    - Updates cafes.main_image so the trending endpoint no longer needs runtime lookups
+    - Admin only
+    """
+    try:
+        supabase = get_supabase_client()
+
+        # 1. Get cafes without main_image
+        cafes_result = supabase.table("cafes").select("id").is_(
+            "main_image", "null"
+        ).limit(batch_size).execute()
+
+        if not cafes_result.data:
+            return {"message": "No cafes need image backfill", "updated": 0, "scanned": 0}
+
+        cafe_ids = [c["id"] for c in cafes_result.data]
+
+        # 2. Batch fetch the most recent photo per cafe
+        logs_result = supabase.table("cafe_visits").select(
+            "cafe_id, photo_urls"
+        ).in_(
+            "cafe_id", cafe_ids
+        ).eq(
+            "is_public", True
+        ).not_.is_(
+            "photo_urls", "null"
+        ).order(
+            "visited_at", desc=True
+        ).execute()
+
+        # Deduplicate: keep only the first (most recent) photo per cafe
+        cafe_images = {}
+        if logs_result.data:
+            for log in logs_result.data:
+                cid = log.get("cafe_id")
+                urls = log.get("photo_urls", [])
+                if cid not in cafe_images and urls:
+                    cafe_images[cid] = urls[0]
+
+        # 3. Update each cafe's main_image
+        updated = 0
+        for cafe_id, image_url in cafe_images.items():
+            try:
+                supabase.table("cafes").update(
+                    {"main_image": image_url}
+                ).eq("id", cafe_id).execute()
+                updated += 1
+            except Exception:
+                logger.warning("Failed to update main_image for cafe %s", cafe_id, exc_info=True)
+
+        # 4. Invalidate trending cache so next request picks up new images
+        _trending_cache.clear()
+
+        return {
+            "message": "Cafe image backfill completed",
+            "scanned": len(cafe_ids),
+            "updated": updated,
+            "skipped_no_photo": len(cafe_ids) - updated
+        }
+
+    except Exception as e:
+        logger.exception("Error backfilling cafe images")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
 
 @router.get("/cafes/{cafe_id}/logs", response_model=CafeLogsResponse)
 async def get_cafe_logs(
