@@ -620,7 +620,7 @@ async def get_trending_cafes(
                 ).in_("cafe_id", cafe_ids_needing_image).eq(
                     "is_public", True
                 ).not_.is_("photo_urls", "null").order(
-                    "visited_at", desc=False
+                    "visited_at", desc=True
                 ).execute()
                 
                 if logs_with_photos.data:
