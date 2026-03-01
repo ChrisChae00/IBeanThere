@@ -32,10 +32,10 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
       
-      <div className="bg-[var(--color-primary)]">
+      <div className="bg-[var(--color-primary)] flex-1 flex flex-col">
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
       </div>
-      <div className="p-4">
+      <div className="p-4 mt-auto">
         <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1.5 line-clamp-2" title={cafe.name}>
           {cafe.name}
         </h3>

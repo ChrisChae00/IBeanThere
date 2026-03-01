@@ -32,7 +32,7 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
       
-      <div className="overflow-hidden">
+      <div className="overflow-hidden flex-1 flex flex-col">
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" />
       </div>
       <div className="flex flex-col mt-auto p-3">
