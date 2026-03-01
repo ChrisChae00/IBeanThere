@@ -184,10 +184,10 @@ export default function NearbyPage({
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-[var(--color-text)]">
-                  50m 이내 카페
+                  {t('cafes_within_50m')}
                 </h2>
                 <span className="text-[var(--color-textSecondary)]">
-                  {cafes.length}개 카페
+                  {t('cafe_count', { count: cafes.length })}
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

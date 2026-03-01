@@ -82,7 +82,9 @@
       "sign_in_to_drop": "Sign in to Drop",
       "m_away": "{distance}m away",
       "view_cafe_map": "View Cafe Map",
-      "register_new_cafe": "Register New Cafe"
+      "register_new_cafe": "Register New Cafe",
+      "cafes_within_50m": "Cafes within 50m",
+      "cafe_count": "{count} cafes"
     },
     "my_beans": {
       "title": "My Coffee Forest",
