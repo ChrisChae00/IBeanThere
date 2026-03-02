@@ -1,81 +1,50 @@
 # Frontend Repository Structure
 
 ```
-ibeanthere-fe/
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml              # Frontend CI/CD
-│   │   └── deploy.yml          # Vercel deployment
-│   └── pull_request_template.md
-├── .cursor/
-│   └── rules/                   # Frontend-specific Cursor rules
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/
-│   │   │   ├── login/
-│   │   │   └── register/
-│   │   ├── cafes/
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/
-│   │   ├── reviews/
-│   │   │   ├── page.tsx
-│   │   │   └── create/
-│   │   ├── profile/
-│   │   └── layout.tsx
-│   ├── components/
-│   │   ├── ui/                 # Base UI components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   └── Modal.tsx
-│   │   ├── forms/
-│   │   │   ├── ReviewForm.tsx
-│   │   │   └── CafeSearchForm.tsx
-│   │   ├── maps/
-│   │   │   ├── CafeMap.tsx
-│   │   │   └── LocationPicker.tsx
-│   │   └── layout/
-│   │       ├── Header.tsx
-│   │       └── Footer.tsx
-│   ├── lib/
-│   │   ├── api.ts              # API client
-│   │   ├── supabase.ts         # Supabase client
-│   │   ├── utils.ts            # Utility functions
-│   │   └── constants.ts        # App constants
-│   ├── hooks/
-│   │   ├── useAuth.ts
-│   │   ├── useReviews.ts
-│   │   └── useCafes.ts
-│   ├── types/
-│   │   ├── api.ts              # API types
-│   │   ├── cafe.ts
-│   │   ├── review.ts
-│   │   └── user.ts
-│   └── styles/
-│       └── globals.css
-├── public/
-│   ├── images/
-│   └── icons/
-├── tests/
-│   ├── __mocks__/
-│   ├── components/
-│   └── utils/
-├── docs/
-│   ├── README.md
-│   ├── DEPLOYMENT.md
-│   └── API_INTEGRATION.md
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-├── tsconfig.json
-├── .eslintrc.json
-├── .env.local.example
-└── vercel.json
+apps/fe/
+├── .env.local            # Environment variables
+├── next.config.js        # Next.js configuration
+├── package.json          # Node dependencies and scripts
+├── tailwind.config.js    # Styling framework config
+├── tsconfig.json         # TypeScript compiler configurations
+├── public/               # Static assets (images, icons, etc.)
+└── src/                  # Main source code directory
+    ├── app/              # Next.js App Router hierarchy
+    ├   ├── [locale]/     # Internationalization routing
+    ├── components/       # Domain-specific UI elements
+    │   ├── admin/
+    │   ├── auth/
+    │   ├── cafe/
+    │   ├── community/
+    │   ├── landing/
+    │   ├── layout/
+    │   ├── map/
+    │   ├── profile/
+    │   ├── providers/
+    │   ├── settings/
+    │   ├── shared/
+    │   ├── shop/
+    │   ├── ui/           # Base, agnostic UI primitives
+    │   └── visits/
+    ├── contexts/         # Global React context providers
+    ├── features/         # Feature-based architectures and hooks
+    ├── hooks/            # Global custom React Hooks
+    ├── i18n/             # Localization configs and dictionaries
+    ├── lib/              # Utils and client configurations (e.g., Supabase)
+    ├── middleware.ts     # Edge middleware for navigation/auth
+    ├── shared/           # Common code bridging multiple features
+    │   ├── contexts/
+    │   ├── lib/
+    │   ├── types/
+    │   └── ui/
+    ├── styles/           # Global stylesheets
+    └── types/            # App-wide TypeScript definitions
 ```
 
 ## Key Features:
-- **Monorepo-style organization** within frontend
-- **Feature-based folder structure** (auth, cafes, reviews)
-- **Shared components** in `/components/ui`
-- **Type-safe API integration** with backend
-- **Comprehensive testing** setup
-- **CI/CD pipeline** for Vercel deployment
+
+- **Monorepo-style structure** utilizing App Router (`apps/fe/src/app`)
+- **Domain/Feature-based folder architecture** separating pure UI (`components/ui`) from feature logic (`features/`, domain `components/`)
+- **Built-in i18n capabilities** dynamically routing locales
+- **Robust typed configuration** across React, standard web primitives and data
+- **Modern stylistic toolkits** with TailwindCSS integrated
