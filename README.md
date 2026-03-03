@@ -1,5 +1,4 @@
 <h1 align="center">
-  <img src="apps/fe/public/icons/coffee-logo.svg" alt="IBeanThere Logo" width="120" style="vertical-align: middle; margin-right: 10px;" onerror="this.style.display='none'"/>
   IBeanThere
 </h1>
 
