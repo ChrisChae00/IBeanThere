@@ -21,6 +21,7 @@ interface BasicLoggingSectionProps {
   onCommentChange: (value: string) => void;
   photoUrls: string[];
   onPhotoUrlsChange: (urls: string[]) => void;
+  userId: string;
   errors: Record<string, string>;
   onErrorClear: (field: string) => void;
 }
@@ -79,6 +80,7 @@ export default function BasicLoggingSection({
   onCommentChange,
   photoUrls,
   onPhotoUrlsChange,
+  userId,
   errors,
   onErrorClear
 }: BasicLoggingSectionProps) {
@@ -95,6 +97,7 @@ export default function BasicLoggingSection({
       <PhotoUpload
         photos={photoUrls}
         onChange={onPhotoUrlsChange}
+        userId={userId}
         maxPhotos={5}
       />
 

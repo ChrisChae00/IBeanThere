@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { LogFormData, CoffeeLog } from '@/types/api';
 import { ToggleButton } from '@/shared/ui';
 import { Button } from '@/components/ui';
+import { useAuth } from '@/hooks/useAuth';
 import BasicLoggingSection from './logging/BasicLoggingSection';
 import AdvancedCoffeeSection from './logging/AdvancedCoffeeSection';
 import AdvancedSpaceSection from './logging/AdvancedSpaceSection';
@@ -18,6 +19,7 @@ interface CoffeeLogFormProps {
 
 export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoading }: CoffeeLogFormProps) {
   const t = useTranslations('cafe.log');
+  const { user } = useAuth();
   
   // Basic logging state
   const [rating, setRating] = useState<number | undefined>(initialData?.rating);
@@ -210,6 +212,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         onCommentChange={setComment}
         photoUrls={photoUrls}
         onPhotoUrlsChange={setPhotoUrls}
+        userId={user?.id || ''}
         errors={errors}
         onErrorClear={handleErrorClear}
       />

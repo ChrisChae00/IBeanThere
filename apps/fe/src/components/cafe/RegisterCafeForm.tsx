@@ -11,6 +11,7 @@ import { BusinessHours } from '@/types/map';
 import { ErrorAlert, Button, Input } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import { PhotoUploadWithMain } from '@/shared/ui';
+import { useAuth } from '@/hooks/useAuth';
 import OpeningHoursInput from './OpeningHoursInput';
 
 interface RegisterCafeFormProps {
@@ -31,6 +32,7 @@ export default function RegisterCafeForm({
   const t = useTranslations('cafe.register');
   const tErrors = useTranslations('errors');
   const { showToast } = useToast();
+  const { user } = useAuth();
   
   const { coords, getCurrentLocation, isLoading: locationLoading } = useLocation();
   
@@ -604,6 +606,7 @@ export default function RegisterCafeForm({
             onChange={setPhotos}
             mainIndex={mainImageIndex}
             onMainIndexChange={setMainImageIndex}
+            userId={user?.id || ''}
             maxPhotos={5}
           />
           
