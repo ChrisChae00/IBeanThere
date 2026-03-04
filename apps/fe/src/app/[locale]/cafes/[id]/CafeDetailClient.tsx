@@ -129,6 +129,9 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
                   alt={image.alt || `Photo ${index + 1}`}
                   className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
                 {/* Show remaining count on last visible image */}
                 {index === 5 && galleryImages.length > 6 && (
