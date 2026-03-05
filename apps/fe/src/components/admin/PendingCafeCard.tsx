@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Card, Badge, Button } from '@/components/ui';
 import { BusinessHours } from '@/types/map';
 import OpeningHoursInput from '@/components/cafe/OpeningHoursInput';
+import PhotoUploadWithMain from '@/shared/ui/PhotoUploadWithMain';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PendingCafeCardProps {
   cafe: PendingCafe;
@@ -24,6 +26,8 @@ export interface EditCafeData {
   website?: string;
   description?: string;
   business_hours?: BusinessHours;
+  main_image?: string;
+  images?: string[];
 }
 
 export default function PendingCafeCard({
@@ -36,6 +40,7 @@ export default function PendingCafeCard({
   isEditing = false,
 }: PendingCafeCardProps) {
   const t = useTranslations('admin');
+  const { user } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState<EditCafeData>({
     name: cafe.name,
@@ -45,10 +50,36 @@ export default function PendingCafeCard({
     description: cafe.description || '',
     business_hours: cafe.business_hours,
   });
+  const [editPhotos, setEditPhotos] = useState<string[]>(cafe.images || []);
+  const [editMainIndex, setEditMainIndex] = useState<number>(() => {
+    if (cafe.main_image && cafe.images) {
+      const idx = cafe.images.indexOf(cafe.main_image);
+      return idx >= 0 ? idx : 0;
+    }
+    return 0;
+  });
 
   const handleEditSubmit = () => {
-    onEdit(cafe.id, editData);
+    const mainImage = editPhotos.length > 0 ? editPhotos[editMainIndex] || editPhotos[0] : undefined;
+    onEdit(cafe.id, {
+      ...editData,
+      main_image: mainImage,
+      images: editPhotos.length > 0 ? editPhotos : [],
+    });
     setShowEditModal(false);
+  };
+
+  const handleOpenEditModal = () => {
+    // Reset image state from latest cafe data when opening
+    setEditPhotos(cafe.images || []);
+    setEditMainIndex(() => {
+      if (cafe.main_image && cafe.images) {
+        const idx = cafe.images.indexOf(cafe.main_image);
+        return idx >= 0 ? idx : 0;
+      }
+      return 0;
+    });
+    setShowEditModal(true);
   };
 
   return (
@@ -129,7 +160,7 @@ export default function PendingCafeCard({
 
         <div className="flex gap-3 mt-4">
           <Button
-            onClick={() => setShowEditModal(true)}
+            onClick={handleOpenEditModal}
             disabled={isVerifying || isDeleting}
             variant="secondary"
             className="flex-1"
@@ -163,7 +194,7 @@ export default function PendingCafeCard({
             <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">
               {t('edit_cafe_title')}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
@@ -176,7 +207,7 @@ export default function PendingCafeCard({
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                   {t('address')}
@@ -188,7 +219,7 @@ export default function PendingCafeCard({
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                   {t('phone')}
@@ -200,7 +231,7 @@ export default function PendingCafeCard({
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                   {t('website')}
@@ -212,7 +243,7 @@ export default function PendingCafeCard({
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                   {t('description')}
@@ -224,14 +255,25 @@ export default function PendingCafeCard({
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
                 />
               </div>
-              
+
               {/* Opening Hours */}
               <OpeningHoursInput
                 value={editData.business_hours}
                 onChange={(hours) => setEditData({ ...editData, business_hours: hours })}
               />
+
+              {/* Photo Upload */}
+              {user?.id && (
+                <PhotoUploadWithMain
+                  photos={editPhotos}
+                  onChange={setEditPhotos}
+                  mainIndex={editMainIndex}
+                  onMainIndexChange={setEditMainIndex}
+                  userId={user.id}
+                />
+              )}
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 onClick={() => setShowEditModal(false)}
