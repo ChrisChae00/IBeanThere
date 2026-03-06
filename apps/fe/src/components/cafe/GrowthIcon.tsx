@@ -14,7 +14,7 @@ import { SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon } from '../lan
  * 
  * Levels:
  * 0 - No bean (empty)
- * 1 - Sleeping Bean 🫘 (Seed)
+ * 1 - Bean Dropped 🫘 (Seed)
  * 2 - Sprouting 🌱 (Sprout)
  * 3 - Growing 🌿 (Growing)
  * 4 - Sapling 🌳 (Tree)
@@ -60,7 +60,7 @@ export function GrowthIcon({
 function getLevelName(level: number): string {
   switch (level) {
     case 0: return 'No bean';
-    case 1: return 'Sleeping Bean';
+    case 1: return 'Bean Dropped';
     case 2: return 'Sprouting';
     case 3: return 'Growing';
     case 4: return 'Sapling';

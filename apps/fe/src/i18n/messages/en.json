@@ -62,7 +62,7 @@
       "drops": "{count} drops",
       "next_level": "{drops} more to level up",
       "levels": {
-        "1": "Sleeping Bean",
+        "1": "Bean Dropped",
         "2": "Sprouting",
         "3": "Growing",
         "4": "Sapling",
