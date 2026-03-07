@@ -420,7 +420,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col relative z-0">
       {/* Header: Title/Subtitle on top, Controls below on small screens */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
         {/* Left side: Title and Subtitle */}
