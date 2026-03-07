@@ -294,8 +294,11 @@ async def record_cafe_visit(
                 if not already_today:
                     # Update existing bean
                     new_count = existing_bean.data.get("drop_count", 0) + 1
+                    from app.api.v1.cafes import calculate_growth_level
+                    new_level = calculate_growth_level(new_count)
                     supabase.table("cafe_beans").update({
                         "drop_count": new_count,
+                        "growth_level": new_level,
                         "last_dropped_at": datetime.now(timezone.utc).isoformat()
                     }).eq("id", existing_bean.data["id"]).execute()
             else:
@@ -304,6 +307,7 @@ async def record_cafe_visit(
                     "cafe_id": cafe_id,
                     "user_id": current_user.id,
                     "drop_count": 1,
+                    "growth_level": 1,
                     "first_dropped_at": datetime.now(timezone.utc).isoformat(),
                     "last_dropped_at": datetime.now(timezone.utc).isoformat()
                 }).execute()
