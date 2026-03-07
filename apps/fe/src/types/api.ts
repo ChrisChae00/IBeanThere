@@ -164,6 +164,7 @@ export interface CoffeeLog {
   extraction_method?: string;
   extraction_equipment?: string;
   aroma_rating?: number;
+  overall_taste_rating?: number;
   wifi_quality?: string;
   wifi_rating?: number;
   outlet_info?: string;
@@ -250,6 +251,7 @@ export interface LogFormData {
   extraction_method?: string;
   extraction_equipment?: string;
   aroma_rating?: number;
+  overall_taste_rating?: number;
   wifi_quality?: string;
   wifi_rating?: number;
   outlet_info?: string;

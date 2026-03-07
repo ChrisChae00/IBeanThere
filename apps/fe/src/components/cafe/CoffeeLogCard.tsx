@@ -63,6 +63,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     
     // Check Coffee & Taste data
     const hasCoffeeTasteData = Boolean(
+      (log.overall_taste_rating !== undefined && log.overall_taste_rating !== null) ||
       (log.bean_origin && log.bean_origin.trim()) ||
       (log.processing_method && log.processing_method.trim()) ||
       (log.roast_level && log.roast_level.trim()) ||
@@ -397,6 +398,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
               {/* Coffee & Taste Advanced */}
               {(() => {
                 const hasCoffeeTasteData = Boolean(
+                  (log.overall_taste_rating !== undefined && log.overall_taste_rating !== null) ||
                   (log.bean_origin && log.bean_origin.trim()) ||
                   (log.processing_method && log.processing_method.trim()) ||
                   (log.roast_level && log.roast_level.trim()) ||
@@ -409,13 +411,14 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                   (log.body_rating !== undefined && log.body_rating !== null) ||
                   (log.aftertaste_rating !== undefined && log.aftertaste_rating !== null)
                 );
-                
+
                 if (!hasCoffeeTasteData) return null;
-                
+
                 return (
                   <div className="space-y-2">
                     <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
                     <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-[var(--color-cardText)]">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
                       {log.bean_origin && log.bean_origin.trim() && <div>{t('bean_origin')}: {log.bean_origin}</div>}
                       {log.processing_method && log.processing_method.trim() && <div>{t('processing_method')}: {log.processing_method}</div>}
                       {log.roast_level && log.roast_level.trim() && <div>{t('roast_level')}: {log.roast_level}</div>}

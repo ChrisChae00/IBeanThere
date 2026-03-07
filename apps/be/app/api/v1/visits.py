@@ -248,6 +248,7 @@ async def record_cafe_visit(
             "extraction_method": visit_data.extraction_method,
             "extraction_equipment": visit_data.extraction_equipment,
             "aroma_rating": visit_data.aroma_rating,
+            "overall_taste_rating": visit_data.overall_taste_rating,
             "wifi_quality": visit_data.wifi_quality,
             "wifi_rating": visit_data.wifi_rating,
             "outlet_info": visit_data.outlet_info,
@@ -352,6 +353,7 @@ async def record_cafe_visit(
             "extraction_method": visit.get("extraction_method"),
             "extraction_equipment": visit.get("extraction_equipment"),
             "aroma_rating": visit.get("aroma_rating"),
+            "overall_taste_rating": visit.get("overall_taste_rating"),
             "wifi_quality": visit.get("wifi_quality"),
             "wifi_rating": visit.get("wifi_rating"),
             "outlet_info": visit.get("outlet_info"),
@@ -500,7 +502,10 @@ async def update_visit(
         
         if update_data.aroma_rating is not None:
             update_payload["aroma_rating"] = update_data.aroma_rating
-        
+
+        if update_data.overall_taste_rating is not None:
+            update_payload["overall_taste_rating"] = update_data.overall_taste_rating
+
         if update_data.wifi_quality is not None:
             update_payload["wifi_quality"] = update_data.wifi_quality
         
@@ -572,6 +577,7 @@ async def update_visit(
             "extraction_method": visit.get("extraction_method"),
             "extraction_equipment": visit.get("extraction_equipment"),
             "aroma_rating": visit.get("aroma_rating"),
+            "overall_taste_rating": visit.get("overall_taste_rating"),
             "wifi_quality": visit.get("wifi_quality"),
             "wifi_rating": visit.get("wifi_rating"),
             "outlet_info": visit.get("outlet_info"),
@@ -961,7 +967,7 @@ async def get_cafe_logs(
         
         # Get public logs with ratings
         result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, overall_taste_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
         ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
             "visited_at", desc=True
         ).range(offset, offset + page_size - 1).execute()
@@ -986,12 +992,16 @@ async def get_cafe_logs(
         logs = []
         for log in result.data:
             author_display_name = None
+            author_username = None
+            author_avatar_url = None
             if not log.get("anonymous"):
-                # Get username from users table
+                # Get user info from users table
                 try:
-                    user_result = supabase.table("users").select("username").eq("id", log["user_id"]).single().execute()
+                    user_result = supabase.table("users").select("username, display_name, avatar_url").eq("id", log["user_id"]).single().execute()
                     if user_result.data:
-                        author_display_name = user_result.data.get("username") or "User"
+                        author_display_name = user_result.data.get("display_name") or user_result.data.get("username") or "User"
+                        author_username = user_result.data.get("username")
+                        author_avatar_url = user_result.data.get("avatar_url")
                 except Exception:
                     author_display_name = "User"
             else:
@@ -1026,6 +1036,7 @@ async def get_cafe_logs(
                 extraction_method=log.get("extraction_method"),
                 extraction_equipment=log.get("extraction_equipment"),
                 aroma_rating=log.get("aroma_rating"),
+                overall_taste_rating=log.get("overall_taste_rating"),
                 wifi_quality=log.get("wifi_quality"),
                 wifi_rating=log.get("wifi_rating"),
                 outlet_info=log.get("outlet_info"),
@@ -1035,6 +1046,8 @@ async def get_cafe_logs(
                 temperature_lighting=log.get("temperature_lighting"),
                 facilities_info=log.get("facilities_info"),
                 author_display_name=author_display_name,
+                author_username=author_username,
+                author_avatar_url=author_avatar_url,
                 updated_at=datetime.fromisoformat(log["updated_at"].replace("Z", "+00:00")) if log.get("updated_at") else None
             ))
         

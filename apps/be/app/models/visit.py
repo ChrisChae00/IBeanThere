@@ -53,6 +53,7 @@ class CafeVisitCreate(BaseModel):
     extraction_method: Optional[str] = Field(None, max_length=200, description="Extraction method used")
     extraction_equipment: Optional[str] = Field(None, max_length=200, description="Equipment used for extraction (e.g., La Marzocco, Hario, Aeropress)")
     aroma_rating: Optional[int] = Field(None, ge=0, le=10, description="Aroma intensity rating (0-10)")
+    overall_taste_rating: Optional[int] = Field(None, ge=0, le=10, description="Overall taste rating (0-10)")
     # Space & Work Environment fields
     wifi_quality: Optional[str] = Field(None, max_length=500, description="WiFi quality description")
     wifi_rating: Optional[int] = Field(None, ge=1, le=5, description="WiFi rating (1-5)")
@@ -94,6 +95,7 @@ class CafeVisitUpdate(BaseModel):
     extraction_method: Optional[str] = Field(None, max_length=200, description="Extraction method used")
     extraction_equipment: Optional[str] = Field(None, max_length=200, description="Equipment used for extraction (e.g., La Marzocco, Hario, Aeropress)")
     aroma_rating: Optional[int] = Field(None, ge=0, le=10, description="Aroma intensity rating (0-10)")
+    overall_taste_rating: Optional[int] = Field(None, ge=0, le=10, description="Overall taste rating (0-10)")
     # Space & Work Environment fields
     wifi_quality: Optional[str] = Field(None, max_length=500, description="WiFi quality description")
     wifi_rating: Optional[int] = Field(None, ge=1, le=5, description="WiFi rating (1-5)")
@@ -145,6 +147,7 @@ class CafeVisitResponse(BaseModel):
     extraction_method: Optional[str] = None
     extraction_equipment: Optional[str] = None
     aroma_rating: Optional[int] = None
+    overall_taste_rating: Optional[int] = None
     # Space & Work Environment fields
     wifi_quality: Optional[str] = None
     wifi_rating: Optional[int] = None
@@ -213,6 +216,7 @@ class CafeLogPublicResponse(BaseModel):
     extraction_method: Optional[str] = None
     extraction_equipment: Optional[str] = None
     aroma_rating: Optional[int] = None
+    overall_taste_rating: Optional[int] = None
     # Space & Work Environment fields
     wifi_quality: Optional[str] = None
     wifi_rating: Optional[int] = None
@@ -223,6 +227,8 @@ class CafeLogPublicResponse(BaseModel):
     temperature_lighting: Optional[str] = None
     facilities_info: Optional[str] = None
     author_display_name: Optional[str] = None
+    author_username: Optional[str] = None
+    author_avatar_url: Optional[str] = None
     updated_at: Optional[datetime] = None
 
 class CafeLogsResponse(BaseModel):

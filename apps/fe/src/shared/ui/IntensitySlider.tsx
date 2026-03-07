@@ -5,7 +5,7 @@ import CoffeeBean from './CoffeeBean';
 
 interface IntensitySliderProps {
   value: number | undefined;
-  onChange: (value: number) => void;
+  onChange: (value: number | undefined) => void;
   label: string;
   min?: number;
   max?: number;
@@ -91,13 +91,26 @@ export default function IntensitySlider({
         <label className="text-sm font-medium text-[var(--color-text)]">
           {label}
         </label>
-        <div className="h-[24px] flex items-center">
+        <div className="h-[24px] flex items-center gap-1">
           {currentValue !== undefined ? (
-            <div className="px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)]">
-              <span className="text-sm font-semibold text-[var(--color-primary)]">
-                {currentValue}
-              </span>
-            </div>
+            <>
+              <div className="px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <span className="text-sm font-semibold text-[var(--color-primary)]">
+                  {currentValue}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange(undefined);
+                }}
+                className="text-xs text-[var(--color-surfaceTextSecondary)] hover:text-[var(--color-text)] px-0.5"
+                aria-label={`Clear ${label}`}
+              >
+                ✕
+              </button>
+            </>
           ) : (
             <span className="text-xs text-[var(--color-surfaceTextSecondary)] invisible">
               -
