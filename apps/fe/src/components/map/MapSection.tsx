@@ -24,7 +24,7 @@ interface MapSectionProps {
 
 export default function MapSection({ locale, mapTitle, mapSubtitle, userMarkerPalette }: MapSectionProps) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[500px] flex flex-col relative z-0">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 h-full min-h-[500px] flex flex-col relative">
       <MapWithFilters 
         locale={locale} 
         userMarkerPalette={userMarkerPalette}

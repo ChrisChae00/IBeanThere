@@ -9,18 +9,17 @@ const InteractiveMap = dynamic(() => import('./InteractiveMap'), {
   ssr: false
 });
 import LocationPermissionOverlay from './LocationPermissionOverlay';
-import NearbyCafeAlert from '../visits/NearbyCafeAlert';
+
 import FranchiseFilterComponent from './FranchiseFilter';
 import CafeInfoModal from './CafeInfoModal';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
-import { useAuth } from '@/hooks/useAuth';
+
 import { useToast } from '@/contexts/ToastContext';
-import { CafeMapData, FranchiseFilter, NearbyCafe } from '@/types/map';
+import { CafeMapData, FranchiseFilter } from '@/types/map';
 import { isFranchise } from '@/lib/franchiseDetector';
-import { checkIn } from '@/lib/api/visits';
-import { calculateDistance } from '@/lib/utils/checkIn';
+
 import { API_BASE_URL, apiFetch } from '@/lib/api/client';
 
 function getCSSVariable(name: string, fallback: string = ''): string {
@@ -41,17 +40,17 @@ interface MapWithFiltersProps {
 
 export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, mapSubtitle }: MapWithFiltersProps) {
   const t = useTranslations('map');
-  const tVisit = useTranslations('visit');
+
   const { coords, getCurrentLocation, error: locationError } = useLocation();
   const { cafes: allCafes, isLoading, error, searchCafes, clearCache } = useMapData();
-  const { user, isLoading: authLoading } = useAuth();
+
   const { showToast } = useToast();
   
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
-  const [nearbyCafes, setNearbyCafes] = useState<NearbyCafe[]>([]);
+
   const [trackingEnabled, setTrackingEnabled] = useState(false);
-  const [isCheckingIn, setIsCheckingIn] = useState(false);
+
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
   const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
@@ -327,21 +326,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   // Visit detection hook
   const { isTracking, nearbyStays, startTracking, stopTracking, permissionGranted } = useVisitDetection(
     filteredCafes,
-    (cafes) => {
-      if (!coords) return;
-      
-      const cafesWithDistance: NearbyCafe[] = cafes.map(cafe => ({
-        ...cafe,
-        distance: calculateDistance(
-          coords.latitude,
-          coords.longitude,
-          cafe.latitude,
-          cafe.longitude
-        )
-      }));
-      
-      setNearbyCafes(cafesWithDistance);
-    },
+    () => {},
     {
       enabled: trackingEnabled,
       minStayDuration: 0,
@@ -365,45 +350,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     }
   }, []);
 
-  const handleCheckIn = useCallback(async (cafe: NearbyCafe) => {
-    if (isCheckingIn) return;
-    
-    if (!user) {
-      showToast(tVisit('login_required'), 'warning');
-      return;
-    }
-    
-    if (!coords) {
-      showToast(tVisit('location_permission_required'), 'warning');
-      return;
-    }
-    
-    setIsCheckingIn(true);
-    try {
-      const result = await checkIn(
-        cafe,
-        coords.latitude,
-        coords.longitude,
-        user.id
-      );
-      
-      if (result.success) {
-        showToast(tVisit('check_in_success'), 'success');
-        setNearbyCafes([]);
-      } else {
-        showToast(result.error || tVisit('check_in_failed'), 'error');
-      }
-    } catch (error) {
-      console.error('Failed to check in:', error);
-      showToast(tVisit('check_in_failed'), 'error');
-    } finally {
-      setIsCheckingIn(false);
-    }
-  }, [isCheckingIn, user, coords, showToast, tVisit]);
 
-  const handleDismissAlert = useCallback(() => {
-    setNearbyCafes([]);
-  }, []);
 
   const handleRefreshCafes = useCallback(async () => {
     clearCache();
@@ -420,7 +367,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   
 
   return (
-    <div className="flex-1 flex flex-col relative z-0">
+    <div className="flex-1 flex flex-col relative">
       {/* Header: Title/Subtitle on top, Controls below on small screens */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
         {/* Left side: Title and Subtitle */}
@@ -522,14 +469,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         )}
       </div>
 
-      {/* Nearby Cafes Alert */}
-      {nearbyCafes.length > 0 && coords && (
-        <NearbyCafeAlert
-          cafes={nearbyCafes}
-          userLocation={{ lat: coords.latitude, lng: coords.longitude }}
-          onDismiss={handleDismissAlert}
-        />
-      )}
+
 
       {/* Cafe Info Modal */}
       {selectedCafe && (
