@@ -302,7 +302,7 @@ export default function MyBeansPage({
               />
             )}
             
-            {/* Sleeping Beans (Level 1) */}
+            {/* Bean Dropped (Level 1) */}
             {beansByLevel[1] && (
               <BeanLevelSection
                 level={1}

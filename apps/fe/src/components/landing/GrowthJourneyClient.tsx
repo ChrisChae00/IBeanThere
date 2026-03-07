@@ -56,11 +56,11 @@ export default function GrowthJourneyClient({ messages }: GrowthJourneyClientPro
         className="w-48 h-48 sm:w-64 sm:h-64 bg-[var(--color-background)] rounded-full border-4 border-[var(--color-primary)] flex items-center justify-center cursor-pointer mb-8 transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-[0_0_20px_rgba(0,0,0,0.2)] relative overflow-hidden"
       >
         <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'seed' ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-0 -rotate-45'}`}>
-           <SeedIcon className="w-28 h-28" />
+           <SeedIcon className="w-32 h-32" />
         </div>
         
         <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'sprout' ? 'scale-100 opacity-100 translate-y-0' : 'scale-75 opacity-0 translate-y-10'}`}>
-          <SproutIcon className="w-28 h-28" />
+          <SproutIcon className="w-32 h-32" />
         </div>
 
         <div className={`transition-all duration-500 ease-in-out absolute transform ${currentStep === 'growing' ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>

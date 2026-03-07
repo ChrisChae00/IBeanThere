@@ -1282,20 +1282,61 @@ async def get_pending_cafes(
             reverse=True
         )
         
+        # Collect cafe IDs for batch image lookup
+        cafe_ids = [cafe.get("id") for cafe in sorted_data]
+
+        # Batch fetch images from cafe_visits for all pending cafes
+        cafe_images_map = {}
+        if cafe_ids:
+            try:
+                visits_result = supabase.table("cafe_visits").select(
+                    "cafe_id, photo_urls, visited_at"
+                ).in_("cafe_id", cafe_ids).eq(
+                    "is_public", True
+                ).not_.is_("photo_urls", "null").order(
+                    "visited_at", desc=False
+                ).execute()
+
+                if visits_result.data:
+                    for visit in visits_result.data:
+                        cid = visit.get("cafe_id")
+                        if cid not in cafe_images_map:
+                            cafe_images_map[cid] = []
+                        photo_urls = visit.get("photo_urls", [])
+                        if photo_urls:
+                            for url in photo_urls:
+                                if url not in cafe_images_map[cid]:
+                                    cafe_images_map[cid].append(url)
+            except Exception:
+                logger.warning("Error batch fetching images for pending cafes", exc_info=True)
+
         cafes = []
         for cafe in sorted_data:
+            cafe_id = cafe.get("id")
+
             # Parse datetime fields
             created_at_str = cafe.get("created_at")
             created_at = date_parser.parse(created_at_str) if created_at_str else datetime.now(timezone.utc)
-            
+
             updated_at_str = cafe.get("updated_at")
             updated_at = date_parser.parse(updated_at_str) if updated_at_str else None
-            
+
             verified_at_str = cafe.get("verified_at")
             verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
-            
+
+            # Build image list
+            main_image = cafe.get("main_image")
+            all_images = []
+            if main_image:
+                all_images.append(main_image)
+            for url in cafe_images_map.get(cafe_id, []):
+                if url not in all_images:
+                    all_images.append(url)
+            if not main_image and all_images:
+                main_image = all_images[0]
+
             cafes.append(CafeResponse(
-                id=str(cafe.get("id")),
+                id=str(cafe_id),
                 name=cafe.get("name"),
                 address=cafe.get("address"),
                 latitude=Decimal(str(cafe.get("latitude"))),
@@ -1310,7 +1351,9 @@ async def get_pending_cafes(
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
                 vanguard_ids=cafe.get("vanguard_ids", []),
                 created_at=created_at,
-                updated_at=updated_at
+                updated_at=updated_at,
+                main_image=main_image,
+                images=all_images if all_images else None,
             ))
         
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
@@ -1457,6 +1500,8 @@ class AdminCafeUpdateRequest(BaseModel):
     website: Optional[str] = None
     description: Optional[str] = None
     business_hours: Optional[dict] = None  # JSON object with day-by-day hours
+    main_image: Optional[str] = None       # Main image URL
+    images: Optional[List[str]] = None     # Gallery image URLs
 
 @router.patch("/admin/{cafe_id}")
 async def admin_update_cafe(
@@ -1500,28 +1545,69 @@ async def admin_update_cafe(
             update_data["description"] = request.description
         if request.business_hours is not None:
             update_data["business_hours"] = request.business_hours
-        
-        if not update_data:
+        if request.main_image is not None:
+            update_data["main_image"] = request.main_image
+
+        has_image_update = request.images is not None
+
+        if not update_data and not has_image_update:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No fields to update"
             )
-        
+
         # Add updated_at timestamp
         update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
-        
-        # Update the cafe
-        result = supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
-        
-        if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to update cafe"
-            )
-        
+
+        # Update the cafe (if there are cafe-level fields to update)
+        if update_data:
+            result = supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
+
+            if not result.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update cafe"
+                )
+
+        # Update gallery images via admin cafe_visit record
+        if has_image_update:
+            admin_user_id = current_user.get("id") or current_user.get("sub")
+            admin_comment = "Admin Edit"
+
+            # Look for existing admin visit record
+            existing_visit = supabase.table("cafe_visits").select("id").eq(
+                "cafe_id", cafe_id
+            ).eq("user_id", admin_user_id).eq("comment", admin_comment).execute()
+
+            if request.images:
+                if existing_visit.data:
+                    supabase.table("cafe_visits").update(
+                        {"photo_urls": request.images, "visited_at": datetime.now(timezone.utc).isoformat()}
+                    ).eq("id", existing_visit.data[0]["id"]).execute()
+                else:
+                    visit_data = {
+                        "cafe_id": cafe_id,
+                        "user_id": admin_user_id,
+                        "photo_urls": request.images,
+                        "is_public": True,
+                        "anonymous": False,
+                        "comment": admin_comment,
+                        "has_photos": True,
+                        "visited_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    supabase.table("cafe_visits").insert(visit_data).execute()
+            elif existing_visit.data:
+                # images is explicitly empty list - remove admin visit photos
+                supabase.table("cafe_visits").update(
+                    {"photo_urls": []}
+                ).eq("id", existing_visit.data[0]["id"]).execute()
+
+        # Re-fetch the updated cafe
+        updated_cafe = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+
         return {
             "message": "Cafe updated successfully",
-            "cafe": result.data[0]
+            "cafe": updated_cafe.data
         }
         
     except HTTPException:

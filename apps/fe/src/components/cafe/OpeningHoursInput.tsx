@@ -143,11 +143,11 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
           if (!dayHours) return null;
 
           return (
-            <div key={day} className="flex items-center gap-3">
-              <div className="w-24 text-sm text-[var(--color-text)] font-medium">
+            <div key={day} className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="w-20 sm:w-24 text-xs sm:text-sm text-[var(--color-text)] font-medium">
                 {t(`day_${day}` as any)}
               </div>
-              
+
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -155,7 +155,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                   onChange={(e) => handleDayChange(day, 'closed', e.target.checked)}
                   className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
-                <span className="text-sm text-[var(--color-text)]">{t('closed')}</span>
+                <span className="text-xs sm:text-sm text-[var(--color-text)]">{t('closed')}</span>
               </label>
 
               {!dayHours.closed && (
@@ -164,14 +164,14 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                     type="time"
                     value={dayHours.open}
                     onChange={(e) => handleDayChange(day, 'open', e.target.value)}
-                    className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
+                    className="w-[100px] sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
                   />
                   <span className="text-[var(--color-text-secondary)]">-</span>
                   <input
                     type="time"
                     value={dayHours.close}
                     onChange={(e) => handleDayChange(day, 'close', e.target.value)}
-                    className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
+                    className="w-[100px] sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
                   />
                 </>
               )}

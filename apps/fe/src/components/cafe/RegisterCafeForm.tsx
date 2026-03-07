@@ -269,8 +269,12 @@ export default function RegisterCafeForm({
       setAddressFetched(true);
     }
 
-    if (result.data.business_hours) {
+    if (result.data.business_hours && Object.keys(result.data.business_hours).length > 0) {
       setBusinessHours(result.data.business_hours as BusinessHours);
+      // Scroll opening hours into view on mobile so user sees the result
+      setTimeout(() => {
+        document.getElementById('opening-hours-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     }
   };
 
@@ -428,7 +432,7 @@ export default function RegisterCafeForm({
             <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
               {t('google_maps_url_label')}
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="url"
                 name="source_url"
@@ -442,7 +446,7 @@ export default function RegisterCafeForm({
                 onClick={handleGooglePlacesLookup}
                 disabled={!formData.source_url.trim()}
                 loading={isLookingUp}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap w-full sm:w-auto"
               >
                 {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
               </Button>
@@ -489,41 +493,43 @@ export default function RegisterCafeForm({
                 <span className="opacity-60 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="p-3 pt-1 border-t border-[var(--color-border)]">
-                <div className="flex gap-2 mt-2">
-                  <select
-                    value={selectedCountry}
-                    onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
-                    disabled={isDetectingCountry}
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 8px center',
-                      backgroundSize: '12px 12px',
-                      backgroundClip: 'padding-box'
-                    }}
-                  >
-                    <option value="">{t('country_select')}</option>
-                    {countries.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    name="postcode"
-                    value={formData.postcode}
-                    onChange={handleInputChange}
-                    className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 h-[40px] text-sm"
-                    placeholder={t('postcode_placeholder')}
-                  />
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                  <div className="flex gap-2 flex-1">
+                    <select
+                      value={selectedCountry}
+                      onChange={(e) => setSelectedCountry(e.target.value)}
+                      className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
+                      disabled={isDetectingCountry}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 8px center',
+                        backgroundSize: '12px 12px',
+                        backgroundClip: 'padding-box'
+                      }}
+                    >
+                      <option value="">{t('country_select')}</option>
+                      {countries.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      name="postcode"
+                      value={formData.postcode}
+                      onChange={handleInputChange}
+                      className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 h-[40px] text-sm"
+                      placeholder={t('postcode_placeholder')}
+                    />
+                  </div>
                   <Button
                     type="button"
                     onClick={handlePostcodeSearch}
                     disabled={!formData.postcode.trim()}
                     loading={isSearchingPostcode}
-                    className="whitespace-nowrap h-[40px] px-4 text-sm"
+                    className="whitespace-nowrap h-[40px] px-4 text-sm w-full sm:w-auto"
                   >
                     {t('search_postcode')}
                   </Button>
@@ -595,11 +601,13 @@ export default function RegisterCafeForm({
           />
 
           {/* Opening Hours */}
+          <div id="opening-hours-section">
           <OpeningHoursInput
             value={businessHours}
             onChange={setBusinessHours}
           />
-          
+          </div>
+
           {/* Photo Upload */}
           <PhotoUploadWithMain
             photos={photos}

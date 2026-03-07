@@ -23,6 +23,8 @@ export interface PendingCafe {
   created_at: string;
   updated_at: string | null;
   business_hours?: BusinessHours;
+  main_image?: string;
+  images?: string[];
 }
 
 export interface PendingCafesResponse {
@@ -86,6 +88,8 @@ export interface CafeUpdateData {
   website?: string;
   description?: string;
   business_hours?: BusinessHours;
+  main_image?: string;
+  images?: string[];
 }
 
 export interface AdminUpdateResponse {
