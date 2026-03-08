@@ -352,10 +352,15 @@ class GooglePlacesService:
             
             open_hour = open_info.get("hour", 0)
             open_minute = open_info.get("minute", 0)
-            
+
             close_hour = close_info.get("hour", 0)
             close_minute = close_info.get("minute", 0)
-            
+
+            # If close day differs from open day, close is past midnight — add 24h
+            close_day = close_info.get("day")
+            if close_day is not None and close_day != day_index:
+                close_hour += 24
+
             hours[day_name] = {
                 "open": f"{open_hour:02d}:{open_minute:02d}",
                 "close": f"{close_hour:02d}:{close_minute:02d}",
