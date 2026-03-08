@@ -71,9 +71,9 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-[var(--color-cardText)]">{cafe.name}</h1>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-2">
+          <h1 className="text-3xl font-bold text-[var(--color-cardText)] break-words">{cafe.name}</h1>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* Collection Save Buttons */}
             <SaveButtons
               cafeId={cafe.id}

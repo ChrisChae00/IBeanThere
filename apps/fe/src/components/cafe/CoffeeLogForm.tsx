@@ -66,6 +66,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
   const [extractionMethod, setExtractionMethod] = useState(initialData?.extraction_method || '');
   const [extractionEquipment, setExtractionEquipment] = useState(initialData?.extraction_equipment || '');
   const [aromaRating, setAromaRating] = useState<number | undefined>(initialData?.aroma_rating);
+  const [overallTasteRating, setOverallTasteRating] = useState<number | undefined>(initialData?.overall_taste_rating);
   const [acidityRating, setAcidityRating] = useState<number | undefined>(initialData?.acidity_rating);
   const [bodyRating, setBodyRating] = useState<number | undefined>(initialData?.body_rating);
   const [sweetnessRating, setSweetnessRating] = useState<number | undefined>(initialData?.sweetness_rating);
@@ -166,6 +167,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         extraction_method: extractionMethod.trim() || undefined,
         extraction_equipment: extractionEquipment.trim() || undefined,
         aroma_rating: aromaRating,
+        overall_taste_rating: overallTasteRating,
         acidity_rating: acidityRating,
         body_rating: bodyRating,
         sweetness_rating: sweetnessRating,
@@ -229,6 +231,8 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         onExtractionMethodChange={setExtractionMethod}
         extractionEquipment={extractionEquipment}
         onExtractionEquipmentChange={setExtractionEquipment}
+        overallTasteRating={overallTasteRating}
+        onOverallTasteRatingChange={setOverallTasteRating}
         aromaRating={aromaRating}
         onAromaRatingChange={setAromaRating}
         acidityRating={acidityRating}

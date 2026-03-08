@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { Input, IntensitySlider } from '@/components/ui';
 
 interface AdvancedCoffeeSectionProps {
+  overallTasteRating: number | undefined;
+  onOverallTasteRatingChange: (value: number | undefined) => void;
   beanOrigin: string;
   onBeanOriginChange: (value: string) => void;
   processingMethod: string;
@@ -45,6 +47,8 @@ const ROAST_LEVELS = [
 
 
 export default function AdvancedCoffeeSection({
+  overallTasteRating,
+  onOverallTasteRatingChange,
   beanOrigin,
   onBeanOriginChange,
   processingMethod,
@@ -96,6 +100,19 @@ export default function AdvancedCoffeeSection({
       
       {isExpanded && (
         <div className="p-4 space-y-6 bg-[var(--color-cardBackground)]">
+          {/* Overall Taste Rating */}
+          <IntensitySlider
+            value={overallTasteRating}
+            onChange={onOverallTasteRatingChange}
+            label={t('overall_taste')}
+            min={0}
+            max={10}
+            step={1}
+          />
+
+          {/* Divider */}
+          <div className="border-t border-[var(--color-border)]"></div>
+
           {/* Bean Information */}
           <div className="space-y-3">
             <button
