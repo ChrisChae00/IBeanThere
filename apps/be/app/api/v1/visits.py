@@ -967,7 +967,7 @@ async def get_cafe_logs(
         
         # Get public logs with ratings
         result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, overall_taste_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
+            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, price_currency, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, overall_taste_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
         ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
             "visited_at", desc=True
         ).range(offset, offset + page_size - 1).execute()
