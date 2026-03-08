@@ -24,6 +24,7 @@ from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
 from app.core.fraud_detection import check_location_consistency
+from app.utils.timezone import get_timezone_from_coords
 from supabase import Client
 from datetime import datetime, timezone
 from dateutil import parser as date_parser
@@ -855,6 +856,7 @@ async def register_cafe(
                 "website": request.website,
                 "description": request.description,
                 "business_hours": request.business_hours,
+                "timezone": get_timezone_from_coords(float(request.latitude), float(request.longitude)),
                 "status": "pending",
                 "verification_count": 1,
                 "navigator_id": current_user.id,

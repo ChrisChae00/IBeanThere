@@ -62,6 +62,7 @@ export function useMapData() {
         website: cafe.website,
         source_url: cafe.source_url,
         businessHours: cafe.business_hours,
+        timezone: cafe.timezone,
         status: cafe.status || 'pending',
         verification_count: cafe.verification_count || 1,
         foundingCrew: cafe.founding_crew ? {

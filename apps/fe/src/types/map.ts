@@ -19,6 +19,7 @@ export interface CafeMapData {
   website?: string;
   source_url?: string;
   businessHours?: BusinessHours;
+  timezone?: string;
   status?: 'pending' | 'verified' | 'disputed';
   verification_count?: number;
   foundingCrew?: {

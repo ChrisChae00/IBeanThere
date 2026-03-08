@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CafeMapData } from '@/types/map';
 import { CafeDetailResponse } from '@/types/api';
+import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
 import FoundingCrewAvatars from './FoundingCrewAvatars';
 import NavigationButton from './NavigationButton';
 
@@ -17,11 +18,13 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
   const [showAllHours, setShowAllHours] = useState(false);
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const today = daysOfWeek[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
 
-  // Get business hours from either businessHours (CafeMapData) or business_hours (CafeDetailResponse)
-  const businessHours = 'businessHours' in cafe ? cafe.businessHours : 
+  // Get business hours and timezone from either CafeMapData or CafeDetailResponse
+  const businessHours = 'businessHours' in cafe ? cafe.businessHours :
     ('business_hours' in cafe ? cafe.business_hours : undefined);
+  const timezone = 'timezone' in cafe ? (cafe as any).timezone as string | undefined : undefined;
+
+  const today = getCurrentDayInTimezone(timezone);
 
   const getTodayHours = () => {
     if (!businessHours || !businessHours[today]) {
@@ -36,16 +39,6 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const displayHours = h % 12 || 12;
     return `${displayHours}:${minutes} ${ampm}`;
-  };
-
-  const isOpenNow = () => {
-    const todayHours = getTodayHours();
-    if (!todayHours || todayHours.closed) return false;
-
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
-    return currentTime >= todayHours.open && currentTime <= todayHours.close;
   };
 
   const getDayName = (day: string) => {
@@ -153,12 +146,12 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
             {todayHours && !todayHours.closed && (
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
-                  isOpenNow()
+                  isOpenNow(businessHours, timezone)
                     ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                     : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
                 }`}
               >
-                {isOpenNow() ? t('open_now') : t('closed_now')}
+                {isOpenNow(businessHours, timezone) ? t('open_now') : t('closed_now')}
               </span>
             )}
           </div>
