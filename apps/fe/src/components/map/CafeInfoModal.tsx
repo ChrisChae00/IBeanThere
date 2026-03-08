@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
+import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
 import { Badge } from '@/shared/ui';
 import { Button } from '@/shared/ui';
 
@@ -23,7 +24,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   const [showAllHours, setShowAllHours] = useState(false);
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const today = daysOfWeek[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const today = getCurrentDayInTimezone(cafe.timezone);
 
   const getTodayHours = () => {
     if (!cafe.businessHours || !cafe.businessHours[today]) {
@@ -38,16 +39,6 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const displayHours = h % 12 || 12;
     return `${displayHours}:${minutes} ${ampm}`;
-  };
-
-  const isOpenNow = () => {
-    const todayHours = getTodayHours();
-    if (!todayHours || todayHours.closed) return false;
-
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
-    return currentTime >= todayHours.open && currentTime <= todayHours.close;
   };
 
   const getDayName = (day: string) => {
@@ -186,12 +177,12 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                 {todayHours && !todayHours.closed && (
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
-                      isOpenNow()
+                      isOpenNow(cafe.businessHours, cafe.timezone)
                         ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                         : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
                     }`}
                   >
-                    {isOpenNow() ? t('open_now') : t('closed_now')}
+                    {isOpenNow(cafe.businessHours, cafe.timezone) ? t('open_now') : t('closed_now')}
                   </span>
                 )}
               </div>

@@ -20,6 +20,7 @@ export interface CafeSearchResponse {
     description?: string;
     source_url?: string;
     business_hours?: BusinessHoursData;
+    timezone?: string;
     status: 'pending' | 'verified' | 'disputed';
     verification_count: number;
     verified_at?: string;
@@ -192,6 +193,7 @@ export interface CafeDetailResponse {
   description?: string;
   source_url?: string;
   business_hours?: BusinessHoursData;
+  timezone?: string;
   status: 'pending' | 'verified' | 'disputed';
   verification_count: number;
   verified_at?: string;

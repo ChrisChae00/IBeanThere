@@ -67,7 +67,8 @@ class CafeResponse(BaseModel):
     description: Optional[str] = None
     source_url: Optional[str] = None
     business_hours: Optional[Dict[str, Any]] = None
-    
+    timezone: Optional[str] = None
+
     # Verification fields
     status: str  # 'pending' | 'verified'
     verification_count: int
