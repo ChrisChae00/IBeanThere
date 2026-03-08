@@ -178,7 +178,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                   type="button"
                   onClick={() => onToggleCollectionsPublic(!collectionsPublic)}
                   className={`relative w-10 h-5 rounded-full transition-colors ${
-                    collectionsPublic ? 'bg-[var(--color-primary)]' : 'bg-gray-300'
+                    collectionsPublic ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'
                   }`}
                 >
                   <span
@@ -192,7 +192,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
             {isOwnProfile && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-3 py-1.5 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] transition-colors active:scale-[0.98]"
+                className="px-3 py-1.5 text-sm font-medium text-primaryText bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] transition-colors active:scale-[0.98]"
               >
                 + {t('create_new')}
               </button>
