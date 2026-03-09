@@ -204,8 +204,13 @@ async def check_and_award_badges(
         
         # 2. Cafe Explorer: 5 cafe verifications (Navigator/Vanguard)
         if "cafe_explorer" not in existing_codes:
-            verification_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["navigator", "vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
-            if verification_count.count and verification_count.count >= 5:
+            nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
+            navigator_count = nav_count.count if nav_count.count is not None else 0
+            van_result = supabase.table("cafes").select("vanguard_ids").filter(
+                "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
+            ).execute()
+            vanguard_count = len(van_result.data) if van_result.data else 0
+            if (navigator_count + vanguard_count) >= 5:
                 supabase.table("user_badges").insert({
                     "user_id": user_id,
                     "badge_code": "cafe_explorer"
