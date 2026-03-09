@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import useSWR from 'swr';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,73 +47,43 @@ export default function MyBeansPage({
   const tDropBean = useTranslations('drop_bean');
   const { user, isLoading: authLoading } = useAuth();
   
-  const [beans, setBeans] = useState<BeanData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showLevelModal, setShowLevelModal] = useState(false);
-  const [streak, setStreak] = useState<StreakData | null>(null);
 
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchUserBeans();
-      fetchUserStreak();
-    } else if (!authLoading && !user) {
-      setIsLoading(false);
-    }
-  }, [user, authLoading]);
-
-  const fetchUserBeans = async () => {
-    try {
-      setIsLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      
-      const { createClient } = await import('@/shared/lib/supabase/client');
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await fetch(`${apiUrl}/api/v1/cafes/user/beans?limit=100`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token || ''}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch beans');
+  // Fetcher for SWR
+  const fetcher = async (url: string) => {
+    const { createClient } = await import('@/shared/lib/supabase/client');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${session?.access_token || ''}`
       }
+    });
 
-      const data: UserBeansResponse = await response.json();
-      setBeans(data.beans);
-    } catch (err) {
-      console.error('Error fetching beans:', err);
-      setError('Failed to load your beans');
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${url}`);
     }
+
+    return response.json();
   };
 
-  const fetchUserStreak = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      
-      const { createClient } = await import('@/shared/lib/supabase/client');
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await fetch(`${apiUrl}/api/v1/users/me/streak`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token || ''}`
-        }
-      });
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      if (response.ok) {
-        const data = await response.json();
-        setStreak(data);
-      }
-    } catch (err) {
-      console.error('Error fetching streak:', err);
-    }
-  };
+  const { data: beansData, error: beansError, isLoading: beansLoading } = useSWR<UserBeansResponse>(
+    user && !authLoading ? `${apiUrl}/api/v1/cafes/user/beans?limit=100` : null,
+    fetcher
+  );
+
+  const { data: streakData } = useSWR<StreakData>(
+    user && !authLoading ? `${apiUrl}/api/v1/users/me/streak` : null,
+    fetcher
+  );
+
+  const beans = beansData?.beans || [];
+  const streak = streakData || null;
+  const isLoading = authLoading || (user ? beansLoading : false);
+  const error = beansError ? 'Failed to load your beans' : null;
 
   // Calculate stats
   const totalCafes = beans.length;
