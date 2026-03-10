@@ -305,14 +305,10 @@ function ClusterLayer({
 
     return () => {
       if (clusterGroupRef.current) {
+        clusterGroupRef.current.clearLayers();
         map.removeLayer(clusterGroupRef.current);
         clusterGroupRef.current = null;
       }
-      markersRef.current.forEach(marker => {
-        if (clusterGroupRef.current) {
-          clusterGroupRef.current.removeLayer(marker);
-        }
-      });
       markersRef.current = [];
     };
   }, [map, onMarkerClick]);
@@ -320,10 +316,10 @@ function ClusterLayer({
   useEffect(() => {
     if (!clusterGroupRef.current) return;
 
-    markersRef.current.forEach(marker => {
-      clusterGroupRef.current!.removeLayer(marker);
-    });
+    clusterGroupRef.current.clearLayers();
     markersRef.current = [];
+
+    const newMarkers: L.Marker[] = [];
 
     cafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
@@ -347,35 +343,37 @@ function ClusterLayer({
       
       const popupContent = `
         <div style="padding: 8px; min-width: 200px;">
-          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
-          <p style="font-size: 14px; color: ${textSecondaryColor}; margin-bottom: 4px;">${cafe.address}</p>
-          ${cafe.rating ? `<p style="font-size: 14px; margin-bottom: 4px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
-          ${cafe.status === 'verified' ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; font-weight: 600; color: ${primaryColor};">${verifiedText}</p>
-              ${cafe.foundingCrew?.navigator ? `<p style="font-size: 12px; color: ${textSecondaryColor};">${navigatorText}: ${cafe.foundingCrew.navigator.username || unknownText}</p>` : ''}
+          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">\${cafe.name}</h3>
+          <p style="font-size: 14px; color: \${textSecondaryColor}; margin-bottom: 4px;">\${cafe.address}</p>
+          \${cafe.rating ? \`<p style="font-size: 14px; margin-bottom: 4px;">⭐ \${cafe.rating.toFixed(1)}</p>\` : ''}
+          \${cafe.status === 'verified' ? \`
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
+              <p style="font-size: 12px; font-weight: 600; color: \${primaryColor};">\${verifiedText}</p>
+              \${cafe.foundingCrew?.navigator ? \`<p style="font-size: 12px; color: \${textSecondaryColor};">\${navigatorText}: \${cafe.foundingCrew.navigator.username || unknownText}</p>\` : ''}
             </div>
-          ` : ''}
-          ${cafe.status === 'pending' && cafe.verification_count ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
+          \` : ''}
+          \${cafe.status === 'pending' && cafe.verification_count ? \`
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
+              <p style="font-size: 12px; color: \${textSecondaryColor};">\${cafe.verification_count} \${checkInText}</p>
             </div>
-          ` : ''}
-          ${cafe.source_url ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <a href="${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: ${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+          \` : ''}
+          \${cafe.source_url ? \`
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
+              <a href="\${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: \${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                 <span>📍</span>
                 <span style="text-decoration: underline;">View on Google Maps</span>
               </a>
             </div>
-          ` : ''}
+          \` : ''}
         </div>
       `;
 
       marker.bindPopup(popupContent);
-      clusterGroupRef.current.addLayer(marker);
-      markersRef.current.push(marker);
+      newMarkers.push(marker);
     });
+
+    clusterGroupRef.current.addLayers(newMarkers);
+    markersRef.current = newMarkers;
   }, [cafes, onMarkerClick]);
 
   return null;
