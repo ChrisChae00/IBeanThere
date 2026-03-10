@@ -251,7 +251,7 @@ async def check_nearby_cafes(
 async def search_cafes(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
     lng: float = Query(..., ge=-180, le=180, description="Longitude"),
-    radius: int = Query(default=2000, ge=100, le=20000, description="Search radius in meters"),
+    radius: int = Query(default=2000, ge=100, le=150000, description="Search radius in meters"),
     status_filter: Optional[str] = Query(None, description="Filter by status: 'pending' | 'verified'"),
     sort_by: str = Query(default="distance", description="Sort by: distance | trending | rating | newest"),
     min_rating: Optional[float] = Query(None, ge=0, le=5, description="Minimum rating filter")

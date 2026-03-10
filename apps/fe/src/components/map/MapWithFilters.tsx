@@ -63,6 +63,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   // Track last search location to prevent excessive API calls
   const lastSearchRef = useRef<{ lat: number; lng: number } | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const expansionAttemptedRef = useRef(false);
+  const initialSearchDoneRef = useRef(false);
+
+  const MIN_CAFE_COUNT = 9;
+  const EXPANDED_RADIUS = 150000; // 150km
 
   // Dynamic search based on visible area with debouncing
   const handleBoundsChanged = useCallback((bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => {
@@ -113,7 +118,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         searchCafes({
           lat: centerLat,
           lng: centerLng,
-          radius: Math.floor(Math.min(radius, 20000)) // Increased to 20km max
+          radius: Math.floor(Math.min(radius, 150000))
         });
       } catch (error) {
         console.error('Error in handleBoundsChanged:', error);
@@ -207,13 +212,15 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       }
       
       // Only search if this is a new location or forced reload
-      if (forceReload || !lastSearchRef.current || 
+      if (forceReload || !lastSearchRef.current ||
           Math.abs(lastSearchRef.current.lat - newCenter.lat) > 0.001 ||
           Math.abs(lastSearchRef.current.lng - newCenter.lng) > 0.001) {
-        
+
         lastSearchRef.current = newCenter;
-        
-        // Aggressive initial load: 20km radius
+        expansionAttemptedRef.current = false;
+        initialSearchDoneRef.current = false;
+
+        // Initial load: 20km radius
         searchCafes({
           lat: newCenter.lat,
           lng: newCenter.lng,
@@ -222,6 +229,23 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       }
     }
   }, [coords, searchCafes, clearCache]);
+
+  // Progressive expansion: if initial search returned < MIN_CAFE_COUNT, expand to 150km (once)
+  useEffect(() => {
+    if (isLoading || expansionAttemptedRef.current || !center) return;
+    // Mark initial search done once loading finishes with a center set
+    if (!initialSearchDoneRef.current && lastSearchRef.current) {
+      initialSearchDoneRef.current = true;
+    }
+    if (initialSearchDoneRef.current && allCafes.length < MIN_CAFE_COUNT) {
+      expansionAttemptedRef.current = true;
+      searchCafes({
+        lat: center.lat,
+        lng: center.lng,
+        radius: EXPANDED_RADIUS
+      });
+    }
+  }, [allCafes.length, isLoading, center, searchCafes]);
 
   const handleLocationClick = () => {
     // If coords already exist, update center immediately
