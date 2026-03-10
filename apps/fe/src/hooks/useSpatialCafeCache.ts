@@ -18,6 +18,22 @@ const CACHE_TTL = 10 * 60 * 1000;
 const STORAGE_KEY = 'ibeanthere_cafe_cache';
 const REGIONS_KEY = 'ibeanthere_loaded_regions';
 
+const STATUS_PRIORITY: Record<string, number> = { verified: 0, pending: 1, disputed: 2 };
+
+function isBetterCafe(candidate: CafeMapData, existing: CafeMapData): boolean {
+  const cStatus = STATUS_PRIORITY[candidate.status ?? ''] ?? 99;
+  const eStatus = STATUS_PRIORITY[existing.status ?? ''] ?? 99;
+  if (cStatus !== eStatus) return cStatus < eStatus;
+  const cVc = candidate.verification_count ?? 0;
+  const eVc = existing.verification_count ?? 0;
+  if (cVc !== eVc) return cVc > eVc;
+  return candidate.id > existing.id;
+}
+
+function coordKey(cafe: CafeMapData): string {
+  return `${cafe.latitude.toFixed(6)}_${cafe.longitude.toFixed(6)}`;
+}
+
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -32,6 +48,7 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 export function useSpatialCafeCache() {
   const cafeMap = useRef<Map<string, CafeCacheEntry>>(new Map());
+  const coordIndex = useRef<Map<string, string>>(new Map());
   const loadedRegions = useRef<LoadedRegion[]>([]);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -48,6 +65,16 @@ export function useSpatialCafeCache() {
         
         parsed.forEach(([id, entry]) => {
           if (now - entry.timestamp < CACHE_TTL) {
+            const ck = coordKey(entry.cafe);
+            const existingId = coordIndex.current.get(ck);
+            if (existingId) {
+              const existingEntry = cafeMap.current.get(existingId);
+              if (existingEntry && !isBetterCafe(entry.cafe, existingEntry.cafe)) {
+                return; // existing is better, skip duplicate coord
+              }
+              cafeMap.current.delete(existingId);
+            }
+            coordIndex.current.set(ck, id);
             cafeMap.current.set(id, entry);
           }
         });
@@ -97,6 +124,10 @@ export function useSpatialCafeCache() {
         validCafes.push(entry.cafe);
       } else {
         cafeMap.current.delete(id);
+        const ck = coordKey(entry.cafe);
+        if (coordIndex.current.get(ck) === id) {
+          coordIndex.current.delete(ck);
+        }
       }
     });
     
@@ -105,8 +136,18 @@ export function useSpatialCafeCache() {
 
   const addCafes = useCallback((cafes: CafeMapData[], center: { lat: number; lng: number }, radius: number) => {
     const now = Date.now();
-    
+
     cafes.forEach(cafe => {
+      const ck = coordKey(cafe);
+      const existingId = coordIndex.current.get(ck);
+      if (existingId && existingId !== cafe.id) {
+        const existingEntry = cafeMap.current.get(existingId);
+        if (existingEntry && !isBetterCafe(cafe, existingEntry.cafe)) {
+          return; // existing is better, skip
+        }
+        cafeMap.current.delete(existingId);
+      }
+      coordIndex.current.set(ck, cafe.id);
       cafeMap.current.set(cafe.id, {
         cafe,
         timestamp: now
@@ -141,6 +182,7 @@ export function useSpatialCafeCache() {
 
   const clearCache = useCallback(() => {
     cafeMap.current.clear();
+    coordIndex.current.clear();
     loadedRegions.current = [];
     
     if (typeof window !== 'undefined') {

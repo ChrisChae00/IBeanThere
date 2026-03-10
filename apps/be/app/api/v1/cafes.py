@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from decimal import Decimal
 import re
+import math
 from app.models.cafe import (
     CafeSearchParams,
     CafeSearchResponse,
@@ -218,7 +219,7 @@ async def check_nearby_cafes(
         # Use bounding box for optimization, then exact Haversine distance
         # Calculate bounding box
         lat_offset = threshold_meters / 111000
-        lng_offset = threshold_meters / (111000 * abs(lat)) if lat != 0 else threshold_meters / 111000
+        lng_offset = threshold_meters / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else threshold_meters / 111000
         
         result = supabase.table("cafes").select("*").gte(
             "latitude", lat - lat_offset
@@ -247,6 +248,19 @@ async def check_nearby_cafes(
         logger.error("Error checking nearby cafes", exc_info=True)
         return None
 
+_STATUS_PRIORITY = {"verified": 0, "pending": 1, "disputed": 2}
+
+def _is_better_cafe(candidate: dict, existing: dict) -> bool:
+    c_status = _STATUS_PRIORITY.get(candidate.get("status", ""), 99)
+    e_status = _STATUS_PRIORITY.get(existing.get("status", ""), 99)
+    if c_status != e_status:
+        return c_status < e_status
+    c_vc = int(candidate.get("verification_count", 0) or 0)
+    e_vc = int(existing.get("verification_count", 0) or 0)
+    if c_vc != e_vc:
+        return c_vc > e_vc
+    return (candidate.get("created_at", "") or "") > (existing.get("created_at", "") or "")
+
 @router.get("/search", response_model=CafeSearchResponse)
 async def search_cafes(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
@@ -274,7 +288,6 @@ async def search_cafes(
         
         # 1 degree longitude = ~111km * cos(latitude)
         # At latitude 43°, 1 degree longitude ≈ 81km
-        import math
         lng_offset = radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
         
         lat_min = lat - lat_offset
@@ -319,6 +332,21 @@ async def search_cafes(
                 cafe["_distance"] = distance
                 valid_cafes.append(cafe)
         
+        # Deduplicate cafes at identical coordinates - keep the better record
+        seen_coords: dict[tuple[str, str], dict] = {}
+        deduped_cafes: list[dict] = []
+        for cafe in valid_cafes:
+            coord_key = (str(cafe.get("latitude")), str(cafe.get("longitude")))
+            if coord_key in seen_coords:
+                existing = seen_coords[coord_key]
+                if _is_better_cafe(cafe, existing):
+                    deduped_cafes[deduped_cafes.index(existing)] = cafe
+                    seen_coords[coord_key] = cafe
+            else:
+                seen_coords[coord_key] = cafe
+                deduped_cafes.append(cafe)
+        valid_cafes = deduped_cafes
+
         # Sort cafes based on sort_by parameter
         if sort_by == "distance":
             valid_cafes.sort(key=lambda c: c.get("_distance", float("inf")))

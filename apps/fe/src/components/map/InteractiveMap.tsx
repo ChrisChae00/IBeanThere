@@ -268,11 +268,13 @@ function ClusterLayer({
       animateAddingMarkers: true,
       spiderfyOnMaxZoom: true,
       zoomToBoundsOnClick: true,
-      disableClusteringAtZoom: 17,
+      disableClusteringAtZoom: 16,
       maxClusterRadius: (zoom: number) => {
-        if (zoom <= 10) return 80;
-        if (zoom <= 15) return 65;
-        return 50;
+        if (zoom <= 8) return 80;
+        if (zoom <= 10) return 65;
+        if (zoom <= 12) return 50;
+        if (zoom <= 14) return 35;
+        return 20;
       },
       iconCreateFunction: (cluster: any) => {
         const markers = cluster.getAllChildMarkers();
@@ -321,7 +323,28 @@ function ClusterLayer({
 
     const newMarkers: L.Marker[] = [];
 
-    cafes.forEach((cafe) => {
+    // Deduplicate cafes at identical coordinates before adding markers
+    const seenCoords = new Map<string, CafeMapData>();
+    const dedupedCafes: CafeMapData[] = [];
+    for (const cafe of cafes) {
+      const key = `${cafe.latitude.toFixed(6)}_${cafe.longitude.toFixed(6)}`;
+      const existing = seenCoords.get(key);
+      if (existing) {
+        // Prefer verified > pending, then higher verification_count
+        const statusPriority: Record<string, number> = { verified: 0, pending: 1, disputed: 2 };
+        const cs = statusPriority[cafe.status ?? ''] ?? 99;
+        const es = statusPriority[existing.status ?? ''] ?? 99;
+        if (cs < es || (cs === es && (cafe.verification_count ?? 0) > (existing.verification_count ?? 0))) {
+          dedupedCafes[dedupedCafes.indexOf(existing)] = cafe;
+          seenCoords.set(key, cafe);
+        }
+      } else {
+        seenCoords.set(key, cafe);
+        dedupedCafes.push(cafe);
+      }
+    }
+
+    dedupedCafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
       const marker = L.marker([cafe.latitude, cafe.longitude], {
         icon: createCustomMarkerIcon(markerState),
@@ -343,28 +366,28 @@ function ClusterLayer({
       
       const popupContent = `
         <div style="padding: 8px; min-width: 200px;">
-          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">\${cafe.name}</h3>
-          <p style="font-size: 14px; color: \${textSecondaryColor}; margin-bottom: 4px;">\${cafe.address}</p>
-          \${cafe.rating ? \`<p style="font-size: 14px; margin-bottom: 4px;">⭐ \${cafe.rating.toFixed(1)}</p>\` : ''}
-          \${cafe.status === 'verified' ? \`
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
-              <p style="font-size: 12px; font-weight: 600; color: \${primaryColor};">\${verifiedText}</p>
-              \${cafe.foundingCrew?.navigator ? \`<p style="font-size: 12px; color: \${textSecondaryColor};">\${navigatorText}: \${cafe.foundingCrew.navigator.username || unknownText}</p>\` : ''}
+          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
+          <p style="font-size: 14px; color: ${textSecondaryColor}; margin-bottom: 4px;">${cafe.address}</p>
+          ${cafe.rating ? `<p style="font-size: 14px; margin-bottom: 4px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
+          ${cafe.status === 'verified' ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <p style="font-size: 12px; font-weight: 600; color: ${primaryColor};">${verifiedText}</p>
+              ${cafe.foundingCrew?.navigator ? `<p style="font-size: 12px; color: ${textSecondaryColor};">${navigatorText}: ${cafe.foundingCrew.navigator.username || unknownText}</p>` : ''}
             </div>
-          \` : ''}
-          \${cafe.status === 'pending' && cafe.verification_count ? \`
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
-              <p style="font-size: 12px; color: \${textSecondaryColor};">\${cafe.verification_count} \${checkInText}</p>
+          ` : ''}
+          ${cafe.status === 'pending' && cafe.verification_count ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
             </div>
-          \` : ''}
-          \${cafe.source_url ? \`
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid \${borderColor};">
-              <a href="\${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: \${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+          ` : ''}
+          ${cafe.source_url ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
+              <a href="${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: ${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                 <span>📍</span>
                 <span style="text-decoration: underline;">View on Google Maps</span>
               </a>
             </div>
-          \` : ''}
+          ` : ''}
         </div>
       `;
 
@@ -482,6 +505,7 @@ export default function InteractiveMap({
       <MapContainer
         center={centerLatLng}
         zoom={zoom}
+        maxZoom={19}
         className="h-full w-full rounded-xl"
         scrollWheelZoom={true}
         zoomControl={true}

@@ -27,7 +27,7 @@ export function createCustomMarkerIcon(state: CafeMarkerState): L.DivIcon {
       bg: pendingColor,
       border: cafeMarkerColor,
       dash: true,
-      badge: '2'
+      badge: null
     },
     'verified': {
       bg: cafeMarkerColor,
