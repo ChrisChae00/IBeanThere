@@ -268,6 +268,7 @@ function ClusterLayer({
       animateAddingMarkers: true,
       spiderfyOnMaxZoom: true,
       zoomToBoundsOnClick: true,
+      disableClusteringAtZoom: 17,
       maxClusterRadius: (zoom: number) => {
         if (zoom <= 10) return 80;
         if (zoom <= 15) return 65;
@@ -276,25 +277,25 @@ function ClusterLayer({
       iconCreateFunction: (cluster: any) => {
         const markers = cluster.getAllChildMarkers();
         const count = markers.length;
-        
-        const cafes = markers.map((marker: L.Marker) => 
+
+        const cafes = markers.map((marker: L.Marker) =>
           (marker.options as any).cafeData as CafeMapData
         ).filter(Boolean);
-        
+
         const hasVerified = cafes.some((cafe: CafeMapData) => cafe.status === 'verified');
         const state: ClusterState = hasVerified ? 'verified' : 'pending';
-        
+
         return createClusterIcon(count, state);
-      },
-      onClusterClick: (event: any) => {
-        const cluster = event.layer;
-        const markers = cluster.getAllChildMarkers();
-        
-        if (markers.length === 1) {
-          const cafe = (markers[0].options as any).cafeData as CafeMapData;
-          if (cafe && onMarkerClick) {
-            onMarkerClick(cafe);
-          }
+      }
+    });
+
+    clusterGroup.on('clusterclick', (event: any) => {
+      const cluster = event.layer;
+      const markers = cluster.getAllChildMarkers();
+      if (markers.length === 1) {
+        const cafe = (markers[0].options as any).cafeData as CafeMapData;
+        if (cafe && onMarkerClick) {
+          onMarkerClick(cafe);
         }
       }
     });

@@ -64,7 +64,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   const lastSearchRef = useRef<{ lat: number; lng: number } | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const expansionAttemptedRef = useRef(false);
-  const initialSearchDoneRef = useRef(false);
 
   const MIN_CAFE_COUNT = 9;
   const EXPANDED_RADIUS = 150000; // 150km
@@ -218,7 +217,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
 
         lastSearchRef.current = newCenter;
         expansionAttemptedRef.current = false;
-        initialSearchDoneRef.current = false;
 
         // Initial load: 20km radius
         searchCafes({
@@ -230,14 +228,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     }
   }, [coords, searchCafes, clearCache]);
 
-  // Progressive expansion: if initial search returned < MIN_CAFE_COUNT, expand to 150km (once)
+  // Progressive expansion: if initial 20km search returned < MIN_CAFE_COUNT, expand to 150km (once)
   useEffect(() => {
-    if (isLoading || expansionAttemptedRef.current || !center) return;
-    // Mark initial search done once loading finishes with a center set
-    if (!initialSearchDoneRef.current && lastSearchRef.current) {
-      initialSearchDoneRef.current = true;
-    }
-    if (initialSearchDoneRef.current && allCafes.length < MIN_CAFE_COUNT) {
+    // Guard: skip if loading, already attempted, no center, or no initial search done yet
+    if (isLoading || expansionAttemptedRef.current || !center || !lastSearchRef.current) return;
+    if (allCafes.length < MIN_CAFE_COUNT) {
       expansionAttemptedRef.current = true;
       searchCafes({
         lat: center.lat,
