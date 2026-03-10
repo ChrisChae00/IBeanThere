@@ -40,19 +40,21 @@ async def get_user_profiles(display_name: str = Path(..., max_length=30), supaba
             if user_id_result.data:
                 user_id = user_id_result.data["id"]
                 
-                # Count Navigator roles
-                nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+                # Count Navigator roles (cafes where user is navigator_id)
+                nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
                 navigator_count = nav_count.count if nav_count.count is not None else 0
-                
-                # Count Vanguard roles
-                van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
-                vanguard_count = van_count.count if van_count.count is not None else 0
-                
+
+                # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
+                van_result = supabase.table("cafes").select("vanguard_ids").filter(
+                    "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
+                ).execute()
+                vanguard_count = len(van_result.data) if van_result.data else 0
+
                 user["founding_stats"] = {
                     "navigator_count": navigator_count,
                     "vanguard_count": vanguard_count
                 }
-            
+
             response_users.append(UserPublicResponse(**user))
             
         return response_users
@@ -104,15 +106,17 @@ async def get_user_profile_by_username(username: str = Path(..., max_length=20),
         user_full = supabase.table("users").select("id").eq("username", username).single().execute()
         if user_full.data:
             user_id = user_full.data["id"]
-            
-            # Count Navigator roles
-            nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+
+            # Count Navigator roles (cafes where user is navigator_id)
+            nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
             navigator_count = nav_count.count if nav_count.count is not None else 0
-            
-            # Count Vanguard roles
-            van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
-            vanguard_count = van_count.count if van_count.count is not None else 0
-            
+
+            # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
+            van_result = supabase.table("cafes").select("vanguard_ids").filter(
+                "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
+            ).execute()
+            vanguard_count = len(van_result.data) if van_result.data else 0
+
             user_data["founding_stats"] = {
                 "navigator_count": navigator_count,
                 "vanguard_count": vanguard_count
@@ -360,13 +364,15 @@ async def get_my_profile(
         display_name = user_data.get('display_name') or username
         
         # Get founding stats
-        # Count Navigator roles
-        nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", current_user.id).eq("founding_role", "navigator").execute()
+        # Count Navigator roles (cafes where user is navigator_id)
+        nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", current_user.id).execute()
         navigator_count = nav_count.count if nav_count.count is not None else 0
-        
-        # Count Vanguard roles
-        van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", current_user.id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
-        vanguard_count = van_count.count if van_count.count is not None else 0
+
+        # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
+        van_result = supabase.table("cafes").select("vanguard_ids").filter(
+            "vanguard_ids", "cs", f'[{{"user_id": "{current_user.id}"}}]'
+        ).execute()
+        vanguard_count = len(van_result.data) if van_result.data else 0
         
         return UserResponse(
             id=user_data['id'],
@@ -890,11 +896,13 @@ async def get_trusting_users(
             if user_id_result.data:
                 user_id = user_id_result.data["id"]
                 
-                nav_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).eq("founding_role", "navigator").execute()
+                nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
                 navigator_count = nav_count.count if nav_count.count is not None else 0
-                
-                van_count = supabase.table("cafe_checkins").select("id", count="exact").eq("user_id", user_id).in_("founding_role", ["vanguard", "vanguard_2nd", "vanguard_3rd"]).execute()
-                vanguard_count = van_count.count if van_count.count is not None else 0
+
+                van_result = supabase.table("cafes").select("vanguard_ids").filter(
+                    "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
+                ).execute()
+                vanguard_count = len(van_result.data) if van_result.data else 0
                 
                 user["founding_stats"] = {
                     "navigator_count": navigator_count,

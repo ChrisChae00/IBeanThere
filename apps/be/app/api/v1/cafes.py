@@ -251,7 +251,7 @@ async def check_nearby_cafes(
 async def search_cafes(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
     lng: float = Query(..., ge=-180, le=180, description="Longitude"),
-    radius: int = Query(default=2000, ge=100, le=20000, description="Search radius in meters"),
+    radius: int = Query(default=2000, ge=100, le=150000, description="Search radius in meters"),
     status_filter: Optional[str] = Query(None, description="Filter by status: 'pending' | 'verified'"),
     sort_by: str = Query(default="distance", description="Sort by: distance | trending | rating | newest"),
     min_rating: Optional[float] = Query(None, ge=0, le=5, description="Minimum rating filter")
@@ -757,78 +757,87 @@ async def register_cafe(
         )
         
         if existing_cafe:
-            # Existing cafe found - add check-in instead
+            # Existing cafe found - add bean drop as founding contribution
             cafe_id = existing_cafe.get("id")
-            
-            # Check if user already checked in
-            checkin_result = supabase.table("cafe_checkins").select("*").eq(
+
+            # Check if user already has a bean at this cafe
+            existing_bean_result = supabase.table("cafe_beans").select("id").eq(
                 "cafe_id", cafe_id
             ).eq(
                 "user_id", current_user.id
             ).execute()
-            
-            if checkin_result.data and len(checkin_result.data) > 0:
+
+            if existing_bean_result.data and len(existing_bean_result.data) > 0:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="You have already checked in to this cafe"
                 )
-            
-            # Get current check-in count
-            current_count = existing_cafe.get("verification_count", 1)
-            new_count = current_count + 1
-            checkin_order = new_count
-            
-            # Determine role
-            if checkin_order == 1:
-                role = "navigator"
-            else:
-                role = "vanguard"
-            
-            # Add check-in
-            checkin_data = {
+
+            # Create bean record for this user as a founding contribution
+            now_iso = datetime.now(timezone.utc).isoformat()
+            new_bean = supabase.table("cafe_beans").insert({
                 "cafe_id": cafe_id,
                 "user_id": current_user.id,
-                "checkin_order": checkin_order,
-                "founding_role": role,
-                "triggered_verification": False
-            }
-            
-            # Update cafe verification count
-            update_data = {
-                "verification_count": new_count
-            }
-            
-            # If 3rd check-in, trigger verification
-            if new_count == 3:
+                "drop_count": 1,
+                "growth_level": 1,
+                "last_latitude": float(request.latitude),
+                "last_longitude": float(request.longitude),
+                "first_dropped_at": now_iso,
+                "last_dropped_at": now_iso
+            }).execute()
+
+            if new_bean.data:
+                supabase.table("cafe_bean_drops").insert({
+                    "bean_id": new_bean.data[0]["id"],
+                    "user_id": current_user.id,
+                    "cafe_id": cafe_id,
+                    "latitude": float(request.latitude),
+                    "longitude": float(request.longitude),
+                    "dropped_at": now_iso
+                }).execute()
+
+            # Count unique users who have beans at this cafe
+            unique_users_result = supabase.table("cafe_beans").select("user_id").eq("cafe_id", cafe_id).execute()
+            unique_user_ids = list(set([b["user_id"] for b in unique_users_result.data])) if unique_users_result.data else []
+            unique_user_count = len(unique_user_ids)
+
+            update_data = {"verification_count": unique_user_count}
+            triggered_verification = False
+
+            if unique_user_count >= 3:
+                # Get founding order to assign vanguard roles
+                drops_result = supabase.table("cafe_beans").select(
+                    "user_id, first_dropped_at"
+                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
+
+                founding_drops = drops_result.data if drops_result.data else []
+                navigator_id = existing_cafe.get("navigator_id")
+
+                vanguard_ids = []
+                for idx, drop in enumerate(founding_drops):
+                    if drop["user_id"] != navigator_id:
+                        vanguard_ids.append({
+                            "user_id": drop["user_id"],
+                            "role": f"vanguard_{idx + 1}",
+                            "verified_at": now_iso
+                        })
+
                 update_data["status"] = "verified"
-                update_data["verified_at"] = datetime.now(timezone.utc).isoformat()
-                checkin_data["triggered_verification"] = True
-                
-                # Record Founding Crew
-                if checkin_order == 1:
-                    update_data["navigator_id"] = current_user.id
-                else:
-                    # Add to vanguard_ids
-                    vanguard_ids = existing_cafe.get("vanguard_ids", [])
-                    vanguard_ids.append({
-                        "user_id": current_user.id,
-                        "role": f"vanguard_{checkin_order}",
-                        "verified_at": datetime.now(timezone.utc).isoformat()
-                    })
-                    update_data["vanguard_ids"] = vanguard_ids
-            
-            # Transaction: Update cafe + add check-in
+                update_data["verified_at"] = now_iso
+                update_data["vanguard_ids"] = vanguard_ids
+                triggered_verification = True
+                logger.info("Cafe %s auto-verified by 3 unique bean droppers (register flow)", cafe_id)
+
             supabase.table("cafes").update(update_data).eq("id", cafe_id).execute()
-            supabase.table("cafe_checkins").insert(checkin_data).execute()
-            
+
             # Fetch updated cafe
             result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
-            
+
             return {
                 "message": "Check-in recorded",
                 "cafe": result.data,
-                "check_in": checkin_data,
-                "triggered_verification": checkin_data["triggered_verification"]
+                "check_in": {"cafe_id": cafe_id, "user_id": current_user.id},
+                "triggered_verification": triggered_verification
             }
         
         else:
@@ -881,17 +890,6 @@ async def register_cafe(
             new_cafe = result.data[0]
             cafe_id = new_cafe.get("id")
             
-            # Add first check-in (Navigator)
-            checkin_data = {
-                "cafe_id": cafe_id,
-                "user_id": current_user.id,
-                "checkin_order": 1,
-                "founding_role": "navigator",
-                "triggered_verification": False
-            }
-            
-            supabase.table("cafe_checkins").insert(checkin_data).execute()
-            
             # Auto-create first Drop Bean for Navigator (founding member)
             first_bean = supabase.table("cafe_beans").insert({
                 "cafe_id": cafe_id,
@@ -936,7 +934,6 @@ async def register_cafe(
             return {
                 "message": "Cafe registered successfully",
                 "cafe": new_cafe,
-                "check_in": checkin_data,
                 "triggered_verification": False,
                 "auto_bean_dropped": True
             }
@@ -1794,10 +1791,10 @@ async def drop_bean(
                 drops_result = supabase.table("cafe_beans").select(
                     "user_id, first_dropped_at"
                 ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
-                
+
                 founding_drops = drops_result.data if drops_result.data else []
                 navigator_id = cafe_status_result.data.get("navigator_id")
-                
+
                 # Build vanguard_ids (2nd and 3rd droppers)
                 vanguard_ids = []
                 for idx, drop in enumerate(founding_drops):
@@ -1808,16 +1805,22 @@ async def drop_bean(
                             "role": role,
                             "verified_at": datetime.now(timezone.utc).isoformat()
                         })
-                
-                # Update cafe to verified
+
+                # Update cafe to verified, sync verification_count
                 supabase.table("cafes").update({
                     "status": "verified",
                     "verified_at": datetime.now(timezone.utc).isoformat(),
-                    "vanguard_ids": vanguard_ids
+                    "vanguard_ids": vanguard_ids,
+                    "verification_count": unique_user_count
                 }).eq("id", cafe_id).execute()
-                
+
                 triggered_verification = True
                 logger.info("Cafe %s auto-verified by 3 unique bean droppers", cafe_id)
+            else:
+                # Sync verification_count to current unique bean dropper count
+                supabase.table("cafes").update({
+                    "verification_count": unique_user_count
+                }).eq("id", cafe_id).execute()
         
         return {
             "message": "Bean dropped successfully!",
