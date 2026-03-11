@@ -42,7 +42,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   const t = useTranslations('map');
 
   const { coords, getCurrentLocation, error: locationError } = useLocation();
-  const { cafes: allCafes, isLoading, error, searchCafes, clearCache } = useMapData();
+  const { cafes: allCafes, isLoading, error, searchCafes, fetchTrendingFallback, isTrendingFallback, clearCache } = useMapData();
 
   const { showToast } = useToast();
   
@@ -64,6 +64,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
   const lastSearchRef = useRef<{ lat: number; lng: number } | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const expansionAttemptedRef = useRef(false);
+  const trendingFallbackAttemptedRef = useRef(false);
 
   const MIN_CAFE_COUNT = 9;
   const EXPANDED_RADIUS = 150000; // 150km
@@ -102,8 +103,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           if (dist < SEARCH_THRESHOLD) {
             return; // Location hasn't changed enough
           }
+          // Center changed significantly — allow re-expansion for new area
+          expansionAttemptedRef.current = false;
+          trendingFallbackAttemptedRef.current = false;
         }
-        
+
         lastSearchRef.current = { lat: centerLat, lng: centerLng };
         
         // Calculate radius in meters (expand to load more cafes around map)
@@ -217,6 +221,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
 
         lastSearchRef.current = newCenter;
         expansionAttemptedRef.current = false;
+        trendingFallbackAttemptedRef.current = false;
 
         // Initial load: 20km radius
         searchCafes({
@@ -241,6 +246,15 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
       });
     }
   }, [allCafes.length, isLoading, center, searchCafes]);
+
+  // Trending fallback: if 150km expansion returned 0 cafes, load global trending top 8
+  useEffect(() => {
+    if (isLoading || !expansionAttemptedRef.current || trendingFallbackAttemptedRef.current) return;
+    if (allCafes.length === 0 && !isTrendingFallback) {
+      trendingFallbackAttemptedRef.current = true;
+      fetchTrendingFallback();
+    }
+  }, [allCafes.length, isLoading, isTrendingFallback, fetchTrendingFallback]);
 
   const handleLocationClick = () => {
     // If coords already exist, update center immediately
@@ -466,6 +480,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           </div>
         ) : (
           <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full relative">
+            {isTrendingFallback && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 shadow text-xs text-[var(--color-text-secondary)] whitespace-nowrap">
+                {t('trending_fallback_banner')}
+              </div>
+            )}
             <InteractiveMap
               cafes={filteredCafes}
               center={center}
@@ -473,8 +492,9 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
               userMarkerPalette={userMarkerPalette}
               onMarkerClick={handleCafeClick}
-              onBoundsChanged={handleBoundsChanged}
+              onBoundsChanged={isTrendingFallback ? undefined : handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
+              fitToMarkers={isTrendingFallback}
             />
             {isLoading && (
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg">
