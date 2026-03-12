@@ -1381,6 +1381,7 @@ async def get_pending_cafes(
                 updated_at=updated_at,
                 main_image=main_image,
                 images=all_images if all_images else None,
+                business_hours=cafe.get("business_hours"),
             ))
         
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
@@ -1598,7 +1599,7 @@ async def admin_update_cafe(
 
         # Update gallery images via admin cafe_visit record
         if has_image_update:
-            admin_user_id = current_user.get("id") or current_user.get("sub")
+            admin_user_id = current_user.id
             admin_comment = "Admin Edit"
 
             # Look for existing admin visit record
