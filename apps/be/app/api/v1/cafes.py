@@ -646,7 +646,7 @@ async def get_cafe_details(cafe_identifier: str):
                     if photo_urls:
                         # Add images if they are not already in the list (avoid duplicates with main_image)
                         for url in photo_urls:
-                            if url not in all_images:
+                            if url and isinstance(url, str) and url.strip() and url not in all_images:
                                 all_images.append(url)
                 
                 # If no main_image from registration (and none set above), use first image from oldest log
@@ -1599,6 +1599,43 @@ async def admin_update_cafe(
 
         # Update gallery images via admin cafe_visit record
         if has_image_update:
+            # Phase 1: Clean up removed images from ALL cafe_visits for this cafe
+            try:
+                # Fetch all current images from all visits for this cafe
+                all_visits = supabase.table("cafe_visits").select("id, photo_urls").eq("cafe_id", cafe_id).not_.is_("photo_urls", "null").execute()
+                
+                # Determine URLs that were removed by admin
+                current_all_urls = set()
+                if all_visits.data:
+                    for visit in all_visits.data:
+                        for url in (visit.get("photo_urls") or []):
+                            if isinstance(url, str) and url.strip():
+                                current_all_urls.add(url)
+                
+                new_images_set = set(request.images) if request.images is not None else set()
+                removed_urls = current_all_urls - new_images_set
+                
+                # Remove deleted URLs from ALL cafe_visits for this cafe (including other users)
+                if removed_urls and all_visits.data:
+                    for visit in all_visits.data:
+                        visit_photos = visit.get("photo_urls") or []
+                        if not visit_photos: continue
+                        
+                        updated_photos = [url for url in visit_photos if url not in removed_urls]
+                        if len(updated_photos) != len(visit_photos):
+                            supabase.table("cafe_visits").update(
+                                {"photo_urls": updated_photos, "has_photos": len(updated_photos) > 0}
+                            ).eq("id", visit["id"]).execute()
+                            
+                # Also check main_image from cafe
+                cafe_main_image = cafe_result.data.get("main_image") if cafe_result.data else None
+                if cafe_main_image and cafe_main_image in removed_urls:
+                    supabase.table("cafes").update({"main_image": None}).eq("id", cafe_id).execute()
+                    
+            except Exception as e:
+                logger.warning("Error cleaning up removed images globally", exc_info=True)
+
+
             admin_user_id = current_user.id
             admin_comment = "Admin Edit"
 

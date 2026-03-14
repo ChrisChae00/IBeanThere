@@ -42,11 +42,13 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
   
   // Convert images to GalleryImage format
-  const galleryImages: GalleryImage[] = (cafe.images || []).map((url, index) => ({
-    url,
-    alt: `${cafe.name} photo ${index + 1}`,
-    source: 'log' as const
-  }));
+  const galleryImages: GalleryImage[] = (cafe.images || [])
+    .filter((url) => url && typeof url === 'string' && url.trim().length > 0)
+    .map((url, index) => ({
+      url,
+      alt: `${cafe.name} photo ${index + 1}`,
+      source: 'log' as const
+    }));
 
   const handleWriteLog = (e: React.MouseEvent) => {
     if (!user) {
