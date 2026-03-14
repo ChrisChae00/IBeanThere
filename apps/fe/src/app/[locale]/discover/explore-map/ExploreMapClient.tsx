@@ -208,18 +208,30 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       </section>
 
       {/* Load More Section */}
-      {filteredCafes.length > visibleCount && (
+      {(visibleCount > CAFE_GRID_ITEMS_PER_PAGE || filteredCafes.length > visibleCount) ? (
         <section className="py-6">
-          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <button
-              onClick={() => setVisibleCount(prev => prev + CAFE_GRID_ITEMS_PER_PAGE)}
-              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
-            >
-              {tMap('load_more')}
-            </button>
+          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex gap-4 justify-center">
+              {filteredCafes.length > visibleCount && (
+                <button
+                  onClick={() => setVisibleCount(prev => prev + CAFE_GRID_ITEMS_PER_PAGE)}
+                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
+                >
+                  {tMap('load_more')}
+                </button>
+              )}
+              {visibleCount > CAFE_GRID_ITEMS_PER_PAGE && (
+                <button
+                  onClick={() => setVisibleCount(CAFE_GRID_ITEMS_PER_PAGE)}
+                  className="border border-[var(--color-border)] text-[var(--color-text)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+                >
+                  {tMap('show_less')}
+                </button>
+              )}
+            </div>
           </div>
         </section>
-      )}
+      ) : null}
     </>
   );
 }

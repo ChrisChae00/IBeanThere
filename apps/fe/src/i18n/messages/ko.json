@@ -327,6 +327,7 @@
       "popular": "인기",
       "visit": "방문하기",
       "load_more": "더 많은 카페 보기",
+      "show_less": "접기",
       "location_permission_title": "주변 로컬 카페를 찾아보세요",
       "location_permission_reason": "내 주변의 트렌딩 카페를 보려면 위치 공유가 필요해요",
       "location_permission_denied_title": "위치 권한이 필요합니다",

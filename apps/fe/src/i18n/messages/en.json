@@ -331,6 +331,7 @@
       "popular": "Popular",
       "visit": "Visit",
       "load_more": "Load More Cafes",
+      "show_less": "Show Less",
       "location_permission_title": "Discover Local Cafes Nearby",
       "location_permission_reason": "Location sharing is needed to see trending cafes near you",
       "location_permission_denied_title": "Location Permission Required",
