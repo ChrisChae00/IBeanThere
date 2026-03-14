@@ -341,6 +341,7 @@
       "login_required_to_register": "카페 등록을 위해 로그인해주세요",
       "cafe_registered_successfully": "카페가 성공적으로 등록되었습니다!",
       "selected_location": "선택한 위치",
+      "trending_fallback_banner": "주변에 카페가 없습니다 — 인기 카페를 표시합니다",
       "browser_guide": {
         "title": "위치 권한 허용 방법",
         "chrome": "크롬",

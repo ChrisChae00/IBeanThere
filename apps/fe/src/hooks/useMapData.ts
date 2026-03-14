@@ -5,24 +5,49 @@ import { CafeMapData, MapSearchParams } from '@/types/map';
 import { CafeSearchResponse } from '@/types/api';
 import { useSpatialCafeCache } from './useSpatialCafeCache';
 import { apiFetch, API_BASE_URL } from '@/lib/api/client';
+import { getTrendingCafes } from '@/lib/api/cafes';
 
 interface MapDataState {
   cafes: CafeMapData[];
   isLoading: boolean;
   error: string | null;
+  isTrendingFallback: boolean;
 }
 
 export function useMapData() {
   const [state, setState] = useState<MapDataState>({
     cafes: [],
     isLoading: false,
-    error: null
+    error: null,
+    isTrendingFallback: false
   });
 
   const { getCafes, addCafes, isCached, clearCache, filterCafesByDistance } = useSpatialCafeCache();
 
-  const searchCafes = useCallback(async (params: MapSearchParams, forceReload = false) => {
+  const fetchTrendingFallback = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
+    try {
+      const trending = await getTrendingCafes(8);
+      const cafes: CafeMapData[] = trending.map(cafe => ({
+        id: cafe.id,
+        name: cafe.name,
+        slug: cafe.slug,
+        latitude: cafe.latitude,
+        longitude: cafe.longitude,
+        address: cafe.address,
+        status: cafe.status || 'pending',
+        verification_count: 1,
+        main_image: cafe.main_image ?? cafe.image
+      }));
+      setState({ cafes, isLoading: false, error: null, isTrendingFallback: true });
+    } catch (error) {
+      console.error('Error fetching trending fallback:', error);
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, []);
+
+  const searchCafes = useCallback(async (params: MapSearchParams, forceReload = false) => {
+    setState(prev => ({ ...prev, isLoading: true, error: null, isTrendingFallback: false }));
 
     try {
       if (!forceReload) {
@@ -33,7 +58,8 @@ export function useMapData() {
           setState({
             cafes: nearbyCached,
             isLoading: false,
-            error: null
+            error: null,
+            isTrendingFallback: false
           });
           return;
         }
@@ -77,24 +103,27 @@ export function useMapData() {
       setState({
         cafes,
         isLoading: false,
-        error: null
+        error: null,
+        isTrendingFallback: false
       });
     } catch (error) {
       console.error('Error fetching cafes:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch cafes';
-      
-      setState({
-        cafes: [],
+
+      setState(prev => ({
+        cafes: prev.cafes, // preserve existing cafes on error
         isLoading: false,
-        error: errorMessage
-      });
+        error: errorMessage,
+        isTrendingFallback: prev.isTrendingFallback
+      }));
     }
   }, [getCafes, addCafes, isCached, filterCafesByDistance]);
 
   return {
     ...state,
     searchCafes,
+    fetchTrendingFallback,
     clearCache
   };
 }

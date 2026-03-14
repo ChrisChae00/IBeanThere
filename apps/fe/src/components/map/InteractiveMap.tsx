@@ -323,28 +323,7 @@ function ClusterLayer({
 
     const newMarkers: L.Marker[] = [];
 
-    // Deduplicate cafes at identical coordinates before adding markers
-    const seenCoords = new Map<string, CafeMapData>();
-    const dedupedCafes: CafeMapData[] = [];
-    for (const cafe of cafes) {
-      const key = `${cafe.latitude.toFixed(6)}_${cafe.longitude.toFixed(6)}`;
-      const existing = seenCoords.get(key);
-      if (existing) {
-        // Prefer verified > pending, then higher verification_count
-        const statusPriority: Record<string, number> = { verified: 0, pending: 1, disputed: 2 };
-        const cs = statusPriority[cafe.status ?? ''] ?? 99;
-        const es = statusPriority[existing.status ?? ''] ?? 99;
-        if (cs < es || (cs === es && (cafe.verification_count ?? 0) > (existing.verification_count ?? 0))) {
-          dedupedCafes[dedupedCafes.indexOf(existing)] = cafe;
-          seenCoords.set(key, cafe);
-        }
-      } else {
-        seenCoords.set(key, cafe);
-        dedupedCafes.push(cafe);
-      }
-    }
-
-    dedupedCafes.forEach((cafe) => {
+    cafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
       const marker = L.marker([cafe.latitude, cafe.longitude], {
         icon: createCustomMarkerIcon(markerState),
@@ -413,6 +392,7 @@ function MapContent({
   center,
   zoom,
   forceCenterUpdate,
+  fitToMarkers,
   useClustering
 }: {
   cafes: CafeMapData[];
@@ -425,19 +405,26 @@ function MapContent({
   center: { lat: number; lng: number };
   zoom: number;
   forceCenterUpdate?: boolean;
+  fitToMarkers?: boolean;
   useClustering: boolean;
 }) {
   const map = useMap();
   const { currentTheme } = useTheme();
   const [markerKey, setMarkerKey] = useState(0);
   const t = useTranslations('map');
-  
+
   useEffect(() => {
     setMarkerKey(prev => prev + 1);
   }, [currentTheme.name]);
-  
+
+  useEffect(() => {
+    if (!fitToMarkers || cafes.length === 0) return;
+    const bounds = L.latLngBounds(cafes.map(c => [c.latitude, c.longitude] as [number, number]));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+  }, [fitToMarkers, cafes, map]);
+
   const selectedMarkerIcon = createSelectedLocationIcon(36);
-  
+
   return (
     <>
       <MapResizeHandler />
@@ -478,9 +465,11 @@ export default function InteractiveMap({
   onBoundsChanged,
   onMapClick,
   forceCenterUpdate,
+  fitToMarkers,
   onLocationClick
-}: MapProps & { 
+}: MapProps & {
   forceCenterUpdate?: boolean;
+  fitToMarkers?: boolean;
   onLocationClick?: () => void;
 }) {
   const t = useTranslations('map');
@@ -528,6 +517,7 @@ export default function InteractiveMap({
           center={center}
           zoom={zoom}
           forceCenterUpdate={forceCenterUpdate}
+          fitToMarkers={fitToMarkers}
           useClustering={shouldUseClustering}
         />
 

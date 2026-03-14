@@ -345,6 +345,7 @@
       "login_required_to_register": "Please sign in to register a cafe",
       "cafe_registered_successfully": "Cafe registered successfully!",
       "selected_location": "Selected Location",
+      "trending_fallback_banner": "No cafes nearby — showing popular cafes",
       "browser_guide": {
         "title": "How to Enable Location",
         "chrome": "Chrome",
