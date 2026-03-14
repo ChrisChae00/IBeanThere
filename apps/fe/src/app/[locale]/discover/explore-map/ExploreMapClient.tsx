@@ -30,6 +30,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [visibleCount, setVisibleCount] = useState(CAFE_GRID_ITEMS_PER_PAGE);
 
   // Refetch with location once coords become available
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
+    setVisibleCount(CAFE_GRID_ITEMS_PER_PAGE);
 
     let sorted = [...trendingCafes];
 
@@ -193,7 +195,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                 </div>
               </div>
             ) : (
-              filteredCafes.map((cafe) => (
+              filteredCafes.slice(0, visibleCount).map((cafe) => (
                 <CafeGridCard
                   key={cafe.id}
                   cafe={cafe}
@@ -206,10 +208,13 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       </section>
 
       {/* Load More Section */}
-      {filteredCafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
+      {filteredCafes.length > visibleCount && (
         <section className="py-6">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <button className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]">
+            <button
+              onClick={() => setVisibleCount(prev => prev + CAFE_GRID_ITEMS_PER_PAGE)}
+              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
+            >
               {tMap('load_more')}
             </button>
           </div>
