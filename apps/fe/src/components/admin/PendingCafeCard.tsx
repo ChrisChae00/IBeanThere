@@ -108,8 +108,11 @@ export default function PendingCafeCard({
               </span>
             </div>
           </div>
-          <Badge variant="warning" size="sm">
-            {t('pending')}
+          <Badge
+            variant={cafe.status === 'verified' ? 'success' : cafe.status === 'disputed' ? 'error' : 'warning'}
+            size="sm"
+          >
+            {t(cafe.status as 'pending' | 'verified' | 'disputed')}
           </Badge>
         </div>
 
@@ -167,14 +170,16 @@ export default function PendingCafeCard({
           >
             {t('edit')}
           </Button>
-          <Button
-            onClick={() => onVerify(cafe.id)}
-            disabled={isDeleting || isEditing}
-            loading={isVerifying}
-            className="flex-1"
-          >
-            {t('verify')}
-          </Button>
+          {cafe.status === 'pending' && (
+            <Button
+              onClick={() => onVerify(cafe.id)}
+              disabled={isDeleting || isEditing}
+              loading={isVerifying}
+              className="flex-1"
+            >
+              {t('verify')}
+            </Button>
+          )}
           <Button
             onClick={() => onDelete(cafe.id)}
             disabled={isVerifying || isEditing}
