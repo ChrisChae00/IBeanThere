@@ -742,22 +742,26 @@ async def register_cafe(
         # 1. Location verification (50m limit)
         max_distance = 50
         
-        if request.user_location:
-            user_lat = request.user_location.get("lat")
-            user_lng = request.user_location.get("lng")
-            
-            if user_lat and user_lng:
-                distance = calculate_earth_distance(
-                    user_lat, user_lng,
-                    float(request.latitude),
-                    float(request.longitude)
-                )
-                
-                if distance > max_distance:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"You must be within {max_distance}m of the cafe to register. Current distance: {distance:.0f}m"
-                    )
+        user_lat = request.user_location.get("lat")
+        user_lng = request.user_location.get("lng")
+
+        if not user_lat or not user_lng:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Valid user location (lat/lng) is required to register a cafe"
+            )
+
+        distance = calculate_earth_distance(
+            user_lat, user_lng,
+            float(request.latitude),
+            float(request.longitude)
+        )
+
+        if distance > max_distance:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You must be within {max_distance}m of the cafe to register. Current distance: {distance:.0f}m"
+            )
         
         # 2. OSM Cross Check - verify location exists
         osm_service = get_osm_service()
