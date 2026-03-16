@@ -97,6 +97,28 @@ export interface AdminUpdateResponse {
   cafe: PendingCafe;
 }
 
+export interface AllCafesParams {
+  page?: number;
+  pageSize?: number;
+  status?: 'pending' | 'verified' | 'disputed';
+}
+
+export async function getAllCafes(params?: AllCafesParams): Promise<PendingCafesResponse> {
+  const headers = await getAuthHeaders();
+  const searchParams = new URLSearchParams();
+  if (params?.page) searchParams.set('page', String(params.page));
+  if (params?.pageSize) searchParams.set('page_size', String(params.pageSize));
+  if (params?.status) searchParams.set('status', params.status);
+
+  const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/admin/all${query}`, {
+    method: 'GET',
+    headers,
+  });
+
+  return handleResponse<PendingCafesResponse>(response, ADMIN_ERROR_MAP);
+}
+
 export async function updateCafe(cafeId: string, data: CafeUpdateData): Promise<AdminUpdateResponse> {
   const headers = await getAuthHeaders();
   

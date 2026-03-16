@@ -1393,6 +1393,121 @@ async def get_pending_cafes(
             detail="An unexpected error occurred. Please try again."
         )
 
+@router.get("/admin/all", response_model=CafeSearchResponse)
+async def get_all_cafes_admin(
+    page: int = 1,
+    page_size: int = 20,
+    cafe_status: Optional[str] = Query(None, alias="status"),
+    current_user = Depends(require_admin_role),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    Get all cafes with pagination and optional status filter (Admin only).
+
+    Args:
+        page: Page number (default 1)
+        page_size: Number of items per page (default 20)
+        cafe_status: Optional status filter (pending/verified/disputed)
+    """
+    try:
+        offset = (page - 1) * page_size
+
+        # Count query
+        count_query = supabase.table("cafes").select("id", count="exact")
+        if cafe_status:
+            count_query = count_query.eq("status", cafe_status)
+        count_result = count_query.execute()
+        total_count = count_result.count if count_result.count is not None else 0
+
+        # Data query with pagination
+        data_query = supabase.table("cafes").select("*")
+        if cafe_status:
+            data_query = data_query.eq("status", cafe_status)
+        result = data_query.order("created_at", desc=True).range(offset, offset + page_size - 1).execute()
+
+        if not result.data:
+            return CafeSearchResponse(cafes=[], total_count=total_count)
+
+        # Batch fetch images
+        cafe_ids = [cafe.get("id") for cafe in result.data]
+        cafe_images_map = {}
+        if cafe_ids:
+            try:
+                visits_result = supabase.table("cafe_visits").select(
+                    "cafe_id, photo_urls, visited_at"
+                ).in_("cafe_id", cafe_ids).eq(
+                    "is_public", True
+                ).not_.is_("photo_urls", "null").order(
+                    "visited_at", desc=False
+                ).execute()
+
+                if visits_result.data:
+                    for visit in visits_result.data:
+                        cid = visit.get("cafe_id")
+                        if cid not in cafe_images_map:
+                            cafe_images_map[cid] = []
+                        photo_urls = visit.get("photo_urls", [])
+                        if photo_urls:
+                            for url in photo_urls:
+                                if url not in cafe_images_map[cid]:
+                                    cafe_images_map[cid].append(url)
+            except Exception:
+                logger.warning("Error batch fetching images for all cafes", exc_info=True)
+
+        cafes = []
+        for cafe in result.data:
+            cafe_id = cafe.get("id")
+
+            created_at_str = cafe.get("created_at")
+            created_at = date_parser.parse(created_at_str) if created_at_str else datetime.now(timezone.utc)
+
+            updated_at_str = cafe.get("updated_at")
+            updated_at = date_parser.parse(updated_at_str) if updated_at_str else None
+
+            verified_at_str = cafe.get("verified_at")
+            verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
+
+            main_image = cafe.get("main_image")
+            all_images = []
+            if main_image:
+                all_images.append(main_image)
+            for url in cafe_images_map.get(cafe_id, []):
+                if url not in all_images:
+                    all_images.append(url)
+            if not main_image and all_images:
+                main_image = all_images[0]
+
+            cafes.append(CafeResponse(
+                id=str(cafe_id),
+                name=cafe.get("name"),
+                address=cafe.get("address"),
+                latitude=Decimal(str(cafe.get("latitude"))),
+                longitude=Decimal(str(cafe.get("longitude"))),
+                phone=cafe.get("phone"),
+                website=cafe.get("website"),
+                description=cafe.get("description"),
+                status=cafe.get("status", "pending"),
+                verification_count=cafe.get("verification_count", 1),
+                verified_at=verified_at,
+                admin_verified=cafe.get("admin_verified", False),
+                navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
+                vanguard_ids=cafe.get("vanguard_ids", []),
+                created_at=created_at,
+                updated_at=updated_at,
+                main_image=main_image,
+                images=all_images if all_images else None,
+                business_hours=cafe.get("business_hours"),
+            ))
+
+        return CafeSearchResponse(cafes=cafes, total_count=total_count)
+
+    except Exception as e:
+        logger.exception("Error getting all cafes for admin")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
 @router.post("/admin/{cafe_id}/verify")
 async def admin_verify_cafe(
     cafe_id: str,
