@@ -13,7 +13,7 @@ import httpx
 import re
 import logging
 from typing import Optional, Dict, Any
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs, urlencode, urlunparse
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,10 @@ class GooglePlacesService:
             place_id = self._extract_place_id(resolved_url)
             
             if place_id:
-                return await self._get_place_details(place_id)
-            
+                result = await self._get_place_details(place_id)
+                if result:
+                    return result
+
             # Step 3: Try to extract name and coordinates for text search
             name, lat, lng = self._extract_name_and_coords(resolved_url)
             
@@ -89,26 +91,48 @@ class GooglePlacesService:
     
     async def _resolve_short_link(self, url: str) -> str:
         """Follow redirects for short URLs like maps.app.goo.gl or goo.gl/maps.
-        
-        Uses GET instead of HEAD because Google returns different redirect
-        chains for HEAD requests — HEAD sometimes resolves to unusable
-        CID-based URLs instead of the full /place/ URL with name and coords.
+
+        Strips `g_st` query param, then issues a single request without a
+        browser User-Agent so Google returns a 302 directly to a usable Maps
+        URL (browser UAs trigger a Firebase JS page instead of a redirect).
         """
         parsed = urlparse(url)
-        
+
         if parsed.hostname in ("maps.app.goo.gl", "goo.gl"):
+            # Strip g_st to avoid mobile-specific redirect behavior
+            params = parse_qs(parsed.query, keep_blank_values=True)
+            params.pop("g_st", None)
+            clean_query = urlencode({k: v[0] for k, v in params.items()})
+            clean_url = urlunparse(parsed._replace(query=clean_query))
+
             try:
+                # Default httpx UA triggers a 302 to a usable Maps URL
+                async with httpx.AsyncClient(
+                    follow_redirects=False,
+                    timeout=10.0,
+                ) as client:
+                    response = await client.get(clean_url)
+                    location = response.headers.get("location", "")
+                    logger.info(
+                        f"Short link: {clean_url} -> {response.status_code} -> {location!r}"
+                    )
+                    if location:
+                        return location
+
+                # Fallback: follow all redirects and return final URL
                 async with httpx.AsyncClient(
                     follow_redirects=True,
                     timeout=10.0,
-                    headers={"User-Agent": "Mozilla/5.0"}
                 ) as client:
-                    response = await client.get(url)
-                    return str(response.url)
+                    response = await client.get(clean_url)
+                    final_url = str(response.url)
+                    logger.info(f"Short link final URL (fallback): {final_url}")
+                    return final_url
+
             except Exception as e:
                 logger.warning(f"Failed to resolve short link: {e}")
                 return url
-        
+
         return url
     
     def _extract_place_id(self, url: str) -> Optional[str]:
@@ -213,7 +237,16 @@ class GooglePlacesService:
             if q_match:
                 lat = float(q_match.group(1))
                 lng = float(q_match.group(2))
-        
+
+        # Extract name from ?q= parameter (used by maps.google.com redirect URLs)
+        if not name:
+            q_name = re.search(r'[?&]q=([^&]+)', url)
+            if q_name:
+                candidate = unquote(q_name.group(1)).replace('+', ' ')
+                # Only use if it doesn't look like bare coordinates
+                if not re.match(r'^-?\d+\.?\d*,-?\d+\.?\d*$', candidate.strip()):
+                    name = candidate
+
         return name, lat, lng
     
     async def _search_place(
