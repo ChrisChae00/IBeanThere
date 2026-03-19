@@ -93,7 +93,10 @@ export function useMapData() {
         verification_count: cafe.verification_count || 1,
         foundingCrew: cafe.founding_crew ? {
           navigator: cafe.founding_crew.navigator,
-          vanguard: cafe.founding_crew.vanguard || []
+          scouts: (cafe.founding_crew.vanguard || []).map(v => ({
+            ...v,
+            role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2'
+          }))
         } : undefined,
         main_image: cafe.main_image
       }));

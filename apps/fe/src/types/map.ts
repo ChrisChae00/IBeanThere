@@ -27,10 +27,10 @@ export interface CafeMapData {
       user_id: string;
       username?: string;
     };
-    vanguard?: Array<{
+    scouts?: Array<{
       user_id: string;
       username?: string;
-      role: 'vanguard_2nd' | 'vanguard_3rd';
+      role: 'scout_1' | 'scout_2';
     }>;
   };
   main_image?: string;

@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Tooltip from './Tooltip';
 
 export interface AchievementBadgeProps {
-  type: 'navigator' | 'vanguard';
+  type: 'navigator' | 'scout';
   count: number;
   size?: 'sm' | 'md';
   showTooltip?: boolean;
@@ -16,7 +16,7 @@ const badgeConfig = {
     color: 'var(--color-primary)',
     bgColor: 'var(--color-primary)',
   },
-  vanguard: {
+  scout: {
     icon: '🛡️',
     color: 'var(--color-accent)',
     bgColor: 'var(--color-accent)',
@@ -40,7 +40,7 @@ export default function AchievementBadge({
   // Don't show badge if count is 0
   if (count === 0) return null;
   
-  const tooltipKey = type === 'navigator' ? 'navigator_tooltip' : 'vanguard_tooltip';
+  const tooltipKey = type === 'navigator' ? 'navigator_tooltip' : 'scout_tooltip';
   const tooltipText = t(tooltipKey, { count });
   
   const badge = (

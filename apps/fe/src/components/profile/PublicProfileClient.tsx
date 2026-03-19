@@ -216,9 +216,9 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
                         count={profile.founding_stats?.navigator_count || 0} 
                         size="sm"
                         />
-                        <AchievementBadge 
-                        type="vanguard" 
-                        count={profile.founding_stats?.vanguard_count || 0} 
+                        <AchievementBadge
+                        type="scout"
+                        count={profile.founding_stats?.vanguard_count || 0}
                         size="sm"
                         />
                     </div>

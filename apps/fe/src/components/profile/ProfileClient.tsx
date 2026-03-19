@@ -132,9 +132,9 @@ export default function ProfileClient() {
                   count={navigatorCount} 
                   size="sm"
                 />
-                <AchievementBadge 
-                  type="vanguard" 
-                  count={vanguardCount} 
+                <AchievementBadge
+                  type="scout"
+                  count={vanguardCount}
                   size="sm"
                 />
               </div>

@@ -51,16 +51,24 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
   const website = cafe.website;
   const sourceUrl = 'source_url' in cafe ? cafe.source_url : undefined;
 
-  const foundingCrew = 'founding_crew' in cafe ? cafe.founding_crew : 
+  const foundingCrew = 'founding_crew' in cafe ? cafe.founding_crew :
     ('foundingCrew' in cafe ? (cafe as any).foundingCrew : undefined);
+
+  // Normalize scouts: CafeMapData uses `scouts`, CafeDetailResponse (API raw) uses `vanguard`
+  const scouts: Array<{ user_id: string; username?: string; display_name?: string; avatar_url?: string; role: 'scout_1' | 'scout_2' }> =
+    foundingCrew?.scouts ||
+    (foundingCrew?.vanguard || []).map((v: any) => ({
+      ...v,
+      role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2',
+    }));
 
   return (
     <div className="space-y-4">
       {/* Founding Crew Section */}
-      {foundingCrew && (foundingCrew.navigator || (foundingCrew.vanguard && foundingCrew.vanguard.length > 0)) && (
+      {foundingCrew && (foundingCrew.navigator || scouts.length > 0) && (
         <FoundingCrewAvatars
           navigator={foundingCrew.navigator}
-          vanguard={foundingCrew.vanguard}
+          scouts={scouts}
         />
       )}
 
