@@ -8,9 +8,12 @@
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.12",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
     "canvas-confetti": "^1.9.4",
+    "cobe": "^2.0.1",
+    "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.556.0",
