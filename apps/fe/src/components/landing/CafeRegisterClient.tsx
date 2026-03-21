@@ -104,14 +104,14 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
           </div>
 
           {/* Globe — mobile only (between text and accordion) */}
-          <div className="flex justify-center lg:hidden">
+          <div className="flex justify-center items-center lg:hidden">
             <GlobeCanvas />
           </div>
 
           {/* Accordion */}
           <Accordion.Root
             type="single"
-            defaultValue="auto-fill"
+            defaultValue=""
             collapsible
             className="w-full rounded-xl overflow-hidden border border-[var(--color-primaryText)]/20"
           >
@@ -131,7 +131,7 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
                   </Accordion.Trigger>
                 </Accordion.Header>
                 <Accordion.Content className="overflow-hidden data-[state=open]:animate-[accordionDown_200ms_ease-out] data-[state=closed]:animate-[accordionUp_200ms_ease-out]">
-                  <p className="px-5 pb-4 pt-1 text-sm sm:text-base text-[var(--color-background)] leading-relaxed">
+                  <p className="px-5 pb-4 pt-1 text-sm sm:text-base text-[var(--color-background)] leading-relaxed text-left">
                     {item.desc}
                   </p>
                 </Accordion.Content>
@@ -149,8 +149,12 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
         </div>
 
         {/* Right column: globe — desktop only */}
-        <div className="hidden lg:flex justify-center lg:justify-end">
-          <GlobeCanvas />
+        <div className="hidden lg:flex justify-end items-center">
+          <div className="relative w-[390px] h-[390px] overflow-hidden rounded-full">
+            <div className="absolute -top-[35px] -left-[35px]">
+              <GlobeCanvas />
+            </div>
+          </div>
         </div>
       </div>
     </div>
