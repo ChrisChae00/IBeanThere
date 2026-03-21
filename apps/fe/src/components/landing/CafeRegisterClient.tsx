@@ -88,12 +88,12 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 relative z-10">
       {/* Desktop: 2-column. Mobile: single column with globe between text and accordion */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
 
         {/* Left column: text + accordion + CTA */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 w-full">
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--color-primaryText)] mb-4 break-keep leading-tight">
               {messages.title}
@@ -104,7 +104,7 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
           </div>
 
           {/* Globe — mobile only (between text and accordion) */}
-          <div className="flex justify-center items-center lg:hidden">
+          <div className="w-full flex justify-center items-center lg:hidden">
             <GlobeCanvas />
           </div>
 
@@ -150,10 +150,8 @@ export default function CafeRegisterClient({ messages, locale }: CafeRegisterCli
 
         {/* Right column: globe — desktop only */}
         <div className="hidden lg:flex justify-end items-center">
-          <div className="relative w-[390px] h-[390px] overflow-hidden rounded-full">
-            <div className="absolute -top-[35px] -left-[35px]">
-              <GlobeCanvas />
-            </div>
+          <div className="translate-x-[20px]">
+            <GlobeCanvas />
           </div>
         </div>
       </div>
