@@ -134,7 +134,13 @@
         "subtitle": "Mark your favorite local spots<mediumBr></mediumBr> and help build a community<mobileBr></mobileBr> coffee map together.",
         "cta_primary": "Start Your Journey",
         "cta_primary_logged_in": "Drop Bean",
-        "cta_secondary": "Explore Cafes"
+        "cta_secondary": "Explore Cafes",
+        "slide2_title": "Watch Your Bean Grow",
+        "slide2_subtitle": "Drop beans at cafes and watch them grow through 5 stages",
+        "slide2_cta": "See How It Works",
+        "slide3_title": "Know a Hidden Gem?",
+        "slide3_subtitle": "Register your favorite local cafe and put it on the map",
+        "slide3_cta": "Register a Cafe"
       },
       "features": {
         "title": "Your Complete Coffee Companion",
@@ -152,28 +158,48 @@
           "description": "Share your local favorites to help complete the cafe map for everyone."
         }
       },
-      "growth_journey": {
-        "title": "Your Visits Build a Forest",
-        "subtitle": "Watch your beans grow with every cup",
+      "beandrop_timeline": {
+        "title": "Drop a Bean, Watch It Grow",
+        "subtitle": "Every visit to a cafe plants and grows your own bean. Collect badges as you become a regular.",
         "seed": {
-          "title": "The Seed",
-          "description": "First Visit - A single bean planted in fertile soil."
+          "title": "Plant Your First Bean",
+          "badge": "Seed · 1 Drop",
+          "description": "Visit any cafe within 50 meters and tap Drop Bean. Planting your first bean marks the start of your journey at this spot.",
+          "h1": "Location-based check-in",
+          "h2": "One tap, one bean",
+          "h3": "Each cafe grows its own bean"
         },
         "sprout": {
-          "title": "The Sprout",
-          "description": "Revisit - New life emerges as you return."
+          "title": "Watch It Sprout",
+          "badge": "Sprout · 3 Drops",
+          "description": "Come back and drop another bean. Your bean grows with each visit, finally breaking through the soil as a sprout on your third visit.",
+          "h1": "Revisit the same cafe to grow",
+          "h2": "Track your favorite spots",
+          "h3": "Growth is per-cafe, not global"
         },
         "growing": {
-          "title": "Growing",
-          "description": "Frequent - Leaves unfold, gaining strength."
+          "title": "Growing Strong",
+          "badge": "Growing · 5 Drops",
+          "description": "You are well on your way to becoming a true regular. Your plant unfolds its leaves and grows stronger with every coffee you enjoy here.",
+          "h1": "You're officially a regular",
+          "h2": "Halfway to a full tree",
+          "h3": "Check your growth in My Beans"
         },
         "tree": {
-          "title": "The Tree",
-          "description": "Regular - Roots run deep, branches reach high."
+          "title": "Deep Roots",
+          "badge": "Tree · 10 Drops",
+          "description": "You are now officially a true regular. Your roots run deep here, and this cafe has become a core part of your coffee story.",
+          "h1": "A local expert at this cafe",
+          "h2": "10 visits and counting",
+          "h3": "Almost at the final stage"
         },
         "harvest": {
           "title": "The Harvest",
-          "description": "Loyalist - Bearing fruit, a testament to your journey."
+          "badge": "Harvest · 15 Drops",
+          "description": "Your tree is finally bearing fruit. You have earned the highest badge as a testament to your dedication and love for this cafe.",
+          "h1": "Maximum growth achieved",
+          "h2": "Confetti celebration on level-up",
+          "h3": "A testament to your loyalty"
         }
       },
       "user_personas": {
@@ -190,6 +216,19 @@
         "curator": {
           "title": "The Curator",
           "description": "The Guide. You weave experiences into collections, sharing the best paths with others."
+        }
+      },
+      "cafe_register": {
+        "title": "Help Build the Coffee Map",
+        "subtitle": "Know a cafe that's not on the map yet? Register it and help fellow coffee lovers discover hidden gems around the world.",
+        "cta": "Register a Cafe",
+        "accordion": {
+          "auto_fill_title": "Do I really have to type everything in?",
+          "auto_fill_desc": "Just paste a Google Maps URL — the name, address, phone, website, coordinates, and opening hours are all filled in automatically. One click, zero typing.",
+          "verified_title": "Location-Verified Registration",
+          "verified_desc": "You must be within 50 meters of the cafe to register it. This ensures every cafe on the map is a real, visited place — not guesswork.",
+          "photos_title": "Add Photos & Details",
+          "photos_desc": "Upload up to 5 photos and set a main image. Add opening hours, website, and notes to make the listing useful for other explorers."
         }
       },
       "cta": {

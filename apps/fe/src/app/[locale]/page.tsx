@@ -1,4 +1,4 @@
-import { Hero, Features, CTA, GrowthJourney, UserPersonas } from '@/components/landing';
+import { Hero, CTA, BeanDropTimeline, UserPersonas, CafeRegister } from '@/components/landing';
 
 export default async function HomePage({
   params
@@ -10,8 +10,8 @@ export default async function HomePage({
   return (
     <>
       <Hero locale={locale} />
-      <Features locale={locale} />
-      <GrowthJourney locale={locale} />
+<BeanDropTimeline locale={locale} />
+      <CafeRegister locale={locale} />
       <UserPersonas locale={locale} />
       <CTA locale={locale} />
     </>
