@@ -56,7 +56,7 @@ export default function BeanDropTimelineClient({
   }, []);
 
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: ref,
     offset: ['start 10%', 'end 50%'],
   });
 

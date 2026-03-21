@@ -64,11 +64,13 @@ function GlobeCanvas() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[460px] lg:h-[460px]"
-      style={{ maxWidth: '100%', aspectRatio: '1' }}
-    />
+    <div className="relative mx-auto w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[460px] lg:h-[460px] flex justify-center items-center">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        style={{ maxWidth: '100%', aspectRatio: '1' }}
+      />
+    </div>
   );
 }
 
