@@ -64,7 +64,7 @@ export default function BeanDropTimelineClient({
   const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
 
   return (
-    <div className="w-full" style={{ paddingBottom: '100px' }} ref={containerRef}>
+    <div className="relative w-full" style={{ paddingBottom: '100px' }} ref={containerRef}>
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-10 pt-10 pb-0">
         <h2 className="text-3xl md:text-5xl font-bold text-[var(--color-text)] mb-4">
