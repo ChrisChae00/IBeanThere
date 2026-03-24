@@ -53,8 +53,8 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
   
   return (
-    <html lang={locale} className="h-full">
-      <body className="h-full flex flex-col">
+    <html lang={locale} className="h-full" suppressHydrationWarning>
+      <body className="h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
           <ToastProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
