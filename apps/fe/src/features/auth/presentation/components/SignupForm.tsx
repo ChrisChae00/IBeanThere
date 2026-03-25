@@ -383,11 +383,11 @@ export function SignupForm({ locale }: SignupFormProps) {
         </div>
         <label className="text-sm text-[var(--color-text-secondary)] leading-relaxed select-none">
           {t('terms_agreement')}{' '}
-          <Link href={`/${locale}/terms`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
             {t('terms_of_service')}
           </Link>{' '}
           {t('and')}{' '}
-          <Link href={`/${locale}/privacy`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
             {t('privacy_policy')}
           </Link>
         </label>

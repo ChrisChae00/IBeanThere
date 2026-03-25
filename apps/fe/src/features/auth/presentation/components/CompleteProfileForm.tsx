@@ -272,11 +272,11 @@ export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfile
           />
           <label className="text-sm text-[var(--color-text-secondary)]">
             {t('terms_agreement')}{' '}
-            <Link href={`/${locale}/terms`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+            <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
               {t('terms_of_service')}
             </Link>{' '}
             {t('and')}{' '}
-            <Link href={`/${locale}/privacy`} className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+            <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
               {t('privacy_policy')}
             </Link>
           </label>

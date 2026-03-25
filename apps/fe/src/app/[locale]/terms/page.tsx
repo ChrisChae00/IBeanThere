@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import { BackButton } from '@/components/common/BackButton';
 
 export const revalidate = 86400;
 
@@ -28,7 +27,6 @@ export default async function TermsPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <BackButton className="mb-6" />
       <h1 className="text-3xl font-bold mb-6">{t('title')}</h1>
       
       <div className="prose prose-slate dark:prose-invert max-w-none">
