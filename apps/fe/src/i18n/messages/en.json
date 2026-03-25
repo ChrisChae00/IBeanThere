@@ -243,6 +243,8 @@
       "privacy_policy": "Privacy Policy",
       "terms_of_service": "Terms of Service",
       "contact_us": "Contact Us",
+      "contact_email_label": "Email",
+      "contact_instagram_label": "Instagram",
       "homescreen_link": "Easy access like an app",
       "homescreen_modal_title": "Add to Home Screen",
       "homescreen_modal_description": "No app install needed — create a shortcut on your home screen for quick, app-like access.",

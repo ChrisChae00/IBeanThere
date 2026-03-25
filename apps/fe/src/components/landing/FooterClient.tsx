@@ -15,28 +15,41 @@ export default function FooterClient() {
       url: 'https://ibeanthere.app',
     };
 
-    try {
-      if (navigator.share) {
+    if (navigator.share) {
+      try {
         await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
+      } catch (err) {
+        // AbortError means the user dismissed the share sheet — expected, no-op
+        if (err instanceof DOMException && err.name === 'AbortError') return;
       }
-    } catch {
-      // user cancelled or unsupported — no-op
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+      } catch {
+        // Clipboard write failed (permission denied or insecure context)
+        // TODO: show a toast with the URL for manual copy
+      }
     }
   };
 
   useEffect(() => {
     if (!isPopoverOpen) return;
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleOutside = (e: PointerEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         setIsPopoverOpen(false);
       }
     };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsPopoverOpen(false);
+    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [isPopoverOpen]);
 
   return (
@@ -52,17 +65,22 @@ export default function FooterClient() {
       <div className="relative" ref={popoverRef}>
         <button
           onClick={() => setIsPopoverOpen((v) => !v)}
+          aria-expanded={isPopoverOpen}
           className="text-xs text-[var(--color-primaryText)]/60 underline underline-offset-2 hover:text-[var(--color-primaryText)] transition-colors"
         >
           {t('homescreen_link')}
         </button>
 
         {isPopoverOpen && (
-          <div className="absolute bottom-full right-0 mb-3 w-72 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-cardBackground)] shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50">
+          <div
+            role="dialog"
+            aria-labelledby="homescreen-popover-title"
+            className="absolute bottom-full right-0 mb-3 w-72 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-cardBackground)] shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50"
+          >
             <div className="p-4">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <p className="font-semibold text-sm text-[var(--color-cardText)]">
+                  <p id="homescreen-popover-title" className="font-semibold text-sm text-[var(--color-cardText)]">
                     {t('homescreen_modal_title')}
                   </p>
                   <p className="text-xs text-[var(--color-cardTextSecondary)] mt-0.5">

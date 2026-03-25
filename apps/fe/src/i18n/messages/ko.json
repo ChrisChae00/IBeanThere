@@ -242,6 +242,8 @@
       "privacy_policy": "개인정보처리방침",
       "terms_of_service": "이용약관",
       "contact_us": "문의하기",
+      "contact_email_label": "이메일",
+      "contact_instagram_label": "인스타그램",
       "homescreen_link": "앱처럼 쉽게 들어오는 방법",
       "homescreen_modal_title": "홈 화면에 추가하기",
       "homescreen_modal_description": "앱 설치 없이 홈 화면에 바로가기를 만들어 앱처럼 빠르게 접근하세요.",
