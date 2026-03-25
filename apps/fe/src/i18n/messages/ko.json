@@ -241,18 +241,7 @@
     "footer": {
       "privacy_policy": "개인정보처리방침",
       "terms_of_service": "이용약관",
-      "contact_us": "문의하기",
-      "homescreen_link": "앱처럼 쉽게 들어오는 방법",
-      "homescreen_modal_title": "홈 화면에 추가하기",
-      "homescreen_modal_description": "앱 설치 없이 홈 화면에 바로가기를 만들어 앱처럼 빠르게 접근하세요.",
-      "homescreen_ios_title": "iOS Safari",
-      "homescreen_ios_step1": "하단의 공유 버튼(□↑)을 탭하세요",
-      "homescreen_ios_step2": "'홈 화면에 추가'를 선택하세요",
-      "homescreen_ios_step3": "오른쪽 상단의 '추가'를 탭하세요",
-      "homescreen_android_title": "Android Chrome",
-      "homescreen_android_step1": "우측 상단 메뉴(⋮)를 탭하세요",
-      "homescreen_android_step2": "'홈 화면에 추가'를 선택하세요",
-      "homescreen_android_step3": "'추가'를 탭하세요"
+      "contact_us": "문의하기"
     },
     "auth": {
       "app_name": "IBeanThere",

@@ -242,18 +242,7 @@
     "footer": {
       "privacy_policy": "Privacy Policy",
       "terms_of_service": "Terms of Service",
-      "contact_us": "Contact Us",
-      "homescreen_link": "Easy access like an app",
-      "homescreen_modal_title": "Add to Home Screen",
-      "homescreen_modal_description": "No app install needed — create a shortcut on your home screen for quick, app-like access.",
-      "homescreen_ios_title": "iOS Safari",
-      "homescreen_ios_step1": "Tap the share button (□↑) at the bottom",
-      "homescreen_ios_step2": "Select 'Add to Home Screen'",
-      "homescreen_ios_step3": "Tap 'Add' in the top right",
-      "homescreen_android_title": "Android Chrome",
-      "homescreen_android_step1": "Tap the menu (⋮) at the top right",
-      "homescreen_android_step2": "Select 'Add to Home Screen'",
-      "homescreen_android_step3": "Tap 'Add'"
+      "contact_us": "Contact Us"
     },
     "auth": {
       "app_name": "IBeanThere",

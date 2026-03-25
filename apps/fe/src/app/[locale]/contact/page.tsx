@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Card } from '@/shared/ui';
+import { BackButton } from '@/components/common/BackButton';
 
 export default async function ContactPage({
   params
@@ -11,6 +12,8 @@ export default async function ContactPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl min-h-[60vh]">
+      <BackButton className="mb-6" />
+      
       <h1 className="text-3xl font-bold mb-6 text-[var(--color-text)]">{t('title')}</h1>
       
       <Card className="p-8">
