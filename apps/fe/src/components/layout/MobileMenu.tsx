@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Map, MapPin, Plus, BookOpen, Sprout, User, Settings, LogOut, X, Menu, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/shared/ui';
 import { Logo } from '@/shared/ui';
@@ -12,14 +14,12 @@ import LanguageSwitcher from './LanguageSwitcher';
 
 export default function MobileMenu({ locale }: { locale: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDiscoverExpanded, setIsDiscoverExpanded] = useState(false);
-  const [isCoffeeLogsExpanded, setIsCoffeeLogsExpanded] = useState(false);
-  const [isShopExpanded, setIsShopExpanded] = useState(false);
   const [isUserMenuExpanded, setIsUserMenuExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
   const { user, profile, isLoading, signOut } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -31,355 +31,220 @@ export default function MobileMenu({ locale }: { locale: string }) {
     } else {
       document.body.style.overflow = '';
     }
-    
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => {
     setIsOpen(false);
-    setIsDiscoverExpanded(false);
-    setIsCoffeeLogsExpanded(false);
-    setIsShopExpanded(false);
     setIsUserMenuExpanded(false);
   };
-  const toggleDiscover = () => setIsDiscoverExpanded(!isDiscoverExpanded);
-  const toggleCoffeeLogs = () => setIsCoffeeLogsExpanded(!isCoffeeLogsExpanded);
-  const toggleShop = () => setIsShopExpanded(!isShopExpanded);
-  const toggleUserMenu = () => setIsUserMenuExpanded(!isUserMenuExpanded);
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  const navItemClass = (href: string) =>
+    `flex items-center gap-3 px-5 py-3 transition-colors min-h-[48px] w-full relative ${
+      isActive(href)
+        ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/8'
+        : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]'
+    }`;
+
+  const discoverItems = [
+    { href: `/${locale}/discover/explore-map`, icon: Map, label: t('explore_map') },
+    { href: `/${locale}/discover/dropbean`, icon: MapPin, label: t('dropbean') },
+    { href: `/${locale}/discover/register-cafe`, icon: Plus, label: t('register_cafe') },
+  ];
+
+  const journeyItems = [
+    { href: `/${locale}/my-logs`, icon: BookOpen, label: t('coffee_logs_item_1') },
+    { href: `/${locale}/my-beans`, icon: Sprout, label: t('my_beans') },
+  ];
 
   return (
     <>
       {/* Hamburger Button */}
-      <button 
-        onClick={toggleMenu}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
-        <svg 
-          className="w-6 h-6 text-[var(--color-text)]" 
-          fill="none" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth="2" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          {isOpen ? (
-            <path d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
+        {isOpen ? (
+          <X className="w-5 h-5 text-[var(--color-text)]" />
+        ) : (
+          <Menu className="w-5 h-5 text-[var(--color-text)]" />
+        )}
       </button>
 
-      {/* Overlay + Slide-out Menu rendered via Portal to escape Header stacking context */}
       {mounted && createPortal(
         <>
           {/* Overlay */}
           {isOpen && (
-            <div 
+            <div
               className="fixed inset-0 bg-black/50 z-[9998] lg:hidden"
               onClick={closeMenu}
             />
           )}
 
           {/* Slide-out Menu */}
-          <div 
-            className={`fixed inset-y-0 right-0 w-[280px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[9999] transform transition-transform duration-300 ease-in-out lg:hidden overflow-x-hidden ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="flex flex-col h-full bg-[var(--color-background)] overflow-x-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-background)] w-full overflow-x-hidden">
-            <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <Logo size="md" className="text-[var(--color-primary)] flex-shrink-0" />
-              <span className="text-lg font-bold text-[var(--color-primary)] truncate">
-                IBeanThere
-              </span>
-            </div>
-            <button 
-              onClick={closeMenu}
-              className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Close menu"
-            >
-              <svg 
-                className="w-6 h-6 text-[var(--color-text)]" 
-                fill="none" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth="2" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col bg-[var(--color-background)] text-[var(--color-text)] min-h-0 w-full">
-            <Link 
-              href={`/${locale}`}
-              onClick={closeMenu}
-              className="block px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] flex items-center w-full min-w-0"
-            >
-              <span className="truncate">{t('home')}</span>
-            </Link>
-
-            <div className="h-px bg-[var(--color-border)] mx-6" />
-
-            {/* Discover Section - Expand/Collapse only */}
-            <div>
-              <button
-                onClick={toggleDiscover}
-                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
-              >
-                <span className="truncate">{t('discover')}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isDiscoverExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {isDiscoverExpanded && (
-                <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
-                  <Link 
-                    href={`/${locale}/discover/explore-map`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('explore_map')}</span>
-                  </Link>
-                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
-                  <Link 
-                    href={`/${locale}/discover/dropbean`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('dropbean')}</span>
-                  </Link>
-                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
-                  <Link 
-                    href={`/${locale}/discover/register-cafe`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('register_cafe')}</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <div className="h-px bg-[var(--color-border)] mx-6" />
-
-            {/* My Coffee Logs Section - Expandable */}
-            <div>
-              <button
-                onClick={toggleCoffeeLogs}
-                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
-              >
-                <span className="truncate">{t('my_coffee_journey')}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isCoffeeLogsExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {isCoffeeLogsExpanded && (
-                <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
-                  <Link 
-                    href={`/${locale}/my-logs`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('coffee_logs_item_1')}</span>
-                  </Link>
-                  <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
-                  <Link 
-                    href={`/${locale}/my-beans`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('my_beans')}</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* <div className="h-px bg-[var(--color-border)] mx-6" /> */}
-
-            {/* Shop Section - Expandable */}
-            {/* <div className="border-b border-[var(--color-border)]">
-              <button
-                onClick={toggleShop}
-                className="w-full flex items-center justify-between px-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] min-w-0 group"
-              >
-                <span className="truncate">{t('shop')}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isShopExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {isShopExpanded && (
-                <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
-                  <Link 
-                    href={`/${locale}/shop#essentials`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('shop_essentials')}</span>
-                  </Link>
-                  <Link 
-                    href={`/${locale}/shop#explorer`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('shop_explorer')}</span>
-                  </Link>
-                  <Link 
-                    href={`/${locale}/shop#wearable`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('shop_wearable')}</span>
-                  </Link>
-                  <Link 
-                    href={`/${locale}/shop#gift`}
-                    onClick={closeMenu}
-                    className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                  >
-                    <span className="truncate">{t('shop_gift')}</span>
-                  </Link>
-                </div>
-              )}
-            </div> */}
-
-            <div className="pb-2">
-              <div className="h-px bg-[var(--color-border)] mx-6" />
-            </div>
-
-            {/* Conditional rendering based on authentication status */}
-            {isLoading ? (
-              <div className="px-6 py-2">
-                <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse"></div>
+          <div
+            className={`fixed inset-y-0 right-0 w-[300px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[9999] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+              isOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 h-16 border-b border-[var(--color-border)] flex-shrink-0">
+              <div className="flex items-center space-x-2">
+                <Logo size="md" className="text-[var(--color-primary)]" />
+                <span className="text-lg font-bold text-[var(--color-text)]">IBeanThere</span>
               </div>
-            ) : user ? (
-              <>
-                {/* User information - Expandable */}
-                <div>
-                  <button
-                    onClick={toggleUserMenu}
-                    className="w-full flex items-center justify-between px-6 py-2 hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-w-0 group"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0 flex-1">
-                      <div className="flex-shrink-0 group-hover:[&>div]:bg-[var(--color-primaryText)] group-hover:[&>div]:text-[var(--color-primary)]">
-                        <Avatar 
-                          src={profile?.avatar_url || undefined} 
+              <button
+                onClick={closeMenu}
+                className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5 text-[var(--color-text)]" />
+              </button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto">
+              {/* Discover section */}
+              <div className="pt-2 pb-1">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                  Discover
+                </p>
+                {discoverItems.map(({ href, icon: Icon, label }) => (
+                  <Link key={href} href={href} onClick={closeMenu} className={navItemClass(href)}>
+                    {isActive(href) && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                    )}
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">{label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mx-5 h-px bg-[var(--color-border)]" />
+
+              {/* My Journey section */}
+              <div className="pt-2 pb-1">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                  My Journey
+                </p>
+                {journeyItems.map(({ href, icon: Icon, label }) => (
+                  <Link key={href} href={href} onClick={closeMenu} className={navItemClass(href)}>
+                    {isActive(href) && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                    )}
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">{label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mx-5 h-px bg-[var(--color-border)]" />
+
+              {/* Account section */}
+              <div className="pt-2 pb-2">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                  Account
+                </p>
+                {isLoading ? (
+                  <div className="px-5 py-3">
+                    <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse" />
+                  </div>
+                ) : user ? (
+                  <>
+                    <button
+                      onClick={() => setIsUserMenuExpanded(prev => !prev)}
+                      className="flex items-center justify-between px-5 py-3 w-full hover:bg-[var(--color-surface)] transition-colors min-h-[48px] group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          src={profile?.avatar_url || undefined}
                           alt={profile?.display_name || user.user_metadata?.username || 'User'}
                           size="sm"
-                          className="flex-shrink-0"
                         />
+                        <span className="text-sm font-medium text-[var(--color-text)] truncate max-w-[140px]">
+                          {profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
+                        </span>
                       </div>
-                      <p className="text-[var(--color-text)] font-medium truncate leading-tight text-sm group-hover:text-[var(--color-primaryText)] transition-colors">
-                        {profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
-                      </p>
-                    </div>
-                    <svg
-                      className={`w-4 h-4 transition-transform flex-shrink-0 ml-2 ${isUserMenuExpanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  
-                  {isUserMenuExpanded && (
-                    <div className="bg-[var(--color-surface)]/50 w-full overflow-x-hidden">
-                      <Link 
-                        href={`/${locale}/profile`}
-                        onClick={closeMenu}
-                        className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                      >
-                        <span className="truncate">{t('profile')}</span>
-                      </Link>
-                      <div className="h-px bg-[var(--color-border)] ml-12 mr-6" />
-                      <Link 
-                        href={`/${locale}/settings`}
-                        onClick={closeMenu}
-                        className="block pl-12 pr-6 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors min-h-[44px] flex items-center w-full min-w-0"
-                      >
-                        <span className="truncate">{t('settings')}</span>
-                      </Link>
-                      <div className="h-px bg-[var(--color-border)] mx-6" />
-                      <div className="px-6 py-2">
+                      <ChevronDown
+                        className={`w-4 h-4 text-[var(--color-text)]/50 transition-transform duration-200 ${isUserMenuExpanded ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    {isUserMenuExpanded && (
+                      <div>
+                        <Link
+                          href={`/${locale}/profile`}
+                          onClick={closeMenu}
+                          className={navItemClass(`/${locale}/profile`)}
+                        >
+                          {isActive(`/${locale}/profile`) && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                          )}
+                          <User className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm font-medium">{t('profile')}</span>
+                        </Link>
+                        <Link
+                          href={`/${locale}/settings`}
+                          onClick={closeMenu}
+                          className={navItemClass(`/${locale}/settings`)}
+                        >
+                          {isActive(`/${locale}/settings`) && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                          )}
+                          <Settings className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm font-medium">{t('settings')}</span>
+                        </Link>
                         <button
                           onClick={async () => {
                             await signOut();
                             closeMenu();
                             window.location.href = `/${locale}`;
                           }}
-                          className="block w-full px-6 py-1.5 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[40px] text-center border border-[var(--color-border)] rounded-lg"
+                          className="flex items-center gap-3 px-5 py-3 w-full text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-red-500 transition-colors min-h-[48px] text-sm font-medium"
                         >
+                          <LogOut className="w-4 h-4 flex-shrink-0" />
                           {tAuth('logout')}
                         </button>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="px-6 pb-4 w-full overflow-x-hidden">
-                <div className="flex gap-2 w-full min-w-0">
-                  <Link 
-                    href={`/${locale}/signin`}
-                    onClick={closeMenu}
-                    className="flex-1 px-4 py-3 text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors font-medium min-h-[44px] flex items-center justify-center border border-[var(--color-border)] rounded-full min-w-0"
-                  >
-                    <span className="truncate">{t('sign_in')}</span>
-                  </Link>
-                  <Link 
-                    href={`/${locale}/register`}
-                    onClick={closeMenu}
-                    className="flex-1 bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-3 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium min-h-[44px] text-center flex items-center justify-center min-w-0"
-                  >
-                    <span className="truncate">{t('sign_up')}</span>
-                  </Link>
-                </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="px-5 py-3 flex gap-2">
+                    <Link
+                      href={`/${locale}/signin`}
+                      onClick={closeMenu}
+                      className="flex-1 px-4 py-2.5 text-sm text-[var(--color-text)] border border-[var(--color-border)] rounded-full hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] font-medium transition-all text-center"
+                    >
+                      {t('sign_in')}
+                    </Link>
+                    <Link
+                      href={`/${locale}/register`}
+                      onClick={closeMenu}
+                      className="flex-1 bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-2.5 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium text-sm text-center"
+                    >
+                      {t('sign_up')}
+                    </Link>
+                  </div>
+                )}
               </div>
-            )}
-          </nav>
-          
-          {/* Switchers - Fixed at bottom with safe-area padding */}
-          <div className="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-background)] flex-shrink-0 w-full overflow-x-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <div className="flex items-center justify-center gap-3 w-full min-w-0">
-              <ThemeSwitcher />
-              <LanguageSwitcher />
+            </nav>
+
+            {/* Switchers - Fixed at bottom */}
+            <div className="px-5 py-4 border-t border-[var(--color-border)] flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <div className="flex items-center justify-center gap-3">
+                <ThemeSwitcher />
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
         </>,
         document.body
       )}
     </>
   );
 }
-
