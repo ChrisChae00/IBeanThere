@@ -47,7 +47,8 @@
       "profile": "Profile",
       "settings": "Settings",
       "get_started": "Get Started",
-      "admin_dashboard": "Admin Dashboard"
+      "admin_dashboard": "Admin Dashboard",
+    "learn": "Learn"
     },
     "drop_bean": {
       "button": "Drop Bean",
@@ -1295,5 +1296,16 @@
       "title": "Share",
       "copy_link": "Copy Link",
       "copied": "Copied!"
+    },
+    "learn": {
+      "coffee": {
+        "title": "Coffee Roadmap",
+        "subtitle": "Explore the world of coffee drinks — from ancient brewing roots to modern signature creations.",
+        "backToRoadmap": "Back to Roadmap",
+        "origin": "Origin & History",
+        "funFact": "Fun Fact",
+        "relatedDrinks": "Related Drinks",
+        "category": "Category"
+      }
     }
   }

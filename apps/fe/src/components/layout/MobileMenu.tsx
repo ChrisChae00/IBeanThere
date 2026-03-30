@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Map, MapPin, Plus, BookOpen, Sprout, User, Settings, LogOut, X, Menu, ChevronDown } from 'lucide-react';
+import { Map, MapPin, Plus, BookOpen, Sprout, User, Settings, LogOut, X, Menu, ChevronDown, GraduationCap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar } from '@/shared/ui';
 import { Logo } from '@/shared/ui';
@@ -54,6 +54,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
     { href: `/${locale}/discover/explore-map`, icon: Map, label: t('explore_map') },
     { href: `/${locale}/discover/dropbean`, icon: MapPin, label: t('dropbean') },
     { href: `/${locale}/discover/register-cafe`, icon: Plus, label: t('register_cafe') },
+    { href: `/${locale}/learn/coffee`, icon: GraduationCap, label: t('learn') },
   ];
 
   const journeyItems = [

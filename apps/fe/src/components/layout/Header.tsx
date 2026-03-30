@@ -96,6 +96,15 @@ export default function Header({
 
             <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
 
+            <Link
+              href={`/${locale}/learn/coffee`}
+              className={navLinkClass(`/${locale}/learn`)}
+            >
+              {t('learn')}
+            </Link>
+
+            <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
+
             {/* My Journey Dropdown */}
             <div ref={journeyRef} className="relative">
               <button
