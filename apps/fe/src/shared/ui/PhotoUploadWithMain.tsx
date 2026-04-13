@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraIcon from './CameraIcon';
 import { uploadCafeImage } from '@/shared/lib/supabase/storage';
+import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
 interface PhotoUploadWithMainProps {
   photos: string[];
@@ -28,6 +29,7 @@ export default function PhotoUploadWithMain({
   const tLog = useTranslations('cafe.log');
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
+  const [convertingCount, setConvertingCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -37,21 +39,34 @@ export default function PhotoUploadWithMain({
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
     const newPhotos: string[] = [];
 
-    setUploadingCount(filesToProcess.length);
+    for (let file of filesToProcess) {
+      // Convert HEIC to WebP before any other processing
+      if (isHeicFile(file)) {
+        setConvertingCount(prev => prev + 1);
+        try {
+          file = await convertHeicToWebp(file);
+        } catch (error) {
+          console.error('Error converting HEIC file:', error);
+          alert(error instanceof HeicNotSupportedError
+            ? tLog('heic_browser_not_supported')
+            : tLog('heic_conversion_failed'));
+          setConvertingCount(prev => prev - 1);
+          continue;
+        }
+        setConvertingCount(prev => prev - 1);
+      }
 
-    for (const file of filesToProcess) {
       if (file.size > maxSizeMB * 1024 * 1024) {
         alert(tLog('photo_too_large', { maxSize: maxSizeMB }));
-        setUploadingCount(prev => prev - 1);
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
         alert(tLog('invalid_file_type'));
-        setUploadingCount(prev => prev - 1);
         continue;
       }
 
+      setUploadingCount(prev => prev + 1);
       try {
         const url = await uploadCafeImage(file, userId);
         newPhotos.push(url);
@@ -108,7 +123,7 @@ export default function PhotoUploadWithMain({
     onMainIndexChange(index);
   };
 
-  const isUploading = uploadingCount > 0;
+  const isProcessing = uploadingCount > 0 || convertingCount > 0;
 
   return (
     <div className="space-y-2">
@@ -168,7 +183,17 @@ export default function PhotoUploadWithMain({
         </div>
       )}
 
-      {isUploading && (
+      {convertingCount > 0 && (
+        <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+          <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          {tLog('converting')}...
+        </div>
+      )}
+
+      {uploadingCount > 0 && (
         <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -183,9 +208,9 @@ export default function PhotoUploadWithMain({
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          onClick={() => !isUploading && fileInputRef.current?.click()}
+          onClick={() => !isProcessing && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-            isUploading
+            isProcessing
               ? 'border-[var(--color-border)] opacity-50 cursor-not-allowed'
               : isDragging
               ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 cursor-pointer'
@@ -202,11 +227,11 @@ export default function PhotoUploadWithMain({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             className="hidden"
             onChange={(e) => handleFileSelect(e.target.files)}
-            disabled={isUploading}
+            disabled={isProcessing}
           />
         </div>
       )}

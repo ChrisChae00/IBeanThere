@@ -3,6 +3,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, Upload } from 'lucide-react';
+import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
 interface ImageUploaderProps {
   images: File[];
@@ -27,10 +28,11 @@ export default function ImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
 
   const validateFile = useCallback((file: File): string | null => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(file.type) && !isHeicFile(file)) {
       return t('error_invalid_file_type');
     }
 
@@ -42,15 +44,31 @@ export default function ImageUploader({
     return null;
   }, [maxSizeMB, t]);
 
-  const handleFiles = useCallback((files: FileList | File[]) => {
+  const handleFiles = useCallback(async (files: FileList | File[]) => {
     setError(null);
     const fileArray = Array.from(files);
     const newImages: File[] = [];
 
-    for (const file of fileArray) {
+    for (let file of fileArray) {
       if (images.length + newImages.length >= maxImages) {
         setError(t('error_max_images', { max: maxImages }));
         break;
+      }
+
+      // Convert HEIC before size validation (WebP is smaller)
+      if (isHeicFile(file)) {
+        setIsConverting(true);
+        try {
+          file = await convertHeicToWebp(file);
+        } catch (conversionError) {
+          console.error('Error converting HEIC file:', conversionError);
+          setError(conversionError instanceof HeicNotSupportedError
+            ? t('heic_browser_not_supported')
+            : t('heic_conversion_failed'));
+          setIsConverting(false);
+          continue;
+        }
+        setIsConverting(false);
       }
 
       const validationError = validateFile(file);
@@ -101,6 +119,7 @@ export default function ImageUploader({
   }, [images, onImagesChange]);
 
   const canAddMore = images.length < maxImages;
+  const isProcessing = disabled || isConverting;
 
   return (
     <div className="space-y-3">
@@ -110,33 +129,42 @@ export default function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => !disabled && fileInputRef.current?.click()}
+          onClick={() => !isProcessing && fileInputRef.current?.click()}
           className={`
             border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-colors
             ${isDragging
               ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
               : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
             }
-            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,.heic,.heif"
             multiple
             onChange={handleInputChange}
-            disabled={disabled}
+            disabled={isProcessing}
             className="hidden"
           />
           <div className="flex flex-col items-center gap-2">
-            <Upload className="w-6 h-6 text-[var(--color-text-secondary)]" />
+            {isConverting ? (
+              <svg className="w-6 h-6 animate-spin text-[var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <Upload className="w-6 h-6 text-[var(--color-text-secondary)]" />
+            )}
             <p className="text-sm text-[var(--color-text-secondary)]">
-              {t('drag_drop_or_click')}
+              {isConverting ? t('converting') : t('drag_drop_or_click')}
             </p>
-            <p className="text-xs text-[var(--color-text-secondary)]">
-              {t('image_requirements', { max: maxImages, maxSize: maxSizeMB })}
-            </p>
+            {!isConverting && (
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                {t('image_requirements', { max: maxImages, maxSize: maxSizeMB })}
+              </p>
+            )}
           </div>
         </div>
       )}
