@@ -134,7 +134,7 @@ export default function RegisterCafeForm({
         userLocation.lng,
         cafeLocation.lat,
         cafeLocation.lng,
-        50
+        100
       );
       setDistance(validation.distance);
       setIsValidDistance(validation.valid);
@@ -370,10 +370,10 @@ export default function RegisterCafeForm({
           userLocation.lng,
           initialLocation.lat,
           initialLocation.lng,
-          50
+          100
         );
         
-        // Only auto-fill address if distance is valid (within 50m)
+        // Only auto-fill address if distance is valid (within 100m)
         if (validation.valid) {
           // Auto-fill address from coordinates
           reverseGeocodeLocation(initialLocation.lat, initialLocation.lng)

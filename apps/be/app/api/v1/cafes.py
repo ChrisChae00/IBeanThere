@@ -733,14 +733,14 @@ async def register_cafe(
     """
     Register a new cafe (UGC).
     
-    - Location verification (50m distance check)
+    - Location verification (100m distance check)
     - Duplicate detection (25m threshold)
     - Founding Crew recording
     - OSM reverse geocoding for address
     """
     try:
-        # 1. Location verification (50m limit)
-        max_distance = 50
+        # 1. Location verification (100m limit)
+        max_distance = 100
         
         user_lat = request.user_location.get("lat")
         user_lng = request.user_location.get("lng")

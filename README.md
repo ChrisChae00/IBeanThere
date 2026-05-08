@@ -38,7 +38,7 @@
 
 ### Community-Driven Cafe Discovery
 
-- **Register New Spots:** Pin new cafes directly on the map with robust Google Maps link resolution (enforces user location presence and physical proximity within 50m).
+- **Register New Spots:** Pin new cafes directly on the map with robust Google Maps link resolution (enforces user location presence and physical proximity within 100m).
 - **Anti-Duplicate System:** 25m radius conflict detection prevents spamming the same location, along with deduplication of overlapping map markers.
 - **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes.
 - **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
