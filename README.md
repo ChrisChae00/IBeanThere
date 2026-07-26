@@ -7,13 +7,21 @@
 </p>
 
 <p align="center">
-  <strong>Live App: <a href="https://ibeanthere.app">ibeanthere.app</a></strong>
+  <img src="https://img.shields.io/badge/Status-Active_Development-success?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/github/license/ChrisChae00/IBeanThere?style=flat-square" alt="License" />
+</p>
+
+<p align="center">
+  <strong>🔗 Live App: <a href="https://ibeanthere.app">ibeanthere.app</a></strong>
 </p>
 
 <p align="center">
   <a href="#about">About</a> •
   <a href="#key-features">Key Features</a> •
+  <a href="#thematic-color-palettes">Thematic Palettes</a> •
   <a href="#tech-stack">Tech Stack</a> •
+  <a href="#engineering-evolution-log">Engineering Log</a> •
   <a href="#architecture--project-structure">Architecture</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#api-reference">API Overview</a>
@@ -23,64 +31,100 @@
 
 ## About
 
-**IBeanThere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, IBeanThere relies on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
+**IBeanThere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, IBeanThere relies entirely on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
 
 ### Core Philosophy
 
 - **User-Generated Map:** Build a community-verified coffee map from the ground up.
 - **Pioneer System (Gamification):** The first to check-in becomes the **Navigator**. The 2nd and 3rd become **Scouts**. Get permanently recorded in the cafe's history!
 - **Community Verification:** A registered cafe only becomes strictly "verified" once 3 independent users visit and review it.
-- **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Maps API required).
+- **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Google Maps API required).
 
 ---
 
 ## Key Features
 
 ### Community-Driven Cafe Discovery
-
 - **Register New Spots:** Pin new cafes directly on the map with robust Google Maps link resolution (enforces user location presence and physical proximity within 100m).
 - **Anti-Duplicate System:** 25m radius conflict detection prevents spamming the same location, along with deduplication of overlapping map markers.
 - **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes.
 - **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
 
-### Advanced Coffee Journaling
-
+### 📝 Advanced Coffee Journaling
 - **Geo-fenced Check-ins:** Visit tracking activates when your location is within 100m.
 - **Rich Coffee Logs:** Rate beans, atmospheric vibes, drop comments, and upload photo galleries.
 - **Collections & Trending:** 14-day trending algorithm surfaces hot cafes. Users can build their own curated collections.
 - **Community & Follows:** See what cafes your friends or community members are exploring.
 
 ### Enterprise-Grade Security
-
 - **Role-based Access Control (RBAC):** Strict JWT verifications for Admin/User endpoints natively tied with Supabase metadata.
-- **Rate Limiting & Hardened CORS:** API endpoints are protected against brute-force and DDoS via advanced proxy rate-limiters and security headers.
+- **Rate Limiting & Hardened CORS:** API endpoints are protected against brute-force and DDoS via advanced proxy rate-limiters (`slowapi`) and security headers.
 - **Input Sanitization:** URL parameters and payloads are strictly typed (`max_length` constraints, rigorous Pydantic models).
 
 ### Global & Accessible
-
 - **Internationalization (i18n):** Native support for English (`/en`) and Korean (`/ko`).
-- **Dynamic Theming:** Switch between curated coffee aesthetics: _Morning Coffee_, _Night Espresso_, _Matcha Latte_, or _Vanilla Latte_.
+- **Dynamic Theming:** Switch between curated coffee aesthetics matching your mood.
+
+---
+
+## Thematic Color Palettes
+
+IBeanThere supports dynamic theme switching powered by a React Context state system. Here are the curated palettes available to users:
+
+| Theme | Preview | Primary | Background | Card BG | Text | Design Aesthetic |
+|---|---|---|---|---|---|---|
+| **Morning Coffee** | ![#8C5A3A](https://img.shields.io/badge/-%238C5A3A-8C5A3A?style=flat-square) ![#e9d6c0](https://img.shields.io/badge/-%23e9d6c0-e9d6c0?style=flat-square) | `#8C5A3A` | `#e9d6c0` | `#f5f0e8` | `#442f19` | Cozy, warm colors resembling morning filter coffee and cream. |
+| **Dark Roast (Espresso)** | ![#d4c7b8](https://img.shields.io/badge/-%23d4c7b8-d4c7b8?style=flat-square) ![#1A120B](https://img.shields.io/badge/-%231A120B-1A120B?style=flat-square) | `#d4c7b8` | `#1A120B` | `#2A1A13` | `#e9ded2` | Deep contrast, dark mode aesthetic tailored for night coffee logs. |
+| **Matcha Latte** | ![#85a035](https://img.shields.io/badge/-%2385a035-85a035?style=flat-square) ![#e0e8d0](https://img.shields.io/badge/-%23e0e8d0-e0e8d0?style=flat-square) | `#85a035` | `#e0e8d0` | `#f0f2e8` | `#4a5c2a` | Calming, desaturated green hues reflecting high-quality green tea. |
+| **Vanilla Latte** | ![#362C1D](https://img.shields.io/badge/-%23362C1D-362C1D?style=flat-square) ![#FFF8DC](https://img.shields.io/badge/-%23FFF8DC-FFF8DC?style=flat-square) | `#362C1D` | `#FFF8DC` | `#FFF9F0` | `#362C1D` | Creamy white and sweet vanilla shades for a soft and minimal look. |
 
 ---
 
 ## Tech Stack
 
 ### Frontend (Next.js)
-
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + PostCSS
-- **Mapping:** `leaflet`, `react-leaflet`, `leaflet.markercluster`
-- **State & i18n:** React Context API, `next-intl`
-- **Authentication:** `@supabase/ssr`
+<p align="left">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase Auth" />
+</p>
 
 ### Backend (FastAPI)
+<p align="left">
+  <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white" alt="Pydantic" />
+  <img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="OSM" />
+</p>
 
-- **Framework:** FastAPI
-- **Language:** Python 3.11+
-- **Security & Validation:** Pydantic `v2`, `slowapi` (Rate Limiting)
-- **Database & Auth:** Supabase (PostgreSQL), `supabase-py`
-- **Geocoding:** OSM Nominatim API
+---
+
+## Engineering Evolution Log
+
+Here is a summary of major engineering challenges solved and optimizations completed during active development:
+
+### Spatial Proximity & Proximity Hardening (GPS Verification)
+- **Challenge:** User verification on mobile GPS can be erratic, leading to false negatives during cafe check-ins or registrations.
+- **Solution:** Upgraded the geofence validation mechanism. Enforced physical presence on client-side registration payloads and widened the proximity allowance from **50m to 100m** to absorb mobile GPS inaccuracy.
+- **Robust Resolution:** Refined Google Maps URL parsing to capture precise latitude/longitude coordinates cleanly with Nominatim OpenStreetMap fallback resolution.
+
+### Map Optimization & Rendering Performance
+- **Challenge:** Rendering hundreds of close map coordinates resulted in overlapping markers and lag on mobile viewports.
+- **Solution:** 
+  - Integrated `leaflet.markercluster` with custom configurations to group close markers.
+  - Wrote a coordinate deduplication algorithm that merges markers situated within a **25-meter radius** into a single spot.
+  - Dynamically disabled marker clustering at high zoom levels to ensure real-time rendering performance while maintaining UX readability.
+  - Replaced bulk list rendering on search panels with a progressive "Load More" pagination pattern.
+
+### Access Control (RBAC) & Administrative Workflow
+- **Challenge:** Preventing unauthorized manipulation of user-submitted cafe listings.
+- **Solution:** 
+  - Designed an administrative portal featuring live status filters (Pending, Verified, Flagged) secured with Role-Based Access Control (RBAC) via Supabase Auth metadata.
+  - Resolved a caching bug where updated details showed "Ghost Images", implementing a strict invalidation hook on the database level during admin updates.
 
 ---
 
