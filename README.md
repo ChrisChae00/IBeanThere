@@ -9,7 +9,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Active_Development-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square" alt="Version" />
-  <img src="https://img.shields.io/github/license/ChrisChae00/IBeanThere?style=flat-square" alt="License" />
 </p>
 
 <p align="center">
