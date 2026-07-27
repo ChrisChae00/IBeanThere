@@ -49,7 +49,7 @@
 - **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes.
 - **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
 
-### 📝 Advanced Coffee Journaling
+### Advanced Coffee Journaling
 - **Geo-fenced Check-ins:** Visit tracking activates when your location is within 100m.
 - **Rich Coffee Logs:** Rate beans, atmospheric vibes, drop comments, and upload photo galleries.
 - **Collections & Trending:** 14-day trending algorithm surfaces hot cafes. Users can build their own curated collections.
