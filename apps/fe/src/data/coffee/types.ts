@@ -14,11 +14,18 @@ export type CoffeeDrink = {
   content: Record<Locale, LocalizedContent>;
 };
 
+/** Which side of the two-tone ladder a stage sits on. Siblings alternate. */
+export type CategoryAccent = 'primary' | 'secondary';
+
 export type CoffeeCategory = {
   id: string;
   order: number;
   icon: string;
-  colorClass: string;
-  content: Record<Locale, { name: string; subtitle: string }>;
+  /** Depth in the lineage tree. Drives the colour ladder: deeper = denser. */
+  depth: number;
+  accent: CategoryAccent;
+  /** Set when this stage grew out of another one rather than following it. */
+  branchFrom?: string;
+  content: Record<Locale, { name: string; subtitle: string; era: string }>;
   drinkSlugs: string[];
 };

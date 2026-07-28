@@ -55,8 +55,12 @@ export default async function CoffeeDrinkPage({
 
   const t = await getTranslations({ locale, namespace: 'learn.coffee' });
 
+  // drinkSlugs order is authoritative, so siblings double as reading order.
   const allCategoryDrinks = getDrinksByCategory(drink.categoryId);
   const relatedDrinks = allCategoryDrinks.filter(d => d.slug !== drink.slug);
+  const position = allCategoryDrinks.findIndex(d => d.slug === drink.slug);
+  const prev = position > 0 ? allCategoryDrinks[position - 1] : undefined;
+  const next = position >= 0 ? allCategoryDrinks[position + 1] : undefined;
 
   const loc = locale as Locale;
   const drinkContent = drink.content[loc];
@@ -74,7 +78,8 @@ export default async function CoffeeDrinkPage({
     origin: t('origin'),
     funFact: t('funFact'),
     relatedDrinks: t('relatedDrinks'),
-    category: t('category'),
+    prevDrink: t('prevDrink'),
+    nextDrink: t('nextDrink'),
   };
 
   return (
@@ -84,6 +89,8 @@ export default async function CoffeeDrinkPage({
         drink={drink}
         category={category}
         relatedDrinks={relatedDrinks}
+        prev={prev}
+        next={next}
         locale={locale}
         messages={messages}
       />

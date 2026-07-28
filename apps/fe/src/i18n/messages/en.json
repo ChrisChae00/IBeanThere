@@ -48,7 +48,7 @@
       "settings": "Settings",
       "get_started": "Get Started",
       "admin_dashboard": "Admin Dashboard",
-    "learn": "Learn"
+      "learn": "Learn"
     },
     "drop_bean": {
       "button": "Drop Bean",
@@ -1310,11 +1310,16 @@
       "coffee": {
         "title": "Coffee Roadmap",
         "subtitle": "Explore the world of coffee drinks — from ancient brewing roots to modern signature creations.",
+        "eyebrow": "Coffee 101",
+        "stageCount": "{count} stages",
+        "drinkCount": "{count} drinks",
+        "branchFrom": "Branches off {name}",
         "backToRoadmap": "Back to Roadmap",
         "origin": "Origin & History",
         "funFact": "Fun Fact",
         "relatedDrinks": "Related Drinks",
-        "category": "Category"
+        "prevDrink": "Previous",
+        "nextDrink": "Next"
       }
     }
   }

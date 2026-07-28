@@ -47,7 +47,7 @@
       "settings": "설정",
       "get_started": "시작하기",
       "admin_dashboard": "관리자 대시보드",
-    "learn": "커피 가이드"
+      "learn": "커피 가이드"
     },
     "drop_bean": {
       "button": "커피콩 심기",
@@ -1305,11 +1305,16 @@
       "coffee": {
         "title": "커피 로드맵",
         "subtitle": "커피 음료의 세계를 탐험하세요 — 고대 브루잉의 뿌리부터 현대 시그니처 창작까지.",
+        "eyebrow": "커피 입문",
+        "stageCount": "{count}개 단계",
+        "drinkCount": "{count}가지 음료",
+        "branchFrom": "{name}에서 갈라져 나온 갈래",
         "backToRoadmap": "로드맵으로 돌아가기",
         "origin": "유래와 역사",
         "funFact": "재밌는 썰",
         "relatedDrinks": "관련 음료",
-        "category": "카테고리"
+        "prevDrink": "이전",
+        "nextDrink": "다음"
       }
     }
   }
