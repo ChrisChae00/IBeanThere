@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Avatar } from './Avatar';
+import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
 export interface AvatarUploadProps {
   currentAvatarUrl?: string;
@@ -21,50 +22,67 @@ export default function AvatarUpload({
 }: AvatarUploadProps) {
   const t = useTranslations('profile');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const sizeClasses = {
     md: 'w-20 h-20',
     lg: 'w-28 h-28',
   };
 
   const handleClick = () => {
-    if (!isUploading) {
+    if (!isUploading && !isConverting) {
       fileInputRef.current?.click();
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let file = e.target.files?.[0];
     if (!file) return;
-    
+
+    if (isHeicFile(file)) {
+      setIsConverting(true);
+      try {
+        file = await convertHeicToWebp(file);
+      } catch (error) {
+        console.error('Error converting HEIC file:', error);
+        alert(error instanceof HeicNotSupportedError
+        ? t('heic_browser_not_supported')
+        : t('avatar_conversion_failed'));
+        setIsConverting(false);
+        return;
+      }
+      setIsConverting(false);
+    }
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setPreviewUrl(event.target?.result as string);
     };
     reader.readAsDataURL(file);
-    
+
     // Notify parent
     onFileSelect(file);
-    
+
     // Reset input so same file can be selected again
     e.target.value = '';
   };
 
   const displayUrl = previewUrl || currentAvatarUrl;
+  const isProcessing = isUploading || isConverting;
 
   return (
     <div className="flex flex-col items-center gap-2">
       <button
         type="button"
         onClick={handleClick}
-        disabled={isUploading}
+        disabled={isProcessing}
         className={`
           relative rounded-full overflow-hidden group
           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2
           transition-all duration-200
-          ${isUploading ? 'cursor-wait' : 'cursor-pointer'}
+          ${isProcessing ? 'cursor-wait' : 'cursor-pointer'}
           ${sizeClasses[size]}
         `}
       >
@@ -74,14 +92,14 @@ export default function AvatarUpload({
           size="xl"
           className={`${sizeClasses[size]} border-4 border-[var(--color-background)]`}
         />
-        
+
         {/* Hover overlay */}
         <div className={`
           absolute inset-0 bg-black/50 flex items-center justify-center
           opacity-0 group-hover:opacity-100 transition-opacity
-          ${isUploading ? 'opacity-100' : ''}
+          ${isProcessing ? 'opacity-100' : ''}
         `}>
-          {isUploading ? (
+          {isProcessing ? (
             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,15 +109,15 @@ export default function AvatarUpload({
           )}
         </div>
       </button>
-      
+
       <span className="text-xs text-[var(--color-text-secondary)]">
-        {t('change_avatar')}
+        {isConverting ? t('converting_avatar') : t('change_avatar')}
       </span>
-      
+
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,.heic,.heif"
         className="hidden"
         onChange={handleFileChange}
       />

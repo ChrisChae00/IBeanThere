@@ -9,7 +9,7 @@ const intlMiddleware = createIntlMiddleware({
 
 // Pages that don't need a Supabase session refresh on every request.
 // i18n routing still runs for all paths.
-const PUBLIC_PATHS = ['/terms', '/privacy', '/contact'];
+const PUBLIC_PATHS = ['/terms', '/privacy', '/contact', '/learn'];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(p => pathname.includes(p));

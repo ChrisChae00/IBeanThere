@@ -47,7 +47,8 @@
       "profile": "Profile",
       "settings": "Settings",
       "get_started": "Get Started",
-      "admin_dashboard": "Admin Dashboard"
+      "admin_dashboard": "Admin Dashboard",
+      "learn": "Learn"
     },
     "drop_bean": {
       "button": "Drop Bean",
@@ -767,6 +768,9 @@
         "max_size": "Max size",
         "photo_too_large": "Photo is too large. Maximum size is {maxSize}MB",
         "invalid_file_type": "Invalid file type. Please upload an image",
+        "converting": "Converting photo",
+        "heic_conversion_failed": "Failed to convert photo format. Please try a JPEG or PNG file.",
+        "heic_browser_not_supported": "HEIC photos can't be uploaded on this browser. Please use Safari, or convert the photo to JPEG first.",
         "public": "Public",
         "public_description": "Other users can see this log",
         "anonymous": "Anonymous",
@@ -937,6 +941,9 @@
       "taste_tags_label": "Coffee Preferences",
       "select_taste_tags": "Select up to 5 tags that describe your taste",
       "avatar_upload_error": "Failed to upload image. Please try again.",
+      "converting_avatar": "Converting photo...",
+      "avatar_conversion_failed": "Failed to convert photo format. Please try a JPEG or PNG file.",
+      "heic_browser_not_supported": "HEIC photos can't be uploaded on this browser. Please use Safari, or convert the photo to JPEG first.",
       "profile_updated": "Profile updated successfully",
       "taste_tags": {
         "acidic": "Acidic",
@@ -1220,6 +1227,9 @@
       "image_requirements": "Max {max} images, {maxSize}MB each (JPEG, PNG, WebP)",
       "images_count": "{count}/{max} images",
       "error_invalid_file_type": "Invalid file type. Please use JPEG, PNG, or WebP.",
+      "converting": "Converting photo",
+      "heic_conversion_failed": "Failed to convert photo format. Please try a JPEG or PNG file.",
+      "heic_browser_not_supported": "HEIC photos can't be uploaded on this browser. Please use Safari, or convert the photo to JPEG first.",
       "error_file_too_large": "File too large. Maximum size is {maxSize}MB.",
       "error_max_images": "Maximum {max} images allowed.",
       "error_login_required": "Please sign in to submit a report",
@@ -1295,5 +1305,21 @@
       "title": "Share",
       "copy_link": "Copy Link",
       "copied": "Copied!"
+    },
+    "learn": {
+      "coffee": {
+        "title": "Coffee Roadmap",
+        "subtitle": "Explore the world of coffee drinks — from ancient brewing roots to modern signature creations.",
+        "eyebrow": "Coffee 101",
+        "stageCount": "{count} stages",
+        "drinkCount": "{count} drinks",
+        "branchFrom": "Branches off {name}",
+        "backToRoadmap": "Back to Roadmap",
+        "origin": "Origin & History",
+        "funFact": "Fun Fact",
+        "relatedDrinks": "Related Drinks",
+        "prevDrink": "Previous",
+        "nextDrink": "Next"
+      }
     }
   }

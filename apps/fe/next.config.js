@@ -26,6 +26,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https://storage.googleapis.com https://${supabaseHost} https://*.tile.openstreetmap.org`,
       `connect-src 'self' ${apiOrigin} https://${supabaseHost} https://*.supabase.co https://*.tile.openstreetmap.org`,
+      "worker-src blob:",
       "font-src 'self' data:",
       "object-src 'none'",
       "base-uri 'self'",
