@@ -6,9 +6,9 @@ const mokaPot: CoffeeDrink = {
   content: {
     en: {
       name: 'Moka Pot',
-      tagline: 'Italy\'s kitchen espresso. Stovetop intensity without the machine.',
+      tagline: 'The Bialetti family invented the moka pot. When they died, they were buried inside one.',
       description:
-        'The moka pot brews by forcing water pressurized by steam through finely ground coffee using steam pressure — typically 1–2 bar, far below the 9 bar of espresso machines. The result is a strong, concentrated, and slightly bitter brew with a richer body than drip coffee but a different character than true espresso.\n\nMoka pot coffee is more viscous and bold than pour over, with a heavier mouthfeel and caramelized notes. The "crema" that sometimes forms on top isn\'t the same as espresso crema — it\'s more of an emulsion. In Italy, the moka is as much a kitchen fixture as the stove itself.',
+        'Alfonso Bialetti invented the moka pot in 1933, and by the 1950s it sat on nearly every stove in Italy — not a specialty item, just what a kitchen was supposed to have. His son Renato grew it into a global brand. Then, in 2013, Alfonso\'s ashes were sealed inside a giant moka-pot-shaped urn. When Renato died, he reportedly asked for the same. The family that put the moka pot in every Italian home is now resting inside one.\n\nThe pot itself works nothing like an espresso machine, despite the resemblance. Steam builds just 1–2 bar of pressure — a fraction of an espresso machine\'s 9 — pushing water through fine grounds into a strong, slightly bitter brew with more body than drip coffee. The foam on top isn\'t real crema, just an emulsion, but nobody in Italy is arguing about the difference. It\'s just what\'s on the stove.',
       origin:
         'Invented by Alfonso Bialetti in 1933 in Italy, the Bialetti Moka Express became one of the most iconic product designs of the 20th century. By the 1950s, it was in nearly every Italian home. Alfonso\'s son Renato grew the company into a global brand. In 2013, Alfonso Bialetti\'s ashes were interred in a giant moka pot-shaped urn — a fitting tribute.',
       funFact:
@@ -16,9 +16,9 @@ const mokaPot: CoffeeDrink = {
     },
     ko: {
       name: '모카포트',
-      tagline: '이탈리아의 주방 에스프레소. 머신 없이 만드는 스토브 탑 진한 커피.',
+      tagline: '모카포트를 발명한 비알레티 가문은 죽어서도 모카포트 모양의 유골함 속에 잠들었다.',
       description:
-        '모카포트는 증기 압력으로 가압된 물을 곱게 간 원두에 통과시켜 추출합니다. 일반적으로 1~2바(bar)의 압력으로, 에스프레소 머신의 9바보다 훨씬 낮습니다. 결과물은 강하고 농축되어 있으며 약간 쓴 맛이 나고, 드립 커피보다 진한 바디감을 갖지만 진짜 에스프레소와는 다른 개성을 가집니다.\n\n모카포트 커피는 푸어오버보다 점도가 높고 굵직하며, 무거운 질감과 카라멜화된 풍미를 냅니다. 위에 생기는 "크레마"는 에스프레소 크레마와는 다른, 일종의 에멀전입니다. 이탈리아에서 모카포트는 가스레인지만큼이나 주방의 필수품입니다.',
+        '1933년 알폰소 비알레티가 모카포트를 발명했고, 1950년대에는 이탈리아 가정의 거의 모든 가스레인지 위에 놓여 있었습니다. 특별한 물건이 아니라, 주방이라면 당연히 있어야 할 물건이었죠. 아들 레나토는 이를 글로벌 브랜드로 키웠습니다. 그리고 2013년, 알폰소의 유골은 거대한 모카포트 모양의 유골함에 안치되었습니다. 레나토도 세상을 떠나며 같은 방식을 요청했다고 전해집니다. 모든 이탈리아 가정에 모카포트를 들여놓은 가족이, 이제는 그 안에 잠들어 있는 것입니다.\n\n겉모습과 달리 모카포트는 에스프레소 머신과는 전혀 다르게 작동합니다. 증기가 만드는 압력은 1~2바에 불과합니다. 에스프레소 머신의 9바에 비하면 일부에 불과하지만, 그 압력만으로도 곱게 간 원두를 통과시켜 드립 커피보다 진한 바디감의 강하고 살짝 쓴 커피를 뽑아냅니다. 위에 뜨는 거품은 진짜 크레마가 아니라 일종의 에멀전이지만, 이탈리아에서는 아무도 그 차이를 따지지 않습니다. 그냥 스토브 위에 놓인 일상일 뿐이니까요.',
       origin:
         '1933년 이탈리아의 알폰소 비알레티(Alfonso Bialetti)가 발명한 비알레티 모카 익스프레스는 20세기 가장 상징적인 제품 디자인 중 하나가 되었습니다. 1950년대에는 이탈리아 가정 대부분에 자리잡았고, 그의 아들 레나토가 회사를 글로벌 브랜드로 성장시켰습니다.',
       funFact:

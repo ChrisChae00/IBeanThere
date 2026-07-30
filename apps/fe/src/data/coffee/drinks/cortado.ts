@@ -6,9 +6,9 @@ const cortado: CoffeeDrink = {
   content: {
     en: {
       name: 'Cortado',
-      tagline: 'Espresso "cut" with just enough milk.',
+      tagline: "In early-2010s California, ordering a cortado wasn't really about the drink — it was a password.",
       description:
-        'Cortado (from the Spanish "cortar," meaning "to cut") is a 1:1 or 1:2 ratio of espresso to warm, lightly textured milk in a 60–90ml serving. Unlike cappuccino or latte, the milk in a cortado is barely steamed — not heavily foamed — so it cuts the espresso\'s acidity and bitterness without creating a creamy, milky drink.\n\nThe cortado sits between macchiato and flat white in size and intensity. It\'s popular in Spain and Portugal, where it\'s typically served in a small glass rather than a ceramic cup.',
+        'Walk into a specialty coffee bar in 2011 and say "cortado," and you weren\'t just ordering — you were signaling. The word marked you as someone who took coffee seriously, back before the drink normalized, and for a few years it functioned almost like a status symbol in third-wave circles. Underneath the reputation, though, is a genuinely simple idea, borrowed from Spain: "cortado" means "cut."\n\nEspresso gets cut with warm, barely textured milk — not steamed into foam, just enough to soften the acidity — at a 1:1 or 1:2 ratio, in a small 60–90ml glass. It\'s not a latte in miniature; it\'s espresso with the edges filed down. Order one today and nobody blinks — the password expired, but the drink never needed it.',
       origin:
         'The cortado originated in Spain — most likely in the Basque country or Galicia — and is deeply embedded in the coffee culture of Spain and Portugal (where it\'s called "garoto" in the north or "meia de leite" in a slightly larger form). It became a global specialty coffee trend in the early 2010s.',
       funFact:
@@ -16,9 +16,9 @@ const cortado: CoffeeDrink = {
     },
     ko: {
       name: '코르타도',
-      tagline: '딱 필요한 만큼의 우유로 "자른" 에스프레소.',
+      tagline: '2010년대 초 캘리포니아에서 코르타도를 주문하는 건 커피 주문이 아니라 일종의 암구호였다.',
       description:
-        '코르타도(스페인어 "코르타르(cortar)"에서 유래, "자르다"는 뜻)는 에스프레소와 따뜻하고 가볍게 스팀한 우유를 1:1 또는 1:2 비율로 60~90ml 분량으로 제공합니다. 카푸치노나 라떼와 달리 코르타도의 우유는 거의 스팀만 한 것으로 — 풍성하게 폼을 만들지 않아 — 에스프레소의 산도와 쓴맛을 잘라내지만 크리미하고 우유 맛 강한 음료는 만들지 않습니다.\n\n코르타도는 크기와 강도에서 마키아토와 플랫화이트 사이에 위치합니다. 스페인과 포르투갈에서 인기 있으며, 도자기 컵이 아닌 작은 유리잔에 제공되는 것이 일반적입니다.',
+        '2011년 스페셜티 커피 바에 들어가 "코르타도"라고 말하면, 그건 그냥 주문이 아니라 신호였습니다. 아직 이 음료가 대중화되기 전, 그 단어 하나가 당신이 커피에 진심이라는 걸 드러냈고, 몇 년간 서드웨이브 커피 세계에서 거의 지위 상징처럼 기능했습니다. 하지만 그 명성 아래에는 스페인에서 온 아주 단순한 아이디어가 있을 뿐입니다. "코르타도"는 "자르다"라는 뜻입니다.\n\n에스프레소를 따뜻하고 살짝만 텍스처를 준 우유로 자릅니다 — 폼을 만들 정도로 스팀하지 않고, 산미를 누그러뜨릴 만큼만 — 1:1 또는 1:2 비율로 작은 60~90ml 잔에 담습니다. 미니 라떼를 흉내 내는 게 아니라, 모서리만 다듬은 에스프레소로 남으려는 겁니다. 오늘 코르타도를 주문해도 아무도 신경 쓰지 않습니다. 암구호는 유효기간이 끝났지만, 이 음료는 애초에 그게 필요하지 않았습니다.',
       origin:
         '코르타도는 스페인 — 아마도 바스크 지방이나 갈리시아 — 에서 유래했으며 스페인과 포르투갈의 커피 문화에 깊이 뿌리내리고 있습니다. 2010년대 초 글로벌 스페셜티 커피 트렌드가 되었습니다.',
       funFact:
