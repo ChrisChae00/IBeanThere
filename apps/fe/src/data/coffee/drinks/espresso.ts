@@ -6,9 +6,10 @@ const espresso: CoffeeDrink = {
   content: {
     en: {
       name: 'Espresso',
-      tagline: 'Nine bars of pressure. Thirty seconds. The foundation of everything.',
+      tagline:
+        'A machine built to brew coffee faster for factory workers accidentally created the foundation of every café drink on earth.',
       description:
-        'Espresso is brewed by forcing hot water through finely-ground, tightly-packed coffee under 9 bars of pressure for 25–30 seconds, yielding a 25–35ml concentrated shot. The result: an intense, syrupy liquid topped with crema — a reddish-brown foam of emulsified coffee oils and CO₂ that signals a properly extracted shot.\n\nEspresso is less about the bean and more about the extraction. The same coffee that produces a bright, fruity pour over can become a thick, bittersweet espresso depending on grind size, dose, and pressure. It\'s also the base for virtually every café milk drink on the planet.',
+        'In 1901, Luigi Bezzera wasn\'t chasing flavor — he was chasing speed, patenting a machine to get coffee into tired Italian workers\' hands faster. Desiderio Pavoni commercialized it. But it was Achille Gaggia, in 1948, pushing the pressure to 9 bars just to brew even quicker, who stumbled onto something nobody had ordered: crema, the reddish-brown foam that would come to define the drink.\n\nThat accident became the standard. Today, 9 bars of pressure force hot water through tightly-packed, finely-ground coffee for 25–30 seconds, yielding a 25–35ml shot that\'s less about the bean than the extraction — the same coffee can pour bright and fruity or thick and bittersweet, depending only on grind, dose, and pressure. Strip away the milk, the ice, the syrup, and every café drink on the planet reduces to this one shot.',
       origin:
         'The first espresso machine patent was filed in 1901 by Luigi Bezzera in Milan. The goal was efficiency — brewing coffee faster for busy Italian workers. Desiderio Pavoni bought the patent and commercialized the machine, and by the 1920s, the bar espresso machine was standard in Italian cafés. The modern 9-bar standard was set by Achille Gaggia in 1948, who also discovered crema while experimenting with higher pressure.',
       funFact:
@@ -16,9 +17,9 @@ const espresso: CoffeeDrink = {
     },
     ko: {
       name: '에스프레소',
-      tagline: '9바의 압력. 30초. 모든 것의 기반.',
+      tagline: '바쁜 노동자들에게 커피를 더 빨리 내주려던 기계가, 알고 보니 모든 카페 음료의 기반을 만들어냈다.',
       description:
-        '에스프레소는 9바의 압력으로 곱게 분쇄된 원두를 통해 뜨거운 물을 25~30초 동안 강제 통과시켜 25~35ml의 농축 샷을 추출합니다. 결과물은 강렬하고 시럽 같은 액체 위에 크레마 — 유화된 커피 오일과 CO₂로 이루어진 붉은 갈색 거품 — 가 올려져 있습니다. 이 크레마가 제대로 추출된 에스프레소의 신호입니다.\n\n에스프레소는 원두보다 추출에 관한 것입니다. 밝고 과일 향 나는 푸어오버를 만들던 같은 원두가 분쇄도, 도징, 압력에 따라 진하고 씁쓸한 에스프레소가 될 수 있습니다. 또한 세상 모든 카페 밀크 음료의 베이스입니다.',
+        '1901년, 루이지 베체라는 맛이 아니라 속도를 좇고 있었습니다. 지친 이탈리아 노동자들에게 커피를 더 빨리 내주기 위한 기계를 특허 냈을 뿐입니다. 데지데리오 파보니가 이를 상업화했습니다. 하지만 1948년, 그저 더 빠르게 추출하려고 압력을 9바까지 끌어올린 아킬레 가기아가 아무도 주문한 적 없는 무언가를 우연히 발견했습니다. 바로 크레마, 이후 이 음료를 정의하게 될 붉은 갈색 거품이었습니다.\n\n그 우연이 표준이 되었습니다. 오늘날 에스프레소는 9바의 압력으로 곱게 분쇄해 꽉 채운 원두를 25~30초 동안 통과시켜 25~35ml의 샷을 뽑아냅니다. 원두보다 추출이 중요해서, 같은 원두도 분쇄도와 도징, 압력에 따라 밝고 과일 향 나는 커피가 되기도, 진하고 씁쓸한 에스프레소가 되기도 합니다. 우유도, 얼음도, 시럽도 다 걷어내면 세상 모든 카페 음료는 결국 이 한 샷으로 귀결됩니다.',
       origin:
         '최초의 에스프레소 머신 특허는 1901년 밀라노의 루이지 베체라(Luigi Bezzera)가 신청했습니다. 목표는 효율성 — 바쁜 이탈리아 노동자들을 위해 더 빠르게 커피를 만드는 것이었습니다. 데지데리오 파보니(Desiderio Pavoni)가 특허를 사들여 상업화했고, 1920년대에는 이탈리아 카페의 표준이 되었습니다. 현대적인 9바 기준은 1948년 아킬레 가기아(Achille Gaggia)가 확립했으며, 더 높은 압력을 실험하다 크레마도 발견했습니다.',
       funFact:

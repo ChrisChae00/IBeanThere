@@ -6,9 +6,9 @@ const macchiato: CoffeeDrink = {
   content: {
     en: {
       name: 'Macchiato',
-      tagline: 'Espresso "stained" with just a dash of milk foam.',
+      tagline: 'Starbucks named a 400-calorie vanilla drink after an espresso shot you finish in twenty seconds — and the two share almost nothing.',
       description:
-        'The word "macchiato" means "stained" or "marked" in Italian. A traditional caffè macchiato is simply an espresso with a small dollop of milk foam on top — typically 5–10ml. The foam marks the espresso, cutting slightly the bitterness while preserving most of its intensity and concentration.\n\nNote: the Starbucks "Caramel Macchiato" has essentially nothing to do with the traditional Italian macchiato. It\'s a layered vanilla latte with caramel drizzle, named misleadingly. The traditional macchiato is tiny, intense, and takes about 20 seconds to drink.',
+        'Ask for a macchiato in Italy and you\'ll get an espresso with a single dollop of milk foam, maybe 10ml, gone in a few sips. Ask for one at Starbucks and you\'ll get a vanilla latte layered with caramel drizzle, built in the reverse order — milk first, espresso poured over it last. Both call themselves "macchiato," Italian for "stained," but only one earns the name honestly.\n\nThe real one is minimalist by design — a tiny mark of foam meant to soften straight espresso\'s bitterness without diluting its intensity, made for people who wanted the punch of a shot but not quite the full bite. Its mirror image, the latte macchiato, flips the ratio entirely: a splash of espresso staining a full glass of milk instead. Same word, opposite drink.',
       origin:
         'The macchiato originated in Italy as a practical solution for people who wanted the intensity of espresso but found the pure shot too bitter. A small spot of milk foam was the minimalist intervention. There\'s also "latte macchiato" — the reverse — where a small amount of espresso is added to a large glass of steamed milk, staining the milk instead.',
       funFact:
@@ -16,9 +16,9 @@ const macchiato: CoffeeDrink = {
     },
     ko: {
       name: '마키아토',
-      tagline: '밀크 폼 한 방울로 "얼룩진" 에스프레소.',
+      tagline: '스타벅스는 20초 만에 다 마시는 에스프레소의 이름을 400칼로리 바닐라 음료에 붙였다 — 공통점은 거의 없다.',
       description:
-        '"마키아토(macchiato)"는 이탈리아어로 "얼룩진" 또는 "표시된"이라는 뜻입니다. 전통적인 카페 마키아토는 에스프레소 위에 작은 밀크 폼 한 방울만 올린 것 — 보통 5~10ml입니다. 폼이 에스프레소에 표시되어 쓴맛을 약간 줄여주면서 강도와 농도는 대부분 유지합니다.\n\n주의: 스타벅스의 "캐러멜 마키아토"는 전통 이탈리아 마키아토와 본질적으로 관계가 없습니다. 바닐라 라떼에 캐러멜 드리즐을 올린 레이어 음료로, 이름이 오해를 불러일으킵니다. 전통 마키아토는 작고, 강렬하고, 마시는 데 약 20초 걸립니다.',
+        '이탈리아에서 마키아토를 주문하면 에스프레소 위에 밀크 폼 한 방울, 약 10ml만 올라간 잔이 나와 몇 모금이면 끝납니다. 스타벅스에서 주문하면 바닐라 라떼에 캐러멜 드리즐을 올린, 순서마저 반대인 음료가 나옵니다 — 우유가 먼저, 에스프레소는 맨 마지막에 붓습니다. 둘 다 "얼룩진"이라는 뜻의 "마키아토"를 자처하지만, 그 이름값을 제대로 하는 건 하나뿐입니다.\n\n원조는 철저히 미니멀합니다. 순수 에스프레소가 너무 쓰다고 느끼지만 강도는 포기하고 싶지 않은 사람들을 위해, 폼 한 점으로 쓴맛만 살짝 눌러주는 방식입니다. 거울 반대편에 있는 라떼 마키아토는 비율을 완전히 뒤집어, 큰 잔의 우유에 에스프레소를 살짝 떨어뜨려 얼룩지게 합니다. 같은 이름, 정반대의 음료.',
       origin:
         '마키아토는 에스프레소의 강도는 원하지만 순수 샷이 너무 쓰다고 느끼는 사람들을 위한 실용적 해결책으로 이탈리아에서 탄생했습니다. 소량의 밀크 폼이 최소한의 개입이었습니다. 반대 방향의 "라떼 마키아토"도 있습니다. 큰 잔의 스팀 밀크에 소량의 에스프레소를 넣어 우유를 얼룩지게 하는 방식입니다.',
       funFact:

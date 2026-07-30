@@ -6,9 +6,9 @@ const aeropress: CoffeeDrink = {
   content: {
     en: {
       name: 'AeroPress',
-      tagline: 'The engineer\'s coffee maker. Forgiving, fast, and endlessly hackable.',
+      tagline: 'A frustrated engineer built this to fix one bad cup. It now has a world championship.',
       description:
-        'The AeroPress combines immersion and pressure brewing in a single plastic cylinder. Coffee steep in hot water for 30–60 seconds, then air pressure created by pushing the plunger forces the liquid through a micro-filter and into the cup. The result is a smooth, low-acid coffee with surprisingly rich body — often described as halfway between espresso and pour over.\n\nWhat makes AeroPress unique is its flexibility. You can invert it (the "inverted method"), adjust steep time from 30 seconds to 3 minutes, use different water temperatures, and swap in metal or paper filters. There are thousands of published recipes and an annual World AeroPress Championship where competitors brew with wildly different techniques.',
+        'Alan Adler wasn\'t trying to reinvent coffee. He was a Stanford engineer already famous for inventing a flying disc — but he couldn\'t stand how his drip machine ruined a single cup. So he built a plunger that pushes hot water through grounds using nothing but air pressure and thirty seconds of patience.\n\nIt looks like lab equipment, and in a way, it is. Steep, plunge, done — except the ritual is so tunable that thousands of competing recipes now face off every year at the World AeroPress Championship. Invert it, stretch the steep time from 30 seconds to 3 minutes, swap paper for metal — the machine doesn\'t flinch. What comes out is smooth, low in acid, and lands somewhere between espresso and pour over, which is exactly why travelers, campers, and coffee obsessives all claim it as their own.',
       origin:
         'Invented in 2005 by Alan Adler, a Stanford engineering professor and inventor of the Aerobie flying disc. He designed the AeroPress after obsessing over why conventional drip machines made bad single cups. It launched at a trade show in 2005 and became a cult favorite — particularly among travelers and outdoor enthusiasts — due to its durability and portability.',
       funFact:
@@ -16,9 +16,9 @@ const aeropress: CoffeeDrink = {
     },
     ko: {
       name: '에어로프레스',
-      tagline: '엔지니어가 만든 커피 기구. 관용적이고, 빠르고, 끝없이 실험 가능한.',
+      tagline: '한 엔지니어가 형편없는 커피 한 잔에 화나서 만들었다. 지금은 세계 챔피언십까지 열린다.',
       description:
-        '에어로프레스는 침지와 압력 추출을 하나의 플라스틱 실린더에서 결합한 방식입니다. 커피를 뜨거운 물에 30~60초 담근 후, 플런저를 누르는 공기 압력이 액체를 마이크로 필터를 통해 컵으로 밀어냅니다. 결과물은 에스프레소와 푸어오버의 중간 어딘가로 표현되는, 부드럽고 산도가 낮으며 의외로 진한 바디감을 가진 커피입니다.\n\n에어로프레스의 특징은 유연성입니다. 뒤집어 사용하는 "인버티드 방법", 30초에서 3분까지 조절 가능한 추출 시간, 다양한 물 온도, 금속 또는 종이 필터 선택 — 수천 가지 레시피가 존재하며, 매년 세계 에어로프레스 챔피언십이 열립니다.',
+        '앨런 애들러는 커피를 재발명하려던 게 아니었습니다. 이미 프리즈비로 유명해진 스탠퍼드 공대 엔지니어였을 뿐인데, 드립 머신이 싱글 컵을 망치는 꼴을 도저히 못 참았습니다. 그래서 공기 압력과 30초의 인내만으로 뜨거운 물을 원두에 밀어내는 플런저를 만들었습니다.\n\n생김새는 실험 기구에 가깝고, 실제로도 그렇습니다. 담그고, 누르고, 끝 — 그런데 이 단순한 과정이 너무 다양하게 조절 가능해서 매년 세계 에어로프레스 챔피언십에서 수천 가지 레시피가 경쟁을 벌입니다. 뒤집어 쓰고, 추출 시간을 30초에서 3분까지 늘리고, 종이 대신 금속 필터를 껴도 기계는 흔들리지 않습니다. 결과물은 부드럽고 산도가 낮으며 에스프레소와 푸어오버 사이 어딘가에 자리 잡습니다. 여행자와 캠퍼, 커피 덕후들이 저마다 이 기구를 자기 것이라 주장하는 이유입니다.',
       origin:
         '2005년 스탠퍼드 공대 교수이자 에어로비(Aerobie) 프리즈비 발명가인 앨런 애들러(Alan Adler)가 발명했습니다. 기존 드립 머신으로는 싱글 컵을 제대로 만들 수 없다는 문제에 집착한 끝에 탄생시킨 제품입니다. 2005년 무역 박람회에서 출시된 이후 내구성과 휴대성 덕분에 여행자와 아웃도어 애호가 사이에서 컬트적 인기를 얻었습니다.',
       funFact:
