@@ -1,8 +1,35 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { getTrendingCafes } from '@/lib/api/cafes';
 import ExploreMapClient from './ExploreMapClient';
 import { PlusIcon } from '@/components/ui';
+import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
+
+const PATH = '/discover/explore-map';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'discover.explore_map' });
+
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+    alternates: {
+      canonical: buildCanonical(locale as Locale, PATH),
+      languages: buildAlternateLanguages(PATH),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('subtitle'),
+      type: 'website',
+    },
+  };
+}
 
 export default async function ExploreMapPage({
   params

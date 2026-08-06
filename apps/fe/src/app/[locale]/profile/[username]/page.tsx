@@ -1,5 +1,24 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import PublicProfileClient from '@/components/profile/PublicProfileClient';
+import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; username: string }>;
+}): Promise<Metadata> {
+  const { locale, username } = await params;
+  const path = `/profile/${username}`;
+
+  return {
+    title: `${username} | IBeanThere`,
+    alternates: {
+      canonical: buildCanonical(locale as Locale, path),
+      languages: buildAlternateLanguages(path),
+    },
+  };
+}
 
 export default async function PublicProfilePage({
   params,

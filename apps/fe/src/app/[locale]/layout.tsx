@@ -8,6 +8,7 @@ import { AuthWatcher } from '@/components/auth';
 import { ClientProviders } from '@/components/providers';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
+import { getSiteUrl, buildAlternateLanguages, type Locale } from '@/lib/seo';
 
 // Dynamic metadata generation with i18n support
 export async function generateMetadata({
@@ -18,27 +19,28 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
 
-  const getMetadataBase = (): URL => {
-    if (process.env.NEXT_PUBLIC_APP_URL) {
-      return new URL(process.env.NEXT_PUBLIC_APP_URL);
-    }
-    
-    if (process.env.VERCEL_URL) {
-      return new URL(`https://${process.env.VERCEL_URL}`);
-    }
-    
-    return new URL('http://localhost:3000');
-  };
-
-  const metadataBase = getMetadataBase();
-
   return {
-    metadataBase,
+    metadataBase: getSiteUrl(),
     title: t('title'),
     description: t('description'),
     icons: {
       icon: '/icons/coffee-logo.svg',
-    }
+    },
+    alternates: {
+      languages: buildAlternateLanguages('/'),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      siteName: 'IBeanThere',
+      locale: locale as Locale,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title: t('title'),
+      description: t('description'),
+    },
   };
 }
 

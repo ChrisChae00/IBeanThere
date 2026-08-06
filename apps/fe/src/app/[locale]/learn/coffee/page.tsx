@@ -3,8 +3,11 @@ import type { Metadata } from 'next';
 import { getAllCategories, getDrinksByCategory } from '@/data/coffee';
 import type { Locale } from '@/data/coffee/types';
 import CoffeeRoadmap from '@/components/learn/CoffeeRoadmap';
+import { buildAlternateLanguages, buildCanonical, type Locale as SeoLocale } from '@/lib/seo';
 
 export const revalidate = 86400;
+
+const PATH = '/learn/coffee';
 
 export async function generateMetadata({
   params,
@@ -17,6 +20,15 @@ export async function generateMetadata({
   return {
     title: t('title'),
     description: t('subtitle'),
+    alternates: {
+      canonical: buildCanonical(locale as SeoLocale, PATH),
+      languages: buildAlternateLanguages(PATH),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('subtitle'),
+      type: 'website',
+    },
   };
 }
 

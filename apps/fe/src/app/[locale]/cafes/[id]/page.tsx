@@ -4,29 +4,38 @@ import { getCafeDetail } from '@/lib/api/cafes';
 import CafeDetailClient from './CafeDetailClient';
 import Script from 'next/script';
 import { redirect } from 'next/navigation';
+import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
 
 interface CafeDetailPageProps {
   params: Promise<{ locale: string; id: string }>;
 }
 
 export async function generateMetadata({ params }: CafeDetailPageProps): Promise<Metadata> {
-  const { id } = await params;
-  
+  const { id, locale } = await params;
+
   try {
     // id can be either slug or UUID
     const cafe = await getCafeDetail(id);
     const t = await getTranslations('cafe.detail');
-    
+
     const title = `${cafe.name} - ${cafe.address || ''} | IBeanThere`;
     const description = cafe.average_rating
       ? `${cafe.name} - ${t('average_rating')}: ${cafe.average_rating.toFixed(1)}/5 ${t('from')} ${cafe.log_count} ${t('coffee_logs')}`
       : `${cafe.name} - ${cafe.address || ''}`;
-    
+
     const imageUrl = cafe.recent_logs?.[0]?.photo_urls?.[0] || '/default-cafe.jpg';
-    
+
+    // Canonical always points at the slug URL — cafe pages are reachable by
+    // slug or UUID, and without this both would index as duplicate content.
+    const canonicalPath = `/cafes/${cafe.slug || id}`;
+
     return {
       title,
       description,
+      alternates: {
+        canonical: buildCanonical(locale as Locale, canonicalPath),
+        languages: buildAlternateLanguages(canonicalPath),
+      },
       openGraph: {
         title: cafe.name,
         description: cafe.address || description,

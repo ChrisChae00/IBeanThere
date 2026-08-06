@@ -9,3 +9,5 @@ Disallow: /*/my-beans/
 Disallow: /*/my-logs/
 Disallow: /*/theme-demo/
 Disallow: /*/cafes/*/log
+
+Sitemap: https://ibeanthere.app/sitemap.xml

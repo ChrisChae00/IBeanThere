@@ -1,7 +1,35 @@
 import { useTranslations } from 'next-intl';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import ShopHero from '@/components/shop/ShopHero';
 import SectionHeader from '@/components/shop/SectionHeader';
 import ProductCard from '@/components/shop/ProductCard';
+import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
+
+const PATH = '/shop';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'shop' });
+
+  return {
+    title: t('hero_title'),
+    description: t('hero_subtitle_line1'),
+    alternates: {
+      canonical: buildCanonical(locale as Locale, PATH),
+      languages: buildAlternateLanguages(PATH),
+    },
+    openGraph: {
+      title: t('hero_title'),
+      description: t('hero_subtitle_line1'),
+      type: 'website',
+    },
+  };
+}
 
 export default function ShopPage() {
   const t = useTranslations('shop');

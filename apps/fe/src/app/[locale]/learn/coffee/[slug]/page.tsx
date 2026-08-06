@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getAllDrinks, getDrinkBySlug, getCategory, getDrinksByCategory } from '@/data/coffee';
 import type { Locale } from '@/data/coffee/types';
 import CoffeeDrinkDetail from '@/components/learn/CoffeeDrinkDetail';
+import { buildAlternateLanguages, buildCanonical, type Locale as SeoLocale } from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -22,10 +23,20 @@ export async function generateMetadata({
 
   const loc = locale as Locale;
   const content = drink.content[loc];
+  const path = `/learn/coffee/${slug}`;
 
   return {
     title: content.name,
     description: content.tagline,
+    alternates: {
+      canonical: buildCanonical(locale as SeoLocale, path),
+      languages: buildAlternateLanguages(path),
+    },
+    openGraph: {
+      title: content.name,
+      description: content.tagline,
+      type: 'article',
+    },
   };
 }
 
