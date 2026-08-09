@@ -584,10 +584,9 @@
         "be_navigator": "개척자 되기",
         "filter_all": "전체",
         "filter_closest": "가까운 순",
-        "filter_top_rated": "높은 평점",
         "filter_most_popular": "인기 순",
         "trending_this_week": "이번 주 트렌딩",
-        "cafes_found": "개의 카페",
+        "showing_cafes": "카페 {count}곳 표시 중",
         "no_location": "이 필터는 위치 정보가 필요합니다"
       },
       "pending_spots": {

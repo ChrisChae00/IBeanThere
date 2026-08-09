@@ -588,10 +588,9 @@
         "be_navigator": "Be a Navigator",
         "filter_all": "All",
         "filter_closest": "Closest",
-        "filter_top_rated": "Top Rated",
         "filter_most_popular": "Most Popular",
         "trending_this_week": "Trending This Week",
-        "cafes_found": "cafes found",
+        "showing_cafes": "Showing {count} cafes",
         "no_location": "Location needed for this filter"
       },
       "pending_spots": {

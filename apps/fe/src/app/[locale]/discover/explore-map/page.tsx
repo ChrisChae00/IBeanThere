@@ -5,6 +5,7 @@ import { getTrendingCafes } from '@/lib/api/cafes';
 import ExploreMapClient from './ExploreMapClient';
 import { PlusIcon } from '@/components/ui';
 import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
+import { CAFE_GRID_ITEMS_PER_PAGE } from '@/lib/constants/cafe';
 
 const PATH = '/discover/explore-map';
 
@@ -39,7 +40,7 @@ export default async function ExploreMapPage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'discover.explore_map' });
 
-  const initialCafes = await getTrendingCafes(12, 0);
+  const initialCafes = await getTrendingCafes(CAFE_GRID_ITEMS_PER_PAGE, 0);
 
   return (
     <main className="min-h-screen bg-[var(--color-background)]">
