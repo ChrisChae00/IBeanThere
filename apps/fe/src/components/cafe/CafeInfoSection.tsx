@@ -62,6 +62,8 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2',
     }));
 
+  const sourceType = 'source_type' in cafe ? cafe.source_type : undefined;
+
   return (
     <div className="space-y-4">
       {/* Founding Crew Section */}
@@ -70,6 +72,11 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
           navigator={foundingCrew.navigator}
           scouts={scouts}
         />
+      )}
+
+      {/* App-seeded cafe (e.g. OSM import) with no navigator yet */}
+      {sourceType === 'app_seed' && !foundingCrew?.navigator && (
+        <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('added_by_app')}</p>
       )}
 
       {/* Status Badge + Verification Count (only show count when not verified and no founding crew) */}
@@ -98,19 +105,21 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
           <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
           <p className="text-[var(--color-cardText)]">{cafe.address}</p>
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            {sourceUrl && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg text-xs font-medium text-[var(--color-cardText)] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                <span>{t('google_maps')}</span>
-              </a>
-            )}
+            <a
+              href={
+                sourceUrl && sourceUrl.startsWith('https://www.google.com/maps')
+                  ? sourceUrl
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${cafe.name}, ${cafe.address || `${cafe.latitude},${cafe.longitude}`}`)}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg text-xs font-medium text-[var(--color-cardText)] transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+              <span>{t('google_maps')}</span>
+            </a>
             {cafe.latitude && cafe.longitude && (
               <NavigationButton latitude={cafe.latitude} longitude={cafe.longitude} size="sm" />
             )}

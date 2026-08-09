@@ -11,7 +11,6 @@ interface TrendingCafesSectionProps {
   cafes: TrendingCafeResponse[];
   locale: string;
   isLoading: boolean;
-  error?: string | null;
   onCheckIn?: (cafeId: string) => void;
 }
 
@@ -62,7 +61,6 @@ export default function TrendingCafesSection({
   cafes,
   locale,
   isLoading,
-  error,
   onCheckIn
 }: TrendingCafesSectionProps) {
   const t = useTranslations('discover.explore_map');

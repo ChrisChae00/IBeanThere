@@ -24,6 +24,9 @@ export default async function Footer({ locale }: { locale: string }) {
             <p className="text-[var(--color-primaryText)]/60 text-sm">
               © 2026 {commonT('app_name')}. All rights reserved.
             </p>
+            <p className="text-[var(--color-primaryText)]/40 text-xs mt-1">
+              {t('osm_attribution')}
+            </p>
           </div>
 
           {/* Center: Links */}

@@ -1,20 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import MapSection from '@/components/map/MapSection';
-import { getTrendingCafes } from '@/lib/api/cafes';
+import { getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
 import { TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
-import { calculateDistance } from '@/lib/utils/checkIn';
 import { TrendingCafesSection, CafeGridCard } from '@/components/cafe';
-import { CAFE_GRID_ITEMS_PER_PAGE } from '@/lib/constants/cafe';
+import { CAFE_GRID_ITEMS_PER_PAGE, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
 
-type FilterType = 'all' | 'closest' | 'top_rated' | 'most_popular';
+type FilterType = 'all' | 'closest' | 'most_popular';
 
-interface CafeWithDistance extends TrendingCafeResponse {
-  distance?: number;
-}
+// Sorting happens on the server: the grid only ever holds the pages fetched so
+// far, so sorting client-side would only reorder those and leave later pages
+// appended out of order.
+const FILTER_SORT: Record<FilterType, TrendingSortBy> = {
+  all: 'trending',
+  closest: 'distance',
+  most_popular: 'popular',
+};
 
 interface ExploreMapClientProps {
   locale: string;
@@ -25,76 +29,91 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const t = useTranslations('discover.explore_map');
   const tMap = useTranslations('map');
   const { coords } = useLocation();
-  const [trendingCafes, setTrendingCafes] = useState<CafeWithDistance[]>(initialCafes);
-  const [filteredCafes, setFilteredCafes] = useState<CafeWithDistance[]>(initialCafes);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  // Panel always shows the trending order, independent of the grid's filter
+  const [trendingCafes, setTrendingCafes] = useState<TrendingCafeResponse[]>(
+    initialCafes.slice(0, TRENDING_CAFES_COUNT)
+  );
+  const [cafes, setCafes] = useState<TrendingCafeResponse[]>(initialCafes);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [visibleCount, setVisibleCount] = useState(CAFE_GRID_ITEMS_PER_PAGE);
+  const [hasMore, setHasMore] = useState(initialCafes.length === CAFE_GRID_ITEMS_PER_PAGE);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Refetch with location once coords become available
+  const location = useMemo(
+    () => (coords ? { lat: coords.latitude, lng: coords.longitude } : undefined),
+    [coords]
+  );
+
+  // Refresh the trending panel once coordinates arrive so it shows local results
   useEffect(() => {
-    if (!coords) return;
+    if (!location) return;
 
-    async function refetchWithLocation() {
-      try {
-        setIsLoading(true);
-        const location = { lat: coords!.latitude, lng: coords!.longitude };
-        const cafes = await getTrendingCafes(12, 0, location);
-        setTrendingCafes(cafes);
-        setFilteredCafes(cafes);
-      } catch (err) {
-        console.error('Failed to load trending cafes:', err);
-        setError('Failed to load trending cafes');
-      } finally {
-        setIsLoading(false);
-      }
+    let cancelled = false;
+    getTrendingCafes(TRENDING_CAFES_COUNT, 0, location, 'trending').then((top) => {
+      if (!cancelled && top.length > 0) setTrendingCafes(top);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location]);
+
+  // Load page 1 of the grid whenever the filter or the location changes
+  const isInitialRender = useRef(true);
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      // The server already rendered page 1 for the default filter without location
+      if (!location && activeFilter === 'all') return;
     }
 
-    refetchWithLocation();
-  }, [coords]);
+    let cancelled = false;
+    setIsLoading(true);
 
-  const handleFilterChange = (filter: FilterType) => {
-    setActiveFilter(filter);
-    setVisibleCount(CAFE_GRID_ITEMS_PER_PAGE);
+    getTrendingCafes(CAFE_GRID_ITEMS_PER_PAGE, 0, location, FILTER_SORT[activeFilter])
+      .then((page) => {
+        if (cancelled) return;
+        setCafes(page);
+        setHasMore(page.length === CAFE_GRID_ITEMS_PER_PAGE);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
-    let sorted = [...trendingCafes];
+    return () => {
+      cancelled = true;
+    };
+  }, [location, activeFilter]);
 
-    switch (filter) {
-      case 'all':
-        setFilteredCafes(sorted);
-        break;
-      case 'closest':
-        if (!coords) {
-          setFilteredCafes(sorted);
-          return;
-        }
-        sorted = sorted.map(cafe => ({
-          ...cafe,
-          distance: calculateDistance(
-            coords.latitude,
-            coords.longitude,
-            typeof cafe.latitude === 'string' ? parseFloat(cafe.latitude) : cafe.latitude,
-            typeof cafe.longitude === 'string' ? parseFloat(cafe.longitude) : cafe.longitude
-          )
-        }));
-        sorted.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-        setFilteredCafes(sorted);
-        break;
-      case 'top_rated':
-        sorted.sort((a, b) => {
-          const scoreA = typeof a.trending_score === 'string' ? parseFloat(a.trending_score) : (a.trending_score || 0);
-          const scoreB = typeof b.trending_score === 'string' ? parseFloat(b.trending_score) : (b.trending_score || 0);
-          return Number(scoreB) - Number(scoreA);
-        });
-        setFilteredCafes(sorted);
-        break;
-      case 'most_popular':
-        sorted.sort((a, b) => (b.visit_count_14d || 0) - (a.visit_count_14d || 0));
-        setFilteredCafes(sorted);
-        break;
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      const page = await getTrendingCafes(
+        CAFE_GRID_ITEMS_PER_PAGE,
+        cafes.length,
+        location,
+        FILTER_SORT[activeFilter]
+      );
+      setCafes((prev) => [...prev, ...page]);
+      // A short page means the server has nothing left to give
+      setHasMore(page.length === CAFE_GRID_ITEMS_PER_PAGE);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
+
+  const handleShowLess = () => {
+    setCafes((prev) => prev.slice(0, CAFE_GRID_ITEMS_PER_PAGE));
+    setHasMore(true);
+  };
+
+  const filterButtonClass = (filter: FilterType) =>
+    `px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
+      activeFilter === filter
+        ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
+        : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
+    }`;
 
   return (
     <>
@@ -113,8 +132,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
             <TrendingCafesSection
               cafes={trendingCafes}
               locale={locale}
-              isLoading={isLoading}
-              error={error}
+              isLoading={false}
             />
           </div>
         </div>
@@ -125,50 +143,28 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-3 justify-center">
             <button
-              onClick={() => handleFilterChange('all')}
-              className={`px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-                activeFilter === 'all'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
-              }`}
+              onClick={() => setActiveFilter('all')}
+              className={filterButtonClass('all')}
             >
               {t('filter_all')}
             </button>
             <button
-              onClick={() => handleFilterChange('closest')}
+              onClick={() => setActiveFilter('closest')}
               disabled={!coords}
-              className={`px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-                activeFilter === 'closest'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
-              } ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`${filterButtonClass('closest')} ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={!coords ? t('no_location') : ''}
             >
               {t('filter_closest')}
             </button>
             <button
-              onClick={() => handleFilterChange('top_rated')}
-              className={`px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-                activeFilter === 'top_rated'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
-              }`}
-            >
-              {t('filter_top_rated')}
-            </button>
-            <button
-              onClick={() => handleFilterChange('most_popular')}
-              className={`px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-                activeFilter === 'most_popular'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
-              }`}
+              onClick={() => setActiveFilter('most_popular')}
+              className={filterButtonClass('most_popular')}
             >
               {t('filter_most_popular')}
             </button>
           </div>
           <div className="text-center mt-4 text-sm text-[var(--color-text-secondary)]">
-            {filteredCafes.length} {t('cafes_found')}
+            {t('showing_cafes', { count: cafes.length })}
           </div>
         </div>
       </section>
@@ -188,14 +184,14 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                   </div>
                 </div>
               ))
-            ) : filteredCafes.length === 0 ? (
+            ) : cafes.length === 0 ? (
               <div className="col-span-full text-center py-16 space-y-4">
                 <div className="text-lg font-medium text-[var(--color-text-secondary)]">
                   {tMap('no_cafes_available')}
                 </div>
               </div>
             ) : (
-              filteredCafes.slice(0, visibleCount).map((cafe) => (
+              cafes.map((cafe) => (
                 <CafeGridCard
                   key={cafe.id}
                   cafe={cafe}
@@ -208,21 +204,22 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       </section>
 
       {/* Load More Section */}
-      {(visibleCount > CAFE_GRID_ITEMS_PER_PAGE || filteredCafes.length > visibleCount) ? (
+      {!isLoading && (hasMore || cafes.length > CAFE_GRID_ITEMS_PER_PAGE) ? (
         <section className="py-6">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-4 justify-center">
-              {filteredCafes.length > visibleCount && (
+              {hasMore && (
                 <button
-                  onClick={() => setVisibleCount(prev => prev + CAFE_GRID_ITEMS_PER_PAGE)}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {tMap('load_more')}
                 </button>
               )}
-              {visibleCount > CAFE_GRID_ITEMS_PER_PAGE && (
+              {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
                 <button
-                  onClick={() => setVisibleCount(CAFE_GRID_ITEMS_PER_PAGE)}
+                  onClick={handleShowLess}
                   className="border border-[var(--color-border)] text-[var(--color-text)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
                 >
                   {tMap('show_less')}

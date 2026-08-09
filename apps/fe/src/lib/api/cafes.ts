@@ -172,18 +172,21 @@ export async function reverseGeocodeLocation(
   }
 }
 
+export type TrendingSortBy = 'trending' | 'distance' | 'popular';
+
 export async function getTrendingCafes(
   limit: number = 10,
   offset: number = 0,
-  location?: { lat: number; lng: number }
+  location?: { lat: number; lng: number },
+  sortBy: TrendingSortBy = 'trending'
 ): Promise<TrendingCafeResponse[]> {
   try {
-    let url = `${API_BASE_URL}/api/v1/cafes/trending?limit=${limit}&offset=${offset}`;
-    
+    let url = `${API_BASE_URL}/api/v1/cafes/trending?limit=${limit}&offset=${offset}&sort_by=${sortBy}`;
+
     if (location) {
       url += `&lat=${location.lat}&lng=${location.lng}&radius=50000`;
     }
-    
+
     const response = await apiFetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

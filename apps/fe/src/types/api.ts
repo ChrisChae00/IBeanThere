@@ -18,6 +18,7 @@ export interface CafeSearchResponse {
     phone?: string;
     website?: string;
     description?: string;
+    source_type?: string;
     source_url?: string;
     business_hours?: BusinessHoursData;
     timezone?: string;
@@ -191,6 +192,7 @@ export interface CafeDetailResponse {
   phone?: string;
   website?: string;
   description?: string;
+  source_type?: string;
   source_url?: string;
   business_hours?: BusinessHoursData;
   timezone?: string;

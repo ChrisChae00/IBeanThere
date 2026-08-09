@@ -31,11 +31,11 @@ _trending_cache: dict[tuple, tuple[list, float]] = {}
 _TRENDING_CACHE_TTL = 300  # 5 minutes
 
 
-def _trending_cache_key(lat, lng, radius, limit, offset):
+def _trending_cache_key(lat, lng, radius, limit, offset, sort_by):
     """Quantize lat/lng to ~1.1 km grid so nearby requests share cache."""
     lat_q = round(lat, 2) if lat is not None else None
     lng_q = round(lng, 2) if lng is not None else None
-    return (lat_q, lng_q, radius, limit, offset)
+    return (lat_q, lng_q, radius, limit, offset, sort_by)
 
 
 def _get_trending_cached(key):
@@ -48,6 +48,52 @@ def _get_trending_cached(key):
         _trending_cache.pop(key, None)
         return None
     return data
+
+
+#: Metric each sort_by value ranks on. "distance" is handled separately in Python.
+_TRENDING_SORT_COLUMNS = {
+    "trending": "trending_score",
+    "popular": "visit_count_14d",
+}
+
+
+def _order_deterministically(query, primary_column: str):
+    """Order by the ranking metric, then by stable tiebreaks.
+
+    Most cafes are OSM-seeded with no activity, so their ranking metric ties at 0.
+    Without explicit tiebreaks Postgres returns tied rows in arbitrary physical
+    order that changes between requests, which makes the list look shuffled and
+    breaks offset pagination (rows repeat or vanish across pages).
+    """
+    return (
+        query.order(primary_column, desc=True)
+        .order("admin_verified", desc=True)
+        .order("verification_count", desc=True)
+        .order("created_at", desc=True)
+        .order("id")
+    )
+
+
+def _bounding_box(lat: float, lng: float, radius: int):
+    """Return (lat_min, lat_max, lng_min, lng_max) covering radius metres."""
+    import math
+
+    lat_offset = radius / 111000
+    lng_offset = (
+        radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
+    )
+    return lat - lat_offset, lat + lat_offset, lng - lng_offset, lng + lng_offset
+
+
+def _within_bounding_box(query, lat: float, lng: float, radius: int):
+    """Restrict a cafes query to the bounding box around lat/lng."""
+    lat_min, lat_max, lng_min, lng_max = _bounding_box(lat, lng, radius)
+    return (
+        query.gte("latitude", lat_min)
+        .lte("latitude", lat_max)
+        .gte("longitude", lng_min)
+        .lte("longitude", lng_max)
+    )
 
 
 def _set_trending_cache(key, data):
@@ -602,22 +648,35 @@ async def update_visit(
 
 @router.get("/cafes/trending", response_model=List[TrendingCafeResponse])
 async def get_trending_cafes(
-    limit: int = 10,
-    offset: int = 0,
+    limit: int = Query(default=20, ge=1, le=100, description="Page size"),
+    offset: int = Query(default=0, ge=0, description="Number of cafes to skip"),
+    sort_by: str = Query(
+        default="trending",
+        pattern="^(trending|distance|popular)$",
+        description="trending = score, popular = 14-day visits, distance = nearest first (needs lat/lng)"
+    ),
     lat: Optional[float] = Query(None, ge=-90, le=90, description="User latitude for location-based filtering"),
     lng: Optional[float] = Query(None, ge=-180, le=180, description="User longitude for location-based filtering"),
     radius: int = Query(default=50000, ge=1000, le=500000, description="Search radius in meters (default 50km for city-level)")
 ):
     """
-    Get trending cafes based on recent activity (14 days).
+    Get cafes ranked for the explore map, paginated.
 
-    - Sorted by trending score (views, visits, reviews, rating)
-    - Optional location filtering: when lat/lng provided, returns trending cafes in the area
-    - Without location: returns global trending cafes
+    - `sort_by=trending`: trending score (views, visits, reviews, rating over 14 days)
+    - `sort_by=popular`: 14-day visit count
+    - `sort_by=distance`: nearest first; requires lat/lng, falls back to trending without them
+    - Optional location filtering: when lat/lng provided, results are limited to the radius
+    - Ties are broken deterministically so repeated calls and `offset` paging are stable
     - Results are cached in-memory for 5 minutes (quantized by ~1.1 km grid)
     """
+    has_location = lat is not None and lng is not None
+
+    # Distance ordering is meaningless without coordinates
+    if sort_by == "distance" and not has_location:
+        sort_by = "trending"
+
     # Check cache first
-    cache_key = _trending_cache_key(lat, lng, radius, limit, offset)
+    cache_key = _trending_cache_key(lat, lng, radius, limit, offset, sort_by)
     cached = _get_trending_cached(cache_key)
     if cached is not None:
         return cached
@@ -625,43 +684,47 @@ async def get_trending_cafes(
     try:
         supabase = get_supabase_client()
 
-        if lat is not None and lng is not None:
-            # Location-based filtering: get cafes within radius first, then sort by trending
-            import math
+        if sort_by == "distance":
+            # ponytail: fetches the whole bounding box and sorts in Python because
+            # Postgres cannot order by a computed distance without PostGIS here.
+            # Fine at ~1.2k cafes; move to PostGIS/earth_distance if the table grows.
+            from app.api.v1.cafes import calculate_earth_distance
 
-            # Calculate bounding box
-            lat_offset = radius / 111000
-            lng_offset = radius / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else radius / 111000
+            box_result = _within_bounding_box(
+                supabase.table("cafes").select("*"), lat, lng, radius
+            ).execute()
 
-            lat_min = lat - lat_offset
-            lat_max = lat + lat_offset
-            lng_min = lng - lng_offset
-            lng_max = lng + lng_offset
+            nearby = []
+            for cafe in box_result.data or []:
+                distance = calculate_earth_distance(
+                    lat, lng,
+                    float(cafe.get("latitude", 0)),
+                    float(cafe.get("longitude", 0))
+                )
+                if distance <= radius:
+                    cafe["_distance"] = distance
+                    nearby.append(cafe)
 
-            result = supabase.table("cafes").select("*").gte(
-                "latitude", lat_min
-            ).lte(
-                "latitude", lat_max
-            ).gte(
-                "longitude", lng_min
-            ).lte(
-                "longitude", lng_max
-            ).order(
-                "trending_score", desc=True
-            ).range(offset, offset + limit - 1).execute()
+            # Secondary key keeps cafes at identical coordinates in a stable order
+            nearby.sort(key=lambda c: (c["_distance"], str(c.get("id"))))
+            rows = nearby[offset:offset + limit]
         else:
-            # Global trending: no location filter
-            result = supabase.table("cafes").select("*").order(
-                "trending_score", desc=True
-            ).range(offset, offset + limit - 1).execute()
+            query = supabase.table("cafes").select("*")
+            if has_location:
+                query = _within_bounding_box(query, lat, lng, radius)
 
-        if not result.data:
+            result = _order_deterministically(
+                query, _TRENDING_SORT_COLUMNS[sort_by]
+            ).range(offset, offset + limit - 1).execute()
+            rows = result.data or []
+
+        if not rows:
             _set_trending_cache(cache_key, [])
             return []
 
         # Get cafe IDs that don't have main_image set
         cafe_ids_needing_image = [
-            cafe.get("id") for cafe in result.data
+            cafe.get("id") for cafe in rows
             if not cafe.get("main_image")
         ]
 
@@ -688,7 +751,7 @@ async def get_trending_cafes(
 
         # Format response with default values for missing fields
         formatted_cafes = []
-        for idx, cafe in enumerate(result.data):
+        for cafe in rows:
             main_image = cafe.get("main_image") or cafe_images.get(cafe.get("id"))
 
             formatted_cafes.append({
@@ -701,7 +764,9 @@ async def get_trending_cafes(
                 "view_count_14d": cafe.get("view_count_14d", 0),
                 "visit_count_14d": cafe.get("visit_count_14d", 0),
                 "trending_score": cafe.get("trending_score", 0.0),
-                "trending_rank": idx + 1 + offset,  # Calculate rank based on position
+                # Global rank from the DB, so the badge means "top N overall",
+                # not "top of whichever page you happen to be looking at"
+                "trending_rank": cafe.get("trending_rank"),
                 "image": cafe.get("image"),
                 "main_image": main_image
             })
