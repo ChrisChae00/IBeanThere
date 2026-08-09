@@ -86,6 +86,7 @@ export function useMapData() {
         address: cafe.address || '',
         phoneNumber: cafe.phone,
         website: cafe.website,
+        source_type: cafe.source_type,
         source_url: cafe.source_url,
         businessHours: cafe.business_hours,
         timezone: cafe.timezone,

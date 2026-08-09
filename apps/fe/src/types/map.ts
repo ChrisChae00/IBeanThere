@@ -17,6 +17,7 @@ export interface CafeMapData {
   isOpen?: boolean;
   phoneNumber?: string;
   website?: string;
+  source_type?: string;
   source_url?: string;
   businessHours?: BusinessHours;
   timezone?: string;

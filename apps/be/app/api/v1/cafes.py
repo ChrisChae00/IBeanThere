@@ -402,6 +402,7 @@ async def search_cafes(
                 "phone": cafe.get("phone"),
                 "website": cafe.get("website"),
                 "description": cafe.get("description"),
+                "source_type": cafe.get("source_type"),
                 "source_url": cafe.get("source_url"),
                 "business_hours": cafe.get("business_hours"),
                 "status": cafe.get("status", "pending"),
@@ -487,6 +488,7 @@ async def get_pending_cafes_public(
                     phone=cafe.get("phone"),
                     website=cafe.get("website"),
                     description=cafe.get("description"),
+                    source_type=cafe.get("source_type"),
                     source_url=cafe.get("source_url"),
                     business_hours=cafe.get("business_hours"),
                     status=cafe.get("status", "pending"),
@@ -665,6 +667,7 @@ async def get_cafe_details(cafe_identifier: str):
             "phone": cafe.get("phone"),
             "website": cafe.get("website"),
             "description": cafe.get("description"),
+            "source_type": cafe.get("source_type"),
             "source_url": cafe.get("source_url"),
             "business_hours": cafe.get("business_hours"),
             "status": cafe.get("status", "pending"),
@@ -836,6 +839,13 @@ async def register_cafe(
             update_data = {"verification_count": unique_user_count}
             triggered_verification = False
 
+            # App-seeded cafes (e.g. OSM import) have no navigator yet — the
+            # first real bean drop claims it.
+            navigator_id = existing_cafe.get("navigator_id")
+            if not navigator_id:
+                navigator_id = current_user.id
+                update_data["navigator_id"] = navigator_id
+
             if unique_user_count >= 3:
                 # Get founding order to assign vanguard roles
                 drops_result = supabase.table("cafe_beans").select(
@@ -843,7 +853,6 @@ async def register_cafe(
                 ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
 
                 founding_drops = drops_result.data if drops_result.data else []
-                navigator_id = existing_cafe.get("navigator_id")
 
                 vanguard_ids = []
                 for idx, drop in enumerate(founding_drops):
@@ -1375,6 +1384,7 @@ async def get_pending_cafes(
                 phone=cafe.get("phone"),
                 website=cafe.get("website"),
                 description=cafe.get("description"),
+                source_type=cafe.get("source_type"),
                 status=cafe.get("status", "pending"),
                 verification_count=cafe.get("verification_count", 1),
                 verified_at=verified_at,
@@ -1387,9 +1397,9 @@ async def get_pending_cafes(
                 images=all_images if all_images else None,
                 business_hours=cafe.get("business_hours"),
             ))
-        
+
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
-        
+
     except Exception as e:
         logger.exception("Error getting pending cafes")
         raise HTTPException(
@@ -1490,6 +1500,7 @@ async def get_all_cafes_admin(
                 phone=cafe.get("phone"),
                 website=cafe.get("website"),
                 description=cafe.get("description"),
+                source_type=cafe.get("source_type"),
                 status=cafe.get("status", "pending"),
                 verification_count=cafe.get("verification_count", 1),
                 verified_at=verified_at,
@@ -1572,6 +1583,7 @@ async def admin_verify_cafe(
                 phone=updated_cafe.get("phone"),
                 website=updated_cafe.get("website"),
                 description=updated_cafe.get("description"),
+                source_type=updated_cafe.get("source_type"),
                 status=updated_cafe.get("status"),
                 verification_count=updated_cafe.get("verification_count"),
                 verified_at=updated_cafe.get("verified_at"),
@@ -1964,7 +1976,14 @@ async def drop_bean(
         triggered_verification = False
         cafe_status_result = supabase.table("cafes").select("status, navigator_id, vanguard_ids").eq("id", cafe_id).single().execute()
         cafe_status = cafe_status_result.data.get("status") if cafe_status_result.data else "pending"
-        
+
+        # App-seeded cafes (e.g. OSM import) have no navigator yet — the
+        # first real bean drop claims it.
+        navigator_id = cafe_status_result.data.get("navigator_id") if cafe_status_result.data else None
+        if not navigator_id:
+            navigator_id = current_user.id
+            supabase.table("cafes").update({"navigator_id": navigator_id}).eq("id", cafe_id).execute()
+
         if cafe_status == "pending":
             # Count unique users who dropped beans at this cafe
             unique_users_result = supabase.table("cafe_beans").select("user_id").eq("cafe_id", cafe_id).execute()
@@ -1978,7 +1997,6 @@ async def drop_bean(
                 ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
 
                 founding_drops = drops_result.data if drops_result.data else []
-                navigator_id = cafe_status_result.data.get("navigator_id")
 
                 # Build vanguard_ids (2nd and 3rd droppers)
                 vanguard_ids = []

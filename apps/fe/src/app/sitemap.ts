@@ -11,6 +11,10 @@ const STATIC_PATHS = [
   '/community',
 ];
 
+// Next builds this route statically otherwise, baking it in once at build
+// time — cafes and drinks added later would never appear until a redeploy.
+export const revalidate = 86400;
+
 function urlFor(locale: string, path: string): string {
   return new URL(`/${locale}${path}`, getSiteUrl()).toString();
 }

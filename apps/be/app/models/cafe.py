@@ -65,6 +65,7 @@ class CafeResponse(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    source_type: Optional[str] = None
     source_url: Optional[str] = None
     business_hours: Optional[Dict[str, Any]] = None
     timezone: Optional[str] = None

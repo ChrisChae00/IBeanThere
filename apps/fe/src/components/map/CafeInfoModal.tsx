@@ -121,10 +121,13 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
               <p className="text-[var(--color-cardText)]">{cafe.address}</p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                {cafe.source_url && (
-                  <a
-                    href={cafe.source_url}
-                    target="_blank"
+                <a
+                  href={
+                    cafe.source_url && cafe.source_url.startsWith('https://www.google.com/maps')
+                      ? cafe.source_url
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${cafe.name}, ${cafe.address || `${cafe.latitude},${cafe.longitude}`}`)}`
+                  }
+                  target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg text-xs font-medium text-[var(--color-cardText)] transition-colors"
                   >

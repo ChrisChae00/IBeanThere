@@ -102,28 +102,38 @@ IBeanThere supports dynamic theme switching powered by a React Context state sys
 
 ---
 
-## Engineering Evolution Log
+## Engineering Highlights
 
-Here is a summary of major engineering challenges solved and optimizations completed during active development:
+Major challenges solved and optimizations completed:
 
-### Spatial Proximity & Proximity Hardening (GPS Verification)
-- **Challenge:** User verification on mobile GPS can be erratic, leading to false negatives during cafe check-ins or registrations.
-- **Solution:** Upgraded the geofence validation mechanism. Enforced physical presence on client-side registration payloads and widened the proximity allowance from **50m to 100m** to absorb mobile GPS inaccuracy.
-- **Robust Resolution:** Refined Google Maps URL parsing to capture precise latitude/longitude coordinates cleanly with Nominatim OpenStreetMap fallback resolution.
+### Spatial Query Indexing & Performance Optimization
+- **Impact:** **11.1x query speedup** (3.39ms → 0.31ms) on proximity search via PostGIS GIST indices
+- **Methodology:** 
+  - Benchmarked before/after with 10,000-row Docker dataset (isolated from production)
+  - Seeded **1,172 real cafes** from OpenStreetMap (OSM) into production
+  - Achieved **88% reduction in buffer I/O** (257 → 31 blocks)
+  - Maintained production integrity (zero impact from benchmarking)
+- **Result:** Proximity search now returns 20 cafes in sub-millisecond time
+- **Details:** See [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md)
 
-### Map Optimization & Rendering Performance
-- **Challenge:** Rendering hundreds of close map coordinates resulted in overlapping markers and lag on mobile viewports.
+### Spatial Proximity & GPS Verification
+- **Challenge:** Mobile GPS erratic, causing false negatives on cafe check-ins/registrations.
+- **Solution:** Widened geofence from **50m to 100m**, refined Google Maps + Nominatim coordinate resolution.
+
+### Map Rendering & UX Performance
+- **Challenge:** Hundreds of overlapping markers caused lag on mobile.
 - **Solution:** 
-  - Integrated `leaflet.markercluster` with custom configurations to group close markers.
-  - Wrote a coordinate deduplication algorithm that merges markers situated within a **25-meter radius** into a single spot.
-  - Dynamically disabled marker clustering at high zoom levels to ensure real-time rendering performance while maintaining UX readability.
-  - Replaced bulk list rendering on search panels with a progressive "Load More" pagination pattern.
+  - Integrated `leaflet.markercluster` with custom clustering configuration
+  - Wrote coordinate deduplication (merge markers within 25-meter radius)
+  - Progressive "Load More" pagination for list rendering
+  - High-zoom level clustering toggle for real-time performance
 
-### Access Control (RBAC) & Administrative Workflow
-- **Challenge:** Preventing unauthorized manipulation of user-submitted cafe listings.
+### Access Control (RBAC) & Admin Workflow
+- **Challenge:** Preventing unauthorized cafe listing manipulation.
 - **Solution:** 
-  - Designed an administrative portal featuring live status filters (Pending, Verified, Flagged) secured with Role-Based Access Control (RBAC) via Supabase Auth metadata.
-  - Resolved a caching bug where updated details showed "Ghost Images", implementing a strict invalidation hook on the database level during admin updates.
+  - Administrative portal with live status filters (Pending/Verified/Flagged)
+  - Role-Based Access Control via Supabase Auth metadata
+  - Fixed cache invalidation bug ("Ghost Images" on admin updates)
 
 ---
 
