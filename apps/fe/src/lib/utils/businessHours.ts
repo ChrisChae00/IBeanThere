@@ -43,9 +43,9 @@ export function isOpenNow(businessHours?: BusinessHours, timezone?: string): boo
   const openMinutes = timeToMinutes(todayHours.open);
   const closeMinutes = timeToMinutes(todayHours.close);
 
-  // close <= open means closes at or past midnight (e.g. "00:00" or "24:00"+)
+  // close <= open means hours wrap past midnight (e.g. 22:00-02:00)
   if (closeMinutes <= openMinutes) {
-    return currentMinutes >= openMinutes;
+    return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
   }
   return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
 }
