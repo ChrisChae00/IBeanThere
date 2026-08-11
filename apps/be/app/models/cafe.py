@@ -28,7 +28,7 @@ class CafeRegistrationRequest(BaseModel):
     business_hours: Optional[Dict[str, Any]] = None
     
     # Location verification (required — backend enforces proximity)
-    user_location: dict  # {lat, lng} — must be within 50m of cafe
+    user_location: dict  # {lat, lng} — must be within 100m of cafe
     
     # Source tracking
     source_type: Optional[str] = None  # 'google_url' | 'map_click' | 'manual'

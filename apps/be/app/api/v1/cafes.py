@@ -748,7 +748,7 @@ async def register_cafe(
         user_lat = request.user_location.get("lat")
         user_lng = request.user_location.get("lng")
 
-        if not user_lat or not user_lng:
+        if user_lat is None or user_lng is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Valid user location (lat/lng) is required to register a cafe"
