@@ -21,6 +21,7 @@ from app.models.cafe import (
     GooglePlacesLookupResponse
 )
 from app.services.osm_service import OSMService
+from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
@@ -782,8 +783,50 @@ async def register_cafe(
         # Auto-complete address from OSM if not provided
         if not request.address and osm_data:
             request.address = osm_data.get('display_name', '')
-        
-        # 3. Check for duplicates (25m threshold)
+
+        # 3. Franchise check - IBeanThere only lists local, independent cafes
+        verdict = await franchise_service.classify(
+            request.name,
+            osm_data.get('extratags'),
+            supabase
+        )
+
+        if verdict.status == franchise_service.FRANCHISE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"{verdict.display_name} is a franchise "
+                    f"({verdict.outlet_count}+ locations worldwide). "
+                    "IBeanThere is for local, independent cafes only."
+                )
+            )
+
+        # 4. Coffee-only rule - bubble tea, tea houses and juice bars are out
+        extratags = osm_data.get('extratags')
+        category = venue_category.classify_venue(extratags)
+
+        if category == venue_category.EXCLUDED:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Bubble tea shops, tea houses and juice bars cannot be registered. "
+                    "IBeanThere only lists cafes that serve coffee."
+                )
+            )
+
+        if category == venue_category.UNKNOWN and not request.serves_coffee:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Map data for this location does not say whether coffee is served. "
+                    "Please confirm this is a cafe that serves coffee."
+                )
+            )
+
+        category_source = 'osm' if category == venue_category.COFFEE else 'self_declared'
+        venue_traits = venue_category.derive_traits(extratags)
+
+        # 5. Check for duplicates (25m threshold)
         existing_cafe = await check_nearby_cafes(
             float(request.latitude),
             float(request.longitude),
@@ -916,7 +959,13 @@ async def register_cafe(
                 "normalized_name": normalized_name,
                 "normalized_address": normalized_address,
                 "slug": slug,
-                "main_image": main_image
+                "main_image": main_image,
+                "brand_key": verdict.brand_key,
+                "brand_status": verdict.status,
+                "serves_coffee": True,
+                "category_source": category_source,
+                "venue_traits": venue_traits,
+                "osm_tags": extratags
             }
             
             # Insert cafe
@@ -1412,6 +1461,7 @@ async def get_all_cafes_admin(
     page: int = 1,
     page_size: int = 20,
     cafe_status: Optional[str] = Query(None, alias="status"),
+    brand_status: Optional[str] = Query(None, description="local | unknown"),
     current_user = Depends(require_admin_role),
     supabase: Client = Depends(get_supabase_client)
 ):
@@ -1422,6 +1472,8 @@ async def get_all_cafes_admin(
         page: Page number (default 1)
         page_size: Number of items per page (default 20)
         cafe_status: Optional status filter (pending/verified/disputed)
+        brand_status: Optional franchise-classification filter (local/unknown).
+            'unknown' is the review queue for cafes we could not classify.
     """
     try:
         offset = (page - 1) * page_size
@@ -1430,6 +1482,8 @@ async def get_all_cafes_admin(
         count_query = supabase.table("cafes").select("id", count="exact")
         if cafe_status:
             count_query = count_query.eq("status", cafe_status)
+        if brand_status:
+            count_query = count_query.eq("brand_status", brand_status)
         count_result = count_query.execute()
         total_count = count_result.count if count_result.count is not None else 0
 
@@ -1437,6 +1491,8 @@ async def get_all_cafes_admin(
         data_query = supabase.table("cafes").select("*")
         if cafe_status:
             data_query = data_query.eq("status", cafe_status)
+        if brand_status:
+            data_query = data_query.eq("brand_status", brand_status)
         result = data_query.order("created_at", desc=True).range(offset, offset + page_size - 1).execute()
 
         if not result.data:
@@ -1661,6 +1717,8 @@ class AdminCafeUpdateRequest(BaseModel):
     business_hours: Optional[dict] = None  # JSON object with day-by-day hours
     main_image: Optional[str] = None       # Main image URL
     images: Optional[List[str]] = None     # Gallery image URLs
+    brand_override: Optional[bool] = None  # True = force franchise, False = force local
+    serves_coffee: Optional[bool] = None   # False hides a venue that does not serve coffee
 
 @router.patch("/admin/{cafe_id}")
 async def admin_update_cafe(
@@ -1706,8 +1764,30 @@ async def admin_update_cafe(
             update_data["business_hours"] = request.business_hours
         if request.main_image is not None:
             update_data["main_image"] = request.main_image
+        if request.serves_coffee is not None:
+            update_data["serves_coffee"] = request.serves_coffee
+            update_data["category_source"] = "admin"
 
         has_image_update = request.images is not None
+
+        # Brand-level franchise override. Stored on the brand, not the cafe, so it
+        # applies to every location of that brand and survives re-classification.
+        if request.brand_override is not None:
+            brand_key = cafe_result.data.get("brand_key") or franchise_service.brand_key(
+                cafe_result.data.get("name", "")
+            )
+            supabase.table("cafe_brands").upsert({
+                "brand_key": brand_key,
+                "display_name": cafe_result.data.get("name", brand_key),
+                "admin_override": request.brand_override,
+                "lookup_source": "admin",
+                "checked_at": datetime.now(timezone.utc).isoformat()
+            }).execute()
+            update_data["brand_key"] = brand_key
+            update_data["brand_status"] = (
+                franchise_service.FRANCHISE if request.brand_override
+                else franchise_service.LOCAL
+            )
 
         if not update_data and not has_image_update:
             raise HTTPException(

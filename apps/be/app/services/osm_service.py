@@ -40,7 +40,8 @@ class OSMService:
                         'lat': lat,
                         'lon': lng,
                         'format': 'json',
-                        'addressdetails': 1
+                        'addressdetails': 1,
+                        'extratags': 1
                     },
                     headers=self.HEADERS
                 )
@@ -56,7 +57,8 @@ class OSMService:
                         'city': address.get('city'),
                         'province': address.get('state') or address.get('region'),
                         'country': address.get('country'),
-                        'postcode': address.get('postcode')
+                        'postcode': address.get('postcode'),
+                        'extratags': data.get('extratags', {})
                     }
                 elif response.status_code == 429:
                     # Rate limit exceeded

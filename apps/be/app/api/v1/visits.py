@@ -118,7 +118,7 @@ async def record_cafe_view(
     
     - Anonymous users supported
     - Tracks IP and user agent for spam prevention
-    - Rate limited by IP to prevent spam attacks
+    - Rate limited per cafe by IP, falling back to user; views with neither are skipped
     """
     try:
         import re
@@ -143,24 +143,34 @@ async def record_cafe_view(
         raw_ip = request.client.host if request.client else None
         ip_address = hashlib.sha256(raw_ip.encode()).hexdigest() if raw_ip else None
 
-        # Rate limiting: Check for recent views from same IP (max 10 per minute per cafe)
-        if ip_address:
-            from datetime import timedelta
-            one_minute_ago = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
-            recent_views = supabase.table("cafe_views").select("id", count="exact").eq(
-                "cafe_id", cafe_id
-            ).eq(
-                "ip_address", ip_address
-            ).gte(
-                "viewed_at", one_minute_ago
-            ).execute()
-            
-            if recent_views.count and recent_views.count >= 10:
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Too many requests. Please try again later."
-                )
-        
+        # Without an IP we fall back to the user, and with neither the view is
+        # unattributable — drop it rather than count a throttle-free row.
+        throttle_column, throttle_value = (
+            ("ip_address", ip_address) if ip_address else ("user_id", user_id)
+        )
+        if not throttle_value:
+            return {
+                "message": "View not recorded",
+                "cafe_id": cafe_id
+            }
+
+        # Rate limiting: max 10 views per minute per cafe from the same source
+        from datetime import timedelta
+        one_minute_ago = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+        recent_views = supabase.table("cafe_views").select("id", count="exact").eq(
+            "cafe_id", cafe_id
+        ).eq(
+            throttle_column, throttle_value
+        ).gte(
+            "viewed_at", one_minute_ago
+        ).execute()
+
+        if recent_views.count and recent_views.count >= 10:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many requests. Please try again later."
+            )
+
         view_data = {
             "cafe_id": cafe_id,
             "user_id": user_id,

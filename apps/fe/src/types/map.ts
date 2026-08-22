@@ -47,12 +47,6 @@ export function getMarkerState(cafe: CafeMapData): CafeMarkerState {
   return count === 1 ? 'pending-1' : 'pending-2';
 }
 
-export interface FranchiseFilter {
-  showFranchises: boolean;
-  blockedFranchises: string[];
-  preferredFranchises: string[];
-  filterMode: 'all' | 'local' | 'preferred';
-}
 
 export interface MapControlCallbacks {
   onLocationClick: () => void;

@@ -61,6 +61,7 @@ export default function RegisterCafeForm({
   const [isDetectingCountry, setIsDetectingCountry] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [servesCoffee, setServesCoffee] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
   const lookupCacheRef = useRef<Record<string, import('@/types/api').GooglePlacesLookupResult>>({});
   
@@ -306,6 +307,12 @@ export default function RegisterCafeForm({
       setIsLoading(false);
       return;
     }
+
+    if (!servesCoffee) {
+      setError(t('serves_coffee_required'));
+      setIsLoading(false);
+      return;
+    }
     
     try {
       const requestData: CafeRegistrationRequest = {
@@ -318,6 +325,7 @@ export default function RegisterCafeForm({
         source_url: formData.source_url || undefined,
         business_hours: businessHours,
         user_location: userLocation,
+        serves_coffee: servesCoffee,
         source_type: formData.source_url ? 'google_url' : locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode',
         images: photos.length > 0 ? photos : undefined,
         main_image_index: photos.length > 0 ? mainImageIndex : undefined
@@ -618,6 +626,19 @@ export default function RegisterCafeForm({
             maxPhotos={5}
           />
           
+          {/* Coffee confirmation — the app only lists cafes that serve coffee */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={servesCoffee}
+              onChange={(e) => setServesCoffee(e.target.checked)}
+              className="mt-0.5 w-4 h-4 flex-shrink-0 accent-[var(--color-primary)]"
+            />
+            <span className="text-sm text-[var(--color-text)]">
+              {t('serves_coffee_confirm')}
+            </span>
+          </label>
+
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
             <Button
@@ -632,7 +653,7 @@ export default function RegisterCafeForm({
               type="submit"
               className="flex-1"
               loading={isLoading}
-              disabled={!isValidDistance || !formData.name.trim()}
+              disabled={!isValidDistance || !formData.name.trim() || !servesCoffee}
             >
               {t('submit')}
             </Button>
