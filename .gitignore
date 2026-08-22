@@ -63,9 +63,7 @@ Thumbs.db
 # Project-specific
 map-feature-implementation.plan.md
 VISITS_AND_TRENDING.md
-# Backend scripts are tracked; only their caches and bytecode are not.
-apps/be/scripts/__pycache__/
-apps/be/scripts/.*.json
+apps/be/scripts/
 /docs/
 
 # Temporary/Development files
