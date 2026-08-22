@@ -7,7 +7,7 @@
 ## Migrations
 
 Numbered SQL files in `scripts/migrations/`, applied by hand through the Supabase SQL
-editor in order. Latest: `011_add_venue_category.sql`.
+editor in order. Latest: `013_drop_dedupe_view.sql`.
 
 ## Cafe curation
 
