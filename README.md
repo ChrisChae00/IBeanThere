@@ -37,6 +37,7 @@
 - **User-Generated Map:** Build a community-verified coffee map from the ground up.
 - **Pioneer System (Gamification):** The first to check-in becomes the **Navigator**. The 2nd and 3rd become **Scouts**. Get permanently recorded in the cafe's history!
 - **Community Verification:** A registered cafe only becomes strictly "verified" once 3 independent users visit and review it.
+- **Local Coffee Only:** Franchises and non-coffee venues are turned away at registration. The map is for independent cafes that actually serve coffee.
 - **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Google Maps API required).
 
 ---
@@ -46,7 +47,8 @@
 ### Community-Driven Cafe Discovery
 - **Register New Spots:** Pin new cafes directly on the map with robust Google Maps link resolution (enforces user location presence and physical proximity within 100m).
 - **Anti-Duplicate System:** 25m radius conflict detection prevents spamming the same location, along with deduplication of overlapping map markers.
-- **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes.
+- **Algorithmic Curation:** Chains (100+ locations worldwide) and non-coffee venues (bubble tea, tea houses, juice bars) are rejected at registration, judged from OpenStreetMap brand and cuisine data rather than a hardcoded brand list — so the rule holds in any market. See [Cafe Curation Rules](./docs/architecture/cafe-curation.md).
+- **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes, plus per-brand and per-cafe overrides when the algorithm gets one wrong.
 - **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
 
 ### Advanced Coffee Journaling
@@ -135,6 +137,15 @@ Major challenges solved and optimizations completed:
   - Role-Based Access Control via Supabase Auth metadata
   - Fixed cache invalidation bug ("Ghost Images" on admin updates)
 
+### Algorithmic Cafe Curation
+- **Challenge:** Keeping a "local coffee" map local. A hardcoded brand blocklist does not survive crossing a border, and name matching misfires — a global name count flags the Toronto cafe "The Link" as a 217-location chain.
+- **Solution:**
+  - Brand size resolved from OpenStreetMap `brand:wikidata` and counted via Overpass, cached per brand so a rejection costs one indexed read
+  - Non-coffee venues detected from the OSM `cuisine` tag; a coffee marker always wins, so cafes that also sell bubble tea stay
+  - Coordinate-proximity plus name matching to link stored rows to map nodes — exact-coordinate matching silently missed 24 "Starbucks Coffee Company" rows
+  - Fail-open by design: an unclassifiable venue is listed and queued for review, never rejected
+- **Result:** 627 → 332 cafes. 253 franchise locations and 42 tea/juice venues removed; every survivor carries its brand verdict and descriptive traits.
+
 ### Automated API Verification & Testing
 - **Coverage:** 100% pass rate across core integration suites (Healthcheck, Spatial Proximity Search, Geofencing, RBAC Auth Guards, and OSM Reverse Geocoding).
 - **Execution Speed:** Fast API verification suite runs with sub-second latency, ensuring continuous regression prevention across all core endpoints.
@@ -162,7 +173,7 @@ IBeanThere/
 └── package.json               # Monorepo/Root tools
 ```
 
-> **For detailed system designs, see the `/docs/` folder.** (Includes routing strategy, module separation rules, and the UGC verification flow diagrams).
+> **For detailed system designs, see the `/docs/` folder.** (Includes routing strategy, module separation rules, the UGC verification flow diagrams, and the [cafe curation rules](./docs/architecture/cafe-curation.md)).
 
 ---
 

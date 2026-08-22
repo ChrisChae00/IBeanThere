@@ -602,6 +602,8 @@
     
     "cafe": {
       "register": {
+        "serves_coffee_confirm": "This cafe serves coffee (required). IBeanThere only lists cafes that serve coffee.",
+        "serves_coffee_required": "Please confirm that this cafe serves coffee.",
         "title": "Register New Cafe",
         "location_select": "Select Location",
         "use_current_location": "Use Current Location",

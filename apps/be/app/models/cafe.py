@@ -29,6 +29,9 @@ class CafeRegistrationRequest(BaseModel):
     
     # Location verification (required — backend enforces proximity)
     user_location: dict  # {lat, lng} — must be within 100m of cafe
+
+    # Registrant's confirmation, used only when the map has no cuisine tag
+    serves_coffee: bool = False
     
     # Source tracking
     source_type: Optional[str] = None  # 'google_url' | 'map_click' | 'manual'

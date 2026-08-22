@@ -21,7 +21,7 @@ from app.models.cafe import (
     GooglePlacesLookupResponse
 )
 from app.services.osm_service import OSMService
-from app.services import franchise_service
+from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
@@ -801,7 +801,32 @@ async def register_cafe(
                 )
             )
 
-        # 4. Check for duplicates (25m threshold)
+        # 4. Coffee-only rule - bubble tea, tea houses and juice bars are out
+        extratags = osm_data.get('extratags')
+        category = venue_category.classify_venue(extratags)
+
+        if category == venue_category.EXCLUDED:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Bubble tea shops, tea houses and juice bars cannot be registered. "
+                    "IBeanThere only lists cafes that serve coffee."
+                )
+            )
+
+        if category == venue_category.UNKNOWN and not request.serves_coffee:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Map data for this location does not say whether coffee is served. "
+                    "Please confirm this is a cafe that serves coffee."
+                )
+            )
+
+        category_source = 'osm' if category == venue_category.COFFEE else 'self_declared'
+        venue_traits = venue_category.derive_traits(extratags)
+
+        # 5. Check for duplicates (25m threshold)
         existing_cafe = await check_nearby_cafes(
             float(request.latitude),
             float(request.longitude),
@@ -936,7 +961,11 @@ async def register_cafe(
                 "slug": slug,
                 "main_image": main_image,
                 "brand_key": verdict.brand_key,
-                "brand_status": verdict.status
+                "brand_status": verdict.status,
+                "serves_coffee": True,
+                "category_source": category_source,
+                "venue_traits": venue_traits,
+                "osm_tags": extratags
             }
             
             # Insert cafe
@@ -1689,6 +1718,7 @@ class AdminCafeUpdateRequest(BaseModel):
     main_image: Optional[str] = None       # Main image URL
     images: Optional[List[str]] = None     # Gallery image URLs
     brand_override: Optional[bool] = None  # True = force franchise, False = force local
+    serves_coffee: Optional[bool] = None   # False hides a venue that does not serve coffee
 
 @router.patch("/admin/{cafe_id}")
 async def admin_update_cafe(
@@ -1734,6 +1764,9 @@ async def admin_update_cafe(
             update_data["business_hours"] = request.business_hours
         if request.main_image is not None:
             update_data["main_image"] = request.main_image
+        if request.serves_coffee is not None:
+            update_data["serves_coffee"] = request.serves_coffee
+            update_data["category_source"] = "admin"
 
         has_image_update = request.images is not None
 
