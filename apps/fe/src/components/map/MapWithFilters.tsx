@@ -325,12 +325,17 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     setSelectedCafe(cafe);
     
     try {
-      await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
+      const res = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       });
+      // fetch only rejects on network failure, so a throttled or rejected view
+      // looks like success unless the status is checked. 204 = deliberately dropped.
+      if (!res.ok || res.status === 204) {
+        console.error('Cafe view not recorded:', res.status, cafe.id);
+      }
     } catch (error) {
       console.error('Failed to record cafe view:', error);
     }

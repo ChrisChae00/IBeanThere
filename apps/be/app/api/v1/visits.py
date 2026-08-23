@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
+from fastapi import APIRouter, HTTPException, status, Depends, Request, Query, Response
 from typing import List, Optional
 import hashlib
 import json
@@ -149,10 +149,11 @@ async def record_cafe_view(
             ("ip_address", ip_address) if ip_address else ("user_id", user_id)
         )
         if not throttle_value:
-            return {
-                "message": "View not recorded",
-                "cafe_id": cafe_id
-            }
+            # 204 rather than the route's 201: nothing was created. Logged because
+            # a steady rate here means real views are being dropped, most likely
+            # from a proxy that hides the client address.
+            logger.warning("Cafe view dropped, no client ip and no user: cafe=%s", cafe_id)
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         # Rate limiting: max 10 views per minute per cafe from the same source
         from datetime import timedelta
