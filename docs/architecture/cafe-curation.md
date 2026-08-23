@@ -96,6 +96,53 @@ Both verdicts are reversible without touching code, via `PATCH /cafes/admin/{caf
 `GET /cafes/admin/all?brand_status=unknown` is the review queue for rows the algorithm
 could not classify.
 
+## Cafe identity
+
+Two rows are the same cafe when they share an id we borrowed from someone else, or
+when nothing else can tell them apart and they stand on the same spot. Three layers,
+no id scheme of our own:
+
+| Layer | What it stops | Where |
+|---|---|---|
+| Borrowed id | The same OSM node or Google place stored twice | `osm_id`, `google_place_id`, partial UNIQUE (migration 014) |
+| Proximity | A second pin on a shop that has no external id | `check_nearby_cafes()`, 25 m, name ignored |
+| On site | A pin dropped from across town | registration requires the user within 100 m |
+
+`osm_id` is an OpenStreetMap **node** id and only the seed scripts write it. The
+registration path does not store the osm_id from Nominatim's reverse geocode: that id
+snaps to the building or the road, so two cafes in one building would claim it and
+collide. `google_place_id` comes only from a server-side Places lookup — a
+client-supplied id could squat the unique index on a place it does not own.
+
+NULL in either column is normal, not a gap to backfill: a brand new local cafe is in
+neither dataset. The UNIQUE indexes are partial (`WHERE ... IS NOT NULL`), so NULLs
+never collide. `source_url` is unique too, which catches the same Google cid arriving
+under two different URLs.
+
+Rows with no external id are defended by proximity plus the on-site requirement: the
+same coordinates cannot be claimed twice, and not remotely.
+
+`app/services/cafe_dedupe.py` holds all of it — distance, the 25 m check, name
+normalization, clustering and the survivor rule. Registration, both seed scripts and
+`dedupe_cafes.py` import from there. When each of them had its own version, the seeds
+inserted rows registration would have rejected, which is what produced the pairs the
+cleanup removed. Add a rule there, not in a caller.
+
+Cleanup is deliberately stricter than insertion: it merges two rows only on a shared
+id, identical coordinates, or a **similar name within 50 m**. Distance alone would
+merge two different shops in one building (Contrabean and KW Coffee Collective are
+~22 m apart and both real). Those pairs stay; a new registration between them is still
+rejected at 25 m. The asymmetry is on purpose — it never splits an existing cafe in two.
+
+### What the next confirm rework does with these columns
+
+Today a `pending` cafe becomes `verified` after three different users drop a bean
+there, which says people showed up, not that the place exists. The next rework asks
+Google or OSM whether a pending row is a real venue: a hit stores the id and confirms
+it, a miss goes to a review queue, and the three-person condition goes away. This
+change only opens the columns; it does not build that pipeline, and it does not
+backfill ids onto existing rows.
+
 ## Maintenance scripts
 
 `apps/be/scripts/` (not tracked in git):
@@ -104,7 +151,15 @@ could not classify.
   and name, applies both rules, and records traits on survivors. Dry run by default;
   `--apply` hard-deletes, cascading to that cafe's reviews, check-ins, bean drops and
   collection entries. Region sweeps and outlet counts are cached to disk between runs.
-- `dedupe_nearby_cafes.sql` — same-name rows within 50 m.
+- `dedupe_cafes.py` — clusters duplicate cafes with the shared rules above and deletes
+  the losers. Dry run by default. The survivor is the row with dependent data, then the
+  one with an image, then the older one; a loser that has beans or visits of its own is
+  printed for a manual merge, never deleted. Run it with `--apply` **before** applying
+  `migrations/014_cafe_identity_uniques.sql` — nine existing pairs share a `source_url`
+  and would fail that unique index.
+- `dedupe_nearby_cafes.sql` — superseded by `dedupe_cafes.py`, kept for reference. Do
+  not run it: it recreates the view and SECURITY DEFINER helper migration 013 dropped.
+- `test_cafe_dedupe.py` — the identity rules, no DB needed.
 - `test_franchise_classifier.py`, `test_venue_category.py` — the classifier checks.
 
 Overpass rate-limits aggressively and will refuse a host that queries too hard; the

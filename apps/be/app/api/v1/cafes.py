@@ -167,87 +167,10 @@ def detect_country_from_postcode(postcode: str) -> Optional[str]:
     
     return None
 
-def calculate_earth_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """
-    Calculate distance between two coordinates using Haversine formula.
-    
-    Args:
-        lat1, lng1: First coordinate
-        lat2, lng2: Second coordinate
-        
-    Returns:
-        Distance in meters
-    """
-    from math import radians, sin, cos, sqrt, atan2
-    
-    R = 6371000  # Earth radius in meters
-    
-    lat1_rad = radians(lat1)
-    lat2_rad = radians(lat2)
-    delta_lat = radians(lat2 - lat1)
-    delta_lng = radians(lng2 - lng1)
-    
-    a = (
-        sin(delta_lat / 2) ** 2 +
-        cos(lat1_rad) * cos(lat2_rad) * sin(delta_lng / 2) ** 2
-    )
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    
-    return R * c
-
-async def check_nearby_cafes(
-    lat: float,
-    lng: float,
-    threshold_meters: int = 25,
-    supabase: Client = None
-) -> Optional[dict]:
-    """
-    Check if cafe exists within threshold using PostGIS earth_distance.
-    
-    Args:
-        lat: Latitude
-        lng: Longitude
-        threshold_meters: Distance threshold in meters (default 25m)
-        supabase: Supabase client
-        
-    Returns:
-        Existing cafe dict or None
-    """
-    if not supabase:
-        supabase = get_supabase_client()
-    
-    try:
-        # Use bounding box for optimization, then exact Haversine distance
-        # Calculate bounding box
-        lat_offset = threshold_meters / 111000
-        lng_offset = threshold_meters / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else threshold_meters / 111000
-        
-        result = supabase.table("cafes").select("*").gte(
-            "latitude", lat - lat_offset
-        ).lte(
-            "latitude", lat + lat_offset
-        ).gte(
-            "longitude", lng - lng_offset
-        ).lte(
-            "longitude", lng + lng_offset
-        ).execute()
-        
-        if result.data:
-            # Filter by exact distance using Haversine
-            for cafe in result.data:
-                distance = calculate_earth_distance(
-                    lat, lng,
-                    float(cafe.get("latitude", 0)),
-                    float(cafe.get("longitude", 0))
-                )
-                if distance < threshold_meters:
-                    return cafe
-        
-        return None
-        
-    except Exception:
-        logger.error("Error checking nearby cafes", exc_info=True)
-        return None
+# Distance + duplicate detection live in one place, shared with the seed and
+# cleanup scripts. calculate_earth_distance is re-exported here because
+# app/api/v1/visits.py imports it from this module.
+from app.services.cafe_dedupe import calculate_earth_distance, check_nearby_cafes  # noqa: F401
 
 _STATUS_PRIORITY = {"verified": 0, "pending": 1, "disputed": 2}
 
@@ -827,7 +750,7 @@ async def register_cafe(
         venue_traits = venue_category.derive_traits(extratags)
 
         # 5. Check for duplicates (25m threshold)
-        existing_cafe = await check_nearby_cafes(
+        existing_cafe = check_nearby_cafes(
             float(request.latitude),
             float(request.longitude),
             threshold_meters=25,
@@ -940,6 +863,24 @@ async def register_cafe(
                 main_image = request.images[main_index]
                 logger.info(f"Main image selected at index {main_index}, storing for later use")
             
+            # Google's own id for this place, so the same shop cannot be registered
+            # twice through a second URL. Looked up server-side from the submitted
+            # URL — a client-supplied id could squat the UNIQUE index on a place
+            # that is not the one being registered.
+            google_place_id = None
+            if request.source_type == 'google_url' and request.source_url:
+                from app.config import settings
+                if settings.google_places_api_key:
+                    try:
+                        from app.services.google_places_service import GooglePlacesService
+                        lookup = await GooglePlacesService(
+                            api_key=settings.google_places_api_key
+                        ).lookup_from_url(request.source_url)
+                        google_place_id = (lookup or {}).get("place_id")
+                    except Exception:
+                        logger.warning("Google place_id lookup failed at registration",
+                                       exc_info=True)
+
             cafe_data = {
                 "name": request.name,
                 "address": request.address,
@@ -965,7 +906,10 @@ async def register_cafe(
                 "serves_coffee": True,
                 "category_source": category_source,
                 "venue_traits": venue_traits,
-                "osm_tags": extratags
+                "osm_tags": extratags,
+                # Nominatim's reverse-geocode osm_id is not stored: it snaps to the
+                # building or road, so two cafes in one building would share it.
+                "google_place_id": google_place_id
             }
             
             # Insert cafe
