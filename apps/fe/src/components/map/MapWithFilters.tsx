@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { LoadingSpinner, RefreshIcon, UserLocationIcon } from '@/shared/ui';
@@ -10,15 +10,13 @@ const InteractiveMap = dynamic(() => import('./InteractiveMap'), {
 });
 import LocationPermissionOverlay from './LocationPermissionOverlay';
 
-import FranchiseFilterComponent from './FranchiseFilter';
 import CafeInfoModal from './CafeInfoModal';
 import { useLocation } from '@/hooks/useLocation';
 import { useMapData } from '@/hooks/useMapData';
 import { useVisitDetection } from '@/hooks/useVisitDetection';
 
 import { useToast } from '@/contexts/ToastContext';
-import { CafeMapData, FranchiseFilter } from '@/types/map';
-import { isFranchise } from '@/lib/franchiseDetector';
+import { CafeMapData } from '@/types/map';
 
 import { API_BASE_URL, apiFetch } from '@/lib/api/client';
 
@@ -53,13 +51,6 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
 
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
-  const [franchiseFilter, setFranchiseFilter] = useState<FranchiseFilter>({
-    showFranchises: true,
-    blockedFranchises: [],
-    preferredFranchises: [],
-    filterMode: 'all'
-  });
-  
   // Track last search location to prevent excessive API calls
   const lastSearchRef = useRef<{ lat: number; lng: number } | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -318,47 +309,9 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     }
   };
 
-  // Filter cafes based on franchise filter
-  const { filteredCafes, localCafes, franchiseCafes } = useMemo(() => {
-    let local = 0;
-    let franchise = 0;
-
-    const filtered = allCafes.filter(cafe => {
-      const isFranchiseCafe = isFranchise(cafe.name);
-      
-      if (isFranchiseCafe) {
-        franchise++;
-      } else {
-        local++;
-      }
-
-      if (franchiseFilter.filterMode === 'all') {
-        return true;
-      }
-      
-      if (franchiseFilter.filterMode === 'local') {
-        return !isFranchiseCafe;
-      }
-      
-      if (franchiseFilter.filterMode === 'preferred') {
-        return franchiseFilter.preferredFranchises.some(pf => 
-          cafe.name.toLowerCase().includes(pf.toLowerCase())
-        );
-      }
-      
-      return true;
-    });
-
-    return { 
-      filteredCafes: filtered, 
-      localCafes: local, 
-      franchiseCafes: franchise 
-    };
-  }, [allCafes, franchiseFilter]);
-
   // Visit detection hook
   const { isTracking, nearbyStays, startTracking, stopTracking, permissionGranted } = useVisitDetection(
-    filteredCafes,
+    allCafes,
     () => {},
     {
       enabled: trackingEnabled,
@@ -372,12 +325,17 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
     setSelectedCafe(cafe);
     
     try {
-      await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
+      const res = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafe.id}/view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       });
+      // fetch only rejects on network failure, so a throttled or rejected view
+      // looks like success unless the status is checked. 204 = deliberately dropped.
+      if (!res.ok || res.status === 204) {
+        console.error('Cafe view not recorded:', res.status, cafe.id);
+      }
     } catch (error) {
       console.error('Failed to record cafe view:', error);
     }
@@ -428,19 +386,11 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span className="text-xs sm:text-sm whitespace-nowrap">{t('refresh')}</span>
             </button>
-
-            <FranchiseFilterComponent
-              filter={franchiseFilter}
-              onFilterChange={setFranchiseFilter}
-              totalCafes={allCafes.length}
-              localCafes={localCafes}
-              franchiseCafes={franchiseCafes}
-            />
           </div>
           {/* Results Info - Compact */}
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] text-right mt-2">
             <span>
-              {filteredCafes.length} of {allCafes.length} cafes
+              {allCafes.length} cafes
               {isTracking && nearbyStays.length > 0 && (
                 <span className="ml-2 text-[var(--color-primary)]">
                   · {nearbyStays.length} nearby
@@ -486,7 +436,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               </div>
             )}
             <InteractiveMap
-              cafes={filteredCafes}
+              cafes={allCafes}
               center={center}
               zoom={14}
               userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}

@@ -27,6 +27,11 @@ apps/be/
     ├── database/       # Database connections and configs
     ├── models/         # Pydantic data models
     └── services/       # Business logic layer
+        ├── email.py
+        ├── franchise_service.py   # Brand size lookup (OSM/Overpass) + verdict cache
+        ├── google_places_service.py
+        ├── osm_service.py         # Nominatim geocoding
+        └── venue_category.py      # Coffee vs tea/juice, descriptive traits
 ```
 
 ## Key Features:
@@ -36,3 +41,9 @@ apps/be/
 - **API versioning** (v1 currently active)
 - **Supabase Integration** for authentication and database management (if applicable to the core infrastructure)
 - **Environment-based** dependency and secret management
+- **Algorithmic cafe curation** rejecting franchises and non-coffee venues at registration — see [Cafe Curation Rules](./cafe-curation.md)
+
+## Database Migrations
+
+Numbered SQL files in `apps/be/scripts/migrations/`, applied by hand through the Supabase
+SQL editor. Latest: `011_add_venue_category.sql`.

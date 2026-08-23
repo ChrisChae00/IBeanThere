@@ -352,12 +352,6 @@
       "search_this_area": "이 지역 검색",
       "permission_denied": "위치 권한이 거부되었습니다",
       "error_loading": "지도 로딩 오류",
-      "filter_cafes": "카페 필터",
-      "filter_options": "필터 옵션",
-      "show_all": "전체 보기",
-      "local_only": "로컬 카페만",
-      "preferred_only": "선호 카페만",
-      "showing": "표시 중",
       "cafes": "카페",
       "verified": "검증됨",
       "navigator": "개척자",
@@ -604,6 +598,8 @@
     
     "cafe": {
       "register": {
+        "serves_coffee_confirm": "이 카페는 커피를 판매합니다 (필수). IBeanThere는 커피를 판매하는 카페만 다룹니다.",
+        "serves_coffee_required": "커피를 판매하는 카페인지 확인해 주세요.",
         "title": "새 카페 등록",
         "location_select": "위치 선택",
         "use_current_location": "현재 위치 사용",
