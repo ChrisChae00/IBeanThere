@@ -12,6 +12,13 @@ class Settings(BaseSettings):
     
     # Google Places API
     google_places_api_key: Optional[str] = None
+
+    # Reverse proxies whose X-Forwarded-For we trust. Render only reaches the
+    # container through its load balancer, so trusting private ranges is enough.
+    # No wildcard here on purpose: uvicorn takes the leftmost, client-writable
+    # X-Forwarded-For entry when every host is trusted, which lets anyone pick
+    # their own rate-limit key.
+    trusted_proxy_ips: str = "127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
     
     @property
     def cors_origins_list(self) -> List[str]:
@@ -20,6 +27,11 @@ class Settings(BaseSettings):
             return ["*"]
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
     
+    @property
+    def trusted_proxy_ips_list(self) -> List[str]:
+        """Parse trusted proxy addresses/networks into a list"""
+        return [ip.strip() for ip in self.trusted_proxy_ips.split(",") if ip.strip()]
+
     @property
     def allow_credentials(self) -> bool:
         """Allow credentials only if not using wildcard"""

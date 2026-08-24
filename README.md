@@ -144,7 +144,8 @@ Major challenges solved and optimizations completed:
   - Non-coffee venues detected from the OSM `cuisine` tag; a coffee marker always wins, so cafes that also sell bubble tea stay
   - Coordinate-proximity plus name matching to link stored rows to map nodes — exact-coordinate matching silently missed 24 "Starbucks Coffee Company" rows
   - Fail-open by design: an unclassifiable venue is listed and queued for review, never rejected
-- **Result:** 627 → 332 cafes. 253 franchise locations and 42 tea/juice venues removed; every survivor carries its brand verdict and descriptive traits.
+  - Identity borrowed rather than invented: a cafe is the OpenStreetMap node id or Google place id it already has, each under a partial UNIQUE index, with a 25 m proximity check for the new local shop that is in neither dataset
+- **Result:** 627 → 314 cafes. 253 franchise locations, 42 tea/juice venues and 18 duplicates removed; every survivor carries its brand verdict and descriptive traits.
 
 ### Automated API Verification & Testing
 - **Coverage:** 100% pass rate across core integration suites (Healthcheck, Spatial Proximity Search, Geofencing, RBAC Auth Guards, and OSM Reverse Geocoding).

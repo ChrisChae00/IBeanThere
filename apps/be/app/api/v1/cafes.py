@@ -167,87 +167,14 @@ def detect_country_from_postcode(postcode: str) -> Optional[str]:
     
     return None
 
-def calculate_earth_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """
-    Calculate distance between two coordinates using Haversine formula.
-    
-    Args:
-        lat1, lng1: First coordinate
-        lat2, lng2: Second coordinate
-        
-    Returns:
-        Distance in meters
-    """
-    from math import radians, sin, cos, sqrt, atan2
-    
-    R = 6371000  # Earth radius in meters
-    
-    lat1_rad = radians(lat1)
-    lat2_rad = radians(lat2)
-    delta_lat = radians(lat2 - lat1)
-    delta_lng = radians(lng2 - lng1)
-    
-    a = (
-        sin(delta_lat / 2) ** 2 +
-        cos(lat1_rad) * cos(lat2_rad) * sin(delta_lng / 2) ** 2
-    )
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    
-    return R * c
+# Distance + duplicate detection live in one place, shared with the seed and
+# cleanup scripts. calculate_earth_distance is re-exported here because
+# app/api/v1/visits.py imports it from this module.
+from app.services.cafe_dedupe import calculate_earth_distance, check_nearby_cafes  # noqa: F401
 
-async def check_nearby_cafes(
-    lat: float,
-    lng: float,
-    threshold_meters: int = 25,
-    supabase: Client = None
-) -> Optional[dict]:
-    """
-    Check if cafe exists within threshold using PostGIS earth_distance.
-    
-    Args:
-        lat: Latitude
-        lng: Longitude
-        threshold_meters: Distance threshold in meters (default 25m)
-        supabase: Supabase client
-        
-    Returns:
-        Existing cafe dict or None
-    """
-    if not supabase:
-        supabase = get_supabase_client()
-    
-    try:
-        # Use bounding box for optimization, then exact Haversine distance
-        # Calculate bounding box
-        lat_offset = threshold_meters / 111000
-        lng_offset = threshold_meters / (111000 * math.cos(math.radians(abs(lat)))) if lat != 0 else threshold_meters / 111000
-        
-        result = supabase.table("cafes").select("*").gte(
-            "latitude", lat - lat_offset
-        ).lte(
-            "latitude", lat + lat_offset
-        ).gte(
-            "longitude", lng - lng_offset
-        ).lte(
-            "longitude", lng + lng_offset
-        ).execute()
-        
-        if result.data:
-            # Filter by exact distance using Haversine
-            for cafe in result.data:
-                distance = calculate_earth_distance(
-                    lat, lng,
-                    float(cafe.get("latitude", 0)),
-                    float(cafe.get("longitude", 0))
-                )
-                if distance < threshold_meters:
-                    return cafe
-        
-        return None
-        
-    except Exception:
-        logger.error("Error checking nearby cafes", exc_info=True)
-        return None
+# How far the place Google returns for a submitted URL may sit from the coordinates
+# being registered. Same 100 m the registrant themselves has to stand within.
+GOOGLE_PLACE_MAX_DRIFT_METERS = 100
 
 _STATUS_PRIORITY = {"verified": 0, "pending": 1, "disputed": 2}
 
@@ -728,6 +655,15 @@ async def get_cafe_details(cafe_identifier: str):
             detail="An unexpected error occurred. Please try again."
         )
 
+def _is_duplicate_key_error(error: Exception) -> bool:
+    """Whether a Supabase write failed on a unique index (PostgreSQL 23505)."""
+    code = getattr(error, "code", None)
+    if code is None and isinstance(getattr(error, "args", None), tuple) and error.args:
+        first = error.args[0]
+        code = first.get("code") if isinstance(first, dict) else None
+    return code == "23505" or "duplicate key value" in str(error)
+
+
 @router.post("/register")
 async def register_cafe(
     request: CafeRegistrationRequest = Body(...),
@@ -826,13 +762,23 @@ async def register_cafe(
         category_source = 'osm' if category == venue_category.COFFEE else 'self_declared'
         venue_traits = venue_category.derive_traits(extratags)
 
-        # 5. Check for duplicates (25m threshold)
-        existing_cafe = await check_nearby_cafes(
-            float(request.latitude),
-            float(request.longitude),
-            threshold_meters=25,
-            supabase=supabase
-        )
+        # 5. Check for duplicates (25m threshold). A failure here must not be read as
+        # "no duplicate nearby" — that would let an outage create the very rows this
+        # check exists to prevent.
+        try:
+            existing_cafe = check_nearby_cafes(
+                float(request.latitude),
+                float(request.longitude),
+                threshold_meters=25,
+                supabase=supabase
+            )
+        except Exception:
+            logger.exception("Duplicate check failed during registration (%s, %s)",
+                             request.latitude, request.longitude)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Could not check whether this cafe is already listed. Please try again in a moment."
+            )
         
         if existing_cafe:
             # Existing cafe found - add bean drop as founding contribution
@@ -940,6 +886,57 @@ async def register_cafe(
                 main_image = request.images[main_index]
                 logger.info(f"Main image selected at index {main_index}, storing for later use")
             
+            # Google's own id for this place, so the same shop cannot be registered
+            # twice through a second URL, plus the canonical URL Google gives back.
+            #
+            # Both are taken from a server-side lookup and both are discarded unless
+            # the place Google returns sits at the coordinates being registered. The
+            # submitted URL is client input: without that check, a user standing in
+            # cafe A could paste cafe B's URL and permanently claim B's identity,
+            # which would then block B's own registration on the UNIQUE index.
+            google_place_id = None
+            source_url = None
+            if request.source_type == 'google_url' and request.source_url:
+                from app.config import settings
+                if not settings.google_places_api_key:
+                    logger.error(
+                        "Google Places API key is not configured — registering %r "
+                        "without a place id, so duplicate detection for this cafe "
+                        "falls back to proximity alone", request.name
+                    )
+                else:
+                    lookup = None
+                    try:
+                        from app.services.google_places_service import GooglePlacesService
+                        lookup = await GooglePlacesService(
+                            api_key=settings.google_places_api_key
+                        ).lookup_from_url(request.source_url)
+                    except Exception:
+                        logger.exception("Google Places lookup raised for %s",
+                                         request.source_url)
+                    if not lookup:
+                        logger.error("Google Places lookup found nothing for %s — "
+                                     "registering without a place id",
+                                     request.source_url)
+                    else:
+                        drift = None
+                        if lookup.get("latitude") is not None and lookup.get("longitude") is not None:
+                            drift = calculate_earth_distance(
+                                float(request.latitude), float(request.longitude),
+                                float(lookup["latitude"]), float(lookup["longitude"]),
+                            )
+                        if drift is not None and drift <= GOOGLE_PLACE_MAX_DRIFT_METERS:
+                            google_place_id = lookup.get("place_id")
+                            source_url = lookup.get("google_maps_url") or request.source_url
+                        else:
+                            logger.error(
+                                "Google Places lookup for %r resolved %s from the "
+                                "registration point; storing neither its place id "
+                                "nor its URL",
+                                request.name,
+                                f"{drift:.0f}m" if drift is not None else "nowhere",
+                            )
+
             cafe_data = {
                 "name": request.name,
                 "address": request.address,
@@ -955,7 +952,7 @@ async def register_cafe(
                 "navigator_id": current_user.id,
                 "vanguard_ids": [],
                 "source_type": request.source_type,
-                "source_url": request.source_url,
+                "source_url": source_url,
                 "normalized_name": normalized_name,
                 "normalized_address": normalized_address,
                 "slug": slug,
@@ -965,12 +962,30 @@ async def register_cafe(
                 "serves_coffee": True,
                 "category_source": category_source,
                 "venue_traits": venue_traits,
-                "osm_tags": extratags
+                "osm_tags": extratags,
+                "google_place_id": google_place_id,
+                # osm_id is intentionally absent: the only osm_id this path could
+                # supply comes from Nominatim's reverse geocode, which snaps to the
+                # building or the road, so two cafes in one building would claim the
+                # same one and collide on cafes_osm_id_uidx.
             }
             
-            # Insert cafe
-            result = supabase.table("cafes").insert(cafe_data).execute()
-            
+            # Insert cafe. The identity columns are UNIQUE, and the 25 m check above
+            # cannot see a duplicate registered from the far side of the same shop,
+            # so a collision here means the cafe is already listed — say so instead
+            # of asking the user to retry something that can never succeed.
+            try:
+                result = supabase.table("cafes").insert(cafe_data).execute()
+            except Exception as insert_error:
+                if _is_duplicate_key_error(insert_error):
+                    logger.info("Registration blocked by a cafe identity unique index: %s",
+                                insert_error)
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="This cafe is already listed on IBeanThere. Open it from the map to drop a bean."
+                    )
+                raise
+
             if not result.data or len(result.data) == 0:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

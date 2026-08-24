@@ -96,6 +96,73 @@ Both verdicts are reversible without touching code, via `PATCH /cafes/admin/{caf
 `GET /cafes/admin/all?brand_status=unknown` is the review queue for rows the algorithm
 could not classify.
 
+## Cafe identity
+
+Two rows are the same cafe when they share an id we borrowed from someone else, or
+when nothing else can tell them apart and they stand on the same spot. Three layers,
+no id scheme of our own:
+
+| Layer | What it stops | Where |
+|---|---|---|
+| Borrowed id | The same OSM node or Google place stored twice | `osm_id`, `google_place_id`, partial UNIQUE (migration 014) |
+| Proximity | A second pin on a shop that has no external id | `check_nearby_cafes()`, 25 m, name ignored |
+| On site | A pin dropped from across town | registration requires the user within 100 m |
+
+`osm_id` is an OpenStreetMap **node** id and only the seed scripts write it. The
+registration path does not store the osm_id from Nominatim's reverse geocode: that id
+snaps to the building or the road, so two cafes in one building would claim it and
+collide. `google_place_id` comes only from a server-side Places lookup — a
+client-supplied id could squat the unique index on a place it does not own.
+
+NULL in either column is normal, not a gap to backfill: a brand new local cafe is in
+neither dataset. The UNIQUE indexes are partial (`WHERE ... IS NOT NULL`), so NULLs
+never collide. `source_url` is unique too, but only against the identical string —
+two different URLs pointing at one place are caught by `google_place_id`, not here.
+It is stored only when a server-side lookup resolved the submitted URL to a place
+within 100 m of the coordinates being registered; otherwise the row keeps no URL at
+all. Without that check any user could register a throwaway cafe carrying a real
+cafe's URL and permanently block that cafe's own registration on the unique index.
+
+Rows with no external id are defended by proximity plus the on-site requirement: the
+same coordinates cannot be claimed twice, and not remotely.
+
+`app/services/cafe_dedupe.py` holds the shared rules — distance, the 25 m check, name
+normalization, clustering and the survivor rule. Registration, both seed scripts and
+`dedupe_cafes.py` import from there. The module itself implements the proximity layer;
+the borrowed-id layer is enforced by the unique indexes, and the seed scripts also
+check the ids they already hold in memory to save a round trip. When each caller had
+its own notion of "duplicate", the seeds inserted rows registration would have
+rejected, which is what produced the pairs the cleanup removed. Add a rule there, not
+in a caller.
+
+A failed proximity check raises rather than returning "nothing nearby", and
+registration answers 503. A duplicate that slips past it anyway lands on a unique
+index, and that comes back as a 409 naming the existing cafe.
+
+Cleanup is deliberately stricter than insertion: no pair of rows is merged on
+distance alone — a shared id, or a similar name within 50 m. Two different shops can
+sit at the same coordinates (KW Coffee Collective and Contrabean Roasting Company are
+stored at byte-identical ones and are both real), so identical coordinates by
+themselves merge nothing. Those pairs stay; a new registration between them is still
+rejected at 25 m. The asymmetry is on purpose — it never splits an existing cafe in two.
+
+Two caveats on the name test. Containment ("World Peace" inside "World Peace Donuts")
+requires the shorter name to be at least six characters, or a row named "Cafe" would
+absorb every neighbour. And clustering is transitive, so a chain — A matching B by
+name, B matching C by a shared id — puts all three together without ever comparing A
+to C; every cluster is printed before anything is deleted for that reason. A name with
+no ASCII letters (Korean, Chinese) normalizes to empty and never matches, so cleanup
+leaves those rows alone.
+
+### What the next confirm rework does with these columns
+
+Today a `pending` cafe becomes `verified` after three different users drop a bean
+there, which says people showed up, not that the place exists. The next rework asks
+Google or OSM whether a pending row is a real venue: a hit stores the id and confirms
+it, a miss goes to a review queue, and the three-person condition goes away. This
+change only opens the columns; it does not build that pipeline, and it does not
+backfill ids onto existing rows.
+
 ## Maintenance scripts
 
 `apps/be/scripts/` (not tracked in git):
@@ -104,7 +171,20 @@ could not classify.
   and name, applies both rules, and records traits on survivors. Dry run by default;
   `--apply` hard-deletes, cascading to that cafe's reviews, check-ins, bean drops and
   collection entries. Region sweeps and outlet counts are cached to disk between runs.
-- `dedupe_nearby_cafes.sql` — same-name rows within 50 m.
+- `dedupe_cafes.py` — clusters duplicate cafes with the shared rules above and deletes
+  the losers. Dry run by default. The survivor is the row with dependent data, then the
+  one with an image, then the older one; a loser that has beans or visits of its own is
+  printed for a manual merge, never deleted. Rows sharing a `source_url` fail
+  `cafes_source_url_uidx`, so run `--apply` **before** applying
+  `migrations/014_cafe_identity_uniques.sql`, and resolve whatever it prints as MANUAL
+  — those rows are left in place on purpose and still fail the migration. It refuses
+  to run at all if a dependent-row count comes back incomplete, because a missing
+  count is indistinguishable from "this cafe has no data".
+- `dedupe_nearby_cafes.sql` — superseded by `dedupe_cafes.py`, kept for reference. Do
+  not run it: it recreates the view and the SECURITY DEFINER `cafe_child_rows()` helper
+  that migration 013 dropped (the view now sets `security_invoker`, the function does
+  not).
+- `test_cafe_dedupe.py` — the identity rules, no DB needed.
 - `test_franchise_classifier.py`, `test_venue_category.py` — the classifier checks.
 
 Overpass rate-limits aggressively and will refuse a host that queries too hard; the

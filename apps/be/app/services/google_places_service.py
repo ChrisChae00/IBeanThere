@@ -28,6 +28,7 @@ class GooglePlacesService:
     # Contact fields ($3/1000): nationalPhoneNumber, websiteUri
     # Atmosphere fields ($5/1000): regularOpeningHours
     FIELD_MASK = ",".join([
+        "id",  # place_id — stored server-side as the cafe's Google identity
         "displayName",
         "formattedAddress",
         "location",
@@ -313,7 +314,10 @@ class GooglePlacesService:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    return self._format_response(data)
+                    result = self._format_response(data)
+                    if not result.get("place_id"):
+                        result["place_id"] = place_id
+                    return result
                 else:
                     logger.warning(f"Place details failed: {response.status_code} - {response.text}")
                     return None
@@ -325,6 +329,11 @@ class GooglePlacesService:
     def _format_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert Google Places API response to our standard format."""
         result: Dict[str, Any] = {}
+
+        # Google's stable id for this place. Only the server ever writes it to the
+        # cafes row; the registration path re-looks-it-up rather than trusting the
+        # client with it.
+        result["place_id"] = data.get("id")
         
         # Name
         display_name = data.get("displayName", {})

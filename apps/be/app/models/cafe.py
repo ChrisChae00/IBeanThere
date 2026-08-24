@@ -131,4 +131,5 @@ class GooglePlacesLookupResponse(BaseModel):
     website: Optional[str] = None
     business_hours: Optional[Dict[str, Any]] = None
     google_maps_url: Optional[str] = None
+    place_id: Optional[str] = None
 
