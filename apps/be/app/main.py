@@ -7,6 +7,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.config import settings
 from app.api.v1.router import router as api_v1_router
 
@@ -29,6 +30,15 @@ app.add_middleware(
     allow_credentials=settings.allow_credentials,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
+)
+
+# Must stay the last middleware added, so it is the outermost one: everything
+# that keys off the client address (the rate limiter, the cafe view throttle)
+# reads scope["client"] after this has replaced the proxy address with the real
+# client. Only forwarded headers from settings.trusted_proxy_ips are honoured.
+app.add_middleware(
+    ProxyHeadersMiddleware,
+    trusted_hosts=settings.trusted_proxy_ips_list,
 )
 
 # Include API v1 router
