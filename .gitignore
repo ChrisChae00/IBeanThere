@@ -78,4 +78,7 @@ testsprite_tests/
 # AI Assistants
 CLAUDE.md
 .claude/
+AGENTS.md
+.codex/
+graphify-out/
 memory/
