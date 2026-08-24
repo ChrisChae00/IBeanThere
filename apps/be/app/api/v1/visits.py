@@ -118,7 +118,8 @@ async def record_cafe_view(
     
     - Anonymous users supported
     - Tracks IP and user agent for spam prevention
-    - Rate limited per cafe by IP, falling back to user; views with neither are skipped
+    - Rate limited per cafe by IP; views without a client IP are skipped
+      (user_id is an unauthenticated query param, so it cannot be a throttle key)
     """
     try:
         import re
@@ -141,19 +142,17 @@ async def record_cafe_view(
             )
         
         raw_ip = request.client.host if request.client else None
-        ip_address = hashlib.sha256(raw_ip.encode()).hexdigest() if raw_ip else None
-
-        # Without an IP we fall back to the user, and with neither the view is
-        # unattributable — drop it rather than count a throttle-free row.
-        throttle_column, throttle_value = (
-            ("ip_address", ip_address) if ip_address else ("user_id", user_id)
-        )
-        if not throttle_value:
-            # 204 rather than the route's 201: nothing was created. Logged because
-            # a steady rate here means real views are being dropped, most likely
-            # from a proxy that hides the client address.
-            logger.warning("Cafe view dropped, no client ip and no user: cafe=%s", cafe_id)
+        if not raw_ip:
+            # The IP is the only throttle key we cannot be handed by the caller,
+            # so without it the view is unattributable — drop it rather than
+            # count a throttle-free row. 204 rather than the route's 201:
+            # nothing was created. Logged because a steady rate here means real
+            # views are being dropped, most likely from a proxy that hides the
+            # client address.
+            logger.warning("Cafe view dropped, no client ip: cafe=%s", cafe_id)
             return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+        ip_address = hashlib.sha256(raw_ip.encode()).hexdigest()
 
         # Rate limiting: max 10 views per minute per cafe from the same source
         from datetime import timedelta
@@ -161,7 +160,7 @@ async def record_cafe_view(
         recent_views = supabase.table("cafe_views").select("id", count="exact").eq(
             "cafe_id", cafe_id
         ).eq(
-            throttle_column, throttle_value
+            "ip_address", ip_address
         ).gte(
             "viewed_at", one_minute_ago
         ).execute()
