@@ -116,23 +116,43 @@ client-supplied id could squat the unique index on a place it does not own.
 
 NULL in either column is normal, not a gap to backfill: a brand new local cafe is in
 neither dataset. The UNIQUE indexes are partial (`WHERE ... IS NOT NULL`), so NULLs
-never collide. `source_url` is unique too, which catches the same Google cid arriving
-under two different URLs.
+never collide. `source_url` is unique too, but only against the identical string —
+two different URLs pointing at one place are caught by `google_place_id`, not here.
+It is stored only when a server-side lookup resolved the submitted URL to a place
+within 100 m of the coordinates being registered; otherwise the row keeps no URL at
+all. Without that check any user could register a throwaway cafe carrying a real
+cafe's URL and permanently block that cafe's own registration on the unique index.
 
 Rows with no external id are defended by proximity plus the on-site requirement: the
 same coordinates cannot be claimed twice, and not remotely.
 
-`app/services/cafe_dedupe.py` holds all of it — distance, the 25 m check, name
+`app/services/cafe_dedupe.py` holds the shared rules — distance, the 25 m check, name
 normalization, clustering and the survivor rule. Registration, both seed scripts and
-`dedupe_cafes.py` import from there. When each of them had its own version, the seeds
-inserted rows registration would have rejected, which is what produced the pairs the
-cleanup removed. Add a rule there, not in a caller.
+`dedupe_cafes.py` import from there. The module itself implements the proximity layer;
+the borrowed-id layer is enforced by the unique indexes, and the seed scripts also
+check the ids they already hold in memory to save a round trip. When each caller had
+its own notion of "duplicate", the seeds inserted rows registration would have
+rejected, which is what produced the pairs the cleanup removed. Add a rule there, not
+in a caller.
 
-Cleanup is deliberately stricter than insertion: it merges two rows only on a shared
-id, identical coordinates, or a **similar name within 50 m**. Distance alone would
-merge two different shops in one building (Contrabean and KW Coffee Collective are
-~22 m apart and both real). Those pairs stay; a new registration between them is still
+A failed proximity check raises rather than returning "nothing nearby", and
+registration answers 503. A duplicate that slips past it anyway lands on a unique
+index, and that comes back as a 409 naming the existing cafe.
+
+Cleanup is deliberately stricter than insertion: no pair of rows is merged on
+distance alone — a shared id, or a similar name within 50 m. Two different shops can
+sit at the same coordinates (KW Coffee Collective and Contrabean Roasting Company are
+stored at byte-identical ones and are both real), so identical coordinates by
+themselves merge nothing. Those pairs stay; a new registration between them is still
 rejected at 25 m. The asymmetry is on purpose — it never splits an existing cafe in two.
+
+Two caveats on the name test. Containment ("World Peace" inside "World Peace Donuts")
+requires the shorter name to be at least six characters, or a row named "Cafe" would
+absorb every neighbour. And clustering is transitive, so a chain — A matching B by
+name, B matching C by a shared id — puts all three together without ever comparing A
+to C; every cluster is printed before anything is deleted for that reason. A name with
+no ASCII letters (Korean, Chinese) normalizes to empty and never matches, so cleanup
+leaves those rows alone.
 
 ### What the next confirm rework does with these columns
 
@@ -154,11 +174,16 @@ backfill ids onto existing rows.
 - `dedupe_cafes.py` — clusters duplicate cafes with the shared rules above and deletes
   the losers. Dry run by default. The survivor is the row with dependent data, then the
   one with an image, then the older one; a loser that has beans or visits of its own is
-  printed for a manual merge, never deleted. Run it with `--apply` **before** applying
-  `migrations/014_cafe_identity_uniques.sql` — nine existing pairs share a `source_url`
-  and would fail that unique index.
+  printed for a manual merge, never deleted. Rows sharing a `source_url` fail
+  `cafes_source_url_uidx`, so run `--apply` **before** applying
+  `migrations/014_cafe_identity_uniques.sql`, and resolve whatever it prints as MANUAL
+  — those rows are left in place on purpose and still fail the migration. It refuses
+  to run at all if a dependent-row count comes back incomplete, because a missing
+  count is indistinguishable from "this cafe has no data".
 - `dedupe_nearby_cafes.sql` — superseded by `dedupe_cafes.py`, kept for reference. Do
-  not run it: it recreates the view and SECURITY DEFINER helper migration 013 dropped.
+  not run it: it recreates the view and the SECURITY DEFINER `cafe_child_rows()` helper
+  that migration 013 dropped (the view now sets `security_invoker`, the function does
+  not).
 - `test_cafe_dedupe.py` — the identity rules, no DB needed.
 - `test_franchise_classifier.py`, `test_venue_category.py` — the classifier checks.
 
