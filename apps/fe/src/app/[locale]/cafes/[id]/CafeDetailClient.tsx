@@ -72,9 +72,9 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Cafe Info Section Card */}
-      <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+      <div className="mb-6 p-6 bg-cardBackground rounded-lg shadow-(--color-cardShadow)">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-2">
-          <h1 className="text-3xl font-bold text-[var(--color-cardText)] break-words">{cafe.name}</h1>
+          <h1 className="text-3xl font-bold text-cardText wrap-break-word">{cafe.name}</h1>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* Collection Save Buttons */}
             <SaveButtons
@@ -95,21 +95,21 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
             />
           </div>
         </div>
-        <div className="h-px bg-[var(--color-border)] mb-4"></div>
+        <div className="h-px bg-border mb-4"></div>
         <CafeInfoSection cafe={cafe} />
       </div>
 
       {/* Photos Section - Google Maps Style */}
       {galleryImages.length > 0 && (
-        <div className="mb-6 p-4 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+        <div className="mb-6 p-4 bg-cardBackground rounded-lg shadow-(--color-cardShadow)">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-[var(--color-cardText)]">
+            <h2 className="text-lg font-semibold text-cardText">
               {t('photos')}
             </h2>
             {galleryImages.length > 1 && (
               <button
                 onClick={() => setGalleryModalOpen(true)}
-                className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors"
+                className="text-sm font-medium text-primary hover:text-secondary transition-colors"
               >
                 {t('view_all')} ({galleryImages.length})
               </button>
@@ -120,7 +120,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
             {galleryImages.slice(0, 6).map((image, index) => (
               <div
                 key={index}
-                className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer group"
+                className="relative shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer group"
                 onClick={() => {
                   setLightboxIndex(index);
                   setLightboxOpen(true);
@@ -157,35 +157,35 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
 
       {/* Stats Card */}
       {(cafe.average_rating !== undefined || (cafe.total_beans_dropped ?? 0) > 0 || (cafe.log_count ?? 0) > 0) && (
-        <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+        <div className="mb-6 p-6 bg-cardBackground rounded-lg shadow-(--color-cardShadow)">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('average_rating')}</p>
-              <p className="text-2xl font-bold text-[var(--color-cardText)]">
+              <p className="text-sm text-cardTextSecondary">{t('average_rating')}</p>
+              <p className="text-2xl font-bold text-cardText">
                 {cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-'}
               </p>
             </div>
             <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('total_logs')}</p>
-              <p className="text-2xl font-bold text-[var(--color-cardText)]">{cafe.log_count}</p>
+              <p className="text-sm text-cardTextSecondary">{t('total_logs')}</p>
+              <p className="text-2xl font-bold text-cardText">{cafe.log_count}</p>
             </div>
             <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('beans_dropped') || '심긴 콩'}</p>
-              <p className="text-2xl font-bold text-[var(--color-primary)]">{cafe.total_beans_dropped || 0}</p>
+              <p className="text-sm text-cardTextSecondary">{t('beans_dropped') || '심긴 콩'}</p>
+              <p className="text-2xl font-bold text-primary">{cafe.total_beans_dropped || 0}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Coffee Logs Feed Card */}
-      <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
+      <div className="mb-8 p-6 bg-cardBackground rounded-lg shadow-(--color-cardShadow)">
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-[var(--color-cardText)]">{t('coffee_logs')}</h2>
+            <h2 className="text-xl font-bold text-cardText">{t('coffee_logs')}</h2>
             {user ? (
               <Link
                 href={logPagePath}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                className="bg-primary text-primaryText px-3 py-1.5 rounded-lg hover:bg-secondary transition-colors text-sm font-medium flex items-center gap-1.5"
                 aria-label={t('write_log')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
             ) : (
               <button
                 onClick={handleWriteLog}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                className="bg-primary text-primaryText px-3 py-1.5 rounded-lg hover:bg-secondary transition-colors text-sm font-medium flex items-center gap-1.5"
                 aria-label={t('write_log')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
               </button>
             )}
           </div>
-          <div className="h-px bg-[var(--color-border)]"></div>
+          <div className="h-px bg-border"></div>
         </div>
         <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
       </div>

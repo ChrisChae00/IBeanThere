@@ -60,7 +60,7 @@ export default function ProfileClient() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -76,8 +76,8 @@ export default function ProfileClient() {
   // Edit Mode
   if (isEditing) {
     return (
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
-        <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">
+      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs">
+        <h2 className="text-xl font-bold text-text mb-6">
           {t('edit_profile')}
         </h2>
         <ProfileEditForm
@@ -93,7 +93,7 @@ export default function ProfileClient() {
   return (
     <div className="space-y-6">
       {/* Profile Header - Compact Design */}
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm relative">
+      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs relative">
         {/* Edit Button - Top Right (Desktop) */}
         <div className="absolute top-4 right-4 hidden md:block">
           <Button
@@ -108,12 +108,12 @@ export default function ProfileClient() {
 
         <div className="flex flex-col md:flex-row items-start gap-6">
           {/* Avatar */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Avatar 
               src={profile.avatar_url} 
               alt={profile.display_name} 
               size="xl"
-              className="w-24 h-24 md:w-28 md:h-28 border-4 border-[var(--color-background)] shadow-md"
+              className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-md"
             />
           </div>
           
@@ -121,7 +121,7 @@ export default function ProfileClient() {
           <div className="flex-1 space-y-3 w-full">
             {/* Name + Badges Row */}
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-text)]">
+              <h1 className="text-2xl md:text-3xl font-bold text-text">
                 {profile.display_name}
               </h1>
               
@@ -141,13 +141,13 @@ export default function ProfileClient() {
             </div>
             
             {/* Username */}
-            <p className="text-[var(--color-text-secondary)] font-medium">
+            <p className="text-(--color-text-secondary) font-medium">
               @{profile.username}
             </p>
             
             {/* Bio */}
             {profile.bio && (
-              <p className="text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
+              <p className="text-(--color-text-secondary) max-w-2xl leading-relaxed">
                 {profile.bio}
               </p>
             )}
@@ -170,15 +170,15 @@ export default function ProfileClient() {
             {/* Trust Count & Member Since */}
             <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
               {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-[var(--color-text-secondary)]">
-                  <span className="font-semibold text-[var(--color-primary)]">
+                <span className="text-(--color-text-secondary)">
+                  <span className="font-semibold text-primary">
                     {profile.trust_count}
                   </span>
                   {' '}{t('trust_count', { count: profile.trust_count || 0 }).replace(String(profile.trust_count || 0), '').trim()}
                 </span>
               )}
               
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                 {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
               </span>
             </div>
@@ -191,7 +191,7 @@ export default function ProfileClient() {
                 fullWidth
                 onClick={() => setIsEditing(true)}
                 leftIcon={<EditIcon size={18} />}
-                className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm active:scale-[0.98]"
+                className="bg-surface border-border shadow-xs active:scale-[0.98]"
               >
                 {t('edit_profile')}
               </Button>

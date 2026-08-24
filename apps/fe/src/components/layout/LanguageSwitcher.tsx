@@ -35,9 +35,9 @@ export default function LanguageSwitcher() {
   }, [currentLocale, languageNames]);
 
   return (
-    <div className="relative inline-block bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary)] transition-colors group">
+    <div className="relative inline-block bg-background border border-border rounded-lg hover:bg-primary transition-colors group">
       <svg 
-        className="absolute left-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text)] group-hover:text-[var(--color-primaryText)] pointer-events-none transition-colors" 
+        className="absolute left-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text group-hover:text-primaryText pointer-events-none transition-colors" 
         fill="none" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
@@ -52,7 +52,7 @@ export default function LanguageSwitcher() {
         ref={selectRef}
         value={currentLocale}
         onChange={(e) => handleLanguageChange(e.target.value)}
-        className="bg-transparent text-[var(--color-text)] group-hover:text-[var(--color-primaryText)] text-sm font-medium cursor-pointer focus:outline-none border-none pl-7 pr-[18px] py-2 leading-normal appearance-none transition-colors"
+        className="bg-transparent text-text group-hover:text-primaryText text-sm font-medium cursor-pointer focus:outline-hidden border-none pl-7 pr-[18px] py-2 leading-normal appearance-none transition-colors"
         aria-label="Select language"
       >
         {locales.map((locale) => (
@@ -62,7 +62,7 @@ export default function LanguageSwitcher() {
         ))}
       </select>
       <svg 
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text)] group-hover:text-[var(--color-primaryText)] pointer-events-none transition-colors"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text group-hover:text-primaryText pointer-events-none transition-colors"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

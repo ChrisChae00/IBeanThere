@@ -436,8 +436,8 @@ export default function RegisterCafeForm({
           <ErrorAlert message={error} />
           
           {/* Google Maps Auto Fill */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-sm mb-6">
-            <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+          <div className="bg-surface border border-border p-4 rounded-xl shadow-xs mb-6">
+            <label className="block text-sm font-bold text-text mb-2">
               {t('google_maps_url_label')}
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -446,7 +446,7 @@ export default function RegisterCafeForm({
                 name="source_url"
                 value={formData.source_url}
                 onChange={handleInputChange}
-                className="flex-1 px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 min-h-[44px]"
+                className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-(--color-text-secondary)/80 min-h-[44px]"
                 placeholder={t('google_maps_url_placeholder')}
               />
               <Button
@@ -459,7 +459,7 @@ export default function RegisterCafeForm({
                 {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
               </Button>
             </div>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-2">
+            <p className="text-xs text-(--color-text-secondary) mt-2">
               {t('google_maps_url_hint')}
             </p>
           </div>
@@ -467,10 +467,10 @@ export default function RegisterCafeForm({
           {/* Location Selection */}
           <div className="flex flex-col gap-3">
             <div>
-              <label className="block text-sm font-semibold text-[var(--color-text)] mb-1">
+              <label className="block text-sm font-semibold text-text mb-1">
                 {t('location_select')}
               </label>
-              <p className="text-sm text-[var(--color-text-secondary)]">
+              <p className="text-sm text-(--color-text-secondary)">
                 {t('select_on_map_hint')}
               </p>
               
@@ -480,10 +480,10 @@ export default function RegisterCafeForm({
                 {locationMode === 'current' && coords && coords.accuracy && (
                   <div className={`text-xs font-medium px-2.5 py-1.5 rounded-md flex flex-col justify-center ${
                     coords.accuracy > 50
-                      ? 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+                      ? 'bg-error/10 text-error'
                       : coords.accuracy > 20
-                      ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
-                      : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                      ? 'bg-accent/10 text-accent'
+                      : 'bg-success/10 text-success'
                   }`}>
                     <div>{t('location_accuracy')}: {t('location_accuracy_meters', { accuracy: Math.round(coords.accuracy) })}</div>
                     {coords.accuracy > 50 && (
@@ -495,18 +495,18 @@ export default function RegisterCafeForm({
             </div>
             
             {/* Postcode Search Fallback */}
-            <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-sm">
-              <summary className="text-sm font-medium cursor-pointer p-3 text-[var(--color-text)] hover:bg-[var(--color-border)]/30 transition-colors list-none flex items-center justify-between">
+            <details className="group border border-border rounded-lg bg-surface shadow-xs">
+              <summary className="text-sm font-medium cursor-pointer p-3 text-text hover:bg-border/30 transition-colors list-none flex items-center justify-between">
                 <span>{t('postcode_label')}</span>
                 <span className="opacity-60 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
-              <div className="p-3 pt-1 border-t border-[var(--color-border)]">
+              <div className="p-3 pt-1 border-t border-border">
                 <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <div className="flex gap-2 flex-1">
                     <select
                       value={selectedCountry}
                       onChange={(e) => setSelectedCountry(e.target.value)}
-                      className="px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
+                      className="px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
                       disabled={isDetectingCountry}
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
@@ -528,7 +528,7 @@ export default function RegisterCafeForm({
                       name="postcode"
                       value={formData.postcode}
                       onChange={handleInputChange}
-                      className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)]/80 h-[40px] text-sm"
+                      className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-(--color-text-secondary)/80 h-[40px] text-sm"
                       placeholder={t('postcode_placeholder')}
                     />
                   </div>
@@ -567,12 +567,12 @@ export default function RegisterCafeForm({
               placeholder={t('address_placeholder')}
             />
             {addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
+              <p className="mt-2 text-xs text-(--color-text-secondary)">
                 {t('address_auto_filled')}
               </p>
             )}
             {!addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
+              <p className="mt-2 text-xs text-(--color-text-secondary)">
                 {t('address_edit_hint')}
               </p>
             )}
@@ -581,8 +581,8 @@ export default function RegisterCafeForm({
             {distance !== null && (
               <div className={`mt-2 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center gap-1.5 ${
                 isValidDistance
-                  ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-                  : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+                  ? 'bg-success/10 text-success'
+                  : 'bg-error/10 text-error'
               }`}>
                 <span className="shrink-0">{t('distance')}: {Math.round(distance)}m</span>
                 <span className="opacity-90">{isValidDistance ? `(${t('within_range')})` : `(${t('out_of_range')})`}</span>
@@ -632,9 +632,9 @@ export default function RegisterCafeForm({
               type="checkbox"
               checked={servesCoffee}
               onChange={(e) => setServesCoffee(e.target.checked)}
-              className="mt-0.5 w-4 h-4 flex-shrink-0 accent-[var(--color-primary)]"
+              className="mt-0.5 w-4 h-4 shrink-0 accent-primary"
             />
-            <span className="text-sm text-[var(--color-text)]">
+            <span className="text-sm text-text">
               {t('serves_coffee_confirm')}
             </span>
           </label>

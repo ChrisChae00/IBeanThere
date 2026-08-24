@@ -32,14 +32,14 @@ export default async function TermsPage({
       <div className="prose prose-slate dark:prose-invert max-w-none">
         
         {/* Helper for non-English users */}
-        <div className="bg-[var(--color-background)] p-4 rounded border border-[var(--color-border)] mb-8 text-sm text-[var(--color-text-secondary)]">
+        <div className="bg-background p-4 rounded-sm border border-border mb-8 text-sm text-(--color-text-secondary)">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
             {tLegal('last_updated', { date: '2026-01-19' })}
           </p>
         </div>
 
-        <div className="bg-[var(--color-card)] p-8 rounded-lg shadow-sm border border-[var(--color-border)] space-y-8">
+        <div className="bg-(--color-card) p-8 rounded-lg shadow-xs border border-border space-y-8">
           {sections.map((section) => (
             <div key={section}>
               <h2 className="text-xl font-semibold mb-3">{t(`${section}.title`)}</h2>

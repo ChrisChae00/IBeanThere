@@ -307,10 +307,10 @@ export function SignupForm({ locale }: SignupFormProps) {
           onChange={handleInputChange}
           placeholder={t('username_placeholder')}
           helperText={usernameHelperText}
-          helperTextClassName={isUsernameAvailable && !usernameInputError ? 'text-[var(--color-success)]' : ''}
+          helperTextClassName={isUsernameAvailable && !usernameInputError ? 'text-success' : ''}
           error={usernameInputError}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
         />
 
         <Input
@@ -320,9 +320,9 @@ export function SignupForm({ locale }: SignupFormProps) {
           value={formData.email}
           onChange={handleInputChange}
           placeholder={t('email_placeholder')}
-          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          icon={<MailIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -333,14 +333,14 @@ export function SignupForm({ locale }: SignupFormProps) {
             value={formData.password}
             onChange={handleInputChange}
             placeholder={t('create_password_placeholder')}
-            icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+            icon={<LockIcon size={20} className="text-cardTextSecondary" />}
             required
-            className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+            className="bg-background/50 backdrop-blur-xs"
             endAdornment={
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+                className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
               >
                 {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
               </button>
@@ -354,14 +354,14 @@ export function SignupForm({ locale }: SignupFormProps) {
             value={formData.confirmPassword}
             onChange={handleInputChange}
             placeholder={t('confirm_password_placeholder')}
-            icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+            icon={<LockIcon size={20} className="text-cardTextSecondary" />}
             required
-            className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+            className="bg-background/50 backdrop-blur-xs"
             endAdornment={
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+                className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
               >
                 {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
               </button>
@@ -377,17 +377,17 @@ export function SignupForm({ locale }: SignupFormProps) {
             type="checkbox"
             checked={agreeToTerms}
             onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer accent-[var(--color-primary)]"
+            className="w-5 h-5 text-primary border-border rounded-sm focus:ring-primary cursor-pointer accent-primary"
             required
           />
         </div>
-        <label className="text-sm text-[var(--color-text-secondary)] leading-relaxed select-none">
+        <label className="text-sm text-(--color-text-secondary) leading-relaxed select-none">
           {t('terms_agreement')}{' '}
-          <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors hover:no-underline">
             {t('terms_of_service')}
           </Link>{' '}
           {t('and')}{' '}
-          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors hover:no-underline">
             {t('privacy_policy')}
           </Link>
         </label>
@@ -400,18 +400,18 @@ export function SignupForm({ locale }: SignupFormProps) {
         size="lg" 
         loading={isLoading} 
         disabled={isCheckingUsername || !!usernameInputError} 
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-primary text-primaryText hover:bg-accent hover:text-text"
       >
         {t('create_account')}
       </Button>
 
       {/* Divider */}
       <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 border-t border-[var(--color-border)]/50"></div>
-        <span className="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wider text-xs px-2">
+        <div className="flex-1 border-t border-border/50"></div>
+        <span className="text-sm font-medium text-(--color-text-secondary) uppercase tracking-wider text-xs px-2">
           {t('or_sign_up_with')}
         </span>
-        <div className="flex-1 border-t border-[var(--color-border)]/50"></div>
+        <div className="flex-1 border-t border-border/50"></div>
       </div>
 
       {/* Social Sign Up */}
@@ -423,7 +423,7 @@ export function SignupForm({ locale }: SignupFormProps) {
           variant="outline"
           fullWidth
           leftIcon={<GoogleIcon size={20} />}
-          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md font-medium h-[56px] hover:font-bold"
+          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-xs hover:shadow-md font-medium h-[56px] hover:font-bold"
         >
           {t('google')}
         </Button>
@@ -431,11 +431,11 @@ export function SignupForm({ locale }: SignupFormProps) {
 
       {/* Sign In Link */}
       <div className="text-center mt-8">
-        <p className="text-[var(--color-text-secondary)] text-sm">
+        <p className="text-(--color-text-secondary) text-sm">
           {t('already_have_account')}{' '}
           <Link
             href={`/${locale}/signin`}
-            className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
+            className="text-primary hover:text-secondary font-bold hover:underline decoration-2 underline-offset-4 transition-all"
           >
             {t('sign_in_link')}
           </Link>

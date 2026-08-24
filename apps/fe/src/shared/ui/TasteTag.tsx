@@ -30,8 +30,8 @@ export default function TasteTag({
     <span 
       className={`
         inline-flex items-center gap-1 font-medium rounded-full
-        bg-[var(--color-primary)]/10 text-[var(--color-primary)]
-        border border-[var(--color-primary)]/20
+        bg-primary/10 text-primary
+        border border-primary/20
         transition-all duration-150
         ${removable ? 'pr-1' : ''}
         ${sizeClasses[size]}
@@ -46,8 +46,8 @@ export default function TasteTag({
           onClick={onRemove}
           className="
             ml-0.5 p-0.5 rounded-full
-            hover:bg-[var(--color-primary)]/20
-            focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]
+            hover:bg-primary/20
+            focus:outline-hidden focus:ring-1 focus:ring-primary
             transition-colors
           "
           aria-label={`Remove ${tagLabel}`}

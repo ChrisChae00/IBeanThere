@@ -364,35 +364,35 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
         {/* Left side: Title and Subtitle */}
         <div className="flex-1 min-w-0">
           {mapTitle && (
-            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2 sm:whitespace-nowrap">
+            <h2 className="text-2xl font-bold text-text mb-2 sm:whitespace-nowrap">
               {mapTitle}
             </h2>
           )}
           {mapSubtitle && (
-            <p className="text-[var(--color-text-secondary)] sm:whitespace-nowrap">
+            <p className="text-(--color-text-secondary) sm:whitespace-nowrap">
               {mapSubtitle}
             </p>
           )}
         </div>
         {/* Right side: Controls and Results Info */}
-        <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
+        <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
             <button
               onClick={handleRefreshCafes}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors flex-shrink-0"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface border border-border rounded-lg hover:bg-(--color-surface-hover) transition-colors shrink-0"
               title={t('refresh_cafes')}
               disabled={isLoading}
             >
-              <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
               <span className="text-xs sm:text-sm whitespace-nowrap">{t('refresh')}</span>
             </button>
           </div>
           {/* Results Info - Compact */}
-          <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] text-right mt-2">
+          <div className="flex items-center gap-2 text-xs text-(--color-text-secondary) text-right mt-2">
             <span>
               {allCafes.length} cafes
               {isTracking && nearbyStays.length > 0 && (
-                <span className="ml-2 text-[var(--color-primary)]">
+                <span className="ml-2 text-primary">
                   · {nearbyStays.length} nearby
                 </span>
               )}
@@ -422,16 +422,16 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
             permissionState={locationPermission}
           />
         ) : !center ? (
-          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full flex items-center justify-center bg-[var(--color-surface)]">
+          <div className="border border-border rounded-xl overflow-hidden h-full flex items-center justify-center bg-surface">
             <div className="text-center">
               <LoadingSpinner size="lg" />
-              <p className="text-[var(--color-text-secondary)] mt-4 text-sm">{t('loading_location')}</p>
+              <p className="text-(--color-text-secondary) mt-4 text-sm">{t('loading_location')}</p>
             </div>
           </div>
         ) : (
-          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden h-full relative">
+          <div className="border border-border rounded-xl overflow-hidden h-full relative">
             {isTrendingFallback && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 shadow text-xs text-[var(--color-text-secondary)] whitespace-nowrap">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-1000 bg-surface border border-border rounded-lg px-3 py-1.5 shadow-sm text-xs text-(--color-text-secondary) whitespace-nowrap">
                 {t('trending_fallback_banner')}
               </div>
             )}
@@ -447,10 +447,10 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               fitToMarkers={isTrendingFallback}
             />
             {isLoading && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-1000 bg-surface px-4 py-2 rounded-lg shadow-lg">
                 <div className="flex items-center gap-2">
                   <LoadingSpinner size="sm" />
-                  <span className="text-[var(--color-text)]">{t('loading_cafes')}</span>
+                  <span className="text-text">{t('loading_cafes')}</span>
                 </div>
               </div>
             )}

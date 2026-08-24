@@ -3,7 +3,7 @@ import type { CategoryAccent } from '@/data/coffee/types';
 /**
  * Tints are written as color-mix() rather than Tailwind's `/40` opacity modifier.
  * The palette tokens are `var(--color-*)` strings, and Tailwind v3 cannot apply an
- * opacity modifier to a value it can't parse — `bg-[var(--color-primary)]/40`
+ * opacity modifier to a value it can't parse — `bg-primary/40`
  * silently compiles to nothing. These classes must stay literal for the JIT scanner.
  */
 
@@ -36,8 +36,8 @@ const primary: Ladder[] = [
     era: 'border-[color-mix(in_srgb,var(--color-primary)_58%,transparent)]',
   },
   {
-    marker: 'bg-[var(--color-primary)] border-[var(--color-primary)]',
-    bar: 'bg-[var(--color-primary)]',
+    marker: 'bg-primary border-primary',
+    bar: 'bg-primary',
     era: 'border-[color-mix(in_srgb,var(--color-primary)_70%,transparent)]',
   },
 ];
@@ -62,8 +62,8 @@ const secondary: Ladder[] = [
     era: 'border-[color-mix(in_srgb,var(--color-secondary)_58%,transparent)]',
   },
   {
-    marker: 'bg-[var(--color-secondary)] border-[var(--color-secondary)]',
-    bar: 'bg-[var(--color-secondary)]',
+    marker: 'bg-secondary border-secondary',
+    bar: 'bg-secondary',
     era: 'border-[color-mix(in_srgb,var(--color-secondary)_70%,transparent)]',
   },
 ];

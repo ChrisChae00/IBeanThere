@@ -107,10 +107,10 @@ export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--color-cardText)] mb-4">
+          <h1 className="text-2xl font-bold text-cardText mb-4">
             Cafe not found
           </h1>
-          <p className="text-[var(--color-cardTextSecondary)]">
+          <p className="text-cardTextSecondary">
             The cafe you're looking for doesn't exist or has been removed.
           </p>
         </div>

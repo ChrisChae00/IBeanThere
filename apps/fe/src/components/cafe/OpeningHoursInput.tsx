@@ -85,13 +85,13 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
   if (!showHours) {
     return (
       <div>
-        <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
+        <label className="block text-sm font-semibold text-text mb-2">
           {t('opening_hours_label')}
         </label>
         <button
           type="button"
           onClick={handleToggle}
-          className="px-4 py-2.5 border border-[var(--color-border)] rounded-lg text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+          className="px-4 py-2.5 border border-border rounded-lg text-text hover:bg-surface transition-colors min-h-[44px]"
         >
           + {t('opening_hours_toggle')}
         </button>
@@ -102,19 +102,19 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold text-[var(--color-text)]">
+        <label className="block text-sm font-semibold text-text">
           {t('opening_hours_label')}
         </label>
         <button
           type="button"
           onClick={handleToggle}
-          className="text-sm text-[var(--color-error)] hover:underline"
+          className="text-sm text-error hover:underline"
         >
           {t('remove_hours')}
         </button>
       </div>
       
-      <p className="text-xs text-[var(--color-text-secondary)]">
+      <p className="text-xs text-(--color-text-secondary)">
         {t('opening_hours_hint')}
       </p>
 
@@ -123,14 +123,14 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         <button
           type="button"
           onClick={applyToWeekdays}
-          className="text-xs px-3 py-1.5 bg-[var(--color-surface)] rounded-lg text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors"
+          className="text-xs px-3 py-1.5 bg-surface rounded-lg text-text hover:bg-border transition-colors"
         >
           {t('apply_to_all_weekdays')}
         </button>
         <button
           type="button"
           onClick={applyToAllDays}
-          className="text-xs px-3 py-1.5 bg-[var(--color-surface)] rounded-lg text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors"
+          className="text-xs px-3 py-1.5 bg-surface rounded-lg text-text hover:bg-border transition-colors"
         >
           {t('apply_to_all_days')}
         </button>
@@ -144,7 +144,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
 
           return (
             <div key={day} className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="w-20 sm:w-24 text-xs sm:text-sm text-[var(--color-text)] font-medium">
+              <div className="w-20 sm:w-24 text-xs sm:text-sm text-text font-medium">
                 {t(`day_${day}` as any)}
               </div>
 
@@ -153,9 +153,9 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                   type="checkbox"
                   checked={dayHours.closed}
                   onChange={(e) => handleDayChange(day, 'closed', e.target.checked)}
-                  className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-4 h-4 rounded-sm border-border text-primary focus:ring-2 focus:ring-primary"
                 />
-                <span className="text-xs sm:text-sm text-[var(--color-text)]">{t('closed')}</span>
+                <span className="text-xs sm:text-sm text-text">{t('closed')}</span>
               </label>
 
               {!dayHours.closed && (
@@ -164,14 +164,14 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                     type="time"
                     value={dayHours.open}
                     onChange={(e) => handleDayChange(day, 'open', e.target.value)}
-                    className="w-[100px] sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
+                    className="w-[100px] sm:w-auto px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text text-sm min-h-[40px]"
                   />
-                  <span className="text-[var(--color-text-secondary)]">-</span>
+                  <span className="text-(--color-text-secondary)">-</span>
                   <input
                     type="time"
                     value={dayHours.close}
                     onChange={(e) => handleDayChange(day, 'close', e.target.value)}
-                    className="w-[100px] sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-background)] text-[var(--color-text)] text-sm min-h-[40px]"
+                    className="w-[100px] sm:w-auto px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text text-sm min-h-[40px]"
                   />
                 </>
               )}

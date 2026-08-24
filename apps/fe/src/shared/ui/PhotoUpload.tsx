@@ -94,7 +94,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-[var(--color-cardTextSecondary)]">
+      <label className="block text-sm font-medium text-cardTextSecondary">
         {t('photos')} ({photos.length}/{maxPhotos})
       </label>
 
@@ -121,7 +121,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       )}
 
       {convertingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-cardTextSecondary)]">
+        <div className="flex items-center gap-2 text-sm text-cardTextSecondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -131,7 +131,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       )}
 
       {uploadingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-cardTextSecondary)]">
+        <div className="flex items-center gap-2 text-sm text-cardTextSecondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -148,17 +148,17 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
           onClick={() => !isProcessing && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
             isProcessing
-              ? 'border-[var(--color-border)] opacity-50 cursor-not-allowed'
+              ? 'border-border opacity-50 cursor-not-allowed'
               : isDragging
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 cursor-pointer'
-              : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50 cursor-pointer'
+              ? 'border-primary bg-primary/10 cursor-pointer'
+              : 'border-border hover:border-primary/50 cursor-pointer'
           }`}
         >
-          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-[var(--color-cardTextSecondary)]" />
-          <p className="text-sm text-[var(--color-cardTextSecondary)]">
+          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-cardTextSecondary" />
+          <p className="text-sm text-cardTextSecondary">
             {t('drag_drop_photos')} {t('or')} {t('click_to_upload')}
           </p>
-          <p className="text-xs text-[var(--color-cardTextSecondary)] mt-1">
+          <p className="text-xs text-cardTextSecondary mt-1">
             {t('max_photos', { max: maxPhotos })} ({t('max_size')}: {maxSizeMB}MB)
           </p>
           <input

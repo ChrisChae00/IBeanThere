@@ -56,7 +56,7 @@ export default function FooterClient() {
     <div className="flex flex-col items-end gap-2">
       <button
         onClick={handleShare}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-primaryText)]/10 text-[var(--color-primaryText)] hover:bg-[var(--color-primaryText)]/20 transition-colors"
+        className="w-9 h-9 flex items-center justify-center rounded-full bg-primaryText/10 text-primaryText hover:bg-primaryText/20 transition-colors"
         aria-label="Share IBeanThere"
       >
         <ExternalLink size={16} />
@@ -66,7 +66,7 @@ export default function FooterClient() {
         <button
           onClick={() => setIsPopoverOpen((v) => !v)}
           aria-expanded={isPopoverOpen}
-          className="text-xs text-[var(--color-primaryText)]/60 underline underline-offset-2 hover:text-[var(--color-primaryText)] transition-colors"
+          className="text-xs text-primaryText/60 underline underline-offset-2 hover:text-primaryText transition-colors"
         >
           {t('homescreen_link')}
         </button>
@@ -75,21 +75,21 @@ export default function FooterClient() {
           <div
             role="dialog"
             aria-labelledby="homescreen-popover-title"
-            className="absolute bottom-full right-0 mb-3 w-72 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-cardBackground)] shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50"
+            className="absolute bottom-full right-0 mb-3 w-72 rounded-2xl border border-border/60 bg-cardBackground shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50"
           >
             <div className="p-4">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <p id="homescreen-popover-title" className="font-semibold text-sm text-[var(--color-cardText)]">
+                  <p id="homescreen-popover-title" className="font-semibold text-sm text-cardText">
                     {t('homescreen_modal_title')}
                   </p>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)] mt-0.5">
+                  <p className="text-xs text-cardTextSecondary mt-0.5">
                     {t('homescreen_modal_description')}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsPopoverOpen(false)}
-                  className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surface)]/80 transition-colors"
+                  className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-surface text-cardText hover:bg-surface/80 transition-colors"
                   aria-label="Close"
                 >
                   <X size={12} />
@@ -99,24 +99,24 @@ export default function FooterClient() {
               <div className="space-y-3">
                 {/* iOS Safari */}
                 <div>
-                  <p className="text-xs font-semibold text-[var(--color-cardText)] mb-1">
+                  <p className="text-xs font-semibold text-cardText mb-1">
                     {t('homescreen_ios_title')}
                   </p>
-                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-[var(--color-cardTextSecondary)]">
+                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-cardTextSecondary">
                     <li>{t('homescreen_ios_step1')}</li>
                     <li>{t('homescreen_ios_step2')}</li>
                     <li>{t('homescreen_ios_step3')}</li>
                   </ol>
                 </div>
 
-                <div className="border-t border-[var(--color-border)]/40" />
+                <div className="border-t border-border/40" />
 
                 {/* Android Chrome */}
                 <div>
-                  <p className="text-xs font-semibold text-[var(--color-cardText)] mb-1">
+                  <p className="text-xs font-semibold text-cardText mb-1">
                     {t('homescreen_android_title')}
                   </p>
-                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-[var(--color-cardTextSecondary)]">
+                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-cardTextSecondary">
                     <li>{t('homescreen_android_step1')}</li>
                     <li>{t('homescreen_android_step2')}</li>
                     <li>{t('homescreen_android_step3')}</li>

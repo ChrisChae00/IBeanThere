@@ -120,18 +120,18 @@ export default function PendingCafesList() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-[var(--color-textSecondary)]">{t('loading')}</div>
+        <div className="text-textSecondary">{t('loading')}</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-[var(--color-error)]/10 border border-[var(--color-error)] rounded-lg p-4">
-        <p className="text-[var(--color-error)]">{error}</p>
+      <div className="bg-error/10 border border-error rounded-lg p-4">
+        <p className="text-error">{error}</p>
         <button
           onClick={fetchPendingCafes}
-          className="mt-2 px-4 py-2 bg-[var(--color-error)] hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
+          className="mt-2 px-4 py-2 bg-error hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
         >
           {t('retry')}
         </button>
@@ -142,7 +142,7 @@ export default function PendingCafesList() {
   if (cafes.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--color-textSecondary)] text-lg">
+        <p className="text-textSecondary text-lg">
           {t('no_pending_cafes')}
         </p>
       </div>
@@ -157,7 +157,7 @@ export default function PendingCafesList() {
         </div>
       )}
       <div 
-        className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]"
+        className="bg-surface rounded-xl p-6 border border-border"
         style={{
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
         }}
@@ -180,11 +180,11 @@ export default function PendingCafesList() {
 
       {showVerifyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--color-surface)] rounded-lg p-6 max-w-md w-full mx-4 border border-[var(--color-border)]">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">
+          <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_verify_title')}
             </h3>
-            <p className="text-[var(--color-textSecondary)] mb-6">
+            <p className="text-textSecondary mb-6">
               {t('confirm_verify_message')}
             </p>
             <div className="flex gap-3">
@@ -193,13 +193,13 @@ export default function PendingCafesList() {
                   setShowVerifyModal(false);
                   setSelectedCafeId(null);
                 }}
-                className="flex-1 px-4 py-2 bg-[var(--color-surface)] hover:opacity-80 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg min-h-[44px] transition-opacity"
+                className="flex-1 px-4 py-2 bg-surface hover:opacity-80 border border-border text-text rounded-lg min-h-[44px] transition-opacity"
               >
                 {t('cancel')}
               </button>
               <button
                 onClick={confirmVerify}
-                className="flex-1 px-4 py-2 bg-[var(--color-success)] hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
+                className="flex-1 px-4 py-2 bg-success hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
               >
                 {t('confirm')}
               </button>
@@ -210,11 +210,11 @@ export default function PendingCafesList() {
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--color-surface)] rounded-lg p-6 max-w-md w-full mx-4 border border-[var(--color-border)]">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">
+          <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_delete_title')}
             </h3>
-            <p className="text-[var(--color-textSecondary)] mb-6">
+            <p className="text-textSecondary mb-6">
               {t('confirm_delete_message')}
             </p>
             <div className="flex gap-3">
@@ -223,13 +223,13 @@ export default function PendingCafesList() {
                   setShowDeleteModal(false);
                   setSelectedCafeId(null);
                 }}
-                className="flex-1 px-4 py-2 bg-[var(--color-surface)] hover:opacity-80 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg min-h-[44px] transition-opacity"
+                className="flex-1 px-4 py-2 bg-surface hover:opacity-80 border border-border text-text rounded-lg min-h-[44px] transition-opacity"
               >
                 {t('cancel')}
               </button>
               <button
                 onClick={confirmDelete}
-                className="flex-1 px-4 py-2 bg-[var(--color-error)] hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
+                className="flex-1 px-4 py-2 bg-error hover:opacity-90 text-white rounded-lg min-h-[44px] transition-opacity"
               >
                 {t('confirm_delete')}
               </button>

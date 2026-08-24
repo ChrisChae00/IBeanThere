@@ -79,15 +79,15 @@ export default function AdvancedCoffeeSection({
   const [tastingNotesExpanded, setTastingNotesExpanded] = useState(true);
 
   return (
-    <div className="border border-[var(--color-border)] rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-[var(--color-background)] hover:bg-[var(--color-surfaceHover)] transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between bg-background hover:bg-(--color-surfaceHover) transition-colors"
         aria-expanded={isExpanded}
         aria-label={t('coffee_taste_advanced')}
       >
-        <span className="font-medium text-[var(--color-text)]">{t('coffee_taste_advanced')}</span>
+        <span className="font-medium text-text">{t('coffee_taste_advanced')}</span>
         <svg
           className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
@@ -99,7 +99,7 @@ export default function AdvancedCoffeeSection({
       </button>
       
       {isExpanded && (
-        <div className="p-4 space-y-6 bg-[var(--color-cardBackground)]">
+        <div className="p-4 space-y-6 bg-cardBackground">
           {/* Overall Taste Rating */}
           <IntensitySlider
             value={overallTasteRating}
@@ -111,14 +111,14 @@ export default function AdvancedCoffeeSection({
           />
 
           {/* Divider */}
-          <div className="border-t border-[var(--color-border)]"></div>
+          <div className="border-t border-border"></div>
 
           {/* Bean Information */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={() => setBeanInfoExpanded(!beanInfoExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text)] uppercase tracking-wide hover:text-[var(--color-primary)] transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-text uppercase tracking-wide hover:text-primary transition-colors"
               aria-expanded={beanInfoExpanded}
             >
               <span>Bean Information</span>
@@ -144,13 +144,13 @@ export default function AdvancedCoffeeSection({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+                <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
                   {t('processing_method')}
                 </label>
                 <select
                   value={processingMethod}
                   onChange={(e) => onProcessingMethodChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
                   aria-label={t('processing_method')}
                 >
                   <option value="">{t('optional')}</option>
@@ -163,13 +163,13 @@ export default function AdvancedCoffeeSection({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+                <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
                   {t('roast_level')}
                 </label>
                 <select
                   value={roastLevel}
                   onChange={(e) => onRoastLevelChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
                   aria-label={t('roast_level')}
                 >
                   <option value="">{t('optional')}</option>
@@ -185,14 +185,14 @@ export default function AdvancedCoffeeSection({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[var(--color-border)]"></div>
+          <div className="border-t border-border"></div>
 
           {/* Extraction Information */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={() => setExtractionInfoExpanded(!extractionInfoExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text)] uppercase tracking-wide hover:text-[var(--color-primary)] transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-text uppercase tracking-wide hover:text-primary transition-colors"
               aria-expanded={extractionInfoExpanded}
             >
               <span>Extraction Information</span>
@@ -231,14 +231,14 @@ export default function AdvancedCoffeeSection({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[var(--color-border)]"></div>
+          <div className="border-t border-border"></div>
 
           {/* Tasting Notes */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={() => setTastingNotesExpanded(!tastingNotesExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text)] uppercase tracking-wide hover:text-[var(--color-primary)] transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-text uppercase tracking-wide hover:text-primary transition-colors"
               aria-expanded={tastingNotesExpanded}
             >
               <span>Tasting Notes</span>

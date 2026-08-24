@@ -278,7 +278,7 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
       {/* Privacy Settings */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-[var(--color-surfaceTextSecondary)]">
+          <label className="text-sm font-medium text-surfaceTextSecondary">
             {t('public')}
           </label>
           <ToggleButton
@@ -287,12 +287,12 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
             className="public-toggle"
           />
         </div>
-        <p className="text-xs text-[var(--color-surfaceTextSecondary)]">
+        <p className="text-xs text-surfaceTextSecondary">
           {t('public_description')}
         </p>
 
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-[var(--color-surfaceTextSecondary)]">
+          <label className="text-sm font-medium text-surfaceTextSecondary">
             {t('anonymous')}
           </label>
           <ToggleButton
@@ -301,15 +301,15 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
             className="anonymous-toggle"
           />
         </div>
-        <p className="text-xs text-[var(--color-surfaceTextSecondary)]">
+        <p className="text-xs text-surfaceTextSecondary">
           {t('anonymous_description')}
         </p>
       </div>
 
       {/* Bean Drop Info Note */}
       {!initialData && (
-        <div className="p-3 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20">
-          <p className="text-sm text-[var(--color-primary)]">
+        <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+          <p className="text-sm text-primary">
             {t('bean_drop_note')}
           </p>
         </div>

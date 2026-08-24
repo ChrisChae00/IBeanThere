@@ -92,10 +92,10 @@ export default function MyLogsClient() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+          <h1 className="text-3xl font-bold text-text mb-2">
             {t('my_logs')}
           </h1>
-          <p className="text-[var(--color-textSecondary)]">
+          <p className="text-textSecondary">
             {t('my_logs_description')}
           </p>
         </div>
@@ -103,15 +103,15 @@ export default function MyLogsClient() {
         {/* Write Log Button */}
         <button
           onClick={() => setShowSearchModal(true)}
-          className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 whitespace-nowrap"
+          className="px-4 py-2 bg-primary text-primaryText rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
         >
-          <WriteIcon size={18} className="text-[var(--color-primaryText)]" />
+          <WriteIcon size={18} className="text-primaryText" />
           {t('write_log')}
         </button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-[var(--color-border)]">
+      <div className="flex gap-2 mb-6 border-b border-border">
         {(['all', 'public', 'private'] as FilterType[]).map((filterType) => {
           const translationKey = filterType === 'public' ? 'filter_public' :
             filterType === 'private' ? 'filter_private' : filterType;
@@ -121,8 +121,8 @@ export default function MyLogsClient() {
               onClick={() => setFilter(filterType)}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 filter === filterType
-                  ? 'border-[var(--color-primary)] text-[var(--color-text)]'
-                  : 'border-transparent text-[var(--color-textSecondary)] hover:text-[var(--color-secondary)]'
+                  ? 'border-primary text-text'
+                  : 'border-transparent text-textSecondary hover:text-secondary'
               }`}
             >
               {t(translationKey)}
@@ -140,7 +140,7 @@ export default function MyLogsClient() {
       {/* Logs List */}
       {filteredLogs.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-[var(--color-textSecondary)]">
+          <p className="text-textSecondary">
             {t('no_logs_found')}
           </p>
         </div>
@@ -148,8 +148,8 @@ export default function MyLogsClient() {
         <div className="space-y-4">
           {filteredLogs.map((log) => (
             editingLog?.id === log.id ? (
-              <div key={log.id} className="p-6 bg-[var(--color-cardBackground)] rounded-lg border border-[var(--color-border)]">
-                <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">
+              <div key={log.id} className="p-6 bg-cardBackground rounded-lg border border-border">
+                <h2 className="text-xl font-bold text-text mb-4">
                   {t('edit_log')}
                 </h2>
                 <CoffeeLogForm

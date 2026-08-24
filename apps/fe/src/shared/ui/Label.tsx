@@ -17,7 +17,7 @@ export default function Label({
   return (
     <label
       className={[
-        'flex flex-col gap-1 text-sm font-semibold text-[var(--color-cardText)]',
+        'flex flex-col gap-1 text-sm font-semibold text-cardText',
         className
       ]
         .filter(Boolean)
@@ -27,7 +27,7 @@ export default function Label({
       <span className="inline-flex items-center gap-2">
         {children}
         {required && (
-          <span className="text-[var(--color-error)] text-xs" aria-hidden="true">
+          <span className="text-error text-xs" aria-hidden="true">
             *
           </span>
         )}
@@ -36,8 +36,8 @@ export default function Label({
         <span
           className={`text-xs font-normal ${
             error
-              ? 'text-[var(--color-error)]'
-              : 'text-[var(--color-cardTextSecondary)]'
+              ? 'text-error'
+              : 'text-cardTextSecondary'
           }`}
         >
           {error || description}

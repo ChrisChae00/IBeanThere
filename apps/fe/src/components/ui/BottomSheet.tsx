@@ -116,7 +116,7 @@ export default function BottomSheet({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/30 z-[100] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/30 z-100 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={handleBackdropClick}
@@ -125,7 +125,7 @@ export default function BottomSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`fixed bottom-0 left-0 right-0 bg-[var(--color-surface)] rounded-t-3xl z-[101] transition-all ${
+        className={`fixed bottom-0 left-0 right-0 bg-surface rounded-t-3xl z-101 transition-all ${
           isDragging ? 'transition-none' : 'duration-300 ease-out'
         }`}
         style={{
@@ -138,13 +138,13 @@ export default function BottomSheet({
       >
         {/* Drag Handle */}
         <div className="flex justify-center py-3 cursor-grab active:cursor-grabbing">
-          <div className="w-10 h-1.5 bg-[var(--color-border)] rounded-full" />
+          <div className="w-10 h-1.5 bg-border rounded-full" />
         </div>
         
         {/* Title */}
         {title && (
-          <div className="px-4 pb-3 border-b border-[var(--color-border)]">
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">{title}</h2>
+          <div className="px-4 pb-3 border-b border-border">
+            <h2 className="text-lg font-semibold text-text">{title}</h2>
           </div>
         )}
         

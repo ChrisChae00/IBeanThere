@@ -1,6 +1,68 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --container-8xl: 90rem;
+
+  --shadow-primary:
+    0 4px 6px -1px var(--color-primary), 0 2px 4px -1px var(--color-primary);
+  --shadow-primary-lg:
+    0 10px 15px -3px var(--color-primary), 0 4px 6px -2px var(--color-primary);
+  --shadow-primary-xl:
+    0 12px 16px -4px var(--color-primary), 0 4px 8px -2px var(--color-primary);
+  --shadow-inset-primary:
+    inset -5px -10px 10px -3px
+      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
+    inset 5px 6px 10px -3px
+      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
+    inset 0px 0px 12px
+      color-mix(in srgb, var(--color-cardShadow) 50%, transparent);
+  --shadow-inset-background: inset 0 0 8px var(--color-background);
+
+  --color-primary: var(--color-primary);
+  --color-primaryText: var(--color-primaryText);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --color-background: var(--color-background);
+  --color-cardBackground: var(--color-cardBackground);
+  --color-surface: var(--color-surface);
+  --color-text: var(--color-text);
+  --color-textSecondary: var(--color-textSecondary);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-textHero: var(--color-textHero);
+  --color-cardText: var(--color-cardText);
+  --color-cardTextSecondary: var(--color-cardTextSecondary);
+  --color-surfaceText: var(--color-surfaceText);
+  --color-surfaceTextSecondary: var(--color-surfaceTextSecondary);
+  --color-authText: var(--color-authText);
+  --color-starFilled: var(--color-starFilled);
+  --color-starEmpty: var(--color-starEmpty);
+  --color-starEmptyOutline: var(--color-starEmptyOutline);
+  --color-cardShadow: var(--color-cardShadow);
+  --color-pending: var(--color-pending);
+  --color-userMarkerMap: var(--color-userMarkerMap);
+  --color-cafeMarker: var(--color-cafeMarker);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @keyframes accordionDown {
   from { height: 0; }
@@ -30,103 +92,118 @@
   --ibean-transition: 200ms ease;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/*
+  Element-level rules must live in `@layer base`. Tailwind v4 emits utilities
+  into a real `@layer utilities`, and unlayered CSS outranks every layer, so
+  anything left outside a layer here would override the utility classes.
+*/
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    overflow-y: auto;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+      "Cantarell", sans-serif;
+    line-height: 1.6;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+    font-feature-settings:
+      "liga" on,
+      "calt" on;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 2vw, 1.75rem);
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition),
+      border-color var(--ibean-transition),
+      box-shadow var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
 }
 
-html {
-  overflow-y: auto;
-}
+@layer components {
+  .type-display {
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
 
-body {
-  background-color: var(--color-background);
-  color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", sans-serif;
-  line-height: 1.6;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-  font-feature-settings:
-    "liga" on,
-    "calt" on;
-}
+  .type-subtitle {
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--color-textSecondary);
+  }
 
-h1,
-.type-display {
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-}
+  .type-body {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
 
-h2 {
-  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  font-weight: 600;
-}
+  .type-caption {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-textSecondary);
+  }
 
-h3 {
-  font-size: clamp(1.5rem, 2vw, 1.75rem);
-  line-height: 1.3;
-  font-weight: 600;
-}
+  .cozy-card {
+    border-radius: var(--ibean-radius-xl);
+    background: var(--color-cardBackground);
+    border: 1px solid var(--color-border);
+    padding: var(--ibean-space-sm);
+    box-shadow: var(--ibean-shadow-warm-md);
+  }
 
-.type-subtitle {
-  font-size: 1.125rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--color-textSecondary);
-}
+  .glass-panel {
+    border-radius: var(--ibean-radius-lg);
+    background: color-mix(in srgb, var(--color-cardBackground) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    box-shadow: var(--ibean-shadow-warm-sm);
+    backdrop-filter: blur(16px);
+  }
 
-.type-body {
-  font-size: 1rem;
-  line-height: 1.7;
-}
-
-.type-caption {
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-textSecondary);
-}
-
-button,
-a,
-input,
-textarea,
-select {
-  transition:
-    background-color var(--ibean-transition),
-    color var(--ibean-transition),
-    border-color var(--ibean-transition),
-    box-shadow var(--ibean-transition),
-    transform var(--ibean-transition);
-}
-
-.cozy-card {
-  border-radius: var(--ibean-radius-xl);
-  background: var(--color-cardBackground);
-  border: 1px solid var(--color-border);
-  padding: var(--ibean-space-sm);
-  box-shadow: var(--ibean-shadow-warm-md);
-}
-
-.glass-panel {
-  border-radius: var(--ibean-radius-lg);
-  background: color-mix(in srgb, var(--color-cardBackground) 75%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
-  box-shadow: var(--ibean-shadow-warm-sm);
-  backdrop-filter: blur(16px);
-}
-
-.section-spacing {
-  padding-block: var(--ibean-space-lg);
-  padding-inline: clamp(var(--ibean-space-xs), 5vw, var(--ibean-space-lg));
+  .section-spacing {
+    padding-block: var(--ibean-space-lg);
+    padding-inline: clamp(var(--ibean-space-xs), 5vw, var(--ibean-space-lg));
+  }
 }
 
 /* Motion animations */
@@ -152,12 +229,14 @@ select {
   }
 }
 
-.motion-fade-in {
-  animation: fadeIn 300ms var(--ibean-transition) both;
-}
+@layer components {
+  .motion-fade-in {
+    animation: fadeIn 300ms var(--ibean-transition) both;
+  }
 
-.motion-slide-up {
-  animation: slideUp 400ms var(--ibean-transition) both;
+  .motion-slide-up {
+    animation: slideUp 400ms var(--ibean-transition) both;
+  }
 }
 
 /* Leaflet Map z-index fixes */

@@ -117,7 +117,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
     }
     // Custom collection - primary color circle
     return (
-      <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]" />
+      <div className="w-5 h-5 rounded-full bg-primary" />
     );
   };
 
@@ -140,7 +140,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   if (isLoading) {
     return (
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
+      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs">
         <div className="flex justify-center py-8">
           <LoadingSpinner size="md" />
         </div>
@@ -150,7 +150,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   if (error) {
     return (
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm">
+      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs">
         <p className="text-center text-red-500">{error}</p>
       </div>
     );
@@ -162,23 +162,23 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   return (
     <>
-      <div className="bg-[var(--color-surface)] rounded-xl p-4 sm:p-6 border border-[var(--color-border)] shadow-sm">
+      <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border shadow-xs">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-[var(--color-text)]">
+          <h2 className="text-lg font-semibold text-text">
             {isOwnProfile ? tProfile('my_collections') : tProfile('public_collections')}
           </h2>
           <div className="flex items-center gap-3">
             {isOwnProfile && onToggleCollectionsPublic && (
               <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-xs text-[var(--color-text-secondary)]">
+                <span className="text-xs text-(--color-text-secondary)">
                   {tProfile('collections_public_label')}
                 </span>
                 <button
                   type="button"
                   onClick={() => onToggleCollectionsPublic(!collectionsPublic)}
                   className={`relative w-10 h-5 rounded-full transition-colors ${
-                    collectionsPublic ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'
+                    collectionsPublic ? 'bg-primary' : 'bg-border'
                   }`}
                 >
                   <span
@@ -192,7 +192,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
             {isOwnProfile && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-3 py-1.5 text-sm font-medium text-primaryText bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] transition-colors active:scale-[0.98]"
+                className="px-3 py-1.5 text-sm font-medium text-primaryText bg-primary rounded-lg hover:bg-secondary transition-colors active:scale-[0.98]"
               >
                 + {t('create_new')}
               </button>
@@ -202,7 +202,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
         {/* Collections Grid */}
         {displayCollections.length === 0 ? (
-          <div className="text-center py-8 text-[var(--color-text-secondary)]">
+          <div className="text-center py-8 text-(--color-text-secondary)">
             <p>{t('no_collections')}</p>
             <p className="text-sm mt-1">{t('empty_hint')}</p>
           </div>
@@ -213,28 +213,28 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                 <button
                   key={collection.id}
                   onClick={() => setSelectedCollection(collection)}
-                  className="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg hover:bg-[var(--color-cardBackground)] transition-colors text-left group"
+                  className="flex items-center gap-3 p-3 bg-background rounded-lg hover:bg-cardBackground transition-colors text-left group"
                 >
                   {/* Icon */}
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     {getCollectionIcon(collection.icon_type)}
                   </div>
                   
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-[var(--color-text)] truncate">
+                      <span className="font-medium text-text truncate">
                         {getCollectionName(collection)}
                       </span>
                     </div>
-                    <span className="text-sm text-[var(--color-text-secondary)]">
+                    <span className="text-sm text-(--color-text-secondary)">
                       {t('cafes', { count: collection.item_count || 0 })}
                     </span>
                   </div>
                   
                   {/* Arrow */}
                   <svg 
-                    className="w-4 h-4 text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" 
+                    className="w-4 h-4 text-(--color-text-secondary) opacity-0 group-hover:opacity-100 transition-opacity shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"

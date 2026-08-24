@@ -12,15 +12,15 @@ export default async function SigninPage({
 
   const features = [
     {
-      icon: <LocationIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <LocationIcon size={18} className="text-background" />,
       text: t('discover_cafes')
     },
     {
-      icon: <CameraIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <CameraIcon size={18} className="text-background" />,
       text: t('record_moments')
     },
     {
-      icon: <UsersIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <UsersIcon size={18} className="text-background" />,
       text: t('share_stories')
     }
   ];
@@ -32,10 +32,10 @@ export default async function SigninPage({
       features={features}
     >
       <div className="text-center mb-8">
-        <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-text)] mb-3">
+        <h2 className="text-3xl lg:text-4xl font-bold text-text mb-3">
           {t('sign_in')}
         </h2>
-        <p className="text-lg text-[var(--color-textSecondary)]">
+        <p className="text-lg text-textSecondary">
           {t('sign_in_subtitle')}
         </p>
       </div>

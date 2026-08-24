@@ -55,10 +55,10 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--color-error)] mb-4">{error}</p>
+        <p className="text-error mb-4">{error}</p>
         <button
           onClick={refresh}
-          className="text-[var(--color-primary)] hover:underline"
+          className="text-primary hover:underline"
         >
           {t('retry')}
         </button>
@@ -72,7 +72,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
       <div className="flex flex-wrap items-center gap-4">
         {/* Status filter */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-[var(--color-text)]">
+          <label className="text-sm font-medium text-text">
             {t('status')}:
           </label>
           <select
@@ -80,7 +80,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
             onChange={(e) =>
               setStatusFilter(e.target.value === 'all' ? undefined : (e.target.value as ReportStatus))
             }
-            className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-surface text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -92,7 +92,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
 
         {/* Target type filter */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-[var(--color-text)]">
+          <label className="text-sm font-medium text-text">
             {t('type')}:
           </label>
           <select
@@ -100,7 +100,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
             onChange={(e) =>
               setTargetTypeFilter(e.target.value === 'all' ? undefined : (e.target.value as TargetType))
             }
-            className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-surface text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
           >
             {TARGET_TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -111,7 +111,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
         </div>
 
         {/* Total count */}
-        <span className="text-sm text-[var(--color-text-secondary)]">
+        <span className="text-sm text-(--color-text-secondary)">
           {t('total_count', { count: total })}
         </span>
       </div>
@@ -126,7 +126,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
       {/* Empty state */}
       {!isLoading && reports.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-[var(--color-text-secondary)]">{t('no_reports')}</p>
+          <p className="text-(--color-text-secondary)">{t('no_reports')}</p>
         </div>
       )}
 
@@ -147,17 +147,17 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1 || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-(--color-surface-hover) disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('previous')}
           </button>
-          <span className="text-sm text-[var(--color-text-secondary)]">
+          <span className="text-sm text-(--color-text-secondary)">
             {t('page', { page })}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={!hasMore || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-(--color-surface-hover) disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('next')}
           </button>

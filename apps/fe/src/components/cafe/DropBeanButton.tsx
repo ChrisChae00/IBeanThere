@@ -256,7 +256,7 @@ export default function DropBeanButton({
     <div className="relative flex flex-col items-center gap-2">
       {showGrowthInfo && beanStatus?.has_bean && (
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-xs font-medium text-[var(--color-text-secondary)]">
+          <span className="text-xs font-medium text-(--color-text-secondary)">
             {t('drops', { count: dropCount })}
           </span>
         </div>
@@ -271,11 +271,11 @@ export default function DropBeanButton({
         disabled={!canDrop || isLoading || locationLoading}
         size={size}
         variant="primary"
-        className="whitespace-nowrap shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
+        className="whitespace-nowrap shadow-xs hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
       >
         {isLoading || locationLoading ? (
           <div className="flex items-center gap-2">
-             <LoadingSpinner size="sm" className="text-[var(--color-primaryText)]" />
+             <LoadingSpinner size="sm" className="text-primaryText" />
              <span className="opacity-90">{t('button')}</span>
           </div>
         ) : (
@@ -284,7 +284,7 @@ export default function DropBeanButton({
       </Button>
 
       {!canDrop && showGrowthInfo && nextLevelAt && (
-        <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
+        <div className="text-[10px] text-(--color-text-secondary) text-center mt-0.5 opacity-80">
           {t('next_level', { drops: nextLevelAt - dropCount })}
         </div>
       )}

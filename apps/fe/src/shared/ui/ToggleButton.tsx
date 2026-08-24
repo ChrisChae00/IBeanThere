@@ -41,11 +41,11 @@ export default function ToggleButton({
           bg-transparent
           transition-all duration-300 ease-in-out
           items-center justify-center
-          flex-shrink-0
+          shrink-0
           overflow-hidden
           ${checked 
-            ? 'w-[60px] sm:w-[80px] border-[var(--color-primary)] px-2.5' 
-            : 'w-auto min-w-[60px] sm:min-w-[80px] border-[var(--color-border)] px-3'
+            ? 'w-[60px] sm:w-[80px] border-primary px-2.5' 
+            : 'w-auto min-w-[60px] sm:min-w-[80px] border-border px-3'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -59,7 +59,7 @@ export default function ToggleButton({
           className={`
             absolute
             text-xs font-medium
-            text-[var(--color-text-secondary)]
+            text-(--color-text-secondary)
             pointer-events-none
             transition-opacity duration-300
             whitespace-nowrap
@@ -84,13 +84,13 @@ export default function ToggleButton({
             text-xs font-medium
             transition-all duration-400 ease-in-out
             ${checked 
-              ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)] translate-x-0' 
-              : 'bg-transparent w-5 -translate-x-[50px]'
+              ? 'bg-primary text-primaryText translate-x-0' 
+              : 'bg-transparent w-5 translate-x-[-50px]'
             }
             overflow-hidden
             whitespace-nowrap
-            top-[1px]
-            bottom-[1px]
+            top-px
+            bottom-px
           `}
           style={{
             fontFamily: 'Arial, sans-serif',

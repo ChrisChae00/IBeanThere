@@ -89,12 +89,12 @@ export default function WriteLogPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6">
+      <div className="bg-surface rounded-lg border border-border p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[var(--color-surfaceText)] mb-2">
+          <h1 className="text-2xl font-bold text-surfaceText mb-2">
             {locale === 'ko' ? `${cafe.name} ${t('write_log_for')}` : `${t('write_log_for')} ${cafe.name}`}
           </h1>
-          <p className="text-sm text-[var(--color-surfaceTextSecondary)]">
+          <p className="text-sm text-surfaceTextSecondary">
             {t('write_log_description')}
           </p>
         </div>

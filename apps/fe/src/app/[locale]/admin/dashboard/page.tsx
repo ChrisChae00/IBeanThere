@@ -33,10 +33,10 @@ export default async function AdminDashboardPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+        <h1 className="text-3xl font-bold text-text mb-2">
           {t('dashboard_title')}
         </h1>
-        <p className="text-[var(--color-textSecondary)]">
+        <p className="text-textSecondary">
           {t('dashboard_subtitle')}
         </p>
       </div>

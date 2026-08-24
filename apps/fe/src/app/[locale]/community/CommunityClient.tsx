@@ -88,10 +88,10 @@ export default function CommunityClient() {
       {/* Header - Consistent with standard pages */}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+          <h1 className="text-3xl font-bold text-text mb-2">
             {t('title')}
           </h1>
-          <p className="text-[var(--color-text-secondary)]">
+          <p className="text-(--color-text-secondary)">
             {t('subtitle')}
           </p>
         </div>
@@ -107,8 +107,8 @@ export default function CommunityClient() {
         <TasteMatesSection tasteMates={tasteMates} isLoading={isMatesLoading} />
 
         {/* Feed - Divider */}
-        <div className="border-t border-[var(--color-border)] my-6 pt-6">
-          <h2 className="text-xl font-bold mb-4 px-4 text-[var(--color-text)]">{t('feed_title')}</h2>
+        <div className="border-t border-border my-6 pt-6">
+          <h2 className="text-xl font-bold mb-4 px-4 text-text">{t('feed_title')}</h2>
           <CommunityFeed session={session} />
         </div>
       </div>

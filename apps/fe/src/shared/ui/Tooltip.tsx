@@ -17,10 +17,10 @@ const positionClasses = {
 };
 
 const arrowClasses = {
-  top: 'top-full left-1/2 -translate-x-1/2 border-t-[var(--color-surface)] border-x-transparent border-b-transparent',
-  bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-[var(--color-surface)] border-x-transparent border-t-transparent',
-  left: 'left-full top-1/2 -translate-y-1/2 border-l-[var(--color-surface)] border-y-transparent border-r-transparent',
-  right: 'right-full top-1/2 -translate-y-1/2 border-r-[var(--color-surface)] border-y-transparent border-l-transparent',
+  top: 'top-full left-1/2 -translate-x-1/2 border-t-surface border-x-transparent border-b-transparent',
+  bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-surface border-x-transparent border-t-transparent',
+  left: 'left-full top-1/2 -translate-y-1/2 border-l-surface border-y-transparent border-r-transparent',
+  right: 'right-full top-1/2 -translate-y-1/2 border-r-surface border-y-transparent border-l-transparent',
 };
 
 export default function Tooltip({ 
@@ -56,8 +56,8 @@ export default function Tooltip({
         <div 
           className={`
             absolute z-50 px-2.5 py-1.5 text-xs font-medium whitespace-nowrap
-            bg-[var(--color-surface)] text-[var(--color-text)] 
-            rounded-lg shadow-lg border border-[var(--color-border)]
+            bg-surface text-text 
+            rounded-lg shadow-lg border border-border
             animate-in fade-in-0 zoom-in-95 duration-150
             ${positionClasses[position]}
           `}

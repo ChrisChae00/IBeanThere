@@ -27,7 +27,7 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
   return (
     <Link 
       href={cafePath}
-      className="group bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl overflow-hidden transition-shadow flex flex-col h-full cursor-pointer relative"
+      className="group bg-background border border-border rounded-xl overflow-hidden transition-shadow flex flex-col h-full cursor-pointer relative"
     >
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
@@ -36,16 +36,16 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" />
       </div>
       <div className="flex flex-col mt-auto p-3">
-        <h3 className="text-base font-semibold text-[var(--color-text)] mb-0.5 line-clamp-1" title={cafe.name}>
+        <h3 className="text-base font-semibold text-text mb-0.5 line-clamp-1" title={cafe.name}>
           {cafe.name}
         </h3>
-        <p className="text-xs text-[var(--color-text-secondary)] mb-2 truncate" title={cafe.address}>
+        <p className="text-xs text-(--color-text-secondary) mb-2 truncate" title={cafe.address}>
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-1">
           {/* Trending tag - only show for top 3 */}
           {cafe.trending_rank && cafe.trending_rank <= 3 ? (
-            <span className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+            <span className="bg-primary text-primaryText px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-xs">
               🔥 {tMap('trending')}
             </span>
           ) : (

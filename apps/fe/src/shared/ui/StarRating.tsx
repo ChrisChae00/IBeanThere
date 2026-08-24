@@ -37,7 +37,7 @@ export default function StarRating({
         <div key={i} className="relative inline-block">
           {/* Empty star background */}
           <svg 
-            className={`${sizeClasses[size]} text-[var(--color-starEmpty)]`}
+            className={`${sizeClasses[size]} text-starEmpty`}
             fill="currentColor" 
             stroke="var(--color-starEmptyOutline)"
             strokeWidth="1.5"
@@ -52,7 +52,7 @@ export default function StarRating({
             style={{ width: `${fillPercentage}%` }}
           >
             <svg 
-              className={`${sizeClasses[size]} text-[var(--color-starFilled)]`}
+              className={`${sizeClasses[size]} text-starFilled`}
               fill="currentColor" 
               stroke="currentColor"
               strokeWidth="1"
@@ -74,7 +74,7 @@ export default function StarRating({
         {renderStars()}
       </div>
       {showNumber && (
-        <span className={`${textColor === 'surface' ? 'text-[var(--color-surfaceTextSecondary)]' : 'text-[var(--color-cardTextSecondary)]'} ${textSizeClasses[size]}`}>
+        <span className={`${textColor === 'surface' ? 'text-surfaceTextSecondary' : 'text-cardTextSecondary'} ${textSizeClasses[size]}`}>
           {rating.toFixed(1)}
         </span>
       )}

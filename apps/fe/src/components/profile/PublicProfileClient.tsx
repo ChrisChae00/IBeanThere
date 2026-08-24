@@ -159,7 +159,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   if (loading) {
      return (
        <div className="flex justify-center items-center min-h-[400px]">
-         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
        </div>
      );
   }
@@ -182,22 +182,22 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         {/* Back Button */}
         <button 
             onClick={() => router.back()} 
-            className="flex items-center text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors mb-4"
+            className="flex items-center text-sm text-(--color-text-secondary) hover:text-primary transition-colors mb-4"
         >
             <ArrowLeft className="w-4 h-4 mr-1" />
             {t('back')}
         </button>
 
       {/* Profile Header */}
-      <div className="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)] shadow-sm relative">
+      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs relative">
         <div className="flex flex-col md:flex-row items-start gap-6">
           {/* Avatar */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Avatar 
               src={profile.avatar_url} 
               alt={profile.display_name} 
               size="xl"
-              className="w-24 h-24 md:w-28 md:h-28 border-4 border-[var(--color-background)] shadow-md"
+              className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-md"
             />
           </div>
           
@@ -205,7 +205,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
           <div className="flex-1 space-y-3 w-full">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-text)]">
+                    <h1 className="text-2xl md:text-3xl font-bold text-text">
                         {profile.display_name}
                     </h1>
                     
@@ -247,13 +247,13 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
             </div>
             
             {/* Username */}
-            <p className="text-[var(--color-text-secondary)] font-medium">
+            <p className="text-(--color-text-secondary) font-medium">
               @{profile.username}
             </p>
             
             {/* Bio */}
             {profile.bio && (
-              <p className="text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
+              <p className="text-(--color-text-secondary) max-w-2xl leading-relaxed">
                 {profile.bio}
               </p>
             )}
@@ -276,15 +276,15 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
             {/* Trust Count & Member Since */}
             <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
               {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-[var(--color-text-secondary)]">
-                  <span className="font-semibold text-[var(--color-primary)]">
+                <span className="text-(--color-text-secondary)">
+                  <span className="font-semibold text-primary">
                     {profile.trust_count}
                   </span>
                   {' '}{t('trust_count', { count: profile.trust_count || 0 }).replace(String(profile.trust_count || 0), '').trim()}
                 </span>
               )}
               
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                 {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
               </span>
             </div>
@@ -294,8 +294,8 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
 
       {/* Public Collections */}
       {profile.collections_public && collections.length > 0 && (
-        <div className="bg-[var(--color-surface)] rounded-xl p-4 sm:p-6 border border-[var(--color-border)] shadow-sm">
-          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">
+        <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border shadow-xs">
+          <h2 className="text-lg font-semibold text-text mb-4">
             {t('public_collections')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -309,29 +309,29 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
               <button
                 key={collection.id}
                 onClick={() => setSelectedCollection(collection)}
-                className="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg hover:bg-[var(--color-cardBackground)] transition-colors text-left group"
+                className="flex items-center gap-3 p-3 bg-background rounded-lg hover:bg-cardBackground transition-colors text-left group"
               >
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {collection.icon_type === 'favourite' ? (
                     <HeartIcon filled size={20} color="#ef4444" />
                   ) : collection.icon_type === 'save_later' ? (
                     <BookmarkIcon filled size={20} color="#3b82f6" />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]" />
+                    <div className="w-5 h-5 rounded-full bg-primary" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium text-[var(--color-text)] truncate block">
+                  <span className="font-medium text-text truncate block">
                     {collection.icon_type === 'favourite' ? tCollections('favourite')
                       : collection.icon_type === 'save_later' ? tCollections('save_later')
                       : collection.name}
                   </span>
-                  <span className="text-sm text-[var(--color-text-secondary)]">
+                  <span className="text-sm text-(--color-text-secondary)">
                     {tCollections('items', { count: collection.item_count || 0 })}
                   </span>
                 </div>
                 <svg
-                  className="w-4 h-4 text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                  className="w-4 h-4 text-(--color-text-secondary) opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

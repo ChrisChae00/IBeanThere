@@ -120,23 +120,23 @@ export default function ReportModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-xs"
         onClick={handleClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto bg-[var(--color-surface)] rounded-2xl shadow-xl">
+      <div className="relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto bg-surface rounded-2xl shadow-xl">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] rounded-t-2xl z-10">
-          <h2 className="text-lg font-semibold text-[var(--color-text)]">
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-surface rounded-t-2xl z-10">
+          <h2 className="text-lg font-semibold text-text">
             {getTitle()}
           </h2>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] transition-colors"
+            className="p-2 rounded-full hover:bg-(--color-surface-hover) transition-colors"
           >
-            <X className="w-5 h-5 text-[var(--color-text-secondary)]" />
+            <X className="w-5 h-5 text-(--color-text-secondary)" />
           </button>
         </div>
 
@@ -148,10 +148,10 @@ export default function ReportModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-lg font-semibold text-text mb-2">
               {t('success_title')}
             </h3>
-            <p className="text-[var(--color-text-secondary)]">
+            <p className="text-(--color-text-secondary)">
               {t('success_message')}
             </p>
           </div>
@@ -159,14 +159,14 @@ export default function ReportModal({
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
             {/* Report Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+              <label className="block text-sm font-medium text-text mb-2">
                 {t('select_type')} *
               </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as ReportType)}
                 disabled={isSubmitting}
-                className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
               >
                 <option value="">{t('select_type_placeholder')}</option>
                 {reportTypes.map((type) => (
@@ -179,7 +179,7 @@ export default function ReportModal({
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+              <label className="block text-sm font-medium text-text mb-2">
                 {t('description')}
               </label>
               <textarea
@@ -189,16 +189,16 @@ export default function ReportModal({
                 rows={4}
                 maxLength={2000}
                 placeholder={t('description_placeholder')}
-                className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text placeholder-(--color-text-secondary) focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
               />
-              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+              <p className="text-xs text-(--color-text-secondary) mt-1">
                 {description.length}/2000
               </p>
             </div>
 
             {/* Image Upload */}
             <div>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+              <label className="block text-sm font-medium text-text mb-2">
                 {t('attach_images')}
               </label>
               <ImageUploader
@@ -212,7 +212,7 @@ export default function ReportModal({
 
             {/* Error Message */}
             {displayError && (
-              <div className="p-3 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] text-sm">
+              <div className="p-3 rounded-xl bg-error/10 text-error text-sm">
                 {displayError}
               </div>
             )}

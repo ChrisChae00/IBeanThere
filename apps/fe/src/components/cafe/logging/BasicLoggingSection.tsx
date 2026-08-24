@@ -103,8 +103,8 @@ export default function BasicLoggingSection({
 
       {/* Rating */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
-          {t('rating')} <span className="text-[var(--color-error)]">*</span>
+        <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
+          {t('rating')} <span className="text-error">*</span>
         </label>
         <div className="flex items-center gap-2">
           {[1, 2, 3, 4, 5].map((value) => (
@@ -112,14 +112,14 @@ export default function BasicLoggingSection({
               key={value}
               type="button"
               onClick={() => handleRatingClick(value)}
-              className="focus:outline-none"
+              className="focus:outline-hidden"
               aria-label={`Rate ${value} out of 5`}
             >
               <svg
                 className={`w-8 h-8 transition-colors ${
                   rating && rating >= value
-                    ? 'text-[var(--color-starFilled)]'
-                    : 'text-[var(--color-starEmpty)]'
+                    ? 'text-starFilled'
+                    : 'text-starEmpty'
                 }`}
                 fill="currentColor"
                 stroke={rating && rating >= value ? 'currentColor' : 'var(--color-starEmptyOutline)'}
@@ -131,21 +131,21 @@ export default function BasicLoggingSection({
             </button>
           ))}
           {rating && (
-            <span className="text-sm text-[var(--color-surfaceTextSecondary)] ml-2">
+            <span className="text-sm text-surfaceTextSecondary ml-2">
               {rating}/5
             </span>
           )}
         </div>
         {errors.rating && (
-          <p className="text-sm text-[var(--color-error)] mt-1">{errors.rating}</p>
+          <p className="text-sm text-error mt-1">{errors.rating}</p>
         )}
       </div>
 
       {/* Atmosphere Tags */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
           {t('atmosphere_tags')} {atmosphereTags.length > 0 && (
-            <span className="text-xs text-[var(--color-surfaceTextSecondary)]">
+            <span className="text-xs text-surfaceTextSecondary">
               ({atmosphereTags.length}/3)
             </span>
           )}
@@ -168,10 +168,10 @@ export default function BasicLoggingSection({
                 disabled={isDisabled}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                   isSelected
-                    ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)] border-2 border-[var(--color-primary)]'
+                    ? 'bg-primary text-primaryText border-2 border-primary'
                     : isDisabled
-                    ? 'bg-[var(--color-surface)] text-[var(--color-surfaceTextSecondary)] border-2 border-[var(--color-border)] opacity-50 cursor-not-allowed'
-                    : 'bg-[var(--color-surface)] text-[var(--color-surfaceText)] border-2 border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
+                    ? 'bg-surface text-surfaceTextSecondary border-2 border-border opacity-50 cursor-not-allowed'
+                    : 'bg-surface text-surfaceText border-2 border-border hover:border-primary/50'
                 }`}
                 aria-label={t(tag.labelKey)}
                 aria-pressed={isSelected}
@@ -183,7 +183,7 @@ export default function BasicLoggingSection({
           })}
         </div>
         {atmosphereTags.length >= 3 && (
-          <p className="text-xs text-[var(--color-surfaceTextSecondary)] mt-1">
+          <p className="text-xs text-surfaceTextSecondary mt-1">
             {t('atmosphere_tags_max_reached') || 'Maximum 3 tags selected'}
           </p>
         )}
@@ -191,7 +191,7 @@ export default function BasicLoggingSection({
 
       {/* Coffee Type */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
           {t('coffee_type')} ({t('optional')})
         </label>
         <input
@@ -199,7 +199,7 @@ export default function BasicLoggingSection({
           value={coffeeType}
           onChange={(e) => onCoffeeTypeChange(e.target.value)}
           placeholder={t('coffee_type_placeholder')}
-          className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
           aria-label={t('coffee_type')}
         />
         <datalist id="coffee-types">
@@ -222,7 +222,7 @@ export default function BasicLoggingSection({
 
       {/* Price */}
       <div>
-        <label className="block text-sm font-medium text-[var(--color-surfaceTextSecondary)] mb-2">
+        <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
           {t('price')} ({t('optional')})
         </label>
         <div className="flex gap-2">
@@ -230,7 +230,7 @@ export default function BasicLoggingSection({
             <select
               value={priceCurrency}
               onChange={(e) => onPriceCurrencyChange(e.target.value)}
-              className="w-full rounded-2xl border bg-[var(--color-cardBackground)] text-[var(--color-cardText)] focus:outline-none transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] h-[48px] py-3 pl-4 pr-12 border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary)]/30 appearance-none cursor-pointer"
+              className="w-full rounded-2xl border bg-cardBackground text-cardText focus:outline-hidden transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] h-[48px] py-3 pl-4 pr-12 border-border focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
               aria-label={t('price_currency')}
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
@@ -279,7 +279,7 @@ export default function BasicLoggingSection({
           error={errors.comment}
           aria-label={t('comment')}
         />
-        <div className="mt-1 text-right text-xs text-[var(--color-surfaceTextSecondary)]">
+        <div className="mt-1 text-right text-xs text-surfaceTextSecondary">
           {comment.length}/1000
         </div>
       </div>

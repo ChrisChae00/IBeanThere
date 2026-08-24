@@ -26,7 +26,7 @@ export default function LocationPermissionOverlay({
   ];
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-background)] rounded-xl overflow-hidden border border-[var(--color-border)]">
+    <div className="relative w-full h-full bg-linear-to-br from-surface to-background rounded-xl overflow-hidden border border-border">
       {/* Blurred background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -40,13 +40,13 @@ export default function LocationPermissionOverlay({
         <div className="text-center px-6 py-8 max-w-md w-full">
           {/* Location Icon */}
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center">
-              <LocationIcon size={40} className="text-[var(--color-primary)]" />
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+              <LocationIcon size={40} className="text-primary" />
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">
+          <h3 className="text-xl font-bold text-text mb-3">
             {permissionState === 'denied' 
               ? t('location_permission_denied_title')
               : t('location_permission_title')
@@ -54,7 +54,7 @@ export default function LocationPermissionOverlay({
           </h3>
 
           {/* Description */}
-          <p className="text-[var(--color-text-secondary)] mb-6 leading-relaxed">
+          <p className="text-(--color-text-secondary) mb-6 leading-relaxed">
             {t('location_permission_reason')}
           </p>
 
@@ -62,15 +62,15 @@ export default function LocationPermissionOverlay({
           {permissionState === 'denied' ? (
             <div className="animate-fade-in">
               {/* Browser Tabs */}
-              <div className="flex p-1 bg-[var(--color-surface-hover)] rounded-lg mb-4">
+              <div className="flex p-1 bg-(--color-surface-hover) rounded-lg mb-4">
                 {browsers.map((browser) => (
                   <button
                     key={browser.id}
                     onClick={() => setActiveBrowser(browser.id)}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
                       activeBrowser === browser.id
-                        ? 'bg-[var(--color-surface)] text-[var(--color-text)] shadow-sm'
-                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+                        ? 'bg-surface text-text shadow-xs'
+                        : 'text-(--color-text-secondary) hover:text-text'
                     }`}
                   >
                     {browser.label}
@@ -79,14 +79,14 @@ export default function LocationPermissionOverlay({
               </div>
 
               {/* Guide Steps */}
-              <div className="bg-[var(--color-surface)] p-4 rounded-lg border border-[var(--color-border)] text-left mb-6">
-                <h4 className="text-sm font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+              <div className="bg-surface p-4 rounded-lg border border-border text-left mb-6">
+                <h4 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
                   {t('browser_guide.title')}
                 </h4>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-[var(--color-text-secondary)]">
+                <ol className="list-decimal list-inside space-y-2 text-sm text-(--color-text-secondary)">
                   <li>
                     {t.rich(`browser_guide.${activeBrowser}_step1`, {
-                      icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-[var(--color-text)] mx-0.5" />
+                      icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-text mx-0.5" />
                     })}
                   </li>
                   <li>{t(`browser_guide.${activeBrowser}_step2`)}</li>
@@ -96,7 +96,7 @@ export default function LocationPermissionOverlay({
               {/* Refresh Button */}
               <button
                 onClick={() => window.location.reload()}
-                className="w-full bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full bg-primary text-primaryText px-6 py-3 rounded-full font-semibold hover:bg-secondary transition-colors shadow-lg flex items-center justify-center gap-2"
               >
                 <RefreshIcon className="w-5 h-5" />
                 <span>{t('browser_guide.refresh_page')}</span>
@@ -106,8 +106,8 @@ export default function LocationPermissionOverlay({
             <>
               {/* Info message for prompt state */}
               {permissionState === 'prompt' && (
-                <div className="mb-6 p-4 bg-[var(--color-accent)]/5 border border-[var(--color-accent)]/20 rounded-lg">
-                  <p className="text-sm text-[var(--color-text-secondary)]">
+                <div className="mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
+                  <p className="text-sm text-(--color-text-secondary)">
                     {t('browser_settings_guide')}
                   </p>
                 </div>
@@ -116,7 +116,7 @@ export default function LocationPermissionOverlay({
               {/* CTA Button */}
               <button
                 onClick={onRequestPermission}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px]"
+                className="bg-primary text-primaryText px-8 py-3 rounded-full font-semibold hover:bg-secondary transition-colors shadow-lg min-h-[44px]"
               >
                 {t('share_location')}
               </button>

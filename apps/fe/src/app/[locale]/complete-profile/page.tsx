@@ -20,15 +20,15 @@ export default function CompleteProfilePage(
 
   const features = [
     {
-      icon: <User size={16} className="text-[var(--color-background)]" />,
+      icon: <User size={16} className="text-background" />,
       text: t('feature_profile')
     },
     {
-      icon: <Coffee size={16} className="text-[var(--color-background)]" />,
+      icon: <Coffee size={16} className="text-background" />,
       text: t('feature_experience')
     },
     {
-      icon: <Shield size={16} className="text-[var(--color-background)]" />,
+      icon: <Shield size={16} className="text-background" />,
       text: t('feature_security')
     }
   ];
@@ -40,10 +40,10 @@ export default function CompleteProfilePage(
       features={features}
     >
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
+        <h2 className="text-2xl font-bold text-(--color-text-primary) mb-2">
           {t('finish_setup')}
         </h2>
-        <p className="text-[var(--color-text-secondary)]">
+        <p className="text-(--color-text-secondary)">
           {t('finish_setup_desc')}
         </p>
       </div>

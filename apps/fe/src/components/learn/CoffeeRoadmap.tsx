@@ -51,7 +51,7 @@ function Stage({
       {!isLast && (
         <span
           aria-hidden
-          className={`absolute left-[1.375rem] top-[3.25rem] bottom-0 -translate-x-1/2 ${
+          className={`absolute left-5.5 top-13 bottom-0 -translate-x-1/2 ${
             nextIsBranch
               ? 'border-l border-dashed border-[color-mix(in_srgb,var(--color-text)_28%,transparent)]'
               : 'w-px bg-[color-mix(in_srgb,var(--color-text)_20%,transparent)]'
@@ -61,26 +61,26 @@ function Stage({
 
       <span
         aria-hidden
-        className={`${MARKER_BASE} ${marker} ${isDeepest ? 'text-[var(--color-primaryText)]' : ''}`}
+        className={`${MARKER_BASE} ${marker} ${isDeepest ? 'text-primaryText' : ''}`}
       >
         {category.icon}
       </span>
 
       <div className="min-w-0 pt-1">
         <p className={`inline-flex rounded-full border px-2.5 py-0.5 ${era}`}>
-          <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-textSecondary)]">
+          <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-textSecondary">
             {content.era}
           </span>
         </p>
 
-        <h2 className="mt-2 text-xl font-semibold tracking-[-0.01em] text-[var(--color-text)] sm:text-2xl">
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.01em] text-text sm:text-2xl">
           {content.name}
         </h2>
-        <p className="mt-1 text-sm leading-relaxed text-[var(--color-textSecondary)]">
+        <p className="mt-1 text-sm leading-relaxed text-textSecondary">
           {content.subtitle}
         </p>
         {branchLabel && (
-          <p className="mt-2 text-xs text-[var(--color-textSecondary)]">
+          <p className="mt-2 text-xs text-textSecondary">
             <span aria-hidden>↳ </span>
             {branchLabel}
           </p>
@@ -121,11 +121,11 @@ export default function CoffeeRoadmap({
         className="mb-14 max-w-xl"
       >
         <p className="type-caption">{messages.eyebrow}</p>
-        <h1 className="mt-2 text-[var(--color-text)]">{messages.title}</h1>
-        <p className="mt-3 text-base leading-relaxed text-[var(--color-textSecondary)]">
+        <h1 className="mt-2 text-text">{messages.title}</h1>
+        <p className="mt-3 text-base leading-relaxed text-textSecondary">
           {messages.subtitle}
         </p>
-        <p className="mt-5 text-xs uppercase tracking-[0.08em] text-[var(--color-textSecondary)]">
+        <p className="mt-5 text-xs uppercase tracking-[0.08em] text-textSecondary">
           {messages.stageCount}
           <span aria-hidden className="mx-2">
             ·

@@ -25,7 +25,7 @@ export default async function CafeRegister({ locale }: CafeRegisterProps) {
   return (
     <section
       id="cafe-register"
-      className="relative py-10 sm:py-12 md:py-14 bg-[var(--color-primary)] overflow-hidden"
+      className="relative py-10 sm:py-12 md:py-14 bg-primary overflow-hidden"
     >
       <CafeRegisterClient messages={messages} locale={locale} />
     </section>

@@ -173,7 +173,7 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <LoadingSpinner />
-        <p className="text-[var(--color-cardTextSecondary)]">
+        <p className="text-cardTextSecondary">
           Verifying your reset link...
         </p>
       </div>
@@ -210,15 +210,15 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
+          <h2 className="text-2xl font-bold text-cardText mb-2">
             {t('password_updated')}
           </h2>
-          <p className="text-[var(--color-cardTextSecondary)]">
+          <p className="text-cardTextSecondary">
             {t('password_updated_subtitle')}
           </p>
         </div>
 
-        <p className="text-sm text-[var(--color-cardTextSecondary)]">
+        <p className="text-sm text-cardTextSecondary">
           Redirecting to login...
         </p>
 
@@ -235,10 +235,10 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
+        <h2 className="text-2xl font-bold text-cardText mb-2">
           {t('reset_password_title')}
         </h2>
-        <p className="text-[var(--color-cardTextSecondary)]">
+        <p className="text-cardTextSecondary">
           {t('reset_password_subtitle')}
         </p>
       </div>
@@ -253,14 +253,14 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t('new_password_placeholder')}
-            icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+            icon={<LockIcon size={20} className="text-cardTextSecondary" />}
             required
-            className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+            className="bg-background/50 backdrop-blur-xs"
             endAdornment={
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+                className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
               >
                 {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
               </button>
@@ -271,12 +271,12 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
           {password.length > 0 && (
             <div className="mt-2">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-[var(--color-cardTextSecondary)]">Password strength</span>
+                <span className="text-cardTextSecondary">Password strength</span>
                 <span className="font-medium" style={{ color: getStrengthColor() }}>
                   {getStrengthLabel()}
                 </span>
               </div>
-              <div className="h-1.5 bg-[var(--color-surface)] rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface rounded-full overflow-hidden">
                 <div 
                   className="h-full transition-all duration-300"
                   style={{ width: `${passwordStrength}%`, backgroundColor: getStrengthColor() }}
@@ -292,14 +292,14 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder={t('confirm_new_password_placeholder')}
-          icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          icon={<LockIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
           endAdornment={
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+              className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
             >
               {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
             </button>
@@ -320,7 +320,7 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
         size="lg"
         loading={isLoading}
         disabled={!password || !confirmPassword || !passwordsMatch(password, confirmPassword)}
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-primary text-primaryText hover:bg-accent hover:text-text"
       >
         {t('update_password')}
       </Button>

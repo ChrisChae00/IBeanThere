@@ -111,8 +111,8 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const filterButtonClass = (filter: FilterType) =>
     `px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
       activeFilter === filter
-        ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-        : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
+        ? 'bg-primary text-primaryText'
+        : 'bg-surface text-text border border-border hover:bg-surface/80'
     }`;
 
   return (
@@ -163,7 +163,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               {t('filter_most_popular')}
             </button>
           </div>
-          <div className="text-center mt-4 text-sm text-[var(--color-text-secondary)]">
+          <div className="text-center mt-4 text-sm text-(--color-text-secondary)">
             {t('showing_cafes', { count: cafes.length })}
           </div>
         </div>
@@ -175,18 +175,18 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {isLoading ? (
               Array.from({ length: CAFE_GRID_ITEMS_PER_PAGE }).map((_, index) => (
-                <div key={index} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden animate-pulse">
-                  <div className="h-44 bg-[var(--color-surface)]/50"></div>
+                <div key={index} className="bg-surface border border-border rounded-2xl overflow-hidden animate-pulse">
+                  <div className="h-44 bg-surface/50"></div>
                   <div className="p-4">
-                    <div className="h-4 bg-[var(--color-surface)]/50 rounded mb-2"></div>
-                    <div className="h-3 bg-[var(--color-surface)]/50 rounded w-2/3 mb-3"></div>
-                    <div className="h-3 bg-[var(--color-surface)]/50 rounded w-1/2"></div>
+                    <div className="h-4 bg-surface/50 rounded-sm mb-2"></div>
+                    <div className="h-3 bg-surface/50 rounded-sm w-2/3 mb-3"></div>
+                    <div className="h-3 bg-surface/50 rounded-sm w-1/2"></div>
                   </div>
                 </div>
               ))
             ) : cafes.length === 0 ? (
               <div className="col-span-full text-center py-16 space-y-4">
-                <div className="text-lg font-medium text-[var(--color-text-secondary)]">
+                <div className="text-lg font-medium text-(--color-text-secondary)">
                   {tMap('no_cafes_available')}
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-primary text-primaryText px-8 py-4 rounded-full font-semibold text-lg hover:bg-secondary transition-colors shadow-lg min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {tMap('load_more')}
                 </button>
@@ -220,7 +220,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
                 <button
                   onClick={handleShowLess}
-                  className="border border-[var(--color-border)] text-[var(--color-text)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+                  className="border border-border text-text px-8 py-4 rounded-full font-semibold text-lg hover:bg-surface transition-colors min-h-[44px]"
                 >
                   {tMap('show_less')}
                 </button>

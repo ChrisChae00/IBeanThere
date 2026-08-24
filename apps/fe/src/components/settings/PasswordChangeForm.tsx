@@ -94,7 +94,7 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           {t('current_password')}
         </label>
         <Input
@@ -108,7 +108,7 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           {t('new_password')}
         </label>
         <Input
@@ -122,7 +122,7 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           {t('confirm_new_password')}
         </label>
         <Input
@@ -136,11 +136,11 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--color-error)]">{error}</p>
+        <p className="text-sm text-error">{error}</p>
       )}
 
       {success && (
-        <p className="text-sm text-[var(--color-success)]">{t('password_changed')}</p>
+        <p className="text-sm text-success">{t('password_changed')}</p>
       )}
 
       <div className="flex gap-3 pt-2">

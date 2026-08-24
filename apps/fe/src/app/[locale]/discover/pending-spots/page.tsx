@@ -117,24 +117,24 @@ export default function PendingSpotsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--color-background)]">
+    <main className="min-h-screen bg-background">
       {/* Page Title Section with Gradient and CTA */}
-      <section className="pt-6 pb-4 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
+      <section className="pt-6 pb-4 bg-linear-to-b from-background to-surface/30">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
                 {t('title')}
               </h1>
-              <p className="text-xl text-[var(--color-text-secondary)]">
+              <p className="text-xl text-(--color-text-secondary)">
                 {t('subtitle')}
               </p>
             </div>
             <Link
               href={`/${locale}/discover/register-cafe`}
-              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
+              className="bg-primary text-primaryText px-6 py-3 rounded-full font-semibold hover:bg-secondary transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
             >
-              <PlusIcon size={20} className="text-[var(--color-primaryText)]" />
+              <PlusIcon size={20} className="text-primaryText" />
               {t('register_new')}
             </Link>
           </div>
@@ -150,8 +150,8 @@ export default function PendingSpotsPage() {
               disabled={!coords}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'nearby'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+                  ? 'bg-primary text-primaryText'
+                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
               } ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {locale === 'ko' ? '가까운 순' : 'Nearby'}
@@ -160,8 +160,8 @@ export default function PendingSpotsPage() {
               onClick={() => setSortMode('newest')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'newest'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+                  ? 'bg-primary text-primaryText'
+                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
               }`}
             >
               {locale === 'ko' ? '최신순' : 'Newest'}
@@ -170,15 +170,15 @@ export default function PendingSpotsPage() {
               onClick={() => setSortMode('verification')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'verification'
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]'
+                  ? 'bg-primary text-primaryText'
+                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
               }`}
             >
               {locale === 'ko' ? '검증 필요' : 'Needs Verification'}
             </button>
           </div>
           {sortMode === 'nearby' && !coords && (
-            <p className="text-sm text-[var(--color-text-secondary)] mt-2">
+            <p className="text-sm text-(--color-text-secondary) mt-2">
               {locale === 'ko' ? '위치 권한을 허용하면 가까운 카페를 볼 수 있습니다' : 'Enable location to see cafes near you'}
             </p>
           )}
@@ -189,7 +189,7 @@ export default function PendingSpotsPage() {
       <section className="py-4">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div 
-            className="bg-[var(--color-surface)] rounded-xl p-8 border border-[var(--color-border)]"
+            className="bg-surface rounded-xl p-8 border border-border"
             style={{
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
             }}
@@ -200,12 +200,12 @@ export default function PendingSpotsPage() {
               </div>
             ) : error ? (
               <div className="text-center py-12">
-                <div className="text-lg font-medium text-[var(--color-error)] mb-4">
+                <div className="text-lg font-medium text-error mb-4">
                   {error}
                 </div>
                 <button
                   onClick={loadPendingCafes}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors"
+                  className="bg-primary text-primaryText px-6 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
                 >
                   Retry
                 </button>
@@ -213,17 +213,17 @@ export default function PendingSpotsPage() {
             ) : sortedCafes.length === 0 ? (
               <div className="text-center py-16 space-y-6">
                 <div className="text-6xl">☕️</div>
-                <div className="text-2xl font-bold text-[var(--color-text)]">
+                <div className="text-2xl font-bold text-text">
                   {t('no_pending')}
                 </div>
-                <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
+                <p className="text-(--color-text-secondary) max-w-md mx-auto">
                   {locale === 'ko' 
                     ? '지역에서 새로운 카페를 발견하고 등록해보세요!' 
                     : 'Be the first to discover and register a new cafe in your neighborhood!'}
                 </p>
                 <Link
                   href={`/${locale}/discover/register-cafe`}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] inline-flex items-center justify-center"
+                  className="bg-primary text-primaryText px-8 py-4 rounded-full font-semibold text-lg hover:bg-secondary transition-colors shadow-lg min-h-[44px] inline-flex items-center justify-center"
                 >
                   <span className="text-xl mr-2">🧭</span>
                   {t('register_new')}
@@ -235,19 +235,19 @@ export default function PendingSpotsPage() {
                   <Link
                     key={cafe.id}
                     href={`/${locale}/cafes/${cafe.slug || cafe.id}`}
-                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer block"
+                    className="bg-background border border-border rounded-xl p-6 hover:shadow-inset-primary transition-shadow cursor-pointer block"
                   >
                   {/* Cafe Icon & Distance */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-16 h-16 bg-[var(--color-primary)]/10 rounded-lg flex items-center justify-center">
+                    <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
                       <span className="text-3xl">☕️</span>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-3 py-1 rounded-full text-xs font-semibold">
+                      <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-semibold">
                         {cafe.status === 'pending' ? (locale === 'ko' ? '대기중' : 'Pending') : cafe.status}
                       </span>
                       {cafe.distance !== undefined && (
-                        <span className="text-xs text-[var(--color-text-secondary)] font-medium">
+                        <span className="text-xs text-(--color-text-secondary) font-medium">
                           📍 {formatDistance(cafe.distance)}
                         </span>
                       )}
@@ -255,17 +255,17 @@ export default function PendingSpotsPage() {
                   </div>
 
                   {/* Cafe Info */}
-                  <h3 className="text-lg font-bold text-[var(--color-text)] mb-2 truncate" title={cafe.name}>
+                  <h3 className="text-lg font-bold text-text mb-2 truncate" title={cafe.name}>
                     {cafe.name}
                   </h3>
-                  <p className="text-sm text-[var(--color-text-secondary)] mb-4 line-clamp-2" title={cafe.address}>
+                  <p className="text-sm text-(--color-text-secondary) mb-4 line-clamp-2" title={cafe.address}>
                     {cafe.address}
                   </p>
 
                   {/* Metadata */}
                   <div className="space-y-2 mb-4 text-sm">
                     {cafe.created_at && (
-                      <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                      <div className="flex items-center gap-2 text-(--color-text-secondary)">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -275,7 +275,7 @@ export default function PendingSpotsPage() {
                       </div>
                     )}
                     {cafe.verification_count && (
-                      <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                      <div className="flex items-center gap-2 text-(--color-text-secondary)">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
