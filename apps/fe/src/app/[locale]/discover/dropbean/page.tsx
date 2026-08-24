@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useLocation } from '@/hooks/useLocation';
@@ -14,17 +14,18 @@ import { LocationIcon } from '@/shared/ui';
 
 const NEARBY_RADIUS_METERS = 50;
 
-export default function NearbyPage({
-  params
-}: {
-  params: { locale: string };
-}) {
+export default function NearbyPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = use(props.params);
   const { locale } = params;
   const t = useTranslations('dropbean');
   const tNav = useTranslations('navigation');
   const { user } = useAuth();
   const { coords, getCurrentLocation, isLoading: locationLoading, error: locationError } = useLocation();
-  
+
   const [cafes, setCafes] = useState<(CafeMapData & { distance: number })[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

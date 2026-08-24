@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import useSWR from 'swr';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -37,16 +37,17 @@ interface StreakData {
   streak_active: boolean;
 }
 
-export default function MyBeansPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export default function MyBeansPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = use(props.params);
   const { locale } = params;
   const t = useTranslations('my_beans');
   const tDropBean = useTranslations('drop_bean');
   const { user, isLoading: authLoading } = useAuth();
-  
+
   const [showLevelModal, setShowLevelModal] = useState(false);
 
   // Fetcher for SWR

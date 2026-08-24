@@ -1,16 +1,19 @@
 'use client';
 
+import { use } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { AuthLayout } from '@/components/auth';
 import { CompleteProfileForm } from '@/components/auth';
 import { User, Coffee, Shield } from 'lucide-react';
 
-export default function CompleteProfilePage({
-  params: { locale }
-}: {
-  params: { locale: string }
-}) {
+export default function CompleteProfilePage(
+  props: {
+    params: Promise<{ locale: string }>
+  }
+) {
+  const params = use(props.params);
+  const { locale } = params;
   const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') || '/';
