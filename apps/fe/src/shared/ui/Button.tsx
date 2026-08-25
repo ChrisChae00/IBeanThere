@@ -1,6 +1,19 @@
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { Button as BaseButton } from './base/button';
+import { cn } from '@/lib/cn';
 import LoadingSpinner from './LoadingSpinner';
+
+/*
+  Wrapper over the shadcn/Base UI button (`./base/button`). Base UI supplies the
+  behaviour — focus-visible ring, disabled semantics, native button reset — while this
+  file keeps the public API this repo already calls with, so none of the 19 files using
+  <Button> had to change.
+
+  MIGRATION: new code should import { Button } from '@/shared/ui/base/button' directly.
+  This wrapper exists only for the existing call sites and is deleted once the last one
+  moves over. See "Phase 2b" in docs/ui-refactoring-roadmap.md.
+*/
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -14,27 +27,34 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-const baseClasses =
-  'inline-flex items-center justify-center gap-2 font-semibold rounded-2xl transition-all duration-200 ease-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary';
+/* This repo's variant names predate shadcn's; map rather than rename 19 files. */
+const variantMap = {
+  primary: 'default',
+  secondary: 'secondary',
+  danger: 'destructive',
+  ghost: 'ghost',
+  outline: 'outline'
+} as const;
 
+/*
+  Sizes come from the component token layer, not from shadcn's scale — base-nova's
+  default button is 32px tall against this system's 48px.
+*/
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-4 py-2 text-sm min-h-[40px]',
-  md: 'px-5 py-3 text-base min-h-[48px]',
-  lg: 'px-6 py-4 text-base md:text-lg min-h-[56px]'
+  sm: 'h-(--btn-height-sm) px-4 text-sm',
+  md: 'h-(--btn-height-md) px-5 text-base',
+  lg: 'h-(--btn-height-lg) px-6 text-base md:text-lg'
 };
 
-const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    'bg-primary text-primaryText shadow-[0_12px_30px_rgba(26,18,11,0.22)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(26,18,11,0.28)] active:translate-y-0 disabled:shadow-none',
-  secondary:
-    'bg-surface text-text border border-border shadow-[0_10px_25px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:bg-surface/90',
-  danger:
-    'bg-error text-white shadow-[0_12px_30px_rgba(244,67,54,0.25)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(244,67,54,0.35)] active:translate-y-0 disabled:shadow-none',
-  ghost:
-    'bg-transparent text-text hover:bg-surface/70 border border-transparent',
-  outline:
-    'bg-transparent text-text border border-border hover:bg-surface/60'
-};
+/*
+  Hover and press are carried by relief, not by a colour swap. That is not a style
+  preference: Matcha Latte's green has no lighter shade left that still holds a legible
+  label, so a colour-based hover would have to break either contrast or the theme
+  (Phase 1). `relief-control` already handles hover, active and reduced-motion, so the
+  variant's own colour-shifting hover is cancelled here — tailwind-merge lets the later
+  class win.
+*/
+const reliefOverrides = 'relief-control rounded-(--btn-radius) font-semibold gap-2';
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -53,22 +73,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const isDisabled = disabled || loading;
-    const composedClassName = [
-      baseClasses,
-      sizeClasses[size],
-      variantClasses[variant],
-      fullWidth ? 'w-full' : '',
-      isDisabled ? 'opacity-60 cursor-not-allowed translate-y-0' : '',
-      className
-    ]
-      .filter(Boolean)
-      .join(' ');
 
     return (
-      <button
+      <BaseButton
         ref={ref}
-        className={composedClassName}
+        variant={variantMap[variant]}
         disabled={isDisabled}
+        className={cn(
+          reliefOverrides,
+          sizeClasses[size],
+          fullWidth && 'w-full',
+          isDisabled && 'opacity-60 cursor-not-allowed shadow-none',
+          className
+        )}
         {...props}
       >
         {loading && <LoadingSpinner size="sm" />}
@@ -79,7 +96,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && rightIcon && (
           <span className="text-lg leading-none">{rightIcon}</span>
         )}
-      </button>
+      </BaseButton>
     );
   }
 );
@@ -87,4 +104,3 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 export default Button;
-

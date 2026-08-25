@@ -20,15 +20,15 @@
   /* ---- Layer 2: ink ---- */
   --ink-primary: var(--c-ink);
   --ink-secondary: var(--c-ink-soft);
-  --ink-on-accent: var(--c-on-brand);
+  --ink-on-brand: var(--c-on-brand);
   --ink-on-media: var(--c-on-media);
   --ink-on-auth: var(--c-on-auth);
   --ink-inverse: var(--c-page);
 
   /* ---- Layer 2: accent ---- */
-  --accent: var(--c-brand);
-  --accent-hover: var(--c-brand-soft);
-  --accent-muted: var(--c-accent);
+  --brand: var(--c-brand);
+  --brand-hover: var(--c-brand-soft);
+  --brand-muted: var(--c-accent);
 
   /* ---- Layer 2: edges ---- */
   --edge-subtle: color-mix(in srgb, var(--c-edge) 50%, transparent);

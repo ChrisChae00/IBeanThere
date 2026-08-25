@@ -22,8 +22,8 @@ const SURFACES = ['page', 'raised', 'elevated', 'sunken', 'hover', 'inverse'] as
   whoever reaches for it next. If a third tier is ever needed, it gets designed with its
   contrast, not derived from one that barely clears.
 */
-const INKS = ['primary', 'secondary', 'on-accent', 'on-media', 'inverse'] as const;
-const ACCENTS = ['accent', 'accent-hover', 'accent-muted'] as const;
+const INKS = ['primary', 'secondary', 'on-brand', 'on-media', 'inverse'] as const;
+const ACCENTS = ['brand', 'brand-hover', 'brand-muted'] as const;
 const EDGES = ['edge-subtle', 'edge-default', 'edge-strong'] as const;
 const STATES = ['success', 'warning', 'danger', 'pending'] as const;
 const DOMAIN = [
@@ -205,7 +205,7 @@ export default function ThemeDemoPage() {
 
       <Section
         title="Contrast"
-        note="Every pairing here must clear 4.5:1 in all four themes, and the derived surfaces count - they are darker than the grounds they come from, so tuning ink against page alone is not enough. The one known exception is ink-on-accent over accent-hover: that pairing only exists because buttons still swap colour on hover, and Phase 2 replaces that with relief."
+        note="Every pairing here must clear 4.5:1 in all four themes, and the derived surfaces count - they are darker than the grounds they come from, so tuning ink against page alone is not enough. The one known exception is ink-on-brand over brand-hover: that pairing only exists because buttons still swap colour on hover, and Phase 2 replaces that with relief."
       >
         <div className="grid gap-3 md:grid-cols-2">
           <ContrastRow theme={themeKey} label="ink-primary on surface-page" fg="--ink-primary" bg="--surface-page" />
@@ -215,8 +215,8 @@ export default function ThemeDemoPage() {
           <ContrastRow theme={themeKey} label="ink-secondary on surface-sunken" fg="--ink-secondary" bg="--surface-sunken" />
           <ContrastRow theme={themeKey} label="ink-secondary on surface-hover" fg="--ink-secondary" bg="--surface-hover" />
           <ContrastRow theme={themeKey} label="ink-primary on surface-sunken" fg="--ink-primary" bg="--surface-sunken" />
-          <ContrastRow theme={themeKey} label="ink-on-accent on accent" fg="--ink-on-accent" bg="--accent" />
-          <ContrastRow theme={themeKey} label="ink-on-accent on accent-hover" fg="--ink-on-accent" bg="--accent-hover" />
+          <ContrastRow theme={themeKey} label="ink-on-brand on brand" fg="--ink-on-brand" bg="--brand" />
+          <ContrastRow theme={themeKey} label="ink-on-brand on brand-hover" fg="--ink-on-brand" bg="--brand-hover" />
           <ContrastRow theme={themeKey} label="ink-inverse on surface-inverse" fg="--ink-inverse" bg="--surface-inverse" />
         </div>
       </Section>
@@ -237,7 +237,7 @@ export default function ThemeDemoPage() {
           </button>
           <button
             className="relief-control rounded-[var(--btn-radius)] px-6 py-3 font-semibold"
-            style={{ background: 'var(--accent)', color: 'var(--ink-on-accent)' }}
+            style={{ background: 'var(--brand)', color: 'var(--ink-on-brand)' }}
           >
             Drop Bean
           </button>
