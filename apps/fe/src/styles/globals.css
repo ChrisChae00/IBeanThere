@@ -20,7 +20,6 @@
 
   --color-ink-primary: var(--ink-primary);
   --color-ink-secondary: var(--ink-secondary);
-  --color-ink-muted: var(--ink-muted);
   --color-ink-on-accent: var(--ink-on-accent);
   --color-ink-on-media: var(--ink-on-media);
   --color-ink-inverse: var(--ink-inverse);
@@ -269,27 +268,52 @@
 
 @layer components {
   /*
-    Neumorphic relief, lit from the top left. Deliberately scoped to interactive
-    controls — buttons, toggles, tabs, chips, the search field. Cards, sections and
-    bento cells stay flat, because relief everywhere is what makes neumorphism read as
-    muddy rather than tactile, and low-contrast card surfaces fail WCAG.
+    Neumorphic relief. Deliberately scoped to interactive controls — buttons, toggles,
+    tabs, chips, the search field. Cards, sections and bento cells stay flat, because
+    relief everywhere is what makes neumorphism read as muddy rather than tactile, and
+    low-contrast card surfaces fail WCAG.
 
-    Each theme supplies its own light/dark pair from its own surface, so Dark Roast
-    gets a genuinely dark relief rather than an inverted light one.
+    Each theme supplies its own light/dark pair from its own surface, so Dark Roast gets
+    a genuinely dark relief rather than an inverted light one.
+
+    `relief-control` is what a button uses: it carries hover and active itself, so a
+    control signals state through depth instead of swapping colour. That matters beyond
+    style — Matcha Latte's green has no lighter shade left that still carries a legible
+    label, so a colour-based hover would have to break either contrast or the theme.
   */
   .relief-raised {
-    box-shadow:
-      calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
-        var(--relief-blur) var(--relief-light),
-      var(--relief-spread) var(--relief-spread) var(--relief-blur) var(--relief-dark);
+    box-shadow: var(--relief-shadow-raised);
   }
 
   .relief-pressed {
-    box-shadow:
-      inset calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
-        var(--relief-blur) var(--relief-light),
-      inset var(--relief-spread) var(--relief-spread) var(--relief-blur)
-        var(--relief-dark);
+    box-shadow: var(--relief-shadow-pressed);
+  }
+
+  .relief-control {
+    box-shadow: var(--relief-shadow-raised);
+    transition:
+      box-shadow var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
+
+  .relief-control:hover {
+    box-shadow: var(--relief-shadow-lifted);
+    transform: translateY(-1px);
+  }
+
+  .relief-control:active {
+    box-shadow: var(--relief-shadow-pressed);
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .relief-control {
+      transition: none;
+    }
+
+    .relief-control:hover {
+      transform: none;
+    }
   }
 }
 

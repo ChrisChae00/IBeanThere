@@ -16,7 +16,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 */
 
 const SURFACES = ['page', 'raised', 'elevated', 'sunken', 'hover', 'inverse'] as const;
-const INKS = ['primary', 'secondary', 'muted', 'on-accent', 'on-media', 'inverse'] as const;
+/*
+  There is no third `muted` tier on purpose. Mixing secondary ink toward transparent
+  lands at 2.7-3.1:1 on the light themes, and a token that cannot pass AA is a trap for
+  whoever reaches for it next. If a third tier is ever needed, it gets designed with its
+  contrast, not derived from one that barely clears.
+*/
+const INKS = ['primary', 'secondary', 'on-accent', 'on-media', 'inverse'] as const;
 const ACCENTS = ['accent', 'accent-hover', 'accent-muted'] as const;
 const EDGES = ['edge-subtle', 'edge-default', 'edge-strong'] as const;
 const STATES = ['success', 'warning', 'danger', 'pending'] as const;
@@ -48,8 +54,12 @@ function parseColor(value: string): [number, number, number, number] | null {
   probe.remove();
   const match = resolved.match(/(\d+(?:\.\d+)?)/g);
   if (!match || match.length < 3) return null;
+  // color-mix() comes back as `color(srgb r g b / a)` with 0-1 channels, while plain
+  // colours come back as `rgb()` with 0-255. Reading one as the other turns every
+  // mixed token into near-black and reports contrast failures that do not exist.
+  const scale = resolved.startsWith('color(') ? 255 : 1;
   const alpha = match.length > 3 ? Number(match[3]) : 1;
-  return [Number(match[0]), Number(match[1]), Number(match[2]), alpha];
+  return [Number(match[0]) * scale, Number(match[1]) * scale, Number(match[2]) * scale, alpha];
 }
 
 /** Flattens a translucent foreground onto its background before measuring. */
@@ -184,7 +194,7 @@ export default function ThemeDemoPage() {
 
       <Section
         title="Contrast"
-        note="Every pairing here must clear 4.5:1 in all four themes. A FAIL is a blocker, not a note."
+        note="Every pairing here must clear 4.5:1 in all four themes. The one known exception is ink-on-accent over accent-hover: that pairing only exists because buttons still swap colour on hover, and Phase 2 replaces that with relief."
       >
         <div className="grid gap-3 md:grid-cols-2">
           <ContrastRow label="ink-primary on surface-page" fg="--ink-primary" bg="--surface-page" />
@@ -192,20 +202,30 @@ export default function ThemeDemoPage() {
           <ContrastRow label="ink-secondary on surface-raised" fg="--ink-secondary" bg="--surface-raised" />
           <ContrastRow label="ink-secondary on surface-page" fg="--ink-secondary" bg="--surface-page" />
           <ContrastRow label="ink-on-accent on accent" fg="--ink-on-accent" bg="--accent" />
+          <ContrastRow label="ink-on-accent on accent-hover" fg="--ink-on-accent" bg="--accent-hover" />
           <ContrastRow label="ink-inverse on surface-inverse" fg="--ink-inverse" bg="--surface-inverse" />
         </div>
       </Section>
 
       <Section
         title="Relief"
-        note="Controls only. Cards and sections stay flat — this is the whole neumorphism budget."
+        note="Controls only. Cards and sections stay flat — this is the whole neumorphism budget. Hover and press the first control: state is carried by depth, not by a colour swap."
       >
         <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-card)] bg-surface-raised p-8">
+          <button className="relief-control rounded-[var(--btn-radius)] bg-surface-raised px-6 py-3 text-ink-primary">
+            Hover me
+          </button>
           <button className="relief-raised rounded-[var(--btn-radius)] bg-surface-raised px-6 py-3 text-ink-primary">
             Raised
           </button>
           <button className="relief-pressed rounded-[var(--btn-radius)] bg-surface-raised px-6 py-3 text-ink-primary">
             Pressed
+          </button>
+          <button
+            className="relief-control rounded-[var(--btn-radius)] px-6 py-3 font-semibold"
+            style={{ background: 'var(--accent)', color: 'var(--ink-on-accent)' }}
+          >
+            Drop Bean
           </button>
           <input
             className="relief-pressed rounded-[var(--input-radius)] bg-surface-raised px-4 text-ink-primary outline-hidden"

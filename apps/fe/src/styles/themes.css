@@ -1,6 +1,13 @@
 /*
   Layer 1 — primitive.
 
+  Muted ink in the three light themes was a mid-tone on a near-white ground and failed
+  WCAG AA (as low as 2.35:1). Each was pulled toward its own theme's text colour until
+  both of its surfaces clear 4.5:1 with headroom, so no theme gained a new hue. Dark Roast already
+  passed and is unchanged. Matcha Latte's accent was also too light to carry a button
+  label, so it took over the darker green the theme already owned and its hover moved
+  down to make room.
+
   The only file in the app that contains colour literals. Each theme fills the same
   set of slots; every other token is derived from these in tokens.css, so a new theme
   means filling in this block and nothing else.
@@ -18,7 +25,7 @@
   --c-raised: #f5f0e8;
   --c-elevated: #f5f0e8;
   --c-ink: #442f19;
-  --c-ink-soft: #93795d;
+  --c-ink-soft: #715940;
   --c-edge: #c2ac93;
   --c-on-brand: #f5f0e8;
   --c-on-media: #f5f0e8;
@@ -69,23 +76,23 @@
 }
 
 [data-theme='matchaLatte'] {
-  --c-brand: #85a035;
-  --c-brand-soft: #5d7025;
+  --c-brand: #5d7025;
+  --c-brand-soft: #4c5c1e;
   --c-accent: #a9bc71;
   --c-page: #e0e8d0;
   --c-raised: #f0f2e8;
   --c-elevated: #f0f2e8;
   --c-ink: #4a5c2a;
-  --c-ink-soft: #85a035;
+  --c-ink-soft: #586c2d;
   --c-edge: #a9bc71;
   --c-on-brand: #f0f2e8;
   --c-on-media: #f0f2e8;
   --c-on-auth: #e0e8d0;
-  --c-shadow: #85a035;
+  --c-shadow: #5d7025;
   --c-star: #FF8C00;
   --c-star-off: #A0A0A0;
   --c-star-off-edge: #808080;
-  --c-marker-cafe: #85a035;
+  --c-marker-cafe: #5d7025;
   --c-marker-user: #E78E17;
   --c-success: #4CAF50;
   --c-warning: #FFC107;
@@ -105,7 +112,7 @@
   --c-raised: #FFF9F0;
   --c-elevated: #FFF9F0;
   --c-ink: #362C1D;
-  --c-ink-soft: #8B7355;
+  --c-ink-soft: #836d50;
   --c-edge: #F5E6A3;
   --c-on-brand: #FFF9F0;
   --c-on-media: #FFF9F0;
