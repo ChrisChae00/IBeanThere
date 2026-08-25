@@ -37,7 +37,7 @@ export default function ReportButton({
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`text-(--color-text-secondary) hover:text-text transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+        className={`text-ink-secondary hover:text-text transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       >
         {label}
       </button>

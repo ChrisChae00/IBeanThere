@@ -1,0 +1,74 @@
+/*
+  Layers 2 and 3 — semantic and component tokens.
+
+  Authored once, never per theme. Everything here resolves through the layer-1 slots
+  in themes.css, so switching themes swaps one block and the whole vocabulary follows.
+
+  Feature code should read from layer 2. Layer 3 exists so a control's shape is
+  described in one place instead of being re-typed as utilities on every instance.
+*/
+
+:root {
+  /* ---- Layer 2: surfaces ---- */
+  --surface-page: var(--c-page);
+  --surface-raised: var(--c-raised);
+  --surface-elevated: var(--c-elevated);
+  --surface-sunken: color-mix(in srgb, var(--c-page) 92%, var(--c-ink));
+  --surface-hover: color-mix(in srgb, var(--c-raised) 88%, var(--c-ink));
+  --surface-inverse: var(--c-ink);
+
+  /* ---- Layer 2: ink ---- */
+  --ink-primary: var(--c-ink);
+  --ink-secondary: var(--c-ink-soft);
+  --ink-muted: color-mix(in srgb, var(--c-ink-soft) 70%, transparent);
+  --ink-on-accent: var(--c-on-brand);
+  --ink-on-media: var(--c-on-media);
+  --ink-on-auth: var(--c-on-auth);
+  --ink-inverse: var(--c-page);
+
+  /* ---- Layer 2: accent ---- */
+  --accent: var(--c-brand);
+  --accent-hover: var(--c-brand-soft);
+  --accent-muted: var(--c-accent);
+
+  /* ---- Layer 2: edges ---- */
+  --edge-subtle: color-mix(in srgb, var(--c-edge) 50%, transparent);
+  --edge-default: var(--c-edge);
+  --edge-strong: var(--c-brand);
+
+  /* ---- Layer 2: state ---- */
+  --state-success: var(--c-success);
+  --state-warning: var(--c-warning);
+  --state-danger: var(--c-danger);
+  --state-pending: #9CA3AF;
+
+  /* ---- Layer 2: domain ---- */
+  --star-filled: var(--c-star);
+  --star-empty: var(--c-star-off);
+  --star-empty-edge: var(--c-star-off-edge);
+  --marker-cafe: var(--c-marker-cafe);
+  --marker-user: var(--c-marker-user);
+  --marker-pending: var(--state-pending);
+
+  /* ---- Radius ---- */
+  /* Two values and a pill. Anything that needs a third is asking the wrong question. */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+
+  /* ---- Layer 3: component ---- */
+  --btn-radius: var(--radius-pill);
+  --btn-height-sm: 40px;
+  --btn-height-md: 48px;
+  --btn-height-lg: 56px;
+
+  --card-radius: var(--radius-card);
+  --card-pad: 1.5rem;
+  --card-edge: var(--edge-default);
+  --card-surface: var(--surface-raised);
+
+  --input-height: 48px;
+  --input-radius: var(--radius-control);
+  --input-edge: var(--edge-default);
+  --input-surface: var(--surface-raised);
+}

@@ -81,7 +81,7 @@ export default function VisitConfirmation({
               <h3 className="font-semibold text-text text-lg mb-1">
                 {cafe.name}
               </h3>
-              <p className="text-sm text-(--color-text-secondary) line-clamp-2">
+              <p className="text-sm text-ink-secondary line-clamp-2">
                 {cafe.address}
               </p>
               {cafe.rating && (
@@ -118,7 +118,7 @@ export default function VisitConfirmation({
                 onClick={handleDismiss}
                 className="
                   shrink-0 min-h-[44px] px-4 py-2.5
-                  bg-(--color-surface-2) text-(--color-text-secondary)
+                  bg-(--color-surface-2) text-ink-secondary
                   rounded-lg font-medium
                   hover:bg-border active:scale-95
                   transition-all duration-200

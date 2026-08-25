@@ -112,7 +112,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
             if (isMe) return null;
 
             return (
-              <div key={user.username} className="flex items-center justify-between p-3 hover:bg-(--color-surface-hover) transition-colors border-b border-border last:border-0">
+              <div key={user.username} className="flex items-center justify-between p-3 hover:bg-surface-hover transition-colors border-b border-border last:border-0">
                 <Link href={`/profile/${user.username}`} className="flex items-center gap-3 flex-1 cursor-pointer">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
                     {user.avatar_url ? (
@@ -131,7 +131,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
                   </div>
                   <div>
                     <p className="font-medium text-sm text-text">{user.display_name}</p>
-                    <p className="text-xs text-(--color-text-secondary)">@{user.username}</p>
+                    <p className="text-xs text-ink-secondary">@{user.username}</p>
                   </div>
                 </Link>
 
@@ -143,7 +143,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
                   }}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all ml-3
                     ${isTrusted 
-                      ? 'bg-surface border border-border text-(--color-text-secondary) hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
+                      ? 'bg-surface border border-border text-ink-secondary hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
                       : 'bg-primary text-white hover:opacity-90'
                     }`}
                 >

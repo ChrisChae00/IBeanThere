@@ -11,7 +11,7 @@ export default function SectionHeader({ title, subtitle, icon, id }: SectionHead
   return (
     <div id={id} className="flex flex-col items-center text-center mb-12 scroll-mt-24">
       {icon && (
-        <div className="mb-4 p-3 bg-surface rounded-full text-primary shadow-(--ibean-shadow-soft)">
+        <div className="mb-4 p-3 bg-surface rounded-full text-primary shadow-(--ibean-shadow-warm-sm)">
           {icon}
         </div>
       )}

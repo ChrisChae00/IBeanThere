@@ -36,7 +36,7 @@ export default function TasteMatesSection({ tasteMates, isLoading }: TasteMatesS
       <div className="mb-8 px-4">
         <div className="bg-surface rounded-xl p-6 text-center border border-border">
           <p className="text-text mb-2 font-medium">{t('no_taste_mates')}</p>
-          <p className="text-sm text-(--color-text-secondary)">
+          <p className="text-sm text-ink-secondary">
             {t('no_taste_mates_hint')}
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function TasteMatesSection({ tasteMates, isLoading }: TasteMatesS
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xl font-bold text-(--color-text-secondary)">
+                  <div className="w-full h-full flex items-center justify-center text-xl font-bold text-ink-secondary">
                     {mate.display_name.charAt(0).toUpperCase()}
                   </div>
                 )}

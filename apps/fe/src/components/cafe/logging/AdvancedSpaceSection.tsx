@@ -131,7 +131,7 @@ export default function AdvancedSpaceSection({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-background hover:bg-(--color-surfaceHover) transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between bg-background hover:bg-surface-hover transition-colors"
         aria-expanded={isExpanded}
         aria-label={t('space_work_environment')}
       >

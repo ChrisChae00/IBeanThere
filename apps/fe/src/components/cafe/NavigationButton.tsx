@@ -62,7 +62,7 @@ export default function NavigationButton({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 bg-surface text-cardText hover:bg-(--color-surfaceHover) border border-border rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
+        className={`flex items-center gap-1.5 bg-surface text-cardText hover:bg-surface-hover border border-border rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -87,7 +87,7 @@ export default function NavigationButton({
               <li key={app.id} role="none">
                 <button
                   onClick={() => handleAppClick(app.id)}
-                  className="w-full text-left px-4 py-2 text-sm text-cardText hover:bg-(--color-surfaceHover) transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 text-sm text-cardText hover:bg-surface-hover transition-colors flex items-center gap-2"
                   role="menuitem"
                 >
                   <span>{t(app.labelKey)}</span>

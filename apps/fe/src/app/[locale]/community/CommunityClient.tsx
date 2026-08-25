@@ -91,7 +91,7 @@ export default function CommunityClient() {
           <h1 className="text-3xl font-bold text-text mb-2">
             {t('title')}
           </h1>
-          <p className="text-(--color-text-secondary)">
+          <p className="text-ink-secondary">
             {t('subtitle')}
           </p>
         </div>

@@ -75,7 +75,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
             </div>
 
             {/* Reporter info */}
-            <div className="flex items-center gap-2 text-sm text-(--color-text-secondary)">
+            <div className="flex items-center gap-2 text-sm text-ink-secondary">
               <User size={14} />
               <span>{report.reporterDisplayName || report.reporterUsername || 'Unknown'}</span>
               <span>•</span>
@@ -106,7 +106,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
         {/* Expand/Collapse */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-2 flex items-center gap-1 text-sm text-(--color-text-secondary) hover:text-text"
+          className="mt-2 flex items-center gap-1 text-sm text-ink-secondary hover:text-text"
         >
           {isExpanded ? (
             <>
@@ -128,7 +128,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
           {/* Full description */}
           <div>
             <h4 className="text-sm font-medium text-text mb-2">{t('description')}</h4>
-            <p className="text-sm text-(--color-text-secondary) whitespace-pre-wrap">
+            <p className="text-sm text-ink-secondary whitespace-pre-wrap">
               {report.description}
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder={t('admin_notes_placeholder')}
               rows={3}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-cardBackground text-text placeholder-(--color-text-secondary) focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-cardBackground text-text placeholder-ink-secondary focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
             />
             {adminNotes !== (report.adminNotes || '') && (
               <Button
@@ -222,7 +222,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
 
           {/* Resolved info */}
           {report.resolvedAt && (
-            <p className="text-xs text-(--color-text-secondary)">
+            <p className="text-xs text-ink-secondary">
               {t('resolved_at')}: {formatDate(report.resolvedAt)}
             </p>
           )}

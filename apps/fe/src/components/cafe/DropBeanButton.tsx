@@ -256,7 +256,7 @@ export default function DropBeanButton({
     <div className="relative flex flex-col items-center gap-2">
       {showGrowthInfo && beanStatus?.has_bean && (
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-xs font-medium text-(--color-text-secondary)">
+          <span className="text-xs font-medium text-ink-secondary">
             {t('drops', { count: dropCount })}
           </span>
         </div>
@@ -284,7 +284,7 @@ export default function DropBeanButton({
       </Button>
 
       {!canDrop && showGrowthInfo && nextLevelAt && (
-        <div className="text-[10px] text-(--color-text-secondary) text-center mt-0.5 opacity-80">
+        <div className="text-[10px] text-ink-secondary text-center mt-0.5 opacity-80">
           {t('next_level', { drops: nextLevelAt - dropCount })}
         </div>
       )}

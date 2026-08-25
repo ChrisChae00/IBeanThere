@@ -22,10 +22,10 @@ function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
     return (
       <div className="col-span-1 bg-background border border-border rounded-xl p-4 hover:shadow-inset-primary transition-shadow">
         <div className="text-center py-12 space-y-4">
-          <div className="text-lg font-medium text-(--color-text-secondary) hover:text-text transition-colors">
+          <div className="text-lg font-medium text-ink-secondary hover:text-text transition-colors">
             {tMap('no_cafes_available')}
           </div>
-          <div className="text-(--color-text-secondary) font-semibold flex items-center justify-center gap-2 hover:text-text transition-colors">
+          <div className="text-ink-secondary font-semibold flex items-center justify-center gap-2 hover:text-text transition-colors">
             <span className="text-2xl">🧭</span>
             <span>{tMap('be_the_navigator')}</span>
           </div>
@@ -43,7 +43,7 @@ function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
 
   return (
     <div className="bg-background border border-dashed border-border rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-      <p className="text-sm text-(--color-text-secondary)">
+      <p className="text-sm text-ink-secondary">
         {tMap('few_cafes_nearby')}
       </p>
       <Link
@@ -74,7 +74,7 @@ export default function TrendingCafesSection({
         <h2 className="text-2xl font-bold text-text mb-2">
           {t('trending_this_week')}
         </h2>
-        <p className="text-(--color-text-secondary)">
+        <p className="text-ink-secondary">
           {tMap('top_cafes_subtitle')}
         </p>
       </div>

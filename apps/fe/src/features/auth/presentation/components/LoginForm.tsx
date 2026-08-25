@@ -136,13 +136,13 @@ export function LoginForm({ locale }: LoginFormProps) {
               className="w-5 h-5 text-primary border-border rounded-sm focus:ring-primary transition-all cursor-pointer accent-primary bg-surface"
             />
           </div>
-          <span className="ml-2 text-sm text-(--color-text-secondary) group-hover:text-text transition-colors select-none font-medium">
+          <span className="ml-2 text-sm text-ink-secondary group-hover:text-text transition-colors select-none font-medium">
             {t('remember_me')}
           </span>
         </label>
         <Link
           href={`/${locale}/forgot-password`}
-          className="px-2 text-sm text-(--color-text-secondary) hover:text-primary font-medium transition-colors"
+          className="px-2 text-sm text-ink-secondary hover:text-primary font-medium transition-colors"
         >
           {t('forgot_password')}
         </Link>
@@ -161,7 +161,7 @@ export function LoginForm({ locale }: LoginFormProps) {
       {/* Divider */}
       <div className="flex items-center gap-4 my-8">
         <div className="flex-1 border-t border-border"></div>
-        <span className="text-sm font-medium text-(--color-text-secondary) uppercase tracking-wider text-xs px-2">
+        <span className="text-sm font-medium text-ink-secondary uppercase tracking-wider text-xs px-2">
           {t('or_continue_with')}
         </span>
         <div className="flex-1 border-t border-border"></div>
@@ -184,7 +184,7 @@ export function LoginForm({ locale }: LoginFormProps) {
 
       {/* Sign Up Link */}
       <div className="text-center mt-8">
-        <p className="text-(--color-text-secondary) text-sm">
+        <p className="text-ink-secondary text-sm">
           {t('dont_have_account')}{' '}
           <Link
             href={`/${locale}/register`}

@@ -96,7 +96,7 @@ export default function TasteMateButton({
       </button>
       
       {trustCount > 0 && (
-        <span className="text-xs text-(--color-text-secondary) ml-1">
+        <span className="text-xs text-ink-secondary ml-1">
           {t('trust_count', { count: trustCount })}
         </span>
       )}

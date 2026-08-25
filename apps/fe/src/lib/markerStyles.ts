@@ -1,6 +1,5 @@
 import L from 'leaflet';
 import { CafeMarkerState } from '@/types/map';
-import { themes } from '@/lib/themes/palettes';
 
 function getCSSVariable(name: string): string {
   if (typeof window !== 'undefined') {
@@ -71,20 +70,12 @@ export function createCustomMarkerIcon(state: CafeMarkerState): L.DivIcon {
   });
 }
 
-export function createUserLocationIcon(paletteNameOrColor?: string, size: number = 48): L.DivIcon {
-  let markerColor: string;
-  
-  if (paletteNameOrColor) {
-    if (themes[paletteNameOrColor]) {
-      markerColor = themes[paletteNameOrColor].colors.userMarkerMap;
-    } else if (paletteNameOrColor.startsWith('#')) {
-      markerColor = paletteNameOrColor;
-    } else {
-      markerColor = getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A';
-    }
-  } else {
-    markerColor = getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A';
-  }
+export function createUserLocationIcon(overrideColor?: string, size: number = 48): L.DivIcon {
+  // The active theme already publishes its marker colour, so reading it back beats
+  // looking the palette up by name in JavaScript.
+  const markerColor = overrideColor?.startsWith('#')
+    ? overrideColor
+    : getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A';
   
   const svgIcon = `
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: ${size}px; height: ${size}px;">

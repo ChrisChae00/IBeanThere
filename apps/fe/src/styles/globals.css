@@ -1,49 +1,87 @@
 @import 'tailwindcss';
 
+@import './themes.css';
+@import './tokens.css';
+@import './legacy-tokens.css';
+
 @theme {
   --container-8xl: 90rem;
 
-  --shadow-primary:
-    0 4px 6px -1px var(--color-primary), 0 2px 4px -1px var(--color-primary);
-  --shadow-primary-lg:
-    0 10px 15px -3px var(--color-primary), 0 4px 6px -2px var(--color-primary);
-  --shadow-primary-xl:
-    0 12px 16px -4px var(--color-primary), 0 4px 8px -2px var(--color-primary);
-  --shadow-inset-primary:
-    inset -5px -10px 10px -3px
-      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
-    inset 5px 6px 10px -3px
-      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
-    inset 0px 0px 12px
-      color-mix(in srgb, var(--color-cardShadow) 50%, transparent);
-  --shadow-inset-background: inset 0 0 8px var(--color-background);
+  /*
+    New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
+    `text-ink-secondary`, `border-edge-default`, `bg-accent`.
+  */
+  --color-surface-page: var(--surface-page);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-inverse: var(--surface-inverse);
 
-  --color-primary: var(--color-primary);
-  --color-primaryText: var(--color-primaryText);
-  --color-secondary: var(--color-secondary);
-  --color-accent: var(--color-accent);
-  --color-background: var(--color-background);
-  --color-cardBackground: var(--color-cardBackground);
-  --color-surface: var(--color-surface);
-  --color-text: var(--color-text);
-  --color-textSecondary: var(--color-textSecondary);
-  --color-border: var(--color-border);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-textHero: var(--color-textHero);
-  --color-cardText: var(--color-cardText);
-  --color-cardTextSecondary: var(--color-cardTextSecondary);
-  --color-surfaceText: var(--color-surfaceText);
-  --color-surfaceTextSecondary: var(--color-surfaceTextSecondary);
-  --color-authText: var(--color-authText);
-  --color-starFilled: var(--color-starFilled);
-  --color-starEmpty: var(--color-starEmpty);
-  --color-starEmptyOutline: var(--color-starEmptyOutline);
-  --color-cardShadow: var(--color-cardShadow);
-  --color-pending: var(--color-pending);
-  --color-userMarkerMap: var(--color-userMarkerMap);
-  --color-cafeMarker: var(--color-cafeMarker);
+  --color-ink-primary: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-on-accent: var(--ink-on-accent);
+  --color-ink-on-media: var(--ink-on-media);
+  --color-ink-inverse: var(--ink-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+
+  --color-edge-subtle: var(--edge-subtle);
+  --color-edge-default: var(--edge-default);
+  --color-edge-strong: var(--edge-strong);
+
+  --color-state-success: var(--state-success);
+  --color-state-warning: var(--state-warning);
+  --color-state-danger: var(--state-danger);
+  --color-state-pending: var(--state-pending);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+
+  /*
+    Legacy names, kept so unmigrated pages keep their utility classes. DELETE IN PHASE 6
+    together with legacy-tokens.css.
+  */
+  --color-primary: var(--accent);
+  --color-primaryText: var(--ink-on-accent);
+  --color-secondary: var(--accent-hover);
+  --color-background: var(--surface-page);
+  --color-cardBackground: var(--surface-raised);
+  --color-surface: var(--surface-elevated);
+  --color-text: var(--ink-primary);
+  --color-textSecondary: var(--ink-secondary);
+  --color-border: var(--edge-default);
+  --color-success: var(--state-success);
+  --color-warning: var(--state-warning);
+  --color-error: var(--state-danger);
+  --color-textHero: var(--ink-on-media);
+  --color-cardText: var(--ink-primary);
+  --color-cardTextSecondary: var(--ink-secondary);
+  --color-surfaceText: var(--ink-primary);
+  --color-surfaceTextSecondary: var(--ink-secondary);
+  --color-authText: var(--ink-on-auth);
+  --color-starFilled: var(--star-filled);
+  --color-starEmpty: var(--star-empty);
+  --color-starEmptyOutline: var(--star-empty-edge);
+  --color-cardShadow: var(--c-shadow);
+  --color-pending: var(--state-pending);
+  --color-userMarkerMap: var(--marker-user);
+  --color-cafeMarker: var(--marker-cafe);
+
+  --shadow-primary:
+    0 4px 6px -1px var(--accent), 0 2px 4px -1px var(--accent);
+  --shadow-primary-lg:
+    0 10px 15px -3px var(--accent), 0 4px 6px -2px var(--accent);
+  --shadow-primary-xl:
+    0 12px 16px -4px var(--accent), 0 4px 8px -2px var(--accent);
+  --shadow-inset-primary:
+    inset -5px -10px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 5px 6px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 0px 0px 12px color-mix(in srgb, var(--c-shadow) 50%, transparent);
+  --shadow-inset-background: inset 0 0 8px var(--surface-page);
 }
 
 /*
@@ -226,6 +264,32 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@layer components {
+  /*
+    Neumorphic relief, lit from the top left. Deliberately scoped to interactive
+    controls — buttons, toggles, tabs, chips, the search field. Cards, sections and
+    bento cells stay flat, because relief everywhere is what makes neumorphism read as
+    muddy rather than tactile, and low-contrast card surfaces fail WCAG.
+
+    Each theme supplies its own light/dark pair from its own surface, so Dark Roast
+    gets a genuinely dark relief rather than an inverted light one.
+  */
+  .relief-raised {
+    box-shadow:
+      calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
+        var(--relief-blur) var(--relief-light),
+      var(--relief-spread) var(--relief-spread) var(--relief-blur) var(--relief-dark);
+  }
+
+  .relief-pressed {
+    box-shadow:
+      inset calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
+        var(--relief-blur) var(--relief-light),
+      inset var(--relief-spread) var(--relief-spread) var(--relief-blur)
+        var(--relief-dark);
   }
 }
 

@@ -159,7 +159,7 @@ export default function ProfileEditForm({
           placeholder={t('bio_placeholder')}
           maxLength={500}
         />
-        <p className="mt-1 text-xs text-(--color-text-secondary) text-right">
+        <p className="mt-1 text-xs text-ink-secondary text-right">
           {bio.length}/500
         </p>
       </div>

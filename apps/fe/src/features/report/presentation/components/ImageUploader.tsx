@@ -150,18 +150,18 @@ export default function ImageUploader({
           />
           <div className="flex flex-col items-center gap-2">
             {isConverting ? (
-              <svg className="w-6 h-6 animate-spin text-(--color-text-secondary)" viewBox="0 0 24 24" fill="none">
+              <svg className="w-6 h-6 animate-spin text-ink-secondary" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             ) : (
-              <Upload className="w-6 h-6 text-(--color-text-secondary)" />
+              <Upload className="w-6 h-6 text-ink-secondary" />
             )}
-            <p className="text-sm text-(--color-text-secondary)">
+            <p className="text-sm text-ink-secondary">
               {isConverting ? t('converting') : t('drag_drop_or_click')}
             </p>
             {!isConverting && (
-              <p className="text-xs text-(--color-text-secondary)">
+              <p className="text-xs text-ink-secondary">
                 {t('image_requirements', { max: maxImages, maxSize: maxSizeMB })}
               </p>
             )}
@@ -202,7 +202,7 @@ export default function ImageUploader({
       )}
 
       {/* Image count indicator */}
-      <p className="text-xs text-(--color-text-secondary)">
+      <p className="text-xs text-ink-secondary">
         {t('images_count', { count: images.length, max: maxImages })}
       </p>
     </div>

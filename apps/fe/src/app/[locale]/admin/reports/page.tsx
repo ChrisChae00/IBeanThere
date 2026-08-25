@@ -46,7 +46,7 @@ export default async function ReportsPage({ params }: ReportsPageProps) {
         <h1 className="text-3xl font-bold text-text">
           {t('page_title')}
         </h1>
-        <p className="text-(--color-text-secondary) mt-2">
+        <p className="text-ink-secondary mt-2">
           {t('page_description')}
         </p>
       </div>

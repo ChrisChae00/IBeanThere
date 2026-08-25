@@ -30,7 +30,7 @@ export default function ShopHero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a 
             href="#essentials" 
-            className="px-8 py-4 bg-primary text-primaryText rounded-full font-semibold hover:bg-secondary transition-all shadow-(--ibean-shadow-warm) hover:shadow-(--ibean-shadow-warm-lg) w-full sm:w-auto"
+            className="px-8 py-4 bg-primary text-primaryText rounded-full font-semibold hover:bg-secondary transition-all shadow-(--ibean-shadow-warm-md) hover:shadow-(--ibean-shadow-warm-lg) w-full sm:w-auto"
           >
             {t('explore_collection')}
           </a>

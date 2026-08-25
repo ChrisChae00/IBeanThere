@@ -369,7 +369,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
             </h2>
           )}
           {mapSubtitle && (
-            <p className="text-(--color-text-secondary) sm:whitespace-nowrap">
+            <p className="text-ink-secondary sm:whitespace-nowrap">
               {mapSubtitle}
             </p>
           )}
@@ -379,7 +379,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
             <button
               onClick={handleRefreshCafes}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface border border-border rounded-lg hover:bg-(--color-surface-hover) transition-colors shrink-0"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface border border-border rounded-lg hover:bg-surface-hover transition-colors shrink-0"
               title={t('refresh_cafes')}
               disabled={isLoading}
             >
@@ -388,7 +388,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
             </button>
           </div>
           {/* Results Info - Compact */}
-          <div className="flex items-center gap-2 text-xs text-(--color-text-secondary) text-right mt-2">
+          <div className="flex items-center gap-2 text-xs text-ink-secondary text-right mt-2">
             <span>
               {allCafes.length} cafes
               {isTracking && nearbyStays.length > 0 && (
@@ -425,13 +425,13 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           <div className="border border-border rounded-xl overflow-hidden h-full flex items-center justify-center bg-surface">
             <div className="text-center">
               <LoadingSpinner size="lg" />
-              <p className="text-(--color-text-secondary) mt-4 text-sm">{t('loading_location')}</p>
+              <p className="text-ink-secondary mt-4 text-sm">{t('loading_location')}</p>
             </div>
           </div>
         ) : (
           <div className="border border-border rounded-xl overflow-hidden h-full relative">
             {isTrendingFallback && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-1000 bg-surface border border-border rounded-lg px-3 py-1.5 shadow-sm text-xs text-(--color-text-secondary) whitespace-nowrap">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-1000 bg-surface border border-border rounded-lg px-3 py-1.5 shadow-sm text-xs text-ink-secondary whitespace-nowrap">
                 {t('trending_fallback_banner')}
               </div>
             )}

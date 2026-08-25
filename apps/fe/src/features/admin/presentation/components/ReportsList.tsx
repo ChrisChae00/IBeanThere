@@ -111,7 +111,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
         </div>
 
         {/* Total count */}
-        <span className="text-sm text-(--color-text-secondary)">
+        <span className="text-sm text-ink-secondary">
           {t('total_count', { count: total })}
         </span>
       </div>
@@ -126,7 +126,7 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
       {/* Empty state */}
       {!isLoading && reports.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-(--color-text-secondary)">{t('no_reports')}</p>
+          <p className="text-ink-secondary">{t('no_reports')}</p>
         </div>
       )}
 
@@ -147,17 +147,17 @@ export default function ReportsList({ initialStatus }: ReportsListProps) {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1 || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-(--color-surface-hover) disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('previous')}
           </button>
-          <span className="text-sm text-(--color-text-secondary)">
+          <span className="text-sm text-ink-secondary">
             {t('page', { page })}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={!hasMore || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-(--color-surface-hover) disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-surface text-text hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('next')}
           </button>

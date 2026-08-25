@@ -171,7 +171,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
           <div className="flex items-center gap-3">
             {isOwnProfile && onToggleCollectionsPublic && (
               <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-xs text-(--color-text-secondary)">
+                <span className="text-xs text-ink-secondary">
                   {tProfile('collections_public_label')}
                 </span>
                 <button
@@ -202,7 +202,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
         {/* Collections Grid */}
         {displayCollections.length === 0 ? (
-          <div className="text-center py-8 text-(--color-text-secondary)">
+          <div className="text-center py-8 text-ink-secondary">
             <p>{t('no_collections')}</p>
             <p className="text-sm mt-1">{t('empty_hint')}</p>
           </div>
@@ -227,14 +227,14 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                         {getCollectionName(collection)}
                       </span>
                     </div>
-                    <span className="text-sm text-(--color-text-secondary)">
+                    <span className="text-sm text-ink-secondary">
                       {t('cafes', { count: collection.item_count || 0 })}
                     </span>
                   </div>
                   
                   {/* Arrow */}
                   <svg 
-                    className="w-4 h-4 text-(--color-text-secondary) opacity-0 group-hover:opacity-100 transition-opacity shrink-0" 
+                    className="w-4 h-4 text-ink-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"

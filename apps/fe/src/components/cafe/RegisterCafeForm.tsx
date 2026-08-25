@@ -446,7 +446,7 @@ export default function RegisterCafeForm({
                 name="source_url"
                 value={formData.source_url}
                 onChange={handleInputChange}
-                className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-(--color-text-secondary)/80 min-h-[44px]"
+                className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-ink-secondary/80 min-h-[44px]"
                 placeholder={t('google_maps_url_placeholder')}
               />
               <Button
@@ -459,7 +459,7 @@ export default function RegisterCafeForm({
                 {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
               </Button>
             </div>
-            <p className="text-xs text-(--color-text-secondary) mt-2">
+            <p className="text-xs text-ink-secondary mt-2">
               {t('google_maps_url_hint')}
             </p>
           </div>
@@ -470,7 +470,7 @@ export default function RegisterCafeForm({
               <label className="block text-sm font-semibold text-text mb-1">
                 {t('location_select')}
               </label>
-              <p className="text-sm text-(--color-text-secondary)">
+              <p className="text-sm text-ink-secondary">
                 {t('select_on_map_hint')}
               </p>
               
@@ -528,7 +528,7 @@ export default function RegisterCafeForm({
                       name="postcode"
                       value={formData.postcode}
                       onChange={handleInputChange}
-                      className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-(--color-text-secondary)/80 h-[40px] text-sm"
+                      className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-ink-secondary/80 h-[40px] text-sm"
                       placeholder={t('postcode_placeholder')}
                     />
                   </div>
@@ -567,12 +567,12 @@ export default function RegisterCafeForm({
               placeholder={t('address_placeholder')}
             />
             {addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-(--color-text-secondary)">
+              <p className="mt-2 text-xs text-ink-secondary">
                 {t('address_auto_filled')}
               </p>
             )}
             {!addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-(--color-text-secondary)">
+              <p className="mt-2 text-xs text-ink-secondary">
                 {t('address_edit_hint')}
               </p>
             )}
