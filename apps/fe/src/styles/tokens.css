@@ -94,6 +94,13 @@
   --radius-pill: 9999px;
 
   /* ---- Layer 3: component ---- */
+  /*
+    PROVISIONAL. Buttons went from rounded-2xl to a full pill when Phase 2b wired them to
+    this token, which is a large change to accept sight-unseen across every button in the
+    app. It was taken deliberately, but as a hold rather than a verdict: there was nothing
+    to judge it against yet. Revisit once Header + Landing exist (Phase 3) — switching to
+    `--radius-card` is this one line.
+  */
   --btn-radius: var(--radius-pill);
   --btn-height-sm: 40px;
   --btn-height-md: 48px;
