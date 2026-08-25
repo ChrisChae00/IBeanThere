@@ -167,9 +167,23 @@
       "calt" on;
   }
 
+  /*
+    Headings drive their weight through the variation axis, not just `font-weight`.
+
+    112 headings across the app still carry `font-bold` from before the display faces
+    existed, and a utility beats the base layer. On Korean that pushed Hahmlet to 700,
+    where its serif detail flattens into a plain gothic - losing the one thing it was
+    chosen for. `font-variation-settings` wins over `font-weight` on a variable font, so
+    the token governs regardless.
+
+    The consequence is deliberate: weight utilities do nothing to a heading. Display
+    weight is a system decision, set in tokens.css, not a per-instance one. Both display
+    faces are variable, so this holds for either locale.
+  */
   h1 {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(2rem, 3vw, 3rem);
     line-height: 1.2;
     letter-spacing: -0.03em;
@@ -178,6 +192,7 @@
   h2 {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(1.75rem, 2.5vw, 2.25rem);
     line-height: 1.25;
     letter-spacing: -0.02em;
@@ -186,6 +201,7 @@
   h3 {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(1.5rem, 2vw, 1.75rem);
     line-height: 1.3;
   }
@@ -208,6 +224,7 @@
   .type-display {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(2rem, 3vw, 3rem);
     line-height: 1.2;
     letter-spacing: -0.03em;

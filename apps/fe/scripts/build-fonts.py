@@ -49,10 +49,10 @@ def process(css, slug, keep_subsets=None, base=None):
     return out
 
 blocks = {}
-blocks['instrument-serif'] = process(gf_css('Instrument+Serif:ital@0;1'), 'instrument-serif')
+blocks['playfair-display'] = process(gf_css('Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,700'), 'playfair-display')
 blocks['inter'] = process(gf_css('Inter:wght@400;500;600;700'), 'inter',
                           keep_subsets={'latin', 'latin-ext'})
-blocks['noto-sans-kr'] = process(gf_css('Noto+Sans+KR:wght@400;500;700'), 'noto-sans-kr')
+blocks['hahmlet'] = process(gf_css('Hahmlet:wght@400;500;600;700'), 'hahmlet')
 
 pd = fetch('https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/'
            'pretendardvariable-dynamic-subset.css', ua=False).decode()
@@ -70,9 +70,9 @@ header = """/*
 
   Regenerate with scripts/build-fonts.py after changing a family or weight.
 
-  Instrument Serif  OFL 1.1  https://fonts.google.com/specimen/Instrument+Serif
+  Playfair Display  OFL 1.1  https://fonts.google.com/specimen/Playfair+Display
   Inter             OFL 1.1  https://fonts.google.com/specimen/Inter
-  Noto Sans KR      OFL 1.1  https://fonts.google.com/specimen/Noto+Sans+KR
+  Hahmlet           OFL 1.1  https://fonts.google.com/specimen/Hahmlet
   Pretendard        OFL 1.1  https://github.com/orioncactus/pretendard
 */
 """

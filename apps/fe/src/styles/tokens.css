@@ -51,16 +51,18 @@
 
   /* ---- Typography ---- */
   /*
-    English and Korean each get their own pair, and each stack lists the other locale's
-    face as its fallback so a stray Korean word in an English page still renders.
+    A serif for headings and a sans for everything else, in both languages, so the two
+    locales read as one system. Each stack lists the other locale's face as its
+    fallback: cafe names on the English site are Korean, so that path is used in
+    practice, not just in theory.
 
-    The weight is a token because Instrument Serif ships in one weight: asking it for
-    700 produces a synthetic bold, which is exactly the smeared look a display serif is
-    chosen to avoid. English headings sit at 400 by design; Korean headings need 700 to
-    carry the same presence.
+    The weight stays a token because the two display faces do not carry the same weight
+    at the same number - Playfair's 700 and Hahmlet's 600 sit at a comparable density on
+    screen, and matching the number instead of the density makes one locale look heavier
+    than the other.
   */
-  --font-display: 'Instrument Serif', 'Noto Sans KR', Georgia, serif;
-  --font-display-weight: 400;
+  --font-display: 'Playfair Display', 'Hahmlet', Georgia, serif;
+  --font-display-weight: 700;
   --font-body:
     'Inter', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
@@ -109,8 +111,8 @@
 }
 
 :root:lang(ko) {
-  --font-display: 'Noto Sans KR', 'Instrument Serif', sans-serif;
-  --font-display-weight: 700;
+  --font-display: 'Hahmlet', 'Playfair Display', serif;
+  --font-display-weight: 600;
   --font-body:
     'Pretendard Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
