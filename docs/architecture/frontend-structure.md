@@ -74,6 +74,12 @@ Three layers, each with one job:
    means filling this block and nothing else.
 2. **Semantic** (`tokens.css`) — `surface-*`, `ink-*`, `accent*`, `edge-*`, `state-*`,
    plus domain tokens for stars and map markers. **Feature code reads this layer.**
+
+   One naming wrinkle: the brand colour reaches Tailwind as `brand`, not `accent`
+   (`bg-brand`, `text-brand`). The old palette already had an `accent` — a pale tint —
+   and unmigrated pages still ask for it by that name, so the legacy meaning keeps the
+   utility name and the semantic token is exposed under its own. The CSS custom
+   property is still `--accent`; only the utility differs.
 3. **Component** (`tokens.css`) — `--btn-*`, `--card-*`, `--input-*`, derived from
    layer 2 and never overridden per theme.
 

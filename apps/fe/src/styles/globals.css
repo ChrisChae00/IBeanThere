@@ -13,7 +13,7 @@
 
   /*
     New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
-    `text-ink-secondary`, `border-edge-default`, `bg-accent`.
+    `text-ink-secondary`, `border-edge-default`, `bg-brand`.
   */
   --color-surface-page: var(--surface-page);
   --color-surface-raised: var(--surface-raised);
@@ -28,9 +28,15 @@
   --color-ink-on-media: var(--ink-on-media);
   --color-ink-inverse: var(--ink-inverse);
 
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-muted: var(--accent-muted);
+  /*
+    The brand colour is exposed as `brand`, not `accent`. The old palette already had an
+    `accent` - a pale tint used for tinted chips, soft borders and button hovers - and
+    unmigrated pages still ask for it by that name. Handing `accent` to the brand colour
+    would silently repaint all of them, so the legacy meaning keeps the name and the new
+    semantic takes its own.
+  */
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
 
   --color-edge-subtle: var(--edge-subtle);
   --color-edge-default: var(--edge-default);
@@ -51,6 +57,8 @@
   --color-primary: var(--accent);
   --color-primaryText: var(--ink-on-accent);
   --color-secondary: var(--accent-hover);
+  /* The old palette's pale accent, which is exactly what `--accent-muted` holds. */
+  --color-accent: var(--accent-muted);
   --color-background: var(--surface-page);
   --color-cardBackground: var(--surface-raised);
   --color-surface: var(--surface-elevated);
