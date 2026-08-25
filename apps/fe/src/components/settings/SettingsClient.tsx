@@ -155,8 +155,8 @@ export default function SettingsClient() {
           {/* Withdrawal (Coming Soon) */}
           <div className="border-t border-border/60 pt-3">
             <div className="flex items-center justify-between p-3 rounded-lg opacity-50 cursor-not-allowed">
-              <span className="text-(--color-text-secondary)">{t('withdrawal')}</span>
-              <span className="text-xs text-(--color-text-secondary) bg-surface px-2 py-1 rounded-sm">
+              <span className="text-ink-secondary">{t('withdrawal')}</span>
+              <span className="text-xs text-ink-secondary bg-surface px-2 py-1 rounded-sm">
                 {t('withdrawal_coming_soon')}
               </span>
             </div>
@@ -247,7 +247,7 @@ export default function SettingsClient() {
           {/* Version */}
           <div className="flex items-center justify-between p-3 rounded-lg">
             <span className="text-text">{t('version')}</span>
-            <span className="text-(--color-text-secondary)">v1.0.0</span>
+            <span className="text-ink-secondary">v1.0.0</span>
           </div>
 
           {/* Terms of Service */}

@@ -119,11 +119,11 @@ export default function NearbyCafeAlert({
                         <h3 className="font-bold text-text text-base mb-1 line-clamp-1">
                           {cafe.name}
                         </h3>
-                        <p className="text-xs text-(--color-text-secondary) line-clamp-2 mb-2 italic">
+                        <p className="text-xs text-ink-secondary line-clamp-2 mb-2 italic">
                           {cafe.address}
                         </p>
                         <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-(--color-surface-2) rounded-full text-[10px] font-bold text-(--color-text-secondary)">
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-(--color-surface-2) rounded-full text-[10px] font-bold text-ink-secondary">
                             <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                             {distance}{t('meters')}
                           </div>

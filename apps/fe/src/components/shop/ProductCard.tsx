@@ -27,12 +27,12 @@ export default function ProductCard({
 
   return (
     <div 
-      className="group relative bg-surface rounded-xl overflow-hidden shadow-(--ibean-shadow-soft) hover:shadow-(--ibean-shadow-warm) transition-all duration-300 border border-border flex flex-col h-full"
+      className="group relative bg-surface rounded-xl overflow-hidden shadow-(--ibean-shadow-warm-sm) hover:shadow-(--ibean-shadow-warm-md) transition-all duration-300 border border-border flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-(--color-surface-hover)">
+      <div className="relative aspect-square w-full overflow-hidden bg-surface-hover">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -68,7 +68,7 @@ export default function ProductCard({
           {tags.map((tag, index) => (
             <span 
               key={index}
-              className="text-xs font-medium px-2 py-1 rounded-md bg-(--color-surface-hover) text-textSecondary"
+              className="text-xs font-medium px-2 py-1 rounded-md bg-surface-hover text-textSecondary"
             >
               {t(`tags.${tag}` as any)}
             </span>

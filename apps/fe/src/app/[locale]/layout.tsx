@@ -9,6 +9,11 @@ import { ClientProviders } from '@/components/providers';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { getSiteUrl, buildAlternateLanguages, type Locale } from '@/lib/seo';
+import { defaultThemeName, themeNames } from '@/lib/themes/palettes';
+
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t&&${JSON.stringify(
+  themeNames
+)}.indexOf(t)>-1){document.documentElement.dataset.theme=t}}catch(e){}})()`;
 
 // Dynamic metadata generation with i18n support
 export async function generateMetadata({
@@ -55,7 +60,14 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
   
   return (
-    <html lang={locale} className="h-full" suppressHydrationWarning>
+    <html lang={locale} className="h-full" data-theme={defaultThemeName} suppressHydrationWarning>
+      <head>
+        <script
+          // Applies the saved theme before the first paint. Without it the page paints
+          // in the default theme and then swaps, which reads as a flash on every load.
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
+      </head>
       <body className="h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
           <ToastProvider>

@@ -182,7 +182,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         {/* Back Button */}
         <button 
             onClick={() => router.back()} 
-            className="flex items-center text-sm text-(--color-text-secondary) hover:text-primary transition-colors mb-4"
+            className="flex items-center text-sm text-ink-secondary hover:text-primary transition-colors mb-4"
         >
             <ArrowLeft className="w-4 h-4 mr-1" />
             {t('back')}
@@ -247,13 +247,13 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
             </div>
             
             {/* Username */}
-            <p className="text-(--color-text-secondary) font-medium">
+            <p className="text-ink-secondary font-medium">
               @{profile.username}
             </p>
             
             {/* Bio */}
             {profile.bio && (
-              <p className="text-(--color-text-secondary) max-w-2xl leading-relaxed">
+              <p className="text-ink-secondary max-w-2xl leading-relaxed">
                 {profile.bio}
               </p>
             )}
@@ -276,7 +276,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
             {/* Trust Count & Member Since */}
             <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
               {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-(--color-text-secondary)">
+                <span className="text-ink-secondary">
                   <span className="font-semibold text-primary">
                     {profile.trust_count}
                   </span>
@@ -326,12 +326,12 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
                       : collection.icon_type === 'save_later' ? tCollections('save_later')
                       : collection.name}
                   </span>
-                  <span className="text-sm text-(--color-text-secondary)">
+                  <span className="text-sm text-ink-secondary">
                     {tCollections('items', { count: collection.item_count || 0 })}
                   </span>
                 </div>
                 <svg
-                  className="w-4 h-4 text-(--color-text-secondary) opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  className="w-4 h-4 text-ink-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

@@ -1,0 +1,119 @@
+/*
+  Layers 2 and 3 — semantic and component tokens.
+
+  Authored once, never per theme. Everything here resolves through the layer-1 slots
+  in themes.css, so switching themes swaps one block and the whole vocabulary follows.
+
+  Feature code should read from layer 2. Layer 3 exists so a control's shape is
+  described in one place instead of being re-typed as utilities on every instance.
+*/
+
+:root {
+  /* ---- Layer 2: surfaces ---- */
+  --surface-page: var(--c-page);
+  --surface-raised: var(--c-raised);
+  --surface-elevated: var(--c-elevated);
+  --surface-sunken: color-mix(in srgb, var(--c-page) 92%, var(--c-ink));
+  --surface-hover: color-mix(in srgb, var(--c-raised) 88%, var(--c-ink));
+  --surface-inverse: var(--c-ink);
+
+  /* ---- Layer 2: ink ---- */
+  --ink-primary: var(--c-ink);
+  --ink-secondary: var(--c-ink-soft);
+  --ink-on-accent: var(--c-on-brand);
+  --ink-on-media: var(--c-on-media);
+  --ink-on-auth: var(--c-on-auth);
+  --ink-inverse: var(--c-page);
+
+  /* ---- Layer 2: accent ---- */
+  --accent: var(--c-brand);
+  --accent-hover: var(--c-brand-soft);
+  --accent-muted: var(--c-accent);
+
+  /* ---- Layer 2: edges ---- */
+  --edge-subtle: color-mix(in srgb, var(--c-edge) 50%, transparent);
+  --edge-default: var(--c-edge);
+  --edge-strong: var(--c-brand);
+
+  /* ---- Layer 2: state ---- */
+  --state-success: var(--c-success);
+  --state-warning: var(--c-warning);
+  --state-danger: var(--c-danger);
+  --state-pending: #9CA3AF;
+
+  /* ---- Layer 2: domain ---- */
+  --star-filled: var(--c-star);
+  --star-empty: var(--c-star-off);
+  --star-empty-edge: var(--c-star-off-edge);
+  --marker-cafe: var(--c-marker-cafe);
+  --marker-user: var(--c-marker-user);
+  --marker-pending: var(--state-pending);
+
+  /* ---- Typography ---- */
+  /*
+    A serif for headings and a sans for everything else, in both languages, so the two
+    locales read as one system. Each stack lists the other locale's face as its
+    fallback: cafe names on the English site are Korean, so that path is used in
+    practice, not just in theory.
+
+    The weight stays a token because the two display faces do not carry the same weight
+    at the same number - Playfair's 700 and Hahmlet's 600 sit at a comparable density on
+    screen, and matching the number instead of the density makes one locale look heavier
+    than the other.
+  */
+  --font-display: 'Playfair Display', 'Hahmlet', Georgia, serif;
+  --font-display-weight: 700;
+  --font-body:
+    'Inter', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+
+  /* ---- Relief shadows ---- */
+  /*
+    Composed once so the utilities stay readable and every state is guaranteed to share
+    one light source: highlight up-left, shadow down-right.
+  */
+  --relief-shadow-raised:
+    calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
+      var(--relief-blur) var(--relief-light),
+    var(--relief-spread) var(--relief-spread) var(--relief-blur) var(--relief-dark);
+  --relief-shadow-lifted:
+    calc(var(--relief-spread) * -1.4) calc(var(--relief-spread) * -1.4)
+      calc(var(--relief-blur) * 1.5) var(--relief-light),
+    calc(var(--relief-spread) * 1.4) calc(var(--relief-spread) * 1.4)
+      calc(var(--relief-blur) * 1.5) var(--relief-dark);
+  --relief-shadow-pressed:
+    inset calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
+      var(--relief-blur) var(--relief-light),
+    inset var(--relief-spread) var(--relief-spread) var(--relief-blur)
+      var(--relief-dark);
+
+  /* ---- Radius ---- */
+  /* Two values and a pill. Anything that needs a third is asking the wrong question. */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+
+  /* ---- Layer 3: component ---- */
+  --btn-radius: var(--radius-pill);
+  --btn-height-sm: 40px;
+  --btn-height-md: 48px;
+  --btn-height-lg: 56px;
+
+  --card-radius: var(--radius-card);
+  --card-pad: 1.5rem;
+  --card-edge: var(--edge-default);
+  --card-surface: var(--surface-raised);
+
+  --input-height: 48px;
+  --input-radius: var(--radius-control);
+  --input-edge: var(--edge-default);
+  --input-surface: var(--surface-raised);
+}
+
+:root:lang(ko) {
+  --font-display: 'Hahmlet', 'Playfair Display', serif;
+  --font-display-weight: 600;
+  --font-body:
+    'Pretendard Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+}

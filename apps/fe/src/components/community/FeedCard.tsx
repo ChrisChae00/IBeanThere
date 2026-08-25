@@ -68,7 +68,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       {/* Header - User Info */}
       <div className="flex items-center gap-3 p-4 pb-3">
         <Link href={`/profile/${item.username}`}>
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-(--color-muted) ring-2 ring-primary/10">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-sunken ring-2 ring-primary/10">
             {item.avatar_url ? (
               <Image
                 src={item.avatar_url}
@@ -78,7 +78,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
                 className="object-cover w-full h-full"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-(--color-text-secondary) bg-linear-to-br from-primary/20 to-accent/20">
+              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-ink-secondary bg-linear-to-br from-primary/20 to-accent/20">
                 {item.display_name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -91,8 +91,8 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
                 {item.display_name}
               </span>
             </Link>
-            <span className="text-(--color-text-secondary) text-sm">·</span>
-            <span className="text-xs text-(--color-text-secondary)">{formatDate(item.visited_at)}</span>
+            <span className="text-ink-secondary text-sm">·</span>
+            <span className="text-xs text-ink-secondary">{formatDate(item.visited_at)}</span>
           </div>
           {/* Cafe Location Tag */}
           <Link href={`/cafes/${item.cafe_id}`}>
@@ -135,7 +135,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       {hasPhotos && (
         <div className="relative">
           {item.photo_urls!.length === 1 ? (
-            <div className="relative aspect-16/10 bg-(--color-muted)">
+            <div className="relative aspect-16/10 bg-surface-sunken">
               <Image
                 src={item.photo_urls![0]}
                 alt={item.cafe_name}
@@ -146,7 +146,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
           ) : (
             <div className="grid grid-cols-2 gap-0.5">
               {item.photo_urls!.slice(0, 4).map((url, idx) => (
-                <div key={idx} className="relative aspect-square bg-(--color-muted)">
+                <div key={idx} className="relative aspect-square bg-surface-sunken">
                   <Image src={url} alt={`${item.cafe_name} ${idx + 1}`} fill className="object-cover" />
                   {idx === 3 && item.photo_urls!.length > 4 && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -169,7 +169,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all
               ${item.is_liked_by_me 
                 ? 'text-red-500 bg-red-50 dark:bg-red-500/10' 
-                : 'text-(--color-text-secondary) hover:bg-(--color-muted)'
+                : 'text-ink-secondary hover:bg-surface-sunken'
               } disabled:opacity-50`}
           >
             <Heart className={`w-4 h-4 ${item.is_liked_by_me ? 'fill-red-500' : ''}`} />
@@ -180,12 +180,12 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
         <div className="flex items-center gap-2">
           <Link
             href={`/cafes/${item.cafe_id}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-muted) transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-ink-secondary hover:bg-surface-sunken transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline">{t('view_cafe')}</span>
           </Link>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-muted) transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-ink-secondary hover:bg-surface-sunken transition-colors">
             <Share2 className="w-4 h-4" />
           </button>
         </div>

@@ -130,7 +130,7 @@ export default function PhotoUploadWithMain({
       <label className="block text-sm font-medium text-text">
         {t('photos_label')} ({photos.length}/{maxPhotos})
       </label>
-      <p className="text-xs text-(--color-text-secondary) mb-2">
+      <p className="text-xs text-ink-secondary mb-2">
         {t('photos_hint')}
       </p>
 
@@ -184,7 +184,7 @@ export default function PhotoUploadWithMain({
       )}
 
       {convertingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-(--color-text-secondary)">
+        <div className="flex items-center gap-2 text-sm text-ink-secondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -194,7 +194,7 @@ export default function PhotoUploadWithMain({
       )}
 
       {uploadingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-(--color-text-secondary)">
+        <div className="flex items-center gap-2 text-sm text-ink-secondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -217,11 +217,11 @@ export default function PhotoUploadWithMain({
               : 'border-border hover:border-primary/50 cursor-pointer'
           }`}
         >
-          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-(--color-text-secondary)" />
-          <p className="text-sm text-(--color-text-secondary)">
+          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-ink-secondary" />
+          <p className="text-sm text-ink-secondary">
             {tLog('drag_drop_photos')} {tLog('or')} {tLog('click_to_upload')}
           </p>
-          <p className="text-xs text-(--color-text-secondary) mt-1">
+          <p className="text-xs text-ink-secondary mt-1">
             {tLog('max_photos', { max: maxPhotos })} ({tLog('max_size')}: {maxSizeMB}MB)
           </p>
           <input

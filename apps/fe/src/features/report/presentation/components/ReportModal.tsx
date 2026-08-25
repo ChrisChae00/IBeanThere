@@ -134,9 +134,9 @@ export default function ReportModal({
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 rounded-full hover:bg-(--color-surface-hover) transition-colors"
+            className="p-2 rounded-full hover:bg-surface-hover transition-colors"
           >
-            <X className="w-5 h-5 text-(--color-text-secondary)" />
+            <X className="w-5 h-5 text-ink-secondary" />
           </button>
         </div>
 
@@ -151,7 +151,7 @@ export default function ReportModal({
             <h3 className="text-lg font-semibold text-text mb-2">
               {t('success_title')}
             </h3>
-            <p className="text-(--color-text-secondary)">
+            <p className="text-ink-secondary">
               {t('success_message')}
             </p>
           </div>
@@ -189,9 +189,9 @@ export default function ReportModal({
                 rows={4}
                 maxLength={2000}
                 placeholder={t('description_placeholder')}
-                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text placeholder-(--color-text-secondary) focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text placeholder-ink-secondary focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
               />
-              <p className="text-xs text-(--color-text-secondary) mt-1">
+              <p className="text-xs text-ink-secondary mt-1">
                 {description.length}/2000
               </p>
             </div>

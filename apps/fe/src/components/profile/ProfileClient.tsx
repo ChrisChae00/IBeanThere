@@ -141,13 +141,13 @@ export default function ProfileClient() {
             </div>
             
             {/* Username */}
-            <p className="text-(--color-text-secondary) font-medium">
+            <p className="text-ink-secondary font-medium">
               @{profile.username}
             </p>
             
             {/* Bio */}
             {profile.bio && (
-              <p className="text-(--color-text-secondary) max-w-2xl leading-relaxed">
+              <p className="text-ink-secondary max-w-2xl leading-relaxed">
                 {profile.bio}
               </p>
             )}
@@ -170,7 +170,7 @@ export default function ProfileClient() {
             {/* Trust Count & Member Since */}
             <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
               {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-(--color-text-secondary)">
+                <span className="text-ink-secondary">
                   <span className="font-semibold text-primary">
                     {profile.trust_count}
                   </span>

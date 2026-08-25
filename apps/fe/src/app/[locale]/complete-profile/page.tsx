@@ -43,7 +43,7 @@ export default function CompleteProfilePage(
         <h2 className="text-2xl font-bold text-(--color-text-primary) mb-2">
           {t('finish_setup')}
         </h2>
-        <p className="text-(--color-text-secondary)">
+        <p className="text-ink-secondary">
           {t('finish_setup_desc')}
         </p>
       </div>

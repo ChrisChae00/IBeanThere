@@ -108,7 +108,7 @@ export default function NearbyPage(
               <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
                 {t('title')}
               </h1>
-              <p className="text-xl text-(--color-text-secondary)">
+              <p className="text-xl text-ink-secondary">
                 {t('subtitle')}
               </p>
             </div>

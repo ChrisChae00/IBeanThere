@@ -112,7 +112,7 @@ export default function RegisterCafePage() {
                   {tMap('map_title')}
                 </h2>
                 <div className="px-2 flex items-center justify-between gap-4">
-                  <p className="text-(--color-text-secondary)">
+                  <p className="text-ink-secondary">
                     {t('select_on_map_hint')}
                   </p>
                   <button
@@ -142,7 +142,7 @@ export default function RegisterCafePage() {
                   <div className="flex items-center justify-center h-full bg-background">
                     <div className="text-center">
                       <LoadingSpinner size="lg" />
-                      <p className="mt-4 text-(--color-text-secondary)">
+                      <p className="mt-4 text-ink-secondary">
                         {locationLoading ? tMap('loading_location') : tMap('location_permission_title')}
                       </p>
                       {!locationLoading && !locationError && (

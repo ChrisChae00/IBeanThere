@@ -39,7 +39,7 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
         <h3 className="text-base font-semibold text-text mb-0.5 line-clamp-1" title={cafe.name}>
           {cafe.name}
         </h3>
-        <p className="text-xs text-(--color-text-secondary) mb-2 truncate" title={cafe.address}>
+        <p className="text-xs text-ink-secondary mb-2 truncate" title={cafe.address}>
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-1">

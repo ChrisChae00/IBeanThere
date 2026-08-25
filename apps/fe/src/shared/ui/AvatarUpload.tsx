@@ -110,7 +110,7 @@ export default function AvatarUpload({
         </div>
       </button>
 
-      <span className="text-xs text-(--color-text-secondary)">
+      <span className="text-xs text-ink-secondary">
         {isConverting ? t('converting_avatar') : t('change_avatar')}
       </span>
 

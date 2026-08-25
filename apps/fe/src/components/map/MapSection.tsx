@@ -9,7 +9,7 @@ const MapWithFilters = dynamic(() => import('./MapWithFilters'), {
     <div className="flex items-center justify-center h-full min-h-[500px] bg-surface rounded-xl">
       <div className="text-center">
         <LoadingSpinner size="lg" />
-        <p className="text-(--color-text-secondary) mt-4">Loading map...</p>
+        <p className="text-ink-secondary mt-4">Loading map...</p>
       </div>
     </div>
   )

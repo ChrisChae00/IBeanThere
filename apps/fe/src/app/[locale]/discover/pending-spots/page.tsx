@@ -126,7 +126,7 @@ export default function PendingSpotsPage() {
               <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
                 {t('title')}
               </h1>
-              <p className="text-xl text-(--color-text-secondary)">
+              <p className="text-xl text-ink-secondary">
                 {t('subtitle')}
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function PendingSpotsPage() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'nearby'
                   ? 'bg-primary text-primaryText'
-                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
+                  : 'bg-surface text-text border border-border hover:bg-surface-hover'
               } ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {locale === 'ko' ? '가까운 순' : 'Nearby'}
@@ -161,7 +161,7 @@ export default function PendingSpotsPage() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'newest'
                   ? 'bg-primary text-primaryText'
-                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
+                  : 'bg-surface text-text border border-border hover:bg-surface-hover'
               }`}
             >
               {locale === 'ko' ? '최신순' : 'Newest'}
@@ -171,14 +171,14 @@ export default function PendingSpotsPage() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 sortMode === 'verification'
                   ? 'bg-primary text-primaryText'
-                  : 'bg-surface text-text border border-border hover:bg-(--color-surface-hover)'
+                  : 'bg-surface text-text border border-border hover:bg-surface-hover'
               }`}
             >
               {locale === 'ko' ? '검증 필요' : 'Needs Verification'}
             </button>
           </div>
           {sortMode === 'nearby' && !coords && (
-            <p className="text-sm text-(--color-text-secondary) mt-2">
+            <p className="text-sm text-ink-secondary mt-2">
               {locale === 'ko' ? '위치 권한을 허용하면 가까운 카페를 볼 수 있습니다' : 'Enable location to see cafes near you'}
             </p>
           )}
@@ -216,7 +216,7 @@ export default function PendingSpotsPage() {
                 <div className="text-2xl font-bold text-text">
                   {t('no_pending')}
                 </div>
-                <p className="text-(--color-text-secondary) max-w-md mx-auto">
+                <p className="text-ink-secondary max-w-md mx-auto">
                   {locale === 'ko' 
                     ? '지역에서 새로운 카페를 발견하고 등록해보세요!' 
                     : 'Be the first to discover and register a new cafe in your neighborhood!'}
@@ -247,7 +247,7 @@ export default function PendingSpotsPage() {
                         {cafe.status === 'pending' ? (locale === 'ko' ? '대기중' : 'Pending') : cafe.status}
                       </span>
                       {cafe.distance !== undefined && (
-                        <span className="text-xs text-(--color-text-secondary) font-medium">
+                        <span className="text-xs text-ink-secondary font-medium">
                           📍 {formatDistance(cafe.distance)}
                         </span>
                       )}
@@ -258,14 +258,14 @@ export default function PendingSpotsPage() {
                   <h3 className="text-lg font-bold text-text mb-2 truncate" title={cafe.name}>
                     {cafe.name}
                   </h3>
-                  <p className="text-sm text-(--color-text-secondary) mb-4 line-clamp-2" title={cafe.address}>
+                  <p className="text-sm text-ink-secondary mb-4 line-clamp-2" title={cafe.address}>
                     {cafe.address}
                   </p>
 
                   {/* Metadata */}
                   <div className="space-y-2 mb-4 text-sm">
                     {cafe.created_at && (
-                      <div className="flex items-center gap-2 text-(--color-text-secondary)">
+                      <div className="flex items-center gap-2 text-ink-secondary">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -275,7 +275,7 @@ export default function PendingSpotsPage() {
                       </div>
                     )}
                     {cafe.verification_count && (
-                      <div className="flex items-center gap-2 text-(--color-text-secondary)">
+                      <div className="flex items-center gap-2 text-ink-secondary">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>

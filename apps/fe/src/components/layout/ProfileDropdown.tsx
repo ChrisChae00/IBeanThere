@@ -60,7 +60,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
           {displayName}
         </span>
         <svg 
-          className={`w-4 h-4 text-(--color-text-secondary) transition-transform ${
+          className={`w-4 h-4 text-ink-secondary transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`} 
           fill="none" 

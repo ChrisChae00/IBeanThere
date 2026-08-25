@@ -54,7 +54,7 @@ export default function LocationPermissionOverlay({
           </h3>
 
           {/* Description */}
-          <p className="text-(--color-text-secondary) mb-6 leading-relaxed">
+          <p className="text-ink-secondary mb-6 leading-relaxed">
             {t('location_permission_reason')}
           </p>
 
@@ -62,7 +62,7 @@ export default function LocationPermissionOverlay({
           {permissionState === 'denied' ? (
             <div className="animate-fade-in">
               {/* Browser Tabs */}
-              <div className="flex p-1 bg-(--color-surface-hover) rounded-lg mb-4">
+              <div className="flex p-1 bg-surface-hover rounded-lg mb-4">
                 {browsers.map((browser) => (
                   <button
                     key={browser.id}
@@ -70,7 +70,7 @@ export default function LocationPermissionOverlay({
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
                       activeBrowser === browser.id
                         ? 'bg-surface text-text shadow-xs'
-                        : 'text-(--color-text-secondary) hover:text-text'
+                        : 'text-ink-secondary hover:text-text'
                     }`}
                   >
                     {browser.label}
@@ -83,7 +83,7 @@ export default function LocationPermissionOverlay({
                 <h4 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
                   {t('browser_guide.title')}
                 </h4>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-(--color-text-secondary)">
+                <ol className="list-decimal list-inside space-y-2 text-sm text-ink-secondary">
                   <li>
                     {t.rich(`browser_guide.${activeBrowser}_step1`, {
                       icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-text mx-0.5" />
@@ -107,7 +107,7 @@ export default function LocationPermissionOverlay({
               {/* Info message for prompt state */}
               {permissionState === 'prompt' && (
                 <div className="mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
-                  <p className="text-sm text-(--color-text-secondary)">
+                  <p className="text-sm text-ink-secondary">
                     {t('browser_settings_guide')}
                   </p>
                 </div>

@@ -39,7 +39,7 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
         <h3 className="text-sm font-semibold text-text mb-1.5 line-clamp-2" title={cafe.name}>
           {cafe.name}
         </h3>
-        <p className="text-xs text-(--color-text-secondary) mb-3 truncate" title={cafe.address}>
+        <p className="text-xs text-ink-secondary mb-3 truncate" title={cafe.address}>
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-2">
@@ -49,7 +49,7 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
               🔥 {tMap('trending')}
             </span>
           ) : cafe.status === 'pending' ? (
-            <span className="bg-(--color-surface-hover) text-(--color-text-secondary) border border-border px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span className="bg-surface-hover text-ink-secondary border border-border px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
               ⏳ {locale === 'ko' ? '검증 대기' : 'Pending'}
             </span>
           ) : (

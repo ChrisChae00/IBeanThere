@@ -59,7 +59,7 @@ export default function ToggleButton({
           className={`
             absolute
             text-xs font-medium
-            text-(--color-text-secondary)
+            text-ink-secondary
             pointer-events-none
             transition-opacity duration-300
             whitespace-nowrap

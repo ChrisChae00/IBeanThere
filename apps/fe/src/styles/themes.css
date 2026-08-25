@@ -1,0 +1,179 @@
+/*
+  Layer 1 — primitive.
+
+  Muted ink in the three light themes was a mid-tone on a near-white ground and failed
+  WCAG AA (as low as 2.35:1). Each was pulled toward its own theme's text colour until
+  every surface it lands on clears 4.5:1, so no theme gained a new hue. Dark Roast
+  already passed and is unchanged. Matcha Latte's accent was also too light to carry a
+  button label, so it took over the darker green the theme already owned and its hover
+  moved down to make room.
+
+  "Every surface" includes the two derived in tokens.css - `--surface-sunken` and
+  `--surface-hover` are the page and raised grounds mixed toward ink, so they are darker
+  than either. Tuning muted ink to just clear on `page` leaves it failing on everything
+  derived from it; these values are set against the darkest of the four, not the
+  lightest. Widening the muted/primary gap in a theme means re-checking all four.
+
+  The only file that contains theme colour literals. Each theme fills the same set of
+  slots; every other token is derived from these in tokens.css, so a new theme means
+  filling in this block and nothing else. (A handful of theme-independent literals live
+  elsewhere - the neutral pending grey, plain white, the warm drop shadows - because
+  they do not change per theme and a slot for them would be four identical entries.)
+
+  The four themes are complete visual themes, not a light/dark pair: Dark Roast IS the
+  dark mode. There is one relief set per theme, lit from its own surface.
+*/
+
+:root,
+[data-theme='morningCoffee'] {
+  --c-brand: #8C5A3A;
+  --c-brand-soft: #AB7743;
+  --c-accent: #D9B896;
+  --c-page: #e9d6c0;
+  --c-raised: #f5f0e8;
+  --c-elevated: #f5f0e8;
+  --c-ink: #442f19;
+  --c-ink-soft: #685138;
+  --c-edge: #c2ac93;
+  --c-on-brand: #f5f0e8;
+  --c-on-media: #f5f0e8;
+  --c-on-auth: #442f19;
+  --c-shadow: #8C5A3A;
+  --c-star: #FFA500;
+  --c-star-off: #D3D3D3;
+  --c-star-off-edge: #B0B0B0;
+  --c-marker-cafe: #8C5A3A;
+  --c-marker-user: #D24C28;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+
+  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
+  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
+  --relief-blur: 12px;
+  --relief-spread: 5px;
+}
+
+[data-theme='espresso'] {
+  --c-brand: #d4c7b8;
+  --c-brand-soft: #5e432d;
+  --c-accent: #6B4F3A;
+  --c-page: #1A120B;
+  --c-raised: #2A1A13;
+  --c-elevated: #3C2A21;
+  --c-ink: #e9ded2;
+  --c-ink-soft: #d4c7b8;
+  --c-edge: #5e432d;
+  --c-on-brand: #1A120B;
+  --c-on-media: #e9ded2;
+  --c-on-auth: #e9ded2;
+  --c-shadow: #d4c7b8;
+  --c-star: #FFB347;
+  --c-star-off: #808080;
+  --c-star-off-edge: #606060;
+  --c-marker-cafe: #1A120B;
+  --c-marker-user: #D24C28;
+  --c-success: #66BB6A;
+  --c-warning: #FFA726;
+  --c-danger: #EF5350;
+
+  --relief-light: color-mix(in srgb, var(--c-elevated) 70%, white);
+  --relief-dark: color-mix(in srgb, var(--c-shadow) 55%, transparent);
+  --relief-blur: 10px;
+  --relief-spread: 4px;
+}
+
+[data-theme='matchaLatte'] {
+  --c-brand: #5d7025;
+  --c-brand-soft: #4c5c1e;
+  --c-accent: #a9bc71;
+  --c-page: #e0e8d0;
+  --c-raised: #f0f2e8;
+  --c-elevated: #f0f2e8;
+  --c-ink: #4a5c2a;
+  --c-ink-soft: #52652c;
+  --c-edge: #a9bc71;
+  --c-on-brand: #f0f2e8;
+  --c-on-media: #f0f2e8;
+  --c-on-auth: #e0e8d0;
+  --c-shadow: #5d7025;
+  --c-star: #FF8C00;
+  --c-star-off: #A0A0A0;
+  --c-star-off-edge: #808080;
+  --c-marker-cafe: #5d7025;
+  --c-marker-user: #E78E17;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+
+  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
+  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
+  --relief-blur: 12px;
+  --relief-spread: 5px;
+}
+
+[data-theme='vanillaLatte'] {
+  --c-brand: #362C1D;
+  --c-brand-soft: #C7A17A;
+  --c-accent: #F5E6A3;
+  --c-page: #FFF8DC;
+  --c-raised: #FFF9F0;
+  --c-elevated: #FFF9F0;
+  --c-ink: #362C1D;
+  --c-ink-soft: #735f45;
+  --c-edge: #F5E6A3;
+  --c-on-brand: #FFF9F0;
+  --c-on-media: #FFF9F0;
+  --c-on-auth: #362C1D;
+  --c-shadow: #9d6345;
+  --c-star: #FF7F50;
+  --c-star-off: #A0A0A0;
+  --c-star-off-edge: #808080;
+  --c-marker-cafe: #362C1D;
+  --c-marker-user: #E78E17;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+
+  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
+  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
+  --relief-blur: 12px;
+  --relief-spread: 5px;
+}
+
+/*
+  Growth-journey illustration colours. These are artwork, not UI semantics, so they
+  live in their own namespace and are not part of the surface/ink/accent vocabulary.
+  Only Dark Roast overrides them.
+*/
+:root {
+  --growth-seed-bg: #F5F5F0;
+  --growth-sprout-bg: #F1F8E9;
+  --growth-tree-bg: #E8F5E9;
+  --growth-soil: #bb8f81ff;
+  --growth-bean: #8D6E63;
+  --growth-bean-stroke: #5D4037;
+  --growth-stem: #78BD7B;
+  --growth-leaf: #5CAF60;
+  --growth-leaf-fill: #4CAF50;
+  --growth-trunk: #795548;
+  --growth-canopy: #2E7D32;
+  --growth-canopy-dark: #1B5E20;
+  --growth-fruit: #FF5252;
+}
+
+[data-theme='espresso'] {
+  --growth-seed-bg: #2C2520;
+  --growth-sprout-bg: #252C22;
+  --growth-tree-bg: #1E2C22;
+  --growth-soil: #bb8f81ff;
+  --growth-bean: #A1887F;
+  --growth-bean-stroke: #8D6E63;
+  --growth-stem: #A5D6A7;
+  --growth-leaf: #81C784;
+  --growth-leaf-fill: #66BB6A;
+  --growth-trunk: #8D6E63;
+  --growth-canopy: #43A047;
+  --growth-canopy-dark: #2E7D32;
+  --growth-fruit: #FF8A80;
+}

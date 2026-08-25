@@ -1,0 +1,33 @@
+/*
+  Compatibility layer. DELETE IN PHASE 6.
+
+  Pages that have not been reworked yet still read the old `--color-*` names directly
+  (in `var()` calls inside markup, not through utilities). Redefining them in terms of
+  the new tokens keeps those pages rendering exactly as before while the migration runs
+  page by page.
+
+  The `--color-*` names that Tailwind turns into utility classes live in the `@theme`
+  block in globals.css instead — they have to, to generate the classes. Only the names
+  used directly from markup are here.
+
+  When the last page is migrated, this file and the legacy half of `@theme` go away
+  together. If that has not happened, the migration is not finished.
+*/
+
+:root {
+  --color-white: #FFFFFF;
+
+  --color-growthSeedBg: var(--growth-seed-bg);
+  --color-growthSproutBg: var(--growth-sprout-bg);
+  --color-growthTreeBg: var(--growth-tree-bg);
+  --color-growthSoil: var(--growth-soil);
+  --color-growthBean: var(--growth-bean);
+  --color-growthBeanStroke: var(--growth-bean-stroke);
+  --color-growthStem: var(--growth-stem);
+  --color-growthLeaf: var(--growth-leaf);
+  --color-growthLeafFill: var(--growth-leaf-fill);
+  --color-growthTrunk: var(--growth-trunk);
+  --color-growthCanopy: var(--growth-canopy);
+  --color-growthCanopyDark: var(--growth-canopy-dark);
+  --color-growthFruit: var(--growth-fruit);
+}

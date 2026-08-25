@@ -1,49 +1,95 @@
 @import 'tailwindcss';
 
+@import './fonts.css';
+@import './themes.css';
+@import './tokens.css';
+@import './legacy-tokens.css';
+
 @theme {
   --container-8xl: 90rem;
 
-  --shadow-primary:
-    0 4px 6px -1px var(--color-primary), 0 2px 4px -1px var(--color-primary);
-  --shadow-primary-lg:
-    0 10px 15px -3px var(--color-primary), 0 4px 6px -2px var(--color-primary);
-  --shadow-primary-xl:
-    0 12px 16px -4px var(--color-primary), 0 4px 8px -2px var(--color-primary);
-  --shadow-inset-primary:
-    inset -5px -10px 10px -3px
-      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
-    inset 5px 6px 10px -3px
-      color-mix(in srgb, var(--color-cardShadow) 40%, transparent),
-    inset 0px 0px 12px
-      color-mix(in srgb, var(--color-cardShadow) 50%, transparent);
-  --shadow-inset-background: inset 0 0 8px var(--color-background);
+  /*
+    New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
+    `text-ink-secondary`, `border-edge-default`, `bg-brand`.
+  */
+  --color-surface-page: var(--surface-page);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-inverse: var(--surface-inverse);
 
-  --color-primary: var(--color-primary);
-  --color-primaryText: var(--color-primaryText);
-  --color-secondary: var(--color-secondary);
-  --color-accent: var(--color-accent);
-  --color-background: var(--color-background);
-  --color-cardBackground: var(--color-cardBackground);
-  --color-surface: var(--color-surface);
-  --color-text: var(--color-text);
-  --color-textSecondary: var(--color-textSecondary);
-  --color-border: var(--color-border);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-textHero: var(--color-textHero);
-  --color-cardText: var(--color-cardText);
-  --color-cardTextSecondary: var(--color-cardTextSecondary);
-  --color-surfaceText: var(--color-surfaceText);
-  --color-surfaceTextSecondary: var(--color-surfaceTextSecondary);
-  --color-authText: var(--color-authText);
-  --color-starFilled: var(--color-starFilled);
-  --color-starEmpty: var(--color-starEmpty);
-  --color-starEmptyOutline: var(--color-starEmptyOutline);
-  --color-cardShadow: var(--color-cardShadow);
-  --color-pending: var(--color-pending);
-  --color-userMarkerMap: var(--color-userMarkerMap);
-  --color-cafeMarker: var(--color-cafeMarker);
+  --color-ink-primary: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-on-accent: var(--ink-on-accent);
+  --color-ink-on-media: var(--ink-on-media);
+  --color-ink-inverse: var(--ink-inverse);
+
+  /*
+    The brand colour is exposed as `brand`, not `accent`. The old palette already had an
+    `accent` - a pale tint used for tinted chips, soft borders and button hovers - and
+    unmigrated pages still ask for it by that name. Handing `accent` to the brand colour
+    would silently repaint all of them, so the legacy meaning keeps the name and the new
+    semantic takes its own.
+  */
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
+
+  --color-edge-subtle: var(--edge-subtle);
+  --color-edge-default: var(--edge-default);
+  --color-edge-strong: var(--edge-strong);
+
+  --color-state-success: var(--state-success);
+  --color-state-warning: var(--state-warning);
+  --color-state-danger: var(--state-danger);
+  --color-state-pending: var(--state-pending);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+
+  /*
+    Legacy names, kept so unmigrated pages keep their utility classes. DELETE IN PHASE 6
+    together with legacy-tokens.css.
+  */
+  --color-primary: var(--accent);
+  --color-primaryText: var(--ink-on-accent);
+  --color-secondary: var(--accent-hover);
+  /* The old palette's pale accent, which is exactly what `--accent-muted` holds. */
+  --color-accent: var(--accent-muted);
+  --color-background: var(--surface-page);
+  --color-cardBackground: var(--surface-raised);
+  --color-surface: var(--surface-elevated);
+  --color-text: var(--ink-primary);
+  --color-textSecondary: var(--ink-secondary);
+  --color-border: var(--edge-default);
+  --color-success: var(--state-success);
+  --color-warning: var(--state-warning);
+  --color-error: var(--state-danger);
+  --color-textHero: var(--ink-on-media);
+  --color-cardText: var(--ink-primary);
+  --color-cardTextSecondary: var(--ink-secondary);
+  --color-surfaceText: var(--ink-primary);
+  --color-surfaceTextSecondary: var(--ink-secondary);
+  --color-authText: var(--ink-on-auth);
+  --color-starFilled: var(--star-filled);
+  --color-starEmpty: var(--star-empty);
+  --color-starEmptyOutline: var(--star-empty-edge);
+  --color-cardShadow: var(--c-shadow);
+  --color-pending: var(--state-pending);
+  --color-userMarkerMap: var(--marker-user);
+  --color-cafeMarker: var(--marker-cafe);
+
+  --shadow-primary:
+    0 4px 6px -1px var(--accent), 0 2px 4px -1px var(--accent);
+  --shadow-primary-lg:
+    0 10px 15px -3px var(--accent), 0 4px 6px -2px var(--accent);
+  --shadow-primary-xl:
+    0 12px 16px -4px var(--accent), 0 4px 8px -2px var(--accent);
+  --shadow-inset-primary:
+    inset -5px -10px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 5px 6px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 0px 0px 12px color-mix(in srgb, var(--c-shadow) 50%, transparent);
+  --shadow-inset-background: inset 0 0 8px var(--surface-page);
 }
 
 /*
@@ -111,9 +157,12 @@
   body {
     background-color: var(--color-background);
     color: var(--color-text);
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-      "Cantarell", sans-serif;
+    font-family: var(--font-body);
+    /*
+      Never let the browser fake a weight. Every face here ships the weights it needs,
+      and a synthetic bold on a display serif looks like a mistake rather than emphasis.
+    */
+    font-synthesis-weight: none;
     line-height: 1.6;
     transition:
       background-color 0.3s ease,
@@ -123,24 +172,43 @@
       "calt" on;
   }
 
+  /*
+    Headings drive their weight through the variation axis, not just `font-weight`.
+
+    112 headings across the app still carry `font-bold` from before the display faces
+    existed, and a utility beats the base layer. On Korean that pushed Hahmlet to 700,
+    where its serif detail flattens into a plain gothic - losing the one thing it was
+    chosen for. `font-variation-settings` wins over `font-weight` on a variable font, so
+    the token governs regardless.
+
+    The consequence is deliberate: weight utilities do nothing to a heading. Display
+    weight is a system decision, set in tokens.css, not a per-instance one. Both display
+    faces are variable, so this holds for either locale.
+  */
   h1 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(2rem, 3vw, 3rem);
     line-height: 1.2;
     letter-spacing: -0.03em;
-    font-weight: 700;
   }
 
   h2 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(1.75rem, 2.5vw, 2.25rem);
     line-height: 1.25;
     letter-spacing: -0.02em;
-    font-weight: 600;
   }
 
   h3 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(1.5rem, 2vw, 1.75rem);
     line-height: 1.3;
-    font-weight: 600;
   }
 
   button,
@@ -159,10 +227,12 @@
 
 @layer components {
   .type-display {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
     font-size: clamp(2rem, 3vw, 3rem);
     line-height: 1.2;
     letter-spacing: -0.03em;
-    font-weight: 700;
   }
 
   .type-subtitle {
@@ -226,6 +296,57 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@layer components {
+  /*
+    Neumorphic relief. Deliberately scoped to interactive controls — buttons, toggles,
+    tabs, chips, the search field. Cards, sections and bento cells stay flat, because
+    relief everywhere is what makes neumorphism read as muddy rather than tactile, and
+    low-contrast card surfaces fail WCAG.
+
+    Each theme supplies its own light/dark pair from its own surface, so Dark Roast gets
+    a genuinely dark relief rather than an inverted light one.
+
+    `relief-control` is what a button uses: it carries hover and active itself, so a
+    control signals state through depth instead of swapping colour. That matters beyond
+    style — Matcha Latte's green has no lighter shade left that still carries a legible
+    label, so a colour-based hover would have to break either contrast or the theme.
+  */
+  .relief-raised {
+    box-shadow: var(--relief-shadow-raised);
+  }
+
+  .relief-pressed {
+    box-shadow: var(--relief-shadow-pressed);
+  }
+
+  .relief-control {
+    box-shadow: var(--relief-shadow-raised);
+    transition:
+      box-shadow var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
+
+  .relief-control:hover {
+    box-shadow: var(--relief-shadow-lifted);
+    transform: translateY(-1px);
+  }
+
+  .relief-control:active {
+    box-shadow: var(--relief-shadow-pressed);
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .relief-control {
+      transition: none;
+    }
+
+    .relief-control:hover {
+      transform: none;
+    }
   }
 }
 

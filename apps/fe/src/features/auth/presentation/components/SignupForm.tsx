@@ -381,7 +381,7 @@ export function SignupForm({ locale }: SignupFormProps) {
             required
           />
         </div>
-        <label className="text-sm text-(--color-text-secondary) leading-relaxed select-none">
+        <label className="text-sm text-ink-secondary leading-relaxed select-none">
           {t('terms_agreement')}{' '}
           <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors hover:no-underline">
             {t('terms_of_service')}
@@ -408,7 +408,7 @@ export function SignupForm({ locale }: SignupFormProps) {
       {/* Divider */}
       <div className="flex items-center gap-4 my-8">
         <div className="flex-1 border-t border-border/50"></div>
-        <span className="text-sm font-medium text-(--color-text-secondary) uppercase tracking-wider text-xs px-2">
+        <span className="text-sm font-medium text-ink-secondary uppercase tracking-wider text-xs px-2">
           {t('or_sign_up_with')}
         </span>
         <div className="flex-1 border-t border-border/50"></div>
@@ -431,7 +431,7 @@ export function SignupForm({ locale }: SignupFormProps) {
 
       {/* Sign In Link */}
       <div className="text-center mt-8">
-        <p className="text-(--color-text-secondary) text-sm">
+        <p className="text-ink-secondary text-sm">
           {t('already_have_account')}{' '}
           <Link
             href={`/${locale}/signin`}

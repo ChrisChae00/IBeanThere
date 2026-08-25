@@ -46,12 +46,12 @@ export default function TasteTagSelector({
         <label className="block text-sm font-medium text-text">
           {t('taste_tags_label')}
         </label>
-        <span className="text-xs text-(--color-text-secondary)">
+        <span className="text-xs text-ink-secondary">
           {selectedTags.length}/{maxTags}
         </span>
       </div>
       
-      <p className="text-xs text-(--color-text-secondary)">
+      <p className="text-xs text-ink-secondary">
         {t('select_taste_tags')}
       </p>
       
@@ -72,7 +72,7 @@ export default function TasteTagSelector({
                 ${isSelected
                   ? 'bg-primary text-white border-primary'
                   : isDisabled
-                    ? 'bg-surface text-(--color-text-secondary) border-border opacity-50 cursor-not-allowed'
+                    ? 'bg-surface text-ink-secondary border-border opacity-50 cursor-not-allowed'
                     : 'bg-surface text-text border-border hover:border-primary hover:text-primary'
                 }
               `}

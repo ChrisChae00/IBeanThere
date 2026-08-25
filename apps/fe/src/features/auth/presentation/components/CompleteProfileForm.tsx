@@ -270,7 +270,7 @@ export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfile
             className="w-4 h-4 text-primary border-border rounded-sm focus:ring-primary mt-1"
             required
           />
-          <label className="text-sm text-(--color-text-secondary)">
+          <label className="text-sm text-ink-secondary">
             {t('terms_agreement')}{' '}
             <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors">
               {t('terms_of_service')}

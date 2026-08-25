@@ -100,7 +100,7 @@ export default function BadgeGalleryClient() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-4">
         <h2 className="text-xl font-bold mb-2">{t('login_required_title')}</h2>
-        <p className="text-(--color-text-secondary)">{t('login_required_description')}</p>
+        <p className="text-ink-secondary">{t('login_required_description')}</p>
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function BadgeGalleryClient() {
           <Trophy className="w-8 h-8 text-yellow-500" />
           {t('badge_gallery_title')}
         </h1>
-        <p className="text-(--color-text-secondary) max-w-2xl mx-auto">
+        <p className="text-ink-secondary max-w-2xl mx-auto">
           {t('badge_gallery_description')}
         </p>
       </div>
@@ -137,7 +137,7 @@ export default function BadgeGalleryClient() {
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
-        <p className="text-xs text-(--color-text-secondary) mt-3 text-center">
+        <p className="text-xs text-ink-secondary mt-3 text-center">
           {earnedCount === totalCount 
             ? t('all_badges_earned') 
             : t('badges_remaining', { count: totalCount - earnedCount })}

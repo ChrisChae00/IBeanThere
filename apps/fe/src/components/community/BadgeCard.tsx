@@ -22,7 +22,7 @@ export default function BadgeCard({ badge, isUnlocked, awardedAt }: BadgeCardPro
     <div 
       className={`group relative flex flex-col items-center p-6 rounded-2xl border transition-all duration-300
         ${isUnlocked 
-          ? 'bg-linear-to-br from-surface to-(--color-surface-hover) border-primary/20 shadow-xs hover:shadow-md hover:-translate-y-1' 
+          ? 'bg-linear-to-br from-surface to-surface-hover border-primary/20 shadow-xs hover:shadow-md hover:-translate-y-1' 
           : 'bg-(--color-menu) border-border opacity-80 hover:opacity-100'
         }`}
     >
@@ -43,7 +43,7 @@ export default function BadgeCard({ badge, isUnlocked, awardedAt }: BadgeCardPro
             <Award className="w-12 h-12 text-primary" />
           )
         ) : (
-          <Lock className="w-10 h-10 text-(--color-text-secondary)/50" />
+          <Lock className="w-10 h-10 text-ink-secondary/50" />
         )}
 
         {/* Shine effect for unlocked badges */}
@@ -53,12 +53,12 @@ export default function BadgeCard({ badge, isUnlocked, awardedAt }: BadgeCardPro
       </div>
 
       {/* Text Info */}
-      <h3 className={`text-lg font-bold mb-1 text-center ${isUnlocked ? 'text-text' : 'text-(--color-text-secondary)'}`}>
+      <h3 className={`text-lg font-bold mb-1 text-center ${isUnlocked ? 'text-text' : 'text-ink-secondary'}`}>
         {badge.name}
       </h3>
       
       {/* Description - truncated initially, full on hover via tooltip/expansion if needed */}
-      <p className="text-sm text-(--color-text-secondary) text-center line-clamp-2 max-w-[200px] mb-3 h-10">
+      <p className="text-sm text-ink-secondary text-center line-clamp-2 max-w-[200px] mb-3 h-10">
         {badge.description}
       </p>
 
@@ -70,7 +70,7 @@ export default function BadgeCard({ badge, isUnlocked, awardedAt }: BadgeCardPro
             {formatDate(awardedAt)}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-border text-(--color-text-secondary)">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-border text-ink-secondary">
             <Lock className="w-3 h-3" />
             {t('locked')}
           </span>

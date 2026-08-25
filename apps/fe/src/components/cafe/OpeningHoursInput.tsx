@@ -114,7 +114,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         </button>
       </div>
       
-      <p className="text-xs text-(--color-text-secondary)">
+      <p className="text-xs text-ink-secondary">
         {t('opening_hours_hint')}
       </p>
 
@@ -166,7 +166,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                     onChange={(e) => handleDayChange(day, 'open', e.target.value)}
                     className="w-[100px] sm:w-auto px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text text-sm min-h-[40px]"
                   />
-                  <span className="text-(--color-text-secondary)">-</span>
+                  <span className="text-ink-secondary">-</span>
                   <input
                     type="time"
                     value={dayHours.close}

@@ -163,7 +163,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               {t('filter_most_popular')}
             </button>
           </div>
-          <div className="text-center mt-4 text-sm text-(--color-text-secondary)">
+          <div className="text-center mt-4 text-sm text-ink-secondary">
             {t('showing_cafes', { count: cafes.length })}
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               ))
             ) : cafes.length === 0 ? (
               <div className="col-span-full text-center py-16 space-y-4">
-                <div className="text-lg font-medium text-(--color-text-secondary)">
+                <div className="text-lg font-medium text-ink-secondary">
                   {tMap('no_cafes_available')}
                 </div>
               </div>

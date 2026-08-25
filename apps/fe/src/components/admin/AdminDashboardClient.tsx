@@ -38,7 +38,7 @@ export default function AdminDashboardClient() {
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'cafes'
               ? 'border-primary text-primary'
-              : 'border-transparent text-(--color-text-secondary) hover:text-text'
+              : 'border-transparent text-ink-secondary hover:text-text'
           }`}
         >
           <Coffee size={18} />
@@ -50,7 +50,7 @@ export default function AdminDashboardClient() {
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'reports'
               ? 'border-primary text-primary'
-              : 'border-transparent text-(--color-text-secondary) hover:text-text'
+              : 'border-transparent text-ink-secondary hover:text-text'
           }`}
         >
           <AlertCircle size={18} />
@@ -79,7 +79,7 @@ export default function AdminDashboardClient() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 cafeSubTab === 'pending'
                   ? 'bg-primary text-white'
-                  : 'bg-surface text-(--color-text-secondary) border border-border hover:text-text'
+                  : 'bg-surface text-ink-secondary border border-border hover:text-text'
               }`}
             >
               {t('sub_tab_pending')}
@@ -89,7 +89,7 @@ export default function AdminDashboardClient() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 cafeSubTab === 'all'
                   ? 'bg-primary text-white'
-                  : 'bg-surface text-(--color-text-secondary) border border-border hover:text-text'
+                  : 'bg-surface text-ink-secondary border border-border hover:text-text'
               }`}
             >
               {t('sub_tab_all')}
