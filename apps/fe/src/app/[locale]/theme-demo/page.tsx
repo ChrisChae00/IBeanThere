@@ -83,9 +83,12 @@ function readToken(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function Swatch({ token, label }: { token: string; label: string }) {
+function Swatch({ token, label, theme }: { token: string; label: string; theme: string }) {
   const [value, setValue] = useState('');
-  useEffect(() => setValue(readToken(token)), [token]);
+  // `theme` is not read in the body - it is here so switching themes re-runs the read.
+  // Without it the swatch repaints (the background is a live var) while the value
+  // printed under it stays on the first theme, which is worse than showing nothing.
+  useEffect(() => setValue(readToken(token)), [token, theme]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -101,9 +104,16 @@ function Swatch({ token, label }: { token: string; label: string }) {
   );
 }
 
-function ContrastRow({ label, fg, bg }: { label: string; fg: string; bg: string }) {
+function ContrastRow({ label, fg, bg, theme }: {
+  label: string;
+  fg: string;
+  bg: string;
+  theme: string;
+}) {
   const [ratio, setRatio] = useState<number | null>(null);
-  useEffect(() => setRatio(contrast(readToken(fg), readToken(bg))), [fg, bg]);
+  // Same as Swatch: `theme` is the trigger, not an input. A stale ratio here would
+  // report a pass for a theme that fails.
+  useEffect(() => setRatio(contrast(readToken(fg), readToken(bg))), [fg, bg, theme]);
 
   const passes = ratio !== null && ratio >= 4.5;
   return (
@@ -135,6 +145,7 @@ function Section({ title, note, children }: {
 
 export default function ThemeDemoPage() {
   const { currentTheme, setTheme, availableThemes } = useTheme();
+  const themeKey = currentTheme.name;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -165,7 +176,7 @@ export default function ThemeDemoPage() {
       <Section title="Surfaces">
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-6">
           {SURFACES.map((s) => (
-            <Swatch key={s} token={`--surface-${s}`} label={s} />
+            <Swatch key={s} theme={themeKey} token={`--surface-${s}`} label={s} />
           ))}
         </div>
       </Section>
@@ -173,37 +184,40 @@ export default function ThemeDemoPage() {
       <Section title="Ink">
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-6">
           {INKS.map((s) => (
-            <Swatch key={s} token={`--ink-${s}`} label={s} />
+            <Swatch key={s} theme={themeKey} token={`--ink-${s}`} label={s} />
           ))}
         </div>
       </Section>
 
       <Section title="Accent, edges, state">
         <div className="grid grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-5">
-          {ACCENTS.map((s) => <Swatch key={s} token={`--${s}`} label={s} />)}
-          {EDGES.map((s) => <Swatch key={s} token={`--${s}`} label={s} />)}
-          {STATES.map((s) => <Swatch key={s} token={`--state-${s}`} label={`state-${s}`} />)}
+          {ACCENTS.map((s) => <Swatch key={s} theme={themeKey} token={`--${s}`} label={s} />)}
+          {EDGES.map((s) => <Swatch key={s} theme={themeKey} token={`--${s}`} label={s} />)}
+          {STATES.map((s) => <Swatch key={s} theme={themeKey} token={`--state-${s}`} label={`state-${s}`} />)}
         </div>
       </Section>
 
       <Section title="Domain" note="Stars and map markers travel with the theme.">
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-6">
-          {DOMAIN.map((s) => <Swatch key={s} token={`--${s}`} label={s} />)}
+          {DOMAIN.map((s) => <Swatch key={s} theme={themeKey} token={`--${s}`} label={s} />)}
         </div>
       </Section>
 
       <Section
         title="Contrast"
-        note="Every pairing here must clear 4.5:1 in all four themes. The one known exception is ink-on-accent over accent-hover: that pairing only exists because buttons still swap colour on hover, and Phase 2 replaces that with relief."
+        note="Every pairing here must clear 4.5:1 in all four themes, and the derived surfaces count - they are darker than the grounds they come from, so tuning ink against page alone is not enough. The one known exception is ink-on-accent over accent-hover: that pairing only exists because buttons still swap colour on hover, and Phase 2 replaces that with relief."
       >
         <div className="grid gap-3 md:grid-cols-2">
-          <ContrastRow label="ink-primary on surface-page" fg="--ink-primary" bg="--surface-page" />
-          <ContrastRow label="ink-primary on surface-raised" fg="--ink-primary" bg="--surface-raised" />
-          <ContrastRow label="ink-secondary on surface-raised" fg="--ink-secondary" bg="--surface-raised" />
-          <ContrastRow label="ink-secondary on surface-page" fg="--ink-secondary" bg="--surface-page" />
-          <ContrastRow label="ink-on-accent on accent" fg="--ink-on-accent" bg="--accent" />
-          <ContrastRow label="ink-on-accent on accent-hover" fg="--ink-on-accent" bg="--accent-hover" />
-          <ContrastRow label="ink-inverse on surface-inverse" fg="--ink-inverse" bg="--surface-inverse" />
+          <ContrastRow theme={themeKey} label="ink-primary on surface-page" fg="--ink-primary" bg="--surface-page" />
+          <ContrastRow theme={themeKey} label="ink-primary on surface-raised" fg="--ink-primary" bg="--surface-raised" />
+          <ContrastRow theme={themeKey} label="ink-secondary on surface-raised" fg="--ink-secondary" bg="--surface-raised" />
+          <ContrastRow theme={themeKey} label="ink-secondary on surface-page" fg="--ink-secondary" bg="--surface-page" />
+          <ContrastRow theme={themeKey} label="ink-secondary on surface-sunken" fg="--ink-secondary" bg="--surface-sunken" />
+          <ContrastRow theme={themeKey} label="ink-secondary on surface-hover" fg="--ink-secondary" bg="--surface-hover" />
+          <ContrastRow theme={themeKey} label="ink-primary on surface-sunken" fg="--ink-primary" bg="--surface-sunken" />
+          <ContrastRow theme={themeKey} label="ink-on-accent on accent" fg="--ink-on-accent" bg="--accent" />
+          <ContrastRow theme={themeKey} label="ink-on-accent on accent-hover" fg="--ink-on-accent" bg="--accent-hover" />
+          <ContrastRow theme={themeKey} label="ink-inverse on surface-inverse" fg="--ink-inverse" bg="--surface-inverse" />
         </div>
       </Section>
 

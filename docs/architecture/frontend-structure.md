@@ -89,6 +89,11 @@ Radius is deliberately three values: `--radius-control`, `--radius-card`,
 There is no third `muted` ink tier. Derived from secondary it cannot clear WCAG AA on
 the light themes, and a token that cannot pass is a trap for whoever reaches for it.
 
+`--surface-sunken` and `--surface-hover` are derived by mixing a ground toward ink, so
+they are darker than the ground they come from. Ink tuned to just clear on `page` fails
+on both. `/theme-demo` measures all four surfaces — check it there, not by reading the
+hex values.
+
 ### Themes
 
 Four complete visual themes, not a light/dark pair — Dark Roast *is* the dark mode.

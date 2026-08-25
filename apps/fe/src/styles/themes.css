@@ -3,10 +3,16 @@
 
   Muted ink in the three light themes was a mid-tone on a near-white ground and failed
   WCAG AA (as low as 2.35:1). Each was pulled toward its own theme's text colour until
-  both of its surfaces clear 4.5:1 with headroom, so no theme gained a new hue. Dark Roast already
-  passed and is unchanged. Matcha Latte's accent was also too light to carry a button
-  label, so it took over the darker green the theme already owned and its hover moved
-  down to make room.
+  every surface it lands on clears 4.5:1, so no theme gained a new hue. Dark Roast
+  already passed and is unchanged. Matcha Latte's accent was also too light to carry a
+  button label, so it took over the darker green the theme already owned and its hover
+  moved down to make room.
+
+  "Every surface" includes the two derived in tokens.css - `--surface-sunken` and
+  `--surface-hover` are the page and raised grounds mixed toward ink, so they are darker
+  than either. Tuning muted ink to just clear on `page` leaves it failing on everything
+  derived from it; these values are set against the darkest of the four, not the
+  lightest. Widening the muted/primary gap in a theme means re-checking all four.
 
   The only file in the app that contains colour literals. Each theme fills the same
   set of slots; every other token is derived from these in tokens.css, so a new theme
@@ -25,7 +31,7 @@
   --c-raised: #f5f0e8;
   --c-elevated: #f5f0e8;
   --c-ink: #442f19;
-  --c-ink-soft: #715940;
+  --c-ink-soft: #685138;
   --c-edge: #c2ac93;
   --c-on-brand: #f5f0e8;
   --c-on-media: #f5f0e8;
@@ -83,7 +89,7 @@
   --c-raised: #f0f2e8;
   --c-elevated: #f0f2e8;
   --c-ink: #4a5c2a;
-  --c-ink-soft: #586c2d;
+  --c-ink-soft: #52652c;
   --c-edge: #a9bc71;
   --c-on-brand: #f0f2e8;
   --c-on-media: #f0f2e8;
@@ -112,7 +118,7 @@
   --c-raised: #FFF9F0;
   --c-elevated: #FFF9F0;
   --c-ink: #362C1D;
-  --c-ink-soft: #836d50;
+  --c-ink-soft: #735f45;
   --c-edge: #F5E6A3;
   --c-on-brand: #FFF9F0;
   --c-on-media: #FFF9F0;
