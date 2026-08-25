@@ -8,9 +8,6 @@
 @theme {
   --container-8xl: 90rem;
 
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
-
   /*
     New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
     `text-ink-secondary`, `border-edge-default`, `bg-brand`.
@@ -162,8 +159,8 @@
     color: var(--color-text);
     font-family: var(--font-body);
     /*
-      Never let the browser fake a weight. Instrument Serif has one, and a synthetic
-      bold on a display serif looks like a mistake rather than emphasis.
+      Never let the browser fake a weight. Every face here ships the weights it needs,
+      and a synthetic bold on a display serif looks like a mistake rather than emphasis.
     */
     font-synthesis-weight: none;
     line-height: 1.6;

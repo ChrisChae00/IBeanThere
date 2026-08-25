@@ -151,5 +151,17 @@ exist so pages that have not been reworked keep rendering unchanged during the U
 migration. **They are meant to be deleted once the last page moves over.** If that has
 not happened, the migration is not finished.
 
+Deleting them early does not fail the build — Tailwind simply stops generating the
+class, and the page ships with no background instead of an error. So the deletion is
+gated on a count, not on a feeling. It reaches zero, then they go:
+
+```sh
+cd apps/fe && grep -rlE "\b(bg|text|border|from|to|via|ring|fill|stroke|shadow|divide|outline)-(primary|primaryText|secondary|accent|background|cardBackground|surface|text|textSecondary|border|success|warning|error|textHero|cardText|cardTextSecondary|surfaceText|surfaceTextSecondary|authText|starFilled|starEmpty|starEmptyOutline|cardShadow|pending|userMarkerMap|cafeMarker)\b" src --include="*.tsx" --include="*.ts" | wc -l
+```
+
+134 files as of the design-system branch. No lint rule guards this: every one of those
+files would trip it, and the allowlist keeping them quiet would cost more than the
+count does.
+
 `components/ui/` is likewise vestigial: it holds a single file, while `shared/ui/` holds
 the primitives actually imported across the app. Reach for `shared/ui`.

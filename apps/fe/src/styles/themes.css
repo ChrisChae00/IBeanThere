@@ -14,9 +14,11 @@
   derived from it; these values are set against the darkest of the four, not the
   lightest. Widening the muted/primary gap in a theme means re-checking all four.
 
-  The only file in the app that contains colour literals. Each theme fills the same
-  set of slots; every other token is derived from these in tokens.css, so a new theme
-  means filling in this block and nothing else.
+  The only file that contains theme colour literals. Each theme fills the same set of
+  slots; every other token is derived from these in tokens.css, so a new theme means
+  filling in this block and nothing else. (A handful of theme-independent literals live
+  elsewhere - the neutral pending grey, plain white, the warm drop shadows - because
+  they do not change per theme and a slot for them would be four identical entries.)
 
   The four themes are complete visual themes, not a light/dark pair: Dark Roast IS the
   dark mode. There is one relief set per theme, lit from its own surface.
