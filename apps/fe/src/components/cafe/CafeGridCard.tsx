@@ -27,29 +27,29 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
   return (
     <Link 
       href={cafePath}
-      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden transition-shadow cursor-pointer flex flex-col relative"
+      className="group bg-surface border border-border rounded-2xl overflow-hidden transition-shadow cursor-pointer flex flex-col relative"
     >
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
       
-      <div className="bg-[var(--color-primary)] flex-1 flex flex-col">
+      <div className="bg-primary flex-1 flex flex-col">
         <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
       </div>
       <div className="p-4 mt-auto">
-        <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1.5 line-clamp-2" title={cafe.name}>
+        <h3 className="text-sm font-semibold text-text mb-1.5 line-clamp-2" title={cafe.name}>
           {cafe.name}
         </h3>
-        <p className="text-xs text-[var(--color-text-secondary)] mb-3 truncate" title={cafe.address}>
+        <p className="text-xs text-(--color-text-secondary) mb-3 truncate" title={cafe.address}>
           {extractCity(cafe.address)}
         </p>
         <div className="flex items-center justify-between gap-2 mt-2">
           {/* Trending tag - only show for top 3 */}
           {cafe.trending_rank && cafe.trending_rank <= 3 ? (
-            <span className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+            <span className="bg-primary text-primaryText px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-xs">
               🔥 {tMap('trending')}
             </span>
           ) : cafe.status === 'pending' ? (
-            <span className="bg-[var(--color-surface-hover)] text-[var(--color-text-secondary)] border border-[var(--color-border)] px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <span className="bg-(--color-surface-hover) text-(--color-text-secondary) border border-border px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
               ⏳ {locale === 'ko' ? '검증 대기' : 'Pending'}
             </span>
           ) : (

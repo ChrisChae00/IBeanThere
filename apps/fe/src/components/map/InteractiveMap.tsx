@@ -484,7 +484,7 @@ export default function InteractiveMap({
       {onLocationClick && (
         <button
           onClick={onLocationClick}
-          className="absolute top-4 right-4 z-[1000] bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
+          className="absolute top-4 right-4 z-1000 bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
           title={t('location_button')}
         >
           <UserLocationIcon size={32} color="var(--color-text)" />

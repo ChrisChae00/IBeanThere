@@ -91,7 +91,7 @@ export default function BadgeGalleryClient() {
   if (isAuthLoading || (user && isLoading)) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function BadgeGalleryClient() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-4">
         <h2 className="text-xl font-bold mb-2">{t('login_required_title')}</h2>
-        <p className="text-[var(--color-text-secondary)]">{t('login_required_description')}</p>
+        <p className="text-(--color-text-secondary)">{t('login_required_description')}</p>
       </div>
     );
   }
@@ -118,26 +118,26 @@ export default function BadgeGalleryClient() {
           <Trophy className="w-8 h-8 text-yellow-500" />
           {t('badge_gallery_title')}
         </h1>
-        <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+        <p className="text-(--color-text-secondary) max-w-2xl mx-auto">
           {t('badge_gallery_description')}
         </p>
       </div>
 
       {/* Progress Section */}
-      <div className="mb-12 max-w-xl mx-auto bg-[var(--color-surface)] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm">
+      <div className="mb-12 max-w-xl mx-auto bg-surface p-6 rounded-2xl border border-border shadow-xs">
         <div className="flex justify-between items-end mb-2">
-          <span className="font-semibold text-[var(--color-text)]">{t('collection_progress')}</span>
-          <span className="text-sm font-bold text-[var(--color-primary)]">
+          <span className="font-semibold text-text">{t('collection_progress')}</span>
+          <span className="text-sm font-bold text-primary">
             {earnedCount} / {totalCount}
           </span>
         </div>
-        <div className="w-full bg-[var(--color-border)] rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-border rounded-full h-3 overflow-hidden">
           <div 
-            className="bg-[var(--color-primary)] h-full rounded-full transition-all duration-1000 ease-out"
+            className="bg-primary h-full rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
-        <p className="text-xs text-[var(--color-text-secondary)] mt-3 text-center">
+        <p className="text-xs text-(--color-text-secondary) mt-3 text-center">
           {earnedCount === totalCount 
             ? t('all_badges_earned') 
             : t('badges_remaining', { count: totalCount - earnedCount })}

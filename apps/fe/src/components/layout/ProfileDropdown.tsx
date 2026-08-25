@@ -48,7 +48,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
       {/* Profile button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-full hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+        className="flex items-center space-x-2 p-2 rounded-full hover:bg-surface transition-colors min-h-[44px]"
         aria-label="Profile menu"
       >
         <Avatar 
@@ -56,11 +56,11 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
           alt={displayName}
           size="sm"
         />
-        <span className="hidden md:block text-[var(--color-text)] font-medium">
+        <span className="hidden md:block text-text font-medium">
           {displayName}
         </span>
         <svg 
-          className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${
+          className={`w-4 h-4 text-(--color-text-secondary) transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`} 
           fill="none" 
@@ -73,12 +73,12 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
 
           {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
           <div className="py-1">
             {isAdmin && (
               <Link
                 href={`/${locale}/admin/dashboard`}
-                className="flex items-center px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors font-semibold"
+                className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors font-semibold"
                 onClick={() => setIsOpen(false)}
               >
                 <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,11 +88,11 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
               </Link>
             )}
             {isAdmin && (
-              <div className="border-t border-[var(--color-border)] my-1"></div>
+              <div className="border-t border-border my-1"></div>
             )}
             <Link
               href={`/${locale}/profile`}
-              className="flex items-center px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
             
             <Link
               href={`/${locale}/my-logs`}
-              className="flex items-center px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
             
             <Link
               href={`/${locale}/my-beans`}
-              className="flex items-center px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
             
             <Link
               href={`/${locale}/settings`}
-              className="flex items-center px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,11 +135,11 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
               {t('settings')}
             </Link>
             
-            <div className="border-t border-[var(--color-border)] my-1"></div>
+            <div className="border-t border-border my-1"></div>
             
             <button
               onClick={handleSignOut}
-              className="flex items-center w-full px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center w-full px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
             >
               <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

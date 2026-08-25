@@ -77,11 +77,11 @@ export default function TasteMateButton({
         className={`
           inline-flex items-center gap-2 px-4 py-2 rounded-full
           font-medium text-sm transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-offset-2
+          focus:outline-hidden focus:ring-2 focus:ring-offset-2
           disabled:opacity-50 disabled:cursor-not-allowed
           ${isTrusted
-            ? 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90 focus:ring-[var(--color-primary)]'
-            : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus:ring-[var(--color-primary)]'
+            ? 'bg-primary text-white hover:bg-primary/90 focus:ring-primary'
+            : 'bg-surface text-text border border-border hover:border-primary hover:text-primary focus:ring-primary'
           }
         `}
       >
@@ -96,13 +96,13 @@ export default function TasteMateButton({
       </button>
       
       {trustCount > 0 && (
-        <span className="text-xs text-[var(--color-text-secondary)] ml-1">
+        <span className="text-xs text-(--color-text-secondary) ml-1">
           {t('trust_count', { count: trustCount })}
         </span>
       )}
       
       {error && (
-        <span className="text-xs text-[var(--color-error)] ml-1">
+        <span className="text-xs text-error ml-1">
           {error}
         </span>
       )}

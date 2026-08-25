@@ -31,7 +31,7 @@ export function GrowthIcon({
   if (level === 0) {
     return (
       <span 
-        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] ${className}`}
+        className={`inline-flex items-center justify-center rounded-full bg-surface border border-border ${className}`}
         style={{ width: size, height: size }}
         title="No bean"
       />

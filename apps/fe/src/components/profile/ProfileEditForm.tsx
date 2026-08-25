@@ -128,7 +128,7 @@ export default function ProfileEditForm({
       <div>
         <label 
           htmlFor="display_name"
-          className="block text-sm font-medium text-[var(--color-text)] mb-1"
+          className="block text-sm font-medium text-text mb-1"
         >
           {t('display_name_label')}
         </label>
@@ -146,7 +146,7 @@ export default function ProfileEditForm({
       <div>
         <label 
           htmlFor="bio"
-          className="block text-sm font-medium text-[var(--color-text)] mb-1"
+          className="block text-sm font-medium text-text mb-1"
         >
           {t('bio_label')}
         </label>
@@ -159,7 +159,7 @@ export default function ProfileEditForm({
           placeholder={t('bio_placeholder')}
           maxLength={500}
         />
-        <p className="mt-1 text-xs text-[var(--color-text-secondary)] text-right">
+        <p className="mt-1 text-xs text-(--color-text-secondary) text-right">
           {bio.length}/500
         </p>
       </div>

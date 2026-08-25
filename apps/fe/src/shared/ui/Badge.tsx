@@ -19,15 +19,15 @@ const sizeClasses: Record<BadgeSize, string> = {
 
 const variantClasses: Record<BadgeVariant, string> = {
   default:
-    'bg-[var(--color-surface)] text-[var(--color-surfaceText)] border border-[var(--color-border)]',
+    'bg-surface text-surfaceText border border-border',
   success:
-    'bg-[var(--color-success)]/15 text-[var(--color-success)] border border-[var(--color-success)]/40',
+    'bg-success/15 text-success border border-success/40',
   warning:
-    'bg-[var(--color-warning)]/15 text-[var(--color-warning)] border border-[var(--color-warning)]/40',
+    'bg-warning/15 text-warning border border-warning/40',
   error:
-    'bg-[var(--color-error)]/15 text-[var(--color-error)] border border-[var(--color-error)]/40',
+    'bg-error/15 text-error border border-error/40',
   info:
-    'bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/30'
+    'bg-primary/15 text-primary border border-primary/30'
 };
 
 export default function Badge({

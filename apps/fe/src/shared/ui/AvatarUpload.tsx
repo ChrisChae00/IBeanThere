@@ -80,7 +80,7 @@ export default function AvatarUpload({
         disabled={isProcessing}
         className={`
           relative rounded-full overflow-hidden group
-          focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2
+          focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2
           transition-all duration-200
           ${isProcessing ? 'cursor-wait' : 'cursor-pointer'}
           ${sizeClasses[size]}
@@ -90,7 +90,7 @@ export default function AvatarUpload({
           src={displayUrl}
           alt={displayName}
           size="xl"
-          className={`${sizeClasses[size]} border-4 border-[var(--color-background)]`}
+          className={`${sizeClasses[size]} border-4 border-background`}
         />
 
         {/* Hover overlay */}
@@ -110,7 +110,7 @@ export default function AvatarUpload({
         </div>
       </button>
 
-      <span className="text-xs text-[var(--color-text-secondary)]">
+      <span className="text-xs text-(--color-text-secondary)">
         {isConverting ? t('converting_avatar') : t('change_avatar')}
       </span>
 

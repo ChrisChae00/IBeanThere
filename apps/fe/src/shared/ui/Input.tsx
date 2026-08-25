@@ -21,7 +21,7 @@ export interface InputProps extends Omit<InputElementProps, 'size'> {
 }
 
 const baseFieldClasses =
-  'w-full rounded-2xl border bg-[var(--color-cardBackground)] text-[var(--color-cardText)] placeholder:text-[var(--color-cardTextSecondary)] focus:outline-none transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
+  'w-full rounded-2xl border bg-cardBackground text-cardText placeholder:text-cardTextSecondary focus:outline-hidden transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
   (
@@ -58,8 +58,8 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       paddingWithIcon,
       fullWidth ? 'w-full' : '',
       error
-        ? 'border-[var(--color-error)] focus:ring-2 focus:ring-[var(--color-error)]/30'
-        : 'border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary)]/30',
+        ? 'border-error focus:ring-2 focus:ring-error/30'
+        : 'border-border focus:ring-2 focus:ring-primary/30',
       multiline ? 'resize-none leading-relaxed' : '',
       className
     ]
@@ -74,13 +74,13 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
         htmlFor={fieldId}
       >
         {label && (
-          <span className="text-[var(--color-cardText)]">{label}</span>
+          <span className="text-cardText">{label}</span>
         )}
 
         <div className="relative">
           {icon && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 z-10 text-[var(--color-cardTextSecondary)] ${
+              className={`absolute top-1/2 -translate-y-1/2 z-10 text-cardTextSecondary ${
                 iconPosition === 'left' ? 'left-4' : 'right-4'
               }`}
             >
@@ -107,8 +107,8 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
           <span
             className={`text-xs ${
               error
-                ? 'text-[var(--color-error)]'
-                : helperTextClassName || 'text-[var(--color-cardTextSecondary)]'
+                ? 'text-error'
+                : helperTextClassName || 'text-cardTextSecondary'
             }`}
           >
             {error || helperText}

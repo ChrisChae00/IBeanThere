@@ -169,7 +169,7 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('search_placeholder')}
-            icon={<SearchIcon size={18} className="text-[var(--color-cardTextSecondary)]" />}
+            icon={<SearchIcon size={18} className="text-cardTextSecondary" />}
           />
 
           {/* Search Nearby Button */}
@@ -177,7 +177,7 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
             onClick={handleSearchNearby}
             fullWidth
             loading={locationLoading || isLoading}
-            leftIcon={<LocationIcon size={20} className="text-[var(--color-primaryText)]" />}
+            leftIcon={<LocationIcon size={20} className="text-primaryText" />}
           >
             {t('search_nearby')}
           </Button>
@@ -188,7 +188,7 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
           )}
 
           {!userLocation && !locationLoading && !error && (
-            <p className="text-sm text-[var(--color-cardTextSecondary)]">
+            <p className="text-sm text-cardTextSecondary">
               {t('location_permission_required')}
             </p>
           )}
@@ -200,15 +200,15 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
             </div>
           ) : sortedCafes.length === 0 && cafes.length > 0 ? (
             <div className="text-center py-12">
-              <CoffeeIcon size={48} className="text-[var(--color-cardTextSecondary)] opacity-50 mx-auto mb-3" />
-              <p className="text-[var(--color-cardTextSecondary)]">
+              <CoffeeIcon size={48} className="text-cardTextSecondary opacity-50 mx-auto mb-3" />
+              <p className="text-cardTextSecondary">
                 {t('no_cafes_found')}
               </p>
             </div>
           ) : sortedCafes.length === 0 ? (
             <div className="text-center py-12">
-              <CoffeeIcon size={48} className="text-[var(--color-cardTextSecondary)] opacity-50 mx-auto mb-3" />
-              <p className="text-[var(--color-cardTextSecondary)]">
+              <CoffeeIcon size={48} className="text-cardTextSecondary opacity-50 mx-auto mb-3" />
+              <p className="text-cardTextSecondary">
                 {t('select_cafe_to_write_log')}
               </p>
             </div>
@@ -220,32 +220,32 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
                   <button
                     key={cafe.id}
                     onClick={() => handleCafeSelect(cafe)}
-                    className="w-full text-left p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)]/30 hover:shadow-sm active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+                    className="w-full text-left p-4 bg-surface border border-border rounded-lg hover:bg-surface hover:border-primary/30 hover:shadow-xs active:scale-[0.98] transition-all focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[var(--color-cardText)] text-base mb-1 line-clamp-1">
+                        <h3 className="font-semibold text-cardText text-base mb-1 line-clamp-1">
                           {cafe.name}
                         </h3>
                         {cafe.address && (
-                          <p className="text-sm text-[var(--color-cardTextSecondary)] line-clamp-2">
+                          <p className="text-sm text-cardTextSecondary line-clamp-2">
                             {cafe.address}
                           </p>
                         )}
                         {cafe.rating && (
                           <div className="flex items-center gap-1 mt-2">
-                            <span className="text-[var(--color-accent)] text-sm">⭐</span>
-                            <span className="text-sm text-[var(--color-cardTextSecondary)]">
+                            <span className="text-accent text-sm">⭐</span>
+                            <span className="text-sm text-cardTextSecondary">
                               {cafe.rating.toFixed(1)}
                             </span>
                           </div>
                         )}
                       </div>
                       {distance !== null && (
-                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <div className="flex flex-col items-end gap-1 shrink-0">
                           <div className="flex items-center gap-1">
-                            <LocationIcon size={16} className="text-[var(--color-primary)]" />
-                            <span className="text-sm font-medium text-[var(--color-cardText)] whitespace-nowrap">
+                            <LocationIcon size={16} className="text-primary" />
+                            <span className="text-sm font-medium text-cardText whitespace-nowrap">
                               {Math.round(distance)}m
                             </span>
                           </div>

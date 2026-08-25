@@ -133,8 +133,8 @@ export default function ImageUploader({
           className={`
             border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-colors
             ${isDragging
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
-              : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:border-primary'
             }
             ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
           `}
@@ -150,18 +150,18 @@ export default function ImageUploader({
           />
           <div className="flex flex-col items-center gap-2">
             {isConverting ? (
-              <svg className="w-6 h-6 animate-spin text-[var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none">
+              <svg className="w-6 h-6 animate-spin text-(--color-text-secondary)" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             ) : (
-              <Upload className="w-6 h-6 text-[var(--color-text-secondary)]" />
+              <Upload className="w-6 h-6 text-(--color-text-secondary)" />
             )}
-            <p className="text-sm text-[var(--color-text-secondary)]">
+            <p className="text-sm text-(--color-text-secondary)">
               {isConverting ? t('converting') : t('drag_drop_or_click')}
             </p>
             {!isConverting && (
-              <p className="text-xs text-[var(--color-text-secondary)]">
+              <p className="text-xs text-(--color-text-secondary)">
                 {t('image_requirements', { max: maxImages, maxSize: maxSizeMB })}
               </p>
             )}
@@ -171,7 +171,7 @@ export default function ImageUploader({
 
       {/* Error message */}
       {error && (
-        <p className="text-sm text-[var(--color-error)]">{error}</p>
+        <p className="text-sm text-error">{error}</p>
       )}
 
       {/* Image previews */}
@@ -180,7 +180,7 @@ export default function ImageUploader({
           {images.map((file, index) => (
             <div
               key={`${file.name}-${index}`}
-              className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--color-border)]"
+              className="relative group w-20 h-20 rounded-xl overflow-hidden border border-border"
             >
               <img
                 src={URL.createObjectURL(file)}
@@ -202,7 +202,7 @@ export default function ImageUploader({
       )}
 
       {/* Image count indicator */}
-      <p className="text-xs text-[var(--color-text-secondary)]">
+      <p className="text-xs text-(--color-text-secondary)">
         {t('images_count', { count: images.length, max: maxImages })}
       </p>
     </div>

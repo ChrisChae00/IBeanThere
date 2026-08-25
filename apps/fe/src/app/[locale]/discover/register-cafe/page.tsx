@@ -14,7 +14,7 @@ import { UserLocationIcon } from '@/shared/ui';
 const InteractiveMap = dynamic(() => import('@/components/map/InteractiveMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-[var(--color-background)]">
+    <div className="flex items-center justify-center h-full bg-background">
       <LoadingSpinner size="lg" />
     </div>
   ),
@@ -91,11 +91,11 @@ export default function RegisterCafePage() {
   }
   
   return (
-    <main className="min-h-screen bg-[var(--color-background)]">
+    <main className="min-h-screen bg-background">
       {/* Page Title Section */}
-      <section className="pt-6  bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
+      <section className="pt-6  bg-linear-to-b from-background to-surface/30">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-2">
+            <h1 className="text-4xl md:text-5xl font-bold text-text mb-2">
               {t('title')}
             </h1>
         </div>
@@ -106,18 +106,18 @@ export default function RegisterCafePage() {
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             {/* Left: Interactive Map */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg flex flex-col">
+            <div className="bg-surface border border-border rounded-2xl shadow-lg flex flex-col">
               <div className="p-6">
-                <h2 className="px-2 text-2xl font-bold text-[var(--color-text)] mb-2">
+                <h2 className="px-2 text-2xl font-bold text-text mb-2">
                   {tMap('map_title')}
                 </h2>
                 <div className="px-2 flex items-center justify-between gap-4">
-                  <p className="text-[var(--color-text-secondary)]">
+                  <p className="text-(--color-text-secondary)">
                     {t('select_on_map_hint')}
                   </p>
                   <button
                     onClick={handleReturnToCurrentLocation}
-                    className="flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
+                    className="flex items-center justify-center hover:opacity-80 transition-opacity shrink-0"
                     title={tMap('location_button')}
                     disabled={!coords}
                   >
@@ -139,16 +139,16 @@ export default function RegisterCafePage() {
                     onMapClick={handleMapClick}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full bg-[var(--color-background)]">
+                  <div className="flex items-center justify-center h-full bg-background">
                     <div className="text-center">
                       <LoadingSpinner size="lg" />
-                      <p className="mt-4 text-[var(--color-text-secondary)]">
+                      <p className="mt-4 text-(--color-text-secondary)">
                         {locationLoading ? tMap('loading_location') : tMap('location_permission_title')}
                       </p>
                       {!locationLoading && !locationError && (
                         <button
                           onClick={() => getCurrentLocation().catch(() => {})}
-                          className="mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                          className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
                         >
                           {tMap('share_location')}
                         </button>
@@ -160,7 +160,7 @@ export default function RegisterCafePage() {
             </div>
             
             {/* Right: Registration Form */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-lg">
+            <div className="bg-surface border border-border rounded-2xl p-6 shadow-lg">
               <RegisterCafeForm
                 initialLocation={selectedLocation || undefined}
                 userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}

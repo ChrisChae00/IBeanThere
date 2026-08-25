@@ -64,11 +64,11 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
   };
 
   return (
-    <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-xl border border-border shadow-xs overflow-hidden">
       {/* Header - User Info */}
       <div className="flex items-center gap-3 p-4 pb-3">
         <Link href={`/profile/${item.username}`}>
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--color-muted)] ring-2 ring-[var(--color-primary)]/10">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-(--color-muted) ring-2 ring-primary/10">
             {item.avatar_url ? (
               <Image
                 src={item.avatar_url}
@@ -78,7 +78,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
                 className="object-cover w-full h-full"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[var(--color-text-secondary)] bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-accent)]/20">
+              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-(--color-text-secondary) bg-linear-to-br from-primary/20 to-accent/20">
                 {item.display_name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -87,16 +87,16 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Link href={`/profile/${item.username}`}>
-              <span className="font-semibold text-[var(--color-text)] hover:underline">
+              <span className="font-semibold text-text hover:underline">
                 {item.display_name}
               </span>
             </Link>
-            <span className="text-[var(--color-text-secondary)] text-sm">·</span>
-            <span className="text-xs text-[var(--color-text-secondary)]">{formatDate(item.visited_at)}</span>
+            <span className="text-(--color-text-secondary) text-sm">·</span>
+            <span className="text-xs text-(--color-text-secondary)">{formatDate(item.visited_at)}</span>
           </div>
           {/* Cafe Location Tag */}
           <Link href={`/cafes/${item.cafe_id}`}>
-            <div className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline mt-0.5">
+            <div className="flex items-center gap-1 text-xs text-primary hover:underline mt-0.5">
               <MapPin className="w-3 h-3" />
               <span>{item.cafe_name}</span>
             </div>
@@ -107,7 +107,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       {/* Text Content - Always visible */}
       {item.comment && (
         <div className="px-4 pb-3">
-          <p className="text-[var(--color-text)] text-[15px] leading-relaxed whitespace-pre-wrap">
+          <p className="text-text text-[15px] leading-relaxed whitespace-pre-wrap">
             {item.comment}
           </p>
         </div>
@@ -117,9 +117,9 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       {(item.coffee_type || item.rating) && (
         <div className="px-4 pb-3 flex flex-wrap items-center gap-3">
           {item.coffee_type && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--color-primary)]/10 rounded-full">
-              <Coffee className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-              <span className="text-xs font-medium text-[var(--color-primary)]">{item.coffee_type}</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full">
+              <Coffee className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-primary">{item.coffee_type}</span>
             </div>
           )}
           {item.rating && (
@@ -135,7 +135,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       {hasPhotos && (
         <div className="relative">
           {item.photo_urls!.length === 1 ? (
-            <div className="relative aspect-[16/10] bg-[var(--color-muted)]">
+            <div className="relative aspect-16/10 bg-(--color-muted)">
               <Image
                 src={item.photo_urls![0]}
                 alt={item.cafe_name}
@@ -146,7 +146,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
           ) : (
             <div className="grid grid-cols-2 gap-0.5">
               {item.photo_urls!.slice(0, 4).map((url, idx) => (
-                <div key={idx} className="relative aspect-square bg-[var(--color-muted)]">
+                <div key={idx} className="relative aspect-square bg-(--color-muted)">
                   <Image src={url} alt={`${item.cafe_name} ${idx + 1}`} fill className="object-cover" />
                   {idx === 3 && item.photo_urls!.length > 4 && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -161,7 +161,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
       )}
 
       {/* Actions Bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border)]">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-border">
         <div className="flex items-center gap-1">
           <button
             onClick={handleLike}
@@ -169,7 +169,7 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all
               ${item.is_liked_by_me 
                 ? 'text-red-500 bg-red-50 dark:bg-red-500/10' 
-                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-muted)]'
+                : 'text-(--color-text-secondary) hover:bg-(--color-muted)'
               } disabled:opacity-50`}
           >
             <Heart className={`w-4 h-4 ${item.is_liked_by_me ? 'fill-red-500' : ''}`} />
@@ -180,12 +180,12 @@ export default function FeedCard({ item, session, onLikeToggle }: FeedCardProps)
         <div className="flex items-center gap-2">
           <Link
             href={`/cafes/${item.cafe_id}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-muted)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-muted) transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline">{t('view_cafe')}</span>
           </Link>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-muted)] transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-muted) transition-colors">
             <Share2 className="w-4 h-4" />
           </button>
         </div>

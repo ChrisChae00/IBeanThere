@@ -27,12 +27,12 @@ export default function ProductCard({
 
   return (
     <div 
-      className="group relative bg-[var(--color-surface)] rounded-xl overflow-hidden shadow-[var(--ibean-shadow-soft)] hover:shadow-[var(--ibean-shadow-warm)] transition-all duration-300 border border-[var(--color-border)] flex flex-col h-full"
+      className="group relative bg-surface rounded-xl overflow-hidden shadow-(--ibean-shadow-soft) hover:shadow-(--ibean-shadow-warm) transition-all duration-300 border border-border flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-[var(--color-surface-hover)]">
+      <div className="relative aspect-square w-full overflow-hidden bg-(--color-surface-hover)">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -55,7 +55,7 @@ export default function ProductCard({
         {/* Overlay for Coming Soon */}
         {isComingSoon && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="bg-[var(--color-background)] text-[var(--color-text)] px-4 py-2 rounded-full font-medium text-sm shadow-lg">
+            <span className="bg-background text-text px-4 py-2 rounded-full font-medium text-sm shadow-lg">
               {t('product.coming_soon')}
             </span>
           </div>
@@ -63,32 +63,32 @@ export default function ProductCard({
       </div>
 
       {/* Content */}
-      <div className="p-5 flex flex-col flex-grow">
+      <div className="p-5 flex flex-col grow">
         <div className="flex flex-wrap gap-2 mb-3">
           {tags.map((tag, index) => (
             <span 
               key={index}
-              className="text-xs font-medium px-2 py-1 rounded-md bg-[var(--color-surface-hover)] text-[var(--color-textSecondary)]"
+              className="text-xs font-medium px-2 py-1 rounded-md bg-(--color-surface-hover) text-textSecondary"
             >
               {t(`tags.${tag}` as any)}
             </span>
           ))}
         </div>
         
-        <h3 className="text-lg font-bold text-[var(--color-text)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">
+        <h3 className="text-lg font-bold text-text mb-2 group-hover:text-primary transition-colors">
           {title}
         </h3>
         
-        <p className="text-sm text-[var(--color-textSecondary)] mb-4 flex-grow line-clamp-3">
+        <p className="text-sm text-textSecondary mb-4 grow line-clamp-3">
           {description}
         </p>
         
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--color-border)]">
-          <span className="font-semibold text-[var(--color-text)]">
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
+          <span className="font-semibold text-text">
             {price || t('product.coming_soon')}
           </span>
           <button 
-            className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors"
+            className="text-sm font-medium text-primary hover:text-secondary transition-colors"
             disabled={isComingSoon}
           >
             {isComingSoon ? t('product.notify_me') : t('product.add_to_cart')}

@@ -48,21 +48,21 @@ export default function Header({
   const navLinkClass = (href: string) =>
     `font-medium transition-colors min-h-[44px] px-1 flex items-center text-sm ${
       isActive(href)
-        ? 'text-[var(--color-primary)]'
-        : 'text-[var(--color-text)] hover:text-[var(--color-primary)]'
+        ? 'text-primary'
+        : 'text-text hover:text-primary'
     }`;
 
   const journeyActive =
     isActive(`/${locale}/my-logs`) || isActive(`/${locale}/my-beans`);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-accent)] shadow-[var(--ibean-shadow-warm-sm)] motion-fade-in">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-accent shadow-(--ibean-shadow-warm-sm) motion-fade-in">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center space-x-1 flex-shrink-0">
-            <Logo size="md" className="text-[var(--color-primary)]" />
-            <span className="text-xl font-bold text-[var(--color-text)]">
+          <Link href={`/${locale}`} className="flex items-center space-x-1 shrink-0">
+            <Logo size="md" className="text-primary" />
+            <span className="text-xl font-bold text-text">
               IBeanThere
             </span>
           </Link>
@@ -76,7 +76,7 @@ export default function Header({
               {t('explore_map')}
             </Link>
 
-            <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
 
             <Link
               href={`/${locale}/discover/dropbean`}
@@ -85,7 +85,7 @@ export default function Header({
               {t('dropbean')}
             </Link>
 
-            <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
 
             <Link
               href={`/${locale}/discover/register-cafe`}
@@ -94,7 +94,7 @@ export default function Header({
               {t('register_cafe')}
             </Link>
 
-            <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
 
             <Link
               href={`/${locale}/learn/coffee`}
@@ -103,7 +103,7 @@ export default function Header({
               {t('learn')}
             </Link>
 
-            <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
 
             {/* My Journey Dropdown */}
             <div ref={journeyRef} className="relative">
@@ -113,8 +113,8 @@ export default function Header({
                 aria-haspopup="true"
                 className={`font-medium transition-colors min-h-[44px] px-1 flex items-center gap-1 text-sm ${
                   journeyActive
-                    ? 'text-[var(--color-primary)]'
-                    : 'text-[var(--color-text)] hover:text-[var(--color-primary)]'
+                    ? 'text-primary'
+                    : 'text-text hover:text-primary'
                 }`}
               >
                 {t('my_coffee_journey')}
@@ -124,15 +124,15 @@ export default function Header({
               </button>
 
               {journeyOpen && (
-                <div className="absolute left-0 top-full mt-1 w-44 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl shadow-[var(--ibean-shadow-warm-md)] overflow-hidden z-50 motion-slide-up">
+                <div className="absolute left-0 top-full mt-1 w-44 bg-background border border-border rounded-xl shadow-(--ibean-shadow-warm-md) overflow-hidden z-50 motion-slide-up">
                   <div className="py-1">
                     <Link
                       href={`/${locale}/my-logs`}
                       onClick={() => setJourneyOpen(false)}
                       className={`block px-4 py-2.5 text-sm transition-colors ${
                         isActive(`/${locale}/my-logs`)
-                          ? 'text-[var(--color-primary)] bg-[var(--color-surface)]'
-                          : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]'
+                          ? 'text-primary bg-surface'
+                          : 'text-text hover:bg-surface hover:text-primary'
                       }`}
                     >
                       {t('coffee_logs_item_1')}
@@ -142,8 +142,8 @@ export default function Header({
                       onClick={() => setJourneyOpen(false)}
                       className={`block px-4 py-2.5 text-sm transition-colors ${
                         isActive(`/${locale}/my-beans`)
-                          ? 'text-[var(--color-primary)] bg-[var(--color-surface)]'
-                          : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]'
+                          ? 'text-primary bg-surface'
+                          : 'text-text hover:bg-surface hover:text-primary'
                       }`}
                     >
                       {t('my_beans')}
@@ -163,21 +163,21 @@ export default function Header({
             <LanguageSwitcher />
 
             {isLoading ? (
-              <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse" />
+              <div className="w-8 h-8 bg-surface rounded-full animate-pulse" />
             ) : user ? (
               <ProfileDropdown locale={locale} />
             ) : (
               <>
                 <Link
                   href={`/${locale}/signin`}
-                  className="border border-[var(--color-border)] text-[var(--color-text)] px-4 py-2 rounded-full hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] font-medium transition-all min-h-[44px] flex items-center text-sm"
+                  className="border border-border text-text px-4 py-2 rounded-full hover:bg-surface hover:border-primary font-medium transition-all min-h-[44px] flex items-center text-sm"
                 >
                   {t('sign_in')}
                 </Link>
-                <div className="h-6 w-px bg-[var(--color-border)]" />
+                <div className="h-6 w-px bg-border" />
                 <Link
                   href={`/${locale}/register`}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-5 py-2 rounded-full hover:bg-[var(--color-secondary)] transition-all font-medium min-h-[44px] flex items-center shadow-[var(--ibean-shadow-warm-sm)] text-sm"
+                  className="bg-primary text-primaryText px-5 py-2 rounded-full hover:bg-secondary transition-all font-medium min-h-[44px] flex items-center shadow-(--ibean-shadow-warm-sm) text-sm"
                 >
                   {t('get_started')}
                 </Link>

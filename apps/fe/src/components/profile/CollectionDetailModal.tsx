@@ -180,7 +180,7 @@ export default function CollectionDetailModal({
       return <BookmarkIcon filled size={24} color="#3b82f6" />;
     }
     return (
-      <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]" />
+      <div className="w-6 h-6 rounded-full bg-primary" />
     );
   };
 
@@ -196,17 +196,17 @@ export default function CollectionDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-1001 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
       onClick={onClose}
     >
       <div
-        className="relative bg-[var(--color-cardBackground)] rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="relative bg-cardBackground rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surface)]/80 transition"
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-surface text-cardText hover:bg-surface/80 transition"
           aria-label="Close"
         >
           ✕
@@ -214,7 +214,7 @@ export default function CollectionDetailModal({
 
         <div className="p-6 sm:p-8 min-h-[300px]">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[var(--color-border)]">
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
           {getCollectionIcon(collection.icon_type)}
           
           {isEditing && !isSystemCollection ? (
@@ -222,15 +222,15 @@ export default function CollectionDetailModal({
               type="text"
               value={editName}
               onChange={e => setEditName(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-lg font-semibold border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="flex-1 px-3 py-1.5 text-lg font-semibold border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
               autoFocus
             />
           ) : (
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-[var(--color-cardText)]">
+              <h2 className="text-lg font-semibold text-cardText">
                 {getCollectionName()}
               </h2>
-              <p className="text-sm text-[var(--color-textSecondary)]">
+              <p className="text-sm text-textSecondary">
                 {t('cafes', { count: detail?.item_count ?? collection.item_count ?? 0 })}
               </p>
             </div>
@@ -245,7 +245,7 @@ export default function CollectionDetailModal({
         ) : error ? (
           <div className="text-center py-8 text-red-500">{error}</div>
         ) : detail?.items.length === 0 ? (
-          <div className="text-center py-8 text-[var(--color-textSecondary)]">
+          <div className="text-center py-8 text-textSecondary">
             {t('no_collections')}
           </div>
         ) : (
@@ -253,7 +253,7 @@ export default function CollectionDetailModal({
             {detail?.items.map(item => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-background)] group"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-background group"
               >
                 <div
                   className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
@@ -267,7 +267,7 @@ export default function CollectionDetailModal({
                   }}
                 >
                   {/* Cafe Image */}
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-[var(--color-background)]">
+                  <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-background">
                     {item.cafe_main_image ? (
                       <img
                         src={item.cafe_main_image}
@@ -283,11 +283,11 @@ export default function CollectionDetailModal({
 
                   {/* Cafe Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-[var(--color-cardText)] truncate">
+                    <h3 className="font-medium text-cardText truncate">
                       {item.cafe_name}
                     </h3>
                     {item.cafe_address && (
-                      <p className="text-sm text-[var(--color-textSecondary)] truncate">
+                      <p className="text-sm text-textSecondary truncate">
                         {item.cafe_address}
                       </p>
                     )}
@@ -302,7 +302,7 @@ export default function CollectionDetailModal({
                         e.stopPropagation();
                         setActiveDropdownId(prev => prev === item.id ? null : item.id);
                       }}
-                      className="p-1.5 text-[var(--color-textSecondary)] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[var(--color-surface)] rounded transition-all"
+                      className="p-1.5 text-textSecondary opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-surface rounded-sm transition-all"
                       aria-label={t('more_options')}
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -311,14 +311,14 @@ export default function CollectionDetailModal({
                     </button>
 
                     {activeDropdownId === item.id && (
-                      <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-[var(--color-cardBackground)] border border-[var(--color-border)] rounded-lg shadow-lg overflow-hidden">
+                      <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-cardBackground border border-border rounded-lg shadow-lg overflow-hidden">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setMoveModalItem(item);
                             setActiveDropdownId(null);
                           }}
-                          className="w-full px-3 py-2 text-sm text-left text-[var(--color-cardText)] hover:bg-[var(--color-background)] transition-colors"
+                          className="w-full px-3 py-2 text-sm text-left text-cardText hover:bg-background transition-colors"
                         >
                           {t('move_to')}
                         </button>
@@ -328,7 +328,7 @@ export default function CollectionDetailModal({
                             handleRemoveCafe(item.cafe_id);
                             setActiveDropdownId(null);
                           }}
-                          className="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-[var(--color-background)] transition-colors"
+                          className="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-background transition-colors"
                         >
                           {t('delete')}
                         </button>
@@ -343,13 +343,13 @@ export default function CollectionDetailModal({
 
         {/* Actions */}
         {isOwnProfile && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--color-border)]">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
             {isEditing ? (
               <>
                 <button
                   onClick={handleSave}
                   disabled={isSaving || !editName.trim()}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] disabled:opacity-50 transition-colors"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
                 >
                   {isSaving ? <LoadingSpinner size="sm" /> : t('save')}
                 </button>
@@ -358,7 +358,7 @@ export default function CollectionDetailModal({
                     setIsEditing(false);
                     setEditName(collection.name);
                   }}
-                  className="px-4 py-2 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
+                  className="px-4 py-2 text-sm text-textSecondary hover:text-cardText"
                 >
                   {t('cancel')}
                 </button>
@@ -369,7 +369,7 @@ export default function CollectionDetailModal({
                 <button
                   onClick={handleShare}
                   disabled={shareLoading}
-                  className="px-4 py-2 text-sm font-medium text-[var(--color-primary)] border border-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary)]/10 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 disabled:opacity-50 transition-colors"
                 >
                   {shareLoading ? (
                     <LoadingSpinner size="sm" />
@@ -384,7 +384,7 @@ export default function CollectionDetailModal({
                 {!isSystemCollection && (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 text-sm font-medium text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)] transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-textSecondary hover:text-cardText transition-colors"
                   >
                     {t('edit')}
                   </button>
@@ -403,7 +403,7 @@ export default function CollectionDetailModal({
                       </button>
                       <button
                         onClick={() => setShowDeleteConfirm(false)}
-                        className="px-3 py-2 text-sm text-[var(--color-textSecondary)]"
+                        className="px-3 py-2 text-sm text-textSecondary"
                       >
                         {t('cancel')}
                       </button>

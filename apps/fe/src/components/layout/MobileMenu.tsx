@@ -46,8 +46,8 @@ export default function MobileMenu({ locale }: { locale: string }) {
   const navItemClass = (href: string) =>
     `flex items-center gap-3 px-5 py-3 transition-colors min-h-[48px] w-full relative ${
       isActive(href)
-        ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/8'
-        : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]'
+        ? 'text-primary bg-primary/8'
+        : 'text-text hover:bg-surface hover:text-primary'
     }`;
 
   const discoverItems = [
@@ -67,13 +67,13 @@ export default function MobileMenu({ locale }: { locale: string }) {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+        className="lg:hidden p-2 rounded-lg hover:bg-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
         {isOpen ? (
-          <X className="w-5 h-5 text-[var(--color-text)]" />
+          <X className="w-5 h-5 text-text" />
         ) : (
-          <Menu className="w-5 h-5 text-[var(--color-text)]" />
+          <Menu className="w-5 h-5 text-text" />
         )}
       </button>
 
@@ -82,29 +82,29 @@ export default function MobileMenu({ locale }: { locale: string }) {
           {/* Overlay */}
           {isOpen && (
             <div
-              className="fixed inset-0 bg-black/50 z-[9998] lg:hidden"
+              className="fixed inset-0 bg-black/50 z-9998 lg:hidden"
               onClick={closeMenu}
             />
           )}
 
           {/* Slide-out Menu */}
           <div
-            className={`fixed inset-y-0 right-0 w-[300px] bg-[var(--color-background)] border-l border-[var(--color-border)] z-[9999] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+            className={`fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
               isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 h-16 border-b border-[var(--color-border)] flex-shrink-0">
+            <div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
               <div className="flex items-center space-x-2">
-                <Logo size="md" className="text-[var(--color-primary)]" />
-                <span className="text-lg font-bold text-[var(--color-text)]">IBeanThere</span>
+                <Logo size="md" className="text-primary" />
+                <span className="text-lg font-bold text-text">IBeanThere</span>
               </div>
               <button
                 onClick={closeMenu}
-                className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
+                className="p-2 rounded-lg hover:bg-surface transition-colors"
                 aria-label="Close menu"
               >
-                <X className="w-5 h-5 text-[var(--color-text)]" />
+                <X className="w-5 h-5 text-text" />
               </button>
             </div>
 
@@ -112,54 +112,54 @@ export default function MobileMenu({ locale }: { locale: string }) {
             <nav className="flex-1 overflow-y-auto">
               {/* Discover section */}
               <div className="pt-2 pb-1">
-                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-text/40">
                   Discover
                 </p>
                 {discoverItems.map(({ href, icon: Icon, label }) => (
                   <Link key={href} href={href} onClick={closeMenu} className={navItemClass(href)}>
                     {isActive(href) && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-primary rounded-r-full" />
                     )}
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <Icon className="w-4 h-4 shrink-0" />
                     <span className="text-sm font-medium">{label}</span>
                   </Link>
                 ))}
               </div>
 
-              <div className="mx-5 h-px bg-[var(--color-border)]" />
+              <div className="mx-5 h-px bg-border" />
 
               {/* My Journey section */}
               <div className="pt-2 pb-1">
-                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-text/40">
                   My Journey
                 </p>
                 {journeyItems.map(({ href, icon: Icon, label }) => (
                   <Link key={href} href={href} onClick={closeMenu} className={navItemClass(href)}>
                     {isActive(href) && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-primary rounded-r-full" />
                     )}
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <Icon className="w-4 h-4 shrink-0" />
                     <span className="text-sm font-medium">{label}</span>
                   </Link>
                 ))}
               </div>
 
-              <div className="mx-5 h-px bg-[var(--color-border)]" />
+              <div className="mx-5 h-px bg-border" />
 
               {/* Account section */}
               <div className="pt-2 pb-2">
-                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text)]/40">
+                <p className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-text/40">
                   Account
                 </p>
                 {isLoading ? (
                   <div className="px-5 py-3">
-                    <div className="w-8 h-8 bg-[var(--color-surface)] rounded-full animate-pulse" />
+                    <div className="w-8 h-8 bg-surface rounded-full animate-pulse" />
                   </div>
                 ) : user ? (
                   <>
                     <button
                       onClick={() => setIsUserMenuExpanded(prev => !prev)}
-                      className="flex items-center justify-between px-5 py-3 w-full hover:bg-[var(--color-surface)] transition-colors min-h-[48px] group"
+                      className="flex items-center justify-between px-5 py-3 w-full hover:bg-surface transition-colors min-h-[48px] group"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar
@@ -167,12 +167,12 @@ export default function MobileMenu({ locale }: { locale: string }) {
                           alt={profile?.display_name || user.user_metadata?.username || 'User'}
                           size="sm"
                         />
-                        <span className="text-sm font-medium text-[var(--color-text)] truncate max-w-[140px]">
+                        <span className="text-sm font-medium text-text truncate max-w-[140px]">
                           {profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User'}
                         </span>
                       </div>
                       <ChevronDown
-                        className={`w-4 h-4 text-[var(--color-text)]/50 transition-transform duration-200 ${isUserMenuExpanded ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-text/50 transition-transform duration-200 ${isUserMenuExpanded ? 'rotate-180' : ''}`}
                       />
                     </button>
 
@@ -184,9 +184,9 @@ export default function MobileMenu({ locale }: { locale: string }) {
                           className={navItemClass(`/${locale}/profile`)}
                         >
                           {isActive(`/${locale}/profile`) && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-primary rounded-r-full" />
                           )}
-                          <User className="w-4 h-4 flex-shrink-0" />
+                          <User className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{t('profile')}</span>
                         </Link>
                         <Link
@@ -195,9 +195,9 @@ export default function MobileMenu({ locale }: { locale: string }) {
                           className={navItemClass(`/${locale}/settings`)}
                         >
                           {isActive(`/${locale}/settings`) && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-[var(--color-primary)] rounded-r-full" />
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-primary rounded-r-full" />
                           )}
-                          <Settings className="w-4 h-4 flex-shrink-0" />
+                          <Settings className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{t('settings')}</span>
                         </Link>
                         <button
@@ -206,9 +206,9 @@ export default function MobileMenu({ locale }: { locale: string }) {
                             closeMenu();
                             window.location.href = `/${locale}`;
                           }}
-                          className="flex items-center gap-3 px-5 py-3 w-full text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-red-500 transition-colors min-h-[48px] text-sm font-medium"
+                          className="flex items-center gap-3 px-5 py-3 w-full text-text hover:bg-surface hover:text-red-500 transition-colors min-h-[48px] text-sm font-medium"
                         >
-                          <LogOut className="w-4 h-4 flex-shrink-0" />
+                          <LogOut className="w-4 h-4 shrink-0" />
                           {tAuth('logout')}
                         </button>
                       </div>
@@ -219,14 +219,14 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <Link
                       href={`/${locale}/signin`}
                       onClick={closeMenu}
-                      className="flex-1 px-4 py-2.5 text-sm text-[var(--color-text)] border border-[var(--color-border)] rounded-full hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] font-medium transition-all text-center"
+                      className="flex-1 px-4 py-2.5 text-sm text-text border border-border rounded-full hover:bg-surface hover:border-primary font-medium transition-all text-center"
                     >
                       {t('sign_in')}
                     </Link>
                     <Link
                       href={`/${locale}/register`}
                       onClick={closeMenu}
-                      className="flex-1 bg-[var(--color-primary)] text-[var(--color-primaryText)] px-4 py-2.5 rounded-full hover:bg-[var(--color-secondary)] transition-colors font-medium text-sm text-center"
+                      className="flex-1 bg-primary text-primaryText px-4 py-2.5 rounded-full hover:bg-secondary transition-colors font-medium text-sm text-center"
                     >
                       {t('sign_up')}
                     </Link>
@@ -236,7 +236,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
             </nav>
 
             {/* Switchers - Fixed at bottom */}
-            <div className="px-5 py-4 border-t border-[var(--color-border)] flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="px-5 py-4 border-t border-border shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <div className="flex items-center justify-center gap-3">
                 <ThemeSwitcher />
                 <LanguageSwitcher />

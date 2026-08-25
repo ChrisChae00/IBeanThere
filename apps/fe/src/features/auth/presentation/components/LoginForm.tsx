@@ -99,9 +99,9 @@ export function LoginForm({ locale }: LoginFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('email_placeholder')}
-          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          icon={<MailIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
         />
 
         <Input
@@ -110,14 +110,14 @@ export function LoginForm({ locale }: LoginFormProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t('password_placeholder')}
-          icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          icon={<LockIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
           endAdornment={
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
+              className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
             >
               {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
             </button>
@@ -133,16 +133,16 @@ export function LoginForm({ locale }: LoginFormProps) {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] transition-all cursor-pointer accent-[var(--color-primary)] bg-[var(--color-surface)]"
+              className="w-5 h-5 text-primary border-border rounded-sm focus:ring-primary transition-all cursor-pointer accent-primary bg-surface"
             />
           </div>
-          <span className="ml-2 text-sm text-[var(--color-text-secondary)] group-hover:text-[var(--color-text)] transition-colors select-none font-medium">
+          <span className="ml-2 text-sm text-(--color-text-secondary) group-hover:text-text transition-colors select-none font-medium">
             {t('remember_me')}
           </span>
         </label>
         <Link
           href={`/${locale}/forgot-password`}
-          className="px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] font-medium transition-colors"
+          className="px-2 text-sm text-(--color-text-secondary) hover:text-primary font-medium transition-colors"
         >
           {t('forgot_password')}
         </Link>
@@ -153,18 +153,18 @@ export function LoginForm({ locale }: LoginFormProps) {
         fullWidth 
         size="lg" 
         loading={isLoading} 
-        className="mt-2 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+        className="mt-2 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-primary text-primaryText hover:bg-accent hover:text-text"
       >
         {t('sign_in')}
       </Button>
 
       {/* Divider */}
       <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 border-t border-[var(--color-border)]"></div>
-        <span className="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wider text-xs px-2">
+        <div className="flex-1 border-t border-border"></div>
+        <span className="text-sm font-medium text-(--color-text-secondary) uppercase tracking-wider text-xs px-2">
           {t('or_continue_with')}
         </span>
-        <div className="flex-1 border-t border-[var(--color-border)]"></div>
+        <div className="flex-1 border-t border-border"></div>
       </div>
 
       {/* Social Sign In */}
@@ -176,7 +176,7 @@ export function LoginForm({ locale }: LoginFormProps) {
           variant="outline"
           fullWidth
           leftIcon={<GoogleIcon size={20} />}
-          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md font-medium h-[56px] hover:font-bold"
+          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-xs hover:shadow-md font-medium h-[56px] hover:font-bold"
         >
           {t('google')}
         </Button>
@@ -184,11 +184,11 @@ export function LoginForm({ locale }: LoginFormProps) {
 
       {/* Sign Up Link */}
       <div className="text-center mt-8">
-        <p className="text-[var(--color-text-secondary)] text-sm">
+        <p className="text-(--color-text-secondary) text-sm">
           {t('dont_have_account')}{' '}
           <Link
             href={`/${locale}/register`}
-            className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
+            className="text-primary hover:text-secondary font-bold hover:underline decoration-2 underline-offset-4 transition-all"
           >
             {t('sign_up_link')}
           </Link>

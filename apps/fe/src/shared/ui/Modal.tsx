@@ -69,7 +69,7 @@ export default function Modal({
   return createPortal(
     <div
       style={{ zIndex }}
-      className={`fixed inset-0 flex ${alignClasses[align]} justify-center px-4 sm:px-6 lg:px-8 backdrop-blur-sm bg-black/40`}
+      className={`fixed inset-0 flex ${alignClasses[align]} justify-center px-4 sm:px-6 lg:px-8 backdrop-blur-xs bg-black/40`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -79,8 +79,8 @@ export default function Modal({
         className={`w-full ${sizeClasses[size]} relative`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute inset-0 bg-[var(--color-background)]/5 blur-3xl rounded-[40px]" />
-        <div className="relative rounded-[32px] border border-[var(--color-border)]/60 bg-[var(--color-cardBackground)] shadow-[0_30px_80px_rgba(26,18,11,0.25)] transition-all duration-200">
+        <div className="absolute inset-0 bg-background/5 blur-3xl rounded-[40px]" />
+        <div className="relative rounded-[32px] border border-border/60 bg-cardBackground shadow-[0_30px_80px_rgba(26,18,11,0.25)] transition-all duration-200">
           <div className="p-6 sm:p-8">
             {(title || closeButton) && (
               <div className="mb-6 flex items-start justify-between gap-6">
@@ -88,12 +88,12 @@ export default function Modal({
                   <div>
                     <h2
                       id="modal-title"
-                      className="text-2xl font-semibold text-[var(--color-cardText)]"
+                      className="text-2xl font-semibold text-cardText"
                     >
                       {title}
                     </h2>
                     {description && (
-                      <p className="mt-2 text-[var(--color-cardTextSecondary)]">
+                      <p className="mt-2 text-cardTextSecondary">
                         {description}
                       </p>
                     )}
@@ -102,7 +102,7 @@ export default function Modal({
                 {closeButton && (
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-cardText)] transition hover:bg-[var(--color-surface)]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-cardText transition hover:bg-surface/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Close modal"
                   >
                     <span aria-hidden="true">✕</span>
@@ -111,13 +111,13 @@ export default function Modal({
               </div>
             )}
 
-            <div className="space-y-6 text-[var(--color-cardText)]">
+            <div className="space-y-6 text-cardText">
               {children}
             </div>
           </div>
 
           {footer && (
-            <div className="border-t border-[var(--color-border)]/60 bg-[var(--color-surface)]/40 px-6 py-4 sm:px-8">
+            <div className="border-t border-border/60 bg-surface/40 px-6 py-4 sm:px-8">
               {footer}
             </div>
           )}

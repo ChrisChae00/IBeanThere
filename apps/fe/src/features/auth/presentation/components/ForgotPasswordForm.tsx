@@ -121,15 +121,15 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
+          <h2 className="text-2xl font-bold text-cardText mb-2">
             {t('reset_email_sent')}
           </h2>
-          <p className="text-[var(--color-cardTextSecondary)]">
+          <p className="text-cardTextSecondary">
             {t('reset_email_sent_subtitle', { email })}
           </p>
         </div>
 
-        <div className="bg-[var(--color-surface)] p-4 rounded-xl text-sm text-[var(--color-cardTextSecondary)] space-y-2">
+        <div className="bg-surface p-4 rounded-xl text-sm text-cardTextSecondary space-y-2">
           <p>{t('check_spam_folder')}</p>
           <p>{t('email_may_take_time')}</p>
         </div>
@@ -159,7 +159,7 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
             onClick={handleTryDifferentEmail}
             variant="ghost"
             fullWidth
-            className="text-[var(--color-primary)]"
+            className="text-primary"
           >
             {t('try_different_email')}
           </Button>
@@ -169,7 +169,7 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
               variant="ghost"
               fullWidth
               leftIcon={<ArrowLeftIcon size={18} />}
-              className="text-[var(--color-cardTextSecondary)]"
+              className="text-cardTextSecondary"
             >
               {t('back_to_login')}
             </Button>
@@ -183,10 +183,10 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
+        <h2 className="text-2xl font-bold text-cardText mb-2">
           {t('forgot_password_title')}
         </h2>
-        <p className="text-[var(--color-cardTextSecondary)]">
+        <p className="text-cardTextSecondary">
           {t('forgot_password_subtitle')}
         </p>
       </div>
@@ -200,9 +200,9 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('email_placeholder')}
-          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
+          icon={<MailIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="bg-background/50 backdrop-blur-xs"
         />
       </div>
 
@@ -211,7 +211,7 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
         fullWidth
         size="lg"
         loading={isLoading}
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-primary text-primaryText hover:bg-accent hover:text-text"
       >
         {t('send_reset_link')}
       </Button>
@@ -222,7 +222,7 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
             type="button"
             variant="ghost"
             leftIcon={<ArrowLeftIcon size={18} />}
-            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)]"
+            className="text-cardTextSecondary hover:text-cardText"
           >
             {t('back_to_login')}
           </Button>

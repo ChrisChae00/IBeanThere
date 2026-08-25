@@ -88,14 +88,14 @@ export default function IntensitySlider({
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-[var(--color-text)]">
+        <label className="text-sm font-medium text-text">
           {label}
         </label>
         <div className="h-[24px] flex items-center gap-1">
           {currentValue !== undefined ? (
             <>
-              <div className="px-2 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)]">
-                <span className="text-sm font-semibold text-[var(--color-primary)]">
+              <div className="px-2 py-0.5 rounded-md bg-surface border border-border">
+                <span className="text-sm font-semibold text-primary">
                   {currentValue}
                 </span>
               </div>
@@ -105,14 +105,14 @@ export default function IntensitySlider({
                   e.stopPropagation();
                   onChange(undefined);
                 }}
-                className="text-xs text-[var(--color-surfaceTextSecondary)] hover:text-[var(--color-text)] px-0.5"
+                className="text-xs text-surfaceTextSecondary hover:text-text px-0.5"
                 aria-label={`Clear ${label}`}
               >
                 ✕
               </button>
             </>
           ) : (
-            <span className="text-xs text-[var(--color-surfaceTextSecondary)] invisible">
+            <span className="text-xs text-surfaceTextSecondary invisible">
               -
             </span>
           )}
@@ -149,7 +149,7 @@ export default function IntensitySlider({
           }}
         >
           {/* Track */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-[var(--color-border)] rounded-full transform -translate-y-1/2 z-0" />
+          <div className="absolute top-1/2 left-0 right-0 h-1 bg-border rounded-full transform -translate-y-1/2 z-0" />
           
           {/* Step markers (dots) */}
           {Array.from({ length: max - min + 1 }, (_, i) => {
@@ -158,7 +158,7 @@ export default function IntensitySlider({
             return (
               <div
                 key={stepValue}
-                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--color-surface)] z-20"
+                className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-surface z-20"
                 style={{ left: `${stepPercentage}%` }}
               />
             );
@@ -166,7 +166,7 @@ export default function IntensitySlider({
           
           {/* Filled track */}
           <div
-            className="absolute top-1/2 left-0 h-1 bg-[var(--color-primary)] rounded-full transform -translate-y-1/2 transition-all duration-150 z-10"
+            className="absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-150 z-10"
             style={{ width: `${percentage}%` }}
           />
           
@@ -177,12 +177,12 @@ export default function IntensitySlider({
           >
             <div className="relative flex items-center justify-center">
               {/* Circular background to hide track behind thumb */}
-              <div className="absolute w-6 h-6 rounded-full bg-[var(--color-cardBackground)] border border-[var(--color-border)] shadow-sm z-0" />
+              <div className="absolute w-6 h-6 rounded-full bg-cardBackground border border-border shadow-xs z-0" />
               <div className="relative z-10">
-                <CoffeeBean size="sm" className="text-[var(--color-primary)]" />
+                <CoffeeBean size="sm" className="text-primary" />
               </div>
               {isDragging && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-xs font-medium text-[var(--color-text)] whitespace-nowrap z-40 shadow-md">
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-surface border border-border rounded-sm text-xs font-medium text-text whitespace-nowrap z-40 shadow-md">
                   {currentValue}
                 </div>
               )}
@@ -193,19 +193,19 @@ export default function IntensitySlider({
         {/* Value labels */}
         <div className="relative mt-1.5 h-4">
           <span 
-            className="absolute text-xs text-[var(--color-surfaceTextSecondary)] transform -translate-x-1/2"
+            className="absolute text-xs text-surfaceTextSecondary transform -translate-x-1/2"
             style={{ left: '20%' }}
           >
             2
           </span>
           <span 
-            className="absolute text-xs text-[var(--color-surfaceTextSecondary)] transform -translate-x-1/2"
+            className="absolute text-xs text-surfaceTextSecondary transform -translate-x-1/2"
             style={{ left: '50%' }}
           >
             5
           </span>
           <span 
-            className="absolute text-xs text-[var(--color-surfaceTextSecondary)] transform -translate-x-1/2"
+            className="absolute text-xs text-surfaceTextSecondary transform -translate-x-1/2"
             style={{ left: '80%' }}
           >
             8

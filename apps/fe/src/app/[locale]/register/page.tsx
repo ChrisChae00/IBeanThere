@@ -12,15 +12,15 @@ export default async function SignupPage({
 
   const features = [
     {
-      icon: <CheckIcon size={16} className="text-[var(--color-background)]" />,
+      icon: <CheckIcon size={16} className="text-background" />,
       text: t('discover_cafes')
     },
     {
-      icon: <CheckIcon size={16} className="text-[var(--color-background)]" />,
+      icon: <CheckIcon size={16} className="text-background" />,
       text: t('record_experiences')
     },
     {
-      icon: <CheckIcon size={16} className="text-[var(--color-background)]" />,
+      icon: <CheckIcon size={16} className="text-background" />,
       text: t('connect_lovers')
     }
   ];
@@ -32,10 +32,10 @@ export default async function SignupPage({
       features={features}
     >
       <div className="text-center mb-8">
-        <h2 className="text-3xl lg:text-4xl font-bold text-[var(--color-text)] mb-3">
+        <h2 className="text-3xl lg:text-4xl font-bold text-text mb-3">
           {t('create_account')}
         </h2>
-        <p className="text-lg text-[var(--color-accent)]">
+        <p className="text-lg text-accent">
           {t('create_account_subtitle')}
         </p>
       </div>

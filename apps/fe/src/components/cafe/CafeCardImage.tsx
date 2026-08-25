@@ -21,13 +21,13 @@ export default function CafeCardImage({
   const height = size === 'small' ? 'h-full min-h-[180px]' : 'h-full min-h-[200px]';
   const fallbackIconSize = size === 'small' ? 'w-12 h-12 md:w-16 md:h-16' : 'w-16 h-16 md:w-20 md:h-20';
   const bgColor = showImage
-    ? size === 'small' ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface)]/50'
-    : 'bg-[var(--color-accent)]';
+    ? size === 'small' ? 'bg-primary' : 'bg-surface/50'
+    : 'bg-accent';
 
   return (
-    <div className={`w-full ${height} ${bgColor} flex items-center justify-center overflow-hidden flex-shrink-0 relative`}>
+    <div className={`w-full ${height} ${bgColor} flex items-center justify-center overflow-hidden shrink-0 relative`}>
       {showImage && !isLoaded && (
-        <div className="absolute inset-0 bg-[var(--color-surface)] animate-pulse" />
+        <div className="absolute inset-0 bg-surface animate-pulse" />
       )}
       {showImage ? (
         <Image

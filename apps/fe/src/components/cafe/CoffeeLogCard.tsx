@@ -184,16 +184,16 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     <Card>
       {/* Cafe Name */}
       {!hideCafeName && cafe && (
-        <div className="pb-2 border-b border-[var(--color-border)]">
+        <div className="pb-2 border-b border-border">
           {cafePath ? (
             <Link
               href={cafePath}
-              className="text-base font-semibold text-[var(--color-cardText)] hover:text-[var(--color-secondary)] transition-colors"
+              className="text-base font-semibold text-cardText hover:text-secondary transition-colors"
             >
               {cafe.name}
             </Link>
           ) : (
-            <p className="text-base font-semibold text-[var(--color-cardText)]">
+            <p className="text-base font-semibold text-cardText">
               {isLoadingCafe ? 'Loading...' : cafe.name}
             </p>
           )}
@@ -211,10 +211,10 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                   size="sm"
                 />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-cardText)]">
+                  <p className="text-sm font-medium text-cardText">
                     {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
                   </p>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                  <p className="text-xs text-cardTextSecondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -226,17 +226,17 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                     src={log.author_avatar_url}
                     alt={log.author_display_name || 'User'}
                     size="sm"
-                    className="cursor-pointer hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
+                    className="cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                   />
                 </Link>
                 <div>
                   <Link 
                     href={`/${locale}/profile/${log.author_username}`}
-                    className="text-sm font-medium text-[var(--color-cardText)] hover:text-[var(--color-primary)] transition-colors"
+                    className="text-sm font-medium text-cardText hover:text-primary transition-colors"
                   >
                     {log.author_display_name || 'User'}
                   </Link>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                  <p className="text-xs text-cardTextSecondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -244,7 +244,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             )
           )}
           {hideUserInfo && (
-            <p className="text-xs text-[var(--color-cardTextSecondary)]">
+            <p className="text-xs text-cardTextSecondary">
               {formatRelativeDate(log.visited_at)}
             </p>
           )}
@@ -253,7 +253,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onEdit && (
               <button
                 onClick={() => onEdit(log)}
-                className="text-sm text-[var(--color-cardText)] hover:text-[var(--color-secondary)] hover:underline transition-colors"
+                className="text-sm text-cardText hover:text-secondary hover:underline transition-colors"
               >
                 {t('edit')}
               </button>
@@ -261,7 +261,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onDelete && (
               <button
                 onClick={() => onDelete(log.id)}
-                className="text-sm text-[var(--color-error)] hover:underline"
+                className="text-sm text-error hover:underline"
               >
                 {t('delete')}
               </button>
@@ -273,7 +273,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Rating & Atmosphere Tags */}
       <div className="flex flex-wrap items-center gap-2">
         {log.rating && (
-          <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg">
+          <div className="inline-flex items-center gap-2 px-2 py-1 bg-surface rounded-lg">
             <StarRating rating={log.rating} size="sm" textColor="surface" />
           </div>
         )}
@@ -293,7 +293,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full border border-[var(--color-border)]"
+                    className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full border border-border"
                   >
                     {t(`atmosphere_${tag}`)}
                   </span>
@@ -316,7 +316,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 setLightboxIndex(index);
                 setLightboxOpen(true);
               }}
-              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary"
             >
               <img
                 src={url}
@@ -332,14 +332,14 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {(log.coffee_type || log.price) && (
         <div className="flex items-center gap-3 mb-3">
           {log.coffee_type && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary text-primaryText rounded-lg">
               <svg 
                 width="14" 
                 height="14" 
                 viewBox="0 0 142 96" 
                 fill="none" 
                 xmlns="http://www.w3.org/2000/svg"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <path d="M27.15 88.25 c-3.50 -1.50 -4.10 -6.45 -1.10 -8.95 l1.55 -1.30 45.45 0 c48.90 0 47.60 -0.05 48.95 2.45 1 1.95 0.60 4.90 -0.95 6.65 l-1.45 1.65 -45.45 0.10 c-38.30 0.10 -45.65 0 -47 -0.60z" fill="currentColor"/>
                 <path d="M53.65 72 c-4.05 -0.85 -8.30 -3.65 -10.40 -7 -2.60 -4.15 -2.75 -5.55 -2.75 -27.80 0 -12.20 0.20 -21.15 0.50 -21.90 0.25 -0.70 1.20 -1.75 2.10 -2.30 1.60 -0.95 2.55 -1 35.40 -1 19 0 35 0.20 36.65 0.50 16.30 2.65 23.90 21.55 13.90 34.65 -4.25 5.60 -9.45 8.15 -17.70 8.75 l-5.10 0.35 -0.35 2.40 c-0.90 6.50 -6.45 12.10 -13.10 13.30 -3.50 0.65 -35.95 0.65 -39.15 0.05z m61.05 -27.55 c4.70 -1.20 7.80 -5.45 7.80 -10.80 0 -6.30 -5.05 -10.65 -12.30 -10.65 l-3.65 0 -0.15 10.80 c-0.10 5.95 -0.05 10.90 0.05 11 0.45 0.40 6.20 0.20 8.25 -0.35z" fill="currentColor"/>
@@ -348,7 +348,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             </span>
           )}
           {log.price !== undefined && log.price !== null && (
-            <span className="text-sm font-medium text-[var(--color-cardText)]">
+            <span className="text-sm font-medium text-cardText">
               {formatPrice(log.price, log.price_currency) ?? log.price}
             </span>
           )}
@@ -358,7 +358,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Dessert */}
       {log.dessert && (
         <div className="mb-3">
-          <span className="text-xs text-[var(--color-cardTextSecondary)]">
+          <span className="text-xs text-cardTextSecondary">
             {t('dessert')}: {log.dessert}
           </span>
         </div>
@@ -366,8 +366,8 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Comment */}
       {log.comment && (
-        <div className="mb-4 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
-          <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap">
+        <div className="mb-4 p-3 bg-surface rounded-lg border border-border">
+          <p className="text-sm text-cardText whitespace-pre-wrap">
             {log.comment}
           </p>
         </div>
@@ -375,11 +375,11 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Advanced Logging Section */}
       {hasAdvancedData && (
-        <div className="border-t border-[var(--color-border)] pt-4 mt-4">
+        <div className="border-t border-border pt-4 mt-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-sm text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition-colors"
+            className="w-full flex items-center justify-between text-sm text-cardTextSecondary hover:text-cardText transition-colors"
             aria-expanded={showAdvanced}
           >
             <span>{t('detailed_review')}</span>
@@ -416,9 +416,9 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
                 return (
                   <div className="space-y-2">
-                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
-                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
-                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-[var(--color-cardText)]">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
+                    <h5 className="font-semibold text-cardText">{t('coffee_taste_advanced')}</h5>
+                    <div className="space-y-1 text-cardTextSecondary pl-2">
+                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-cardText">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
                       {log.bean_origin && log.bean_origin.trim() && <div>{t('bean_origin')}: {log.bean_origin}</div>}
                       {log.processing_method && log.processing_method.trim() && <div>{t('processing_method')}: {log.processing_method}</div>}
                       {log.roast_level && log.roast_level.trim() && <div>{t('roast_level')}: {log.roast_level}</div>}
@@ -474,8 +474,8 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 
                 return (
                   <div className="space-y-2">
-                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
-                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
+                    <h5 className="font-semibold text-cardText">{t('space_work_environment')}</h5>
+                    <div className="space-y-1 text-cardTextSecondary pl-2">
                       {log.wifi_rating !== undefined && log.wifi_rating !== null && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
                       {log.wifi_quality && log.wifi_quality.trim() && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
                       {log.outlet_info && (() => {

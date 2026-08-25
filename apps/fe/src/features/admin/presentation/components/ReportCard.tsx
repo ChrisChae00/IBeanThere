@@ -58,15 +58,15 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
   };
 
   return (
-    <div className="bg-[var(--color-cardBackground)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
+    <div className="bg-cardBackground rounded-2xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-[var(--color-border)]">
+      <div className="p-4 border-b border-border">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             {/* Type and Target */}
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <span className="text-lg">{targetIcon}</span>
-              <span className="text-sm font-medium text-[var(--color-text)]">
+              <span className="text-sm font-medium text-text">
                 {formatReportType(report.reportType)}
               </span>
               <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusColors.bg} ${statusColors.text}`}>
@@ -75,7 +75,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
             </div>
 
             {/* Reporter info */}
-            <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+            <div className="flex items-center gap-2 text-sm text-(--color-text-secondary)">
               <User size={14} />
               <span>{report.reporterDisplayName || report.reporterUsername || 'Unknown'}</span>
               <span>•</span>
@@ -90,7 +90,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
               href={report.targetUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline"
+              className="flex items-center gap-1 text-sm text-primary hover:underline"
             >
               <span>{t('view_target')}</span>
               <ExternalLink size={14} />
@@ -99,14 +99,14 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
         </div>
 
         {/* Description preview */}
-        <p className="mt-3 text-sm text-[var(--color-text)] line-clamp-2">
+        <p className="mt-3 text-sm text-text line-clamp-2">
           {report.description}
         </p>
 
         {/* Expand/Collapse */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-2 flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+          className="mt-2 flex items-center gap-1 text-sm text-(--color-text-secondary) hover:text-text"
         >
           {isExpanded ? (
             <>
@@ -124,11 +124,11 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="p-4 space-y-4 bg-[var(--color-surface)]">
+        <div className="p-4 space-y-4 bg-surface">
           {/* Full description */}
           <div>
-            <h4 className="text-sm font-medium text-[var(--color-text)] mb-2">{t('description')}</h4>
-            <p className="text-sm text-[var(--color-text-secondary)] whitespace-pre-wrap">
+            <h4 className="text-sm font-medium text-text mb-2">{t('description')}</h4>
+            <p className="text-sm text-(--color-text-secondary) whitespace-pre-wrap">
               {report.description}
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
           {/* Attached images */}
           {report.imageUrls.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-[var(--color-text)] mb-2">
+              <h4 className="text-sm font-medium text-text mb-2">
                 {t('attached_images')} ({report.imageUrls.length})
               </h4>
               <div className="flex flex-wrap gap-2">
@@ -144,7 +144,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className="relative w-20 h-20 rounded-lg overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors"
+                    className="relative w-20 h-20 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
                   >
                     <img
                       src={url}
@@ -159,7 +159,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
 
           {/* Admin notes */}
           <div>
-            <h4 className="text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+            <h4 className="text-sm font-medium text-text mb-2 flex items-center gap-2">
               <MessageSquare size={14} />
               {t('admin_notes')}
             </h4>
@@ -168,7 +168,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder={t('admin_notes_placeholder')}
               rows={3}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-cardBackground)] text-[var(--color-text)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-cardBackground text-text placeholder-(--color-text-secondary) focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
             />
             {adminNotes !== (report.adminNotes || '') && (
               <Button
@@ -185,7 +185,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
 
           {/* Status actions */}
           <div>
-            <h4 className="text-sm font-medium text-[var(--color-text)] mb-2">{t('change_status')}</h4>
+            <h4 className="text-sm font-medium text-text mb-2">{t('change_status')}</h4>
             <div className="flex flex-wrap gap-2">
               {report.status !== 'in_progress' && (
                 <Button
@@ -222,7 +222,7 @@ export default function ReportCard({ report, onUpdateStatus }: ReportCardProps) 
 
           {/* Resolved info */}
           {report.resolvedAt && (
-            <p className="text-xs text-[var(--color-text-secondary)]">
+            <p className="text-xs text-(--color-text-secondary)">
               {t('resolved_at')}: {formatDate(report.resolvedAt)}
             </p>
           )}

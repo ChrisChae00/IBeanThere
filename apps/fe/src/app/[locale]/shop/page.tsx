@@ -107,7 +107,7 @@ export default function ShopPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-20">
+    <div className="min-h-screen bg-background pb-20">
       <ShopHero />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 mt-20">

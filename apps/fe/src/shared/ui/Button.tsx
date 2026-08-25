@@ -15,7 +15,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'inline-flex items-center justify-center gap-2 font-semibold rounded-2xl transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]';
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-2xl transition-all duration-200 ease-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary';
 
 const sizeClasses: Record<ButtonSize, string> = {
   sm: 'px-4 py-2 text-sm min-h-[40px]',
@@ -25,15 +25,15 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--color-primary)] text-[var(--color-primaryText)] shadow-[0_12px_30px_rgba(26,18,11,0.22)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(26,18,11,0.28)] active:translate-y-0 disabled:shadow-none',
+    'bg-primary text-primaryText shadow-[0_12px_30px_rgba(26,18,11,0.22)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(26,18,11,0.28)] active:translate-y-0 disabled:shadow-none',
   secondary:
-    'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] shadow-[0_10px_25px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:bg-[var(--color-surface)]/90',
+    'bg-surface text-text border border-border shadow-[0_10px_25px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:bg-surface/90',
   danger:
-    'bg-[var(--color-error)] text-white shadow-[0_12px_30px_rgba(244,67,54,0.25)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(244,67,54,0.35)] active:translate-y-0 disabled:shadow-none',
+    'bg-error text-white shadow-[0_12px_30px_rgba(244,67,54,0.25)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(244,67,54,0.35)] active:translate-y-0 disabled:shadow-none',
   ghost:
-    'bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)]/70 border border-transparent',
+    'bg-transparent text-text hover:bg-surface/70 border border-transparent',
   outline:
-    'bg-transparent text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/60'
+    'bg-transparent text-text border border-border hover:bg-surface/60'
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

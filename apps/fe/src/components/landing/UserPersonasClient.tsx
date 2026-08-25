@@ -37,16 +37,16 @@ export default function UserPersonasClient({ messages }: UserPersonasClientProps
       {personas.map((persona) => (
         <div
           key={persona.id}
-          className={`relative p-8 rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-300 hover:scale-105 hover:shadow-xl ${persona.hoverBorder}`}
+          className={`relative p-8 rounded-2xl border-2 border-border bg-surface transition-all duration-300 hover:scale-105 hover:shadow-xl ${persona.hoverBorder}`}
         >
           <div className="flex flex-col items-center text-center">
             <div>
                 {persona.icon}
             </div>
-            <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">
+            <h3 className="text-xl font-bold mb-3 text-text">
               {persona.title}
             </h3>
-            <p className="text-[var(--color-textSecondary)] leading-relaxed">
+            <p className="text-textSecondary leading-relaxed">
               {persona.description}
             </p>
           </div>

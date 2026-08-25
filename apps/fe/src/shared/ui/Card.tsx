@@ -12,15 +12,15 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const baseClasses =
-  'relative rounded-3xl border text-[var(--color-cardText)] bg-[var(--color-cardBackground)] transition-all duration-200';
+  'relative rounded-3xl border text-cardText bg-cardBackground transition-all duration-200';
 
 const variantClasses: Record<CardVariant, string> = {
   default:
-    'border-[var(--color-border)] shadow-[0_12px_35px_rgba(26,18,11,0.12)]',
+    'border-border shadow-[0_12px_35px_rgba(26,18,11,0.12)]',
   elevated:
     'border-transparent shadow-[0_20px_45px_rgba(26,18,11,0.18)] hover:-translate-y-1',
   outlined:
-    'border-[var(--color-border)] bg-transparent backdrop-blur-sm shadow-none'
+    'border-border bg-transparent backdrop-blur-xs shadow-none'
 };
 
 const paddingClasses: Record<CardPadding, string> = {
@@ -54,7 +54,7 @@ export default function Card({
       {...props}
     >
       {header && (
-        <div className="mb-4 border-b border-[var(--color-border)]/60 pb-4">
+        <div className="mb-4 border-b border-border/60 pb-4">
           {header}
         </div>
       )}
@@ -62,7 +62,7 @@ export default function Card({
       <div className="space-y-4">{children}</div>
 
       {footer && (
-        <div className="mt-6 border-t border-[var(--color-border)]/60 pt-4">
+        <div className="mt-6 border-t border-border/60 pt-4">
           {footer}
         </div>
       )}

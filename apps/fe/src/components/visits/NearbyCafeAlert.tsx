@@ -69,12 +69,12 @@ export default function NearbyCafeAlert({
           ${isAnimating ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
         `}
       >
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col">
           {/* Header with icon */}
-          <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark,var(--color-secondary))] p-5 flex-shrink-0">
+          <div className="bg-linear-to-br from-primary to-(--color-primary-dark,var(--color-secondary)) p-5 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner">
+                <div className="shrink-0 w-12 h-12 bg-white/20 backdrop-blur-xs rounded-full flex items-center justify-center shadow-inner">
                   <UserLocationIcon size={24} color="white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export default function NearbyCafeAlert({
               </div>
               <button
                 onClick={handleDismiss}
-                className="flex-shrink-0 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors text-white"
+                className="shrink-0 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors text-white"
                 aria-label={t('dismiss')}
               >
                 <span className="text-xl leading-none">×</span>
@@ -112,23 +112,23 @@ export default function NearbyCafeAlert({
                 return (
                   <div
                     key={cafe.id}
-                    className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-4 transition-all hover:border-[var(--color-primary)]/30 shadow-sm"
+                    className="bg-background border border-border rounded-xl p-4 transition-all hover:border-primary/30 shadow-xs"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-[var(--color-text)] text-base mb-1 line-clamp-1">
+                        <h3 className="font-bold text-text text-base mb-1 line-clamp-1">
                           {cafe.name}
                         </h3>
-                        <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mb-2 italic">
+                        <p className="text-xs text-(--color-text-secondary) line-clamp-2 mb-2 italic">
                           {cafe.address}
                         </p>
                         <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--color-surface-2)] rounded-full text-[10px] font-bold text-[var(--color-text-secondary)]">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-(--color-surface-2) rounded-full text-[10px] font-bold text-(--color-text-secondary)">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                             {distance}{t('meters')}
                           </div>
                           {cafe.rating && (
-                            <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--color-accent)]">
+                            <div className="flex items-center gap-1 text-[11px] font-bold text-accent">
                               <span>⭐</span>
                               <span>{cafe.rating.toFixed(1)}</span>
                             </div>
@@ -155,9 +155,9 @@ export default function NearbyCafeAlert({
           </div>
 
           {/* Progress bar */}
-          <div className="h-1 bg-[var(--color-surface-2)] overflow-hidden flex-shrink-0">
+          <div className="h-1 bg-(--color-surface-2) overflow-hidden shrink-0">
             <div
-              className="h-full bg-[var(--color-primary)]/30"
+              className="h-full bg-primary/30"
               style={{
                 animation: `shrink ${autoHideAfter}ms linear`
               }}

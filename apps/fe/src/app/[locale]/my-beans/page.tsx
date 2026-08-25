@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import useSWR from 'swr';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -37,16 +37,17 @@ interface StreakData {
   streak_active: boolean;
 }
 
-export default function MyBeansPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
+export default function MyBeansPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = use(props.params);
   const { locale } = params;
   const t = useTranslations('my_beans');
   const tDropBean = useTranslations('drop_bean');
   const { user, isLoading: authLoading } = useAuth();
-  
+
   const [showLevelModal, setShowLevelModal] = useState(false);
 
   // Fetcher for SWR
@@ -100,19 +101,19 @@ export default function MyBeansPage({
 
   if (!user && !authLoading) {
     return (
-      <main className="min-h-screen bg-[var(--color-background)]">
+      <main className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <div className="text-center py-16">
-            <Trees className="w-16 h-16 mx-auto mb-4 text-[var(--color-primary)]" />
-            <h1 className="text-2xl font-bold text-[var(--color-text)] mb-4">
+            <Trees className="w-16 h-16 mx-auto mb-4 text-primary" />
+            <h1 className="text-2xl font-bold text-text mb-4">
               {t('login_required_title')}
             </h1>
-            <p className="text-[var(--color-textSecondary)] mb-6">
+            <p className="text-textSecondary mb-6">
               {t('login_required_description')}
             </p>
             <Link
               href={`/${locale}/signin`}
-              className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors"
+              className="inline-flex items-center gap-2 bg-primary text-primaryText px-6 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
             >
               {t('sign_in')}
             </Link>
@@ -123,40 +124,40 @@ export default function MyBeansPage({
   }
 
   return (
-    <main className="min-h-screen bg-[var(--color-background)]">
+    <main className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2 flex items-center gap-3">
-            <Trees className="w-8 h-8 text-[var(--color-primary)]" />
+          <h1 className="text-3xl font-bold text-text mb-2 flex items-center gap-3">
+            <Trees className="w-8 h-8 text-primary" />
             {t('title')}
           </h1>
-          <p className="text-[var(--color-textSecondary)]">
+          <p className="text-textSecondary">
             {t('subtitle')}
           </p>
         </div>
 
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 text-center">
-            <div className="text-3xl font-bold text-[var(--color-primary)]">{totalCafes}</div>
-            <div className="text-sm text-[var(--color-textSecondary)]">{t('stats.cafes')}</div>
+          <div className="bg-surface border border-border rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold text-primary">{totalCafes}</div>
+            <div className="text-sm text-textSecondary">{t('stats.cafes')}</div>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 text-center">
-            <div className="text-3xl font-bold text-[var(--color-accent)]">{totalDrops}</div>
-            <div className="text-sm text-[var(--color-textSecondary)]">{t('stats.drops')}</div>
+          <div className="bg-surface border border-border rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold text-accent">{totalDrops}</div>
+            <div className="text-sm text-textSecondary">{t('stats.drops')}</div>
           </div>
           <button
             onClick={() => setShowLevelModal(true)}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]/80 transition-all cursor-pointer group relative"
+            className="bg-surface border border-border rounded-xl p-4 text-center hover:border-primary hover:bg-surface/80 transition-all cursor-pointer group relative"
           >
             <div className="absolute top-2 right-2 opacity-50 group-hover:opacity-100 transition-opacity">
-              <Info className="w-4 h-4 text-[var(--color-textSecondary)]" />
+              <Info className="w-4 h-4 text-textSecondary" />
             </div>
             <div className="flex justify-center mb-1">
               <GrowthIcon level={maxLevel} size={32} />
             </div>
-            <div className="text-sm text-[var(--color-textSecondary)]">{t('stats.highest')}</div>
+            <div className="text-sm text-textSecondary">{t('stats.highest')}</div>
           </button>
         </div>
 
@@ -164,19 +165,19 @@ export default function MyBeansPage({
         {streak && streak.current_streak > 0 && (
           <div className={`mb-8 p-4 rounded-xl border ${
             streak.streak_active 
-              ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
-              : 'bg-[var(--color-surface)] border-[var(--color-border)]'
+              ? 'bg-linear-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
+              : 'bg-surface border-border'
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${streak.streak_active ? 'bg-orange-500/20' : 'bg-[var(--color-border)]'}`}>
-                  <Flame className={`w-6 h-6 ${streak.streak_active ? 'text-orange-500' : 'text-[var(--color-textSecondary)]'}`} />
+                <div className={`p-2 rounded-lg ${streak.streak_active ? 'bg-orange-500/20' : 'bg-border'}`}>
+                  <Flame className={`w-6 h-6 ${streak.streak_active ? 'text-orange-500' : 'text-textSecondary'}`} />
                 </div>
                 <div>
-                  <div className="font-semibold text-[var(--color-text)]">
+                  <div className="font-semibold text-text">
                     {t('streak.current')}: {streak.current_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.current_streak })}
                   </div>
-                  <div className="text-sm text-[var(--color-textSecondary)]">
+                  <div className="text-sm text-textSecondary">
                     {t('streak.best')}: {streak.max_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.max_streak })}
                   </div>
                 </div>
@@ -188,7 +189,7 @@ export default function MyBeansPage({
               )}
             </div>
             {!streak.streak_active && streak.current_streak > 0 && (
-              <p className="mt-2 text-sm text-[var(--color-textSecondary)]">
+              <p className="mt-2 text-sm text-textSecondary">
                 {t('streak.info')}
               </p>
             )}
@@ -199,8 +200,8 @@ export default function MyBeansPage({
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-[var(--color-textSecondary)]">{t('loading')}</p>
+            <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-textSecondary">{t('loading')}</p>
           </div>
         )}
 
@@ -213,17 +214,17 @@ export default function MyBeansPage({
 
         {/* Empty State */}
         {!isLoading && !error && beans.length === 0 && (
-          <div className="text-center py-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl">
-            <Sprout className="w-16 h-16 mx-auto mb-4 text-[var(--color-textSecondary)]" />
-            <h2 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+          <div className="text-center py-12 bg-surface border border-border rounded-xl">
+            <Sprout className="w-16 h-16 mx-auto mb-4 text-textSecondary" />
+            <h2 className="text-xl font-semibold text-text mb-2">
               {t('empty.title')}
             </h2>
-            <p className="text-[var(--color-textSecondary)] mb-6">
+            <p className="text-textSecondary mb-6">
               {t('empty.description')}
             </p>
             <Link
               href={`/${locale}/discover/dropbean`}
-              className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--color-secondary)] transition-colors"
+              className="inline-flex items-center gap-2 bg-primary text-primaryText px-6 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
             >
               {t('empty.cta')}
             </Link>
@@ -313,10 +314,10 @@ function BeanLevelSection({
     <div>
       <div className="flex items-center gap-2 mb-3">
         <GrowthIcon level={level} size={24} />
-        <h3 className="text-lg font-semibold text-[var(--color-text)]">
+        <h3 className="text-lg font-semibold text-text">
           {title}
         </h3>
-        <span className="text-sm text-[var(--color-textSecondary)]">
+        <span className="text-sm text-textSecondary">
           ({beans.length})
         </span>
       </div>
@@ -325,14 +326,14 @@ function BeanLevelSection({
           <Link
             key={bean.id}
             href={`/${locale}/cafes/${bean.cafe_slug || bean.cafe_id}`}
-            className="flex items-center justify-between p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-primary)] transition-colors"
+            className="flex items-center justify-between p-4 bg-surface border border-border rounded-xl hover:border-primary transition-colors"
           >
             <div>
-              <div className="font-medium text-[var(--color-text)]">
+              <div className="font-medium text-text">
                 {bean.cafe_name}
               </div>
               {bean.cafe_address && (
-                <div className="text-sm text-[var(--color-textSecondary)] flex items-center gap-1">
+                <div className="text-sm text-textSecondary flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
                   {bean.cafe_address}
                 </div>
@@ -340,11 +341,11 @@ function BeanLevelSection({
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm font-medium text-[var(--color-text)]">
+                <div className="text-sm font-medium text-text">
                   {bean.drop_count} drops
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[var(--color-textSecondary)]" />
+              <ChevronRight className="w-5 h-5 text-textSecondary" />
             </div>
           </Link>
         ))}
@@ -382,7 +383,7 @@ function LevelInfoModal({ isOpen, onClose, currentLevel, t, tDropBean }: LevelIn
       size="sm"
     >
       <div className="space-y-4">
-        <p className="text-sm text-[var(--color-textSecondary)]">
+        <p className="text-sm text-textSecondary">
           {t('level_info.how_to_level')}
         </p>
         
@@ -392,25 +393,25 @@ function LevelInfoModal({ isOpen, onClose, currentLevel, t, tDropBean }: LevelIn
               key={level}
               className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                 level === currentLevel
-                  ? 'bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30'
-                  : 'bg-[var(--color-surface)]'
+                  ? 'bg-primary/10 border border-primary/30'
+                  : 'bg-surface'
               }`}
             >
               <GrowthIcon level={level} size={28} />
               <div className="flex-1">
                 <div className={`font-medium ${
-                  level === currentLevel ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'
+                  level === currentLevel ? 'text-primary' : 'text-text'
                 }`}>
                   {tDropBean(`levels.${level}`)}
                 </div>
               </div>
               <div className={`text-sm ${
-                level === currentLevel ? 'text-[var(--color-primary)]' : 'text-[var(--color-textSecondary)]'
+                level === currentLevel ? 'text-primary' : 'text-textSecondary'
               }`}>
                 {t('level_info.drops_required', { count: threshold })}
               </div>
               {level === currentLevel && (
-                <span className="text-xs bg-[var(--color-primary)] text-[var(--color-primaryText)] px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-primary text-primaryText px-2 py-0.5 rounded-full">
                   {t('level_info.current_highest')}
                 </span>
               )}

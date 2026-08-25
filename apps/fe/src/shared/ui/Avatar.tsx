@@ -26,7 +26,7 @@ export function Avatar({ src, alt, size = 'md', className = '' }: AvatarProps) {
   };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-[var(--color-primary)] text-[var(--color-primaryText)] flex items-center justify-center overflow-hidden transition-colors group-hover:bg-[var(--color-primaryText)] group-hover:text-[var(--color-primary)] ${className}`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-primary text-primaryText flex items-center justify-center overflow-hidden transition-colors group-hover:bg-primaryText group-hover:text-primary ${className}`}>
       {src && !imageError ? (
         <img
           src={src}

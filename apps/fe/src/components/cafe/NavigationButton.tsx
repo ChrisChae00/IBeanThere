@@ -62,7 +62,7 @@ export default function NavigationButton({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
+        className={`flex items-center gap-1.5 bg-surface text-cardText hover:bg-(--color-surfaceHover) border border-border rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -81,13 +81,13 @@ export default function NavigationButton({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 w-48 bg-[var(--color-cardBackground)] border border-[var(--color-border)] rounded-lg shadow-lg overflow-hidden z-[1050]">
+        <div className="absolute left-0 top-full mt-1 w-48 bg-cardBackground border border-border rounded-lg shadow-lg overflow-hidden z-1050">
           <ul className="py-1" role="menu">
             {apps.map((app) => (
               <li key={app.id} role="none">
                 <button
                   onClick={() => handleAppClick(app.id)}
-                  className="w-full text-left px-4 py-2 text-sm text-[var(--color-cardText)] hover:bg-[var(--color-surfaceHover)] transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 text-sm text-cardText hover:bg-(--color-surfaceHover) transition-colors flex items-center gap-2"
                   role="menuitem"
                 >
                   <span>{t(app.labelKey)}</span>

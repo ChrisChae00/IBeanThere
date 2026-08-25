@@ -136,7 +136,7 @@ export default function CafeMoveToModal({
       return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
     }
     return (
-      <div className={`w-5 h-5 rounded-full bg-[var(--color-primary)] ${isSelected ? '' : 'opacity-40'}`} />
+      <div className={`w-5 h-5 rounded-full bg-primary ${isSelected ? '' : 'opacity-40'}`} />
     );
   };
 
@@ -156,7 +156,7 @@ export default function CafeMoveToModal({
       <button
         onClick={handleMove}
         disabled={selectedIds.size === 0 || isMoving}
-        className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] disabled:opacity-50 transition-colors"
+        className="px-5 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
       >
         {isMoving ? <LoadingSpinner size="sm" /> : t('move')}
       </button>
@@ -166,7 +166,7 @@ export default function CafeMoveToModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('move_to')} size="sm" footer={footer} zIndex={1002}>
       <div className="min-h-[200px]">
-        <p className="text-sm text-[var(--color-textSecondary)] mb-4 truncate">
+        <p className="text-sm text-textSecondary mb-4 truncate">
           {cafeName}
         </p>
 
@@ -192,18 +192,18 @@ export default function CafeMoveToModal({
                     w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left
                     transition-colors duration-150
                     ${isSelected
-                      ? 'bg-[var(--color-primary)]/10'
-                      : 'hover:bg-[var(--color-background)]'
+                      ? 'bg-primary/10'
+                      : 'hover:bg-background'
                     }
                     ${alreadySaved ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
                   {/* Checkbox */}
                   <div className={`
-                    w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
+                    w-5 h-5 rounded border-2 flex items-center justify-center shrink-0
                     transition-colors duration-150
                     ${isSelected
-                      ? 'bg-[var(--color-primary)] border-[var(--color-primary)]'
+                      ? 'bg-primary border-primary'
                       : 'border-gray-300'
                     }
                   `}>
@@ -218,12 +218,12 @@ export default function CafeMoveToModal({
                   {getCollectionIcon(collection.icon_type, isSelected)}
 
                   {/* Name */}
-                  <span className="flex-1 truncate text-[var(--color-cardText)]">
+                  <span className="flex-1 truncate text-cardText">
                     {isSystemCollection ? t(collection.icon_type) : collection.name}
                   </span>
 
                   {/* Item count */}
-                  <span className="text-xs text-[var(--color-textSecondary)]">
+                  <span className="text-xs text-textSecondary">
                     {collection.item_count}
                   </span>
                 </button>
@@ -231,7 +231,7 @@ export default function CafeMoveToModal({
             })}
 
             {sortedCollections.length > 0 && (
-              <div className="h-px bg-[var(--color-border)] my-2" />
+              <div className="h-px bg-border my-2" />
             )}
 
             {/* New collection form */}
@@ -242,7 +242,7 @@ export default function CafeMoveToModal({
                   value={newCollectionName}
                   onChange={e => setNewCollectionName(e.target.value)}
                   placeholder={t('collection_name_placeholder')}
-                  className="flex-1 px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
                   autoFocus
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleCreateCollection();
@@ -255,7 +255,7 @@ export default function CafeMoveToModal({
                 <button
                   onClick={handleCreateCollection}
                   disabled={!newCollectionName.trim() || isCreating}
-                  className="px-3 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] disabled:opacity-50 transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
                 >
                   {isCreating ? <LoadingSpinner size="sm" /> : t('create')}
                 </button>
@@ -264,7 +264,7 @@ export default function CafeMoveToModal({
                     setShowNewForm(false);
                     setNewCollectionName('');
                   }}
-                  className="px-3 py-2 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
+                  className="px-3 py-2 text-sm text-textSecondary hover:text-cardText"
                 >
                   {t('cancel')}
                 </button>
@@ -272,7 +272,7 @@ export default function CafeMoveToModal({
             ) : (
               <button
                 onClick={() => setShowNewForm(true)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-primary hover:bg-primary/10 transition-colors"
               >
                 <span className="w-5 h-5 flex items-center justify-center text-lg">+</span>
                 <span>{t('create_new')}</span>

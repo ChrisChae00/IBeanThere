@@ -7,7 +7,7 @@ interface LoadingSpinnerProps {
 
 export default function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
   return (
-    <div className={`inline-flex items-center justify-center text-[var(--color-primary)] ${className}`}>
+    <div className={`inline-flex items-center justify-center text-primary ${className}`}>
       <div className="animate-spin">
         <CoffeeBean size={size} />
       </div>

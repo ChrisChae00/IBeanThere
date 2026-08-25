@@ -87,7 +87,7 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
   if (logs.length === 0 && !isLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--color-textSecondary)]">{t('no_logs_yet')}</p>
+        <p className="text-textSecondary">{t('no_logs_yet')}</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
 
       {error && (
         <div className="text-center py-4">
-          <p className="text-sm text-[var(--color-error)]">{error}</p>
+          <p className="text-sm text-error">{error}</p>
         </div>
       )}
 
@@ -109,7 +109,7 @@ export default function CoffeeLogFeed({ cafeId, initialLogs = [] }: CoffeeLogFee
           <button
             onClick={loadMore}
             disabled={isLoading}
-            className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+            className="px-4 py-2 bg-primary text-primaryText rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
           >
             {isLoading ? (
               <>

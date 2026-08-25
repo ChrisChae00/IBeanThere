@@ -37,7 +37,7 @@ export default function ReportButton({
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+        className={`text-(--color-text-secondary) hover:text-text transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       >
         {label}
       </button>
@@ -66,7 +66,7 @@ export default function ReportButton({
       disabled={disabled}
       size={size}
       variant="ghost"
-      className={`!min-h-0 !px-2 !py-2 ${className}`}
+      className={`min-h-0! px-2! py-2! ${className}`}
       title={label}
       aria-label={label}
     >

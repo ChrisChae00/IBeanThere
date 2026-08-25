@@ -93,7 +93,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
           value={query}
           onChange={handleInputChange}
           placeholder={t('search_users_placeholder')}
-          className="w-full pl-10 pr-4 py-2 rounded-lg border-2 border-[var(--color-primary)] bg-background focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50"
+          className="w-full pl-10 pr-4 py-2 rounded-lg border-2 border-primary bg-background focus:outline-hidden focus:ring-2 focus:ring-primary/50"
         />
         {isSearching && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -104,7 +104,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
 
       {/* Search Results Dropdown/List */}
       {query.length >= 2 && results.length > 0 && (
-        <div className="mt-2 bg-[var(--color-card-background)] rounded-lg border border-border shadow-lg overflow-hidden">
+        <div className="mt-2 bg-(--color-card-background) rounded-lg border border-border shadow-lg overflow-hidden">
           {results.map((user) => {
             const isTrusted = trustedUsernames.has(user.username);
             const isMe = session?.user?.user_metadata?.username === user.username; // Basic check
@@ -112,9 +112,9 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
             if (isMe) return null;
 
             return (
-              <div key={user.username} className="flex items-center justify-between p-3 hover:bg-[var(--color-surface-hover)] transition-colors border-b border-border last:border-0">
+              <div key={user.username} className="flex items-center justify-between p-3 hover:bg-(--color-surface-hover) transition-colors border-b border-border last:border-0">
                 <Link href={`/profile/${user.username}`} className="flex items-center gap-3 flex-1 cursor-pointer">
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
                     {user.avatar_url ? (
                       <Image
                         src={user.avatar_url}
@@ -124,14 +124,14 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
                         className="object-cover w-full h-full"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold">
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold">
                         {user.display_name.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-sm text-[var(--color-text)]">{user.display_name}</p>
-                    <p className="text-xs text-[var(--color-text-secondary)]">@{user.username}</p>
+                    <p className="font-medium text-sm text-text">{user.display_name}</p>
+                    <p className="text-xs text-(--color-text-secondary)">@{user.username}</p>
                   </div>
                 </Link>
 
@@ -143,8 +143,8 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
                   }}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all ml-3
                     ${isTrusted 
-                      ? 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
-                      : 'bg-[var(--color-primary)] text-white hover:opacity-90'
+                      ? 'bg-surface border border-border text-(--color-text-secondary) hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
+                      : 'bg-primary text-white hover:opacity-90'
                     }`}
                 >
                   {isTrusted ? (
@@ -167,7 +167,7 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
       )}
       
       {query.length >= 2 && results.length === 0 && !isSearching && (
-        <div className="mt-2 text-center p-4 text-sm text-muted-foreground bg-[var(--color-surface)] rounded-lg border border-border">
+        <div className="mt-2 text-center p-4 text-sm text-muted-foreground bg-surface rounded-lg border border-border">
           {t('no_users_found')}
         </div>
       )}

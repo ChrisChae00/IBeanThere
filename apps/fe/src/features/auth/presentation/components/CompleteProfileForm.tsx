@@ -247,7 +247,7 @@ export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfile
           onChange={handleInputChange}
           error={inputError}
           helperText={helperText}
-          helperTextClassName={isUsernameAvailable && !inputError ? 'text-[var(--color-success)]' : ''}
+          helperTextClassName={isUsernameAvailable && !inputError ? 'text-success' : ''}
           required
         />
         
@@ -267,16 +267,16 @@ export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfile
             type="checkbox"
             checked={agreeToTerms}
             onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="w-4 h-4 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] mt-1"
+            className="w-4 h-4 text-primary border-border rounded-sm focus:ring-primary mt-1"
             required
           />
-          <label className="text-sm text-[var(--color-text-secondary)]">
+          <label className="text-sm text-(--color-text-secondary)">
             {t('terms_agreement')}{' '}
-            <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+            <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors">
               {t('terms_of_service')}
             </Link>{' '}
             {t('and')}{' '}
-            <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors">
+            <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary underline font-medium transition-colors">
               {t('privacy_policy')}
             </Link>
           </label>
@@ -286,7 +286,7 @@ export function CompleteProfileForm({ locale, returnUrl = '/' }: CompleteProfile
           type="submit"
           fullWidth
           size="lg"
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white transition-colors"
+          className="bg-primary hover:bg-secondary text-white transition-colors"
           disabled={isLoading || isCheckingUsername || !!inputError || !validation.isValid || !agreeToTerms}
           loading={isLoading}
         >

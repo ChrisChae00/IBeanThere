@@ -23,7 +23,7 @@ export default async function SettingsPage({
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
+        <h1 className="text-3xl font-bold text-text mb-2">
           {t('title')}
         </h1>
       </div>

@@ -44,7 +44,7 @@ export default async function BeanDropTimeline({ locale }: BeanDropTimelineProps
   };
 
   return (
-    <section id="beandrop" className="bg-[var(--color-background)]">
+    <section id="beandrop" className="bg-background">
       <BeanDropTimelineClient messages={messages} />
     </section>
   );

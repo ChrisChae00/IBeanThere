@@ -43,13 +43,13 @@ export default async function Testimonials({ locale }: TestimonialsProps) {
   ];
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-[var(--color-background)]">
+    <section className="py-12 sm:py-16 md:py-20 bg-background">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text mb-3 sm:mb-4">
             {t('title')}
           </h2>
-          <p className="text-base sm:text-lg text-[var(--color-textSecondary)] max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-textSecondary max-w-2xl mx-auto">
             {t('subtitle')}
           </p>
         </div>
@@ -58,15 +58,15 @@ export default async function Testimonials({ locale }: TestimonialsProps) {
           {highlights.map((highlight, index) => (
             <div
               key={index}
-              className="bg-[var(--color-surface)] rounded-2xl p-6 sm:p-8 border border-[var(--color-border)] text-center"
+              className="bg-surface rounded-2xl p-6 sm:p-8 border border-border text-center"
             >
-              <div className="w-16 h-16 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-primaryText)] mx-auto mb-4 sm:mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primaryText mx-auto mb-4 sm:mb-6">
                 {highlight.icon}
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[var(--color-text)] mb-2 sm:mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-text mb-2 sm:mb-3">
                 {highlight.title}
               </h3>
-              <p className="text-sm sm:text-base text-[var(--color-textSecondary)] leading-relaxed">
+              <p className="text-sm sm:text-base text-textSecondary leading-relaxed">
                 {highlight.description}
               </p>
             </div>

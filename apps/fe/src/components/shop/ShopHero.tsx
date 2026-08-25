@@ -8,7 +8,7 @@ export default function ShopHero() {
   const subtitleLine2 = t('hero_subtitle_line2');
 
   return (
-    <div className="relative w-full h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-[var(--color-surface)]">
+    <div className="relative w-full h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-surface">
       {/* Background Pattern - Abstract Map/Coffee Beans */}
       <div className="absolute inset-0 opacity-5">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -17,20 +17,20 @@ export default function ShopHero() {
       </div>
       
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <span className="inline-block py-1 px-3 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-semibold mb-6 tracking-wider uppercase">
+        <span className="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6 tracking-wider uppercase">
           {t('hero_badge')}
         </span>
-        <h1 className="text-5xl md:text-7xl font-bold text-[var(--color-text)] mb-6 leading-tight">
+        <h1 className="text-5xl md:text-7xl font-bold text-text mb-6 leading-tight">
           {t('hero_title')}
         </h1>
-        <p className="text-xl md:text-2xl text-[var(--color-textSecondary)] mb-10 max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl text-textSecondary mb-10 max-w-2xl mx-auto">
           <span className="block">{subtitleLine1}</span>
           {subtitleLine2 && <span className="block">{subtitleLine2}</span>}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a 
             href="#essentials" 
-            className="px-8 py-4 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-all shadow-[var(--ibean-shadow-warm)] hover:shadow-[var(--ibean-shadow-warm-lg)] w-full sm:w-auto"
+            className="px-8 py-4 bg-primary text-primaryText rounded-full font-semibold hover:bg-secondary transition-all shadow-(--ibean-shadow-warm) hover:shadow-(--ibean-shadow-warm-lg) w-full sm:w-auto"
           >
             {t('explore_collection')}
           </a>

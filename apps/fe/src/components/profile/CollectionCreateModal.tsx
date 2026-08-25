@@ -51,7 +51,7 @@ export default function CollectionCreateModal({
       <div className="space-y-4">
         {/* Name Input */}
         <div>
-          <label className="block text-sm font-medium text-[var(--color-cardText)] mb-1">
+          <label className="block text-sm font-medium text-cardText mb-1">
             {t('collection_name_placeholder')}
           </label>
           <input
@@ -59,7 +59,7 @@ export default function CollectionCreateModal({
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder={t('collection_name_placeholder')}
-            className="w-full px-4 py-2.5 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-cardText)] placeholder-[var(--color-textSecondary)]"
+            className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary text-cardText placeholder-textSecondary"
             autoFocus
             onKeyDown={e => {
               if (e.key === 'Enter') handleCreate();
@@ -78,13 +78,13 @@ export default function CollectionCreateModal({
           <button
             onClick={handleCreate}
             disabled={!name.trim() || isCreating}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] disabled:opacity-50 transition-colors"
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
           >
             {isCreating ? <LoadingSpinner size="sm" /> : t('create')}
           </button>
           <button
             onClick={handleClose}
-            className="px-4 py-2.5 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
+            className="px-4 py-2.5 text-sm text-textSecondary hover:text-cardText"
           >
             {t('cancel')}
           </button>

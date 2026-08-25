@@ -12,15 +12,15 @@ export default async function ForgotPasswordPage({
 
   const features = [
     {
-      icon: <LockIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <LockIcon size={18} className="text-background" />,
       text: t('secure_password_reset')
     },
     {
-      icon: <MailIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <MailIcon size={18} className="text-background" />,
       text: t('quick_recovery')
     },
     {
-      icon: <CoffeeIcon size={18} className="text-[var(--color-background)]" />,
+      icon: <CoffeeIcon size={18} className="text-background" />,
       text: t('back_to_coffee')
     }
   ];

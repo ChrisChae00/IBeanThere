@@ -86,11 +86,11 @@ export default function CommunityFeed({ session }: CommunityFeedProps) {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-muted" />
               <div className="space-y-2">
-                <div className="w-24 h-4 bg-muted rounded" />
-                <div className="w-16 h-3 bg-muted rounded" />
+                <div className="w-24 h-4 bg-muted rounded-sm" />
+                <div className="w-16 h-3 bg-muted rounded-sm" />
               </div>
             </div>
-            <div className="w-full h-20 bg-muted rounded" />
+            <div className="w-full h-20 bg-muted rounded-sm" />
           </div>
         ))}
       </div>

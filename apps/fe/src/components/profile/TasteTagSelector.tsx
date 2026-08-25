@@ -43,15 +43,15 @@ export default function TasteTagSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-[var(--color-text)]">
+        <label className="block text-sm font-medium text-text">
           {t('taste_tags_label')}
         </label>
-        <span className="text-xs text-[var(--color-text-secondary)]">
+        <span className="text-xs text-(--color-text-secondary)">
           {selectedTags.length}/{maxTags}
         </span>
       </div>
       
-      <p className="text-xs text-[var(--color-text-secondary)]">
+      <p className="text-xs text-(--color-text-secondary)">
         {t('select_taste_tags')}
       </p>
       
@@ -70,10 +70,10 @@ export default function TasteTagSelector({
                 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium
                 transition-all duration-200 border
                 ${isSelected
-                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
+                  ? 'bg-primary text-white border-primary'
                   : isDisabled
-                    ? 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-[var(--color-border)] opacity-50 cursor-not-allowed'
-                    : 'bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
+                    ? 'bg-surface text-(--color-text-secondary) border-border opacity-50 cursor-not-allowed'
+                    : 'bg-surface text-text border-border hover:border-primary hover:text-primary'
                 }
               `}
             >

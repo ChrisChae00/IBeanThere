@@ -87,15 +87,15 @@ export default function PendingCafeCard({
       <Card variant="elevated" padding="lg">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-xl font-semibold text-text mb-2">
               {cafe.name}
             </h3>
             {cafe.address && (
-              <p className="text-[var(--color-textSecondary)] text-sm mb-2">
+              <p className="text-textSecondary text-sm mb-2">
                 {cafe.address}
               </p>
             )}
-            <div className="flex gap-4 text-sm text-[var(--color-textSecondary)]">
+            <div className="flex gap-4 text-sm text-textSecondary">
               <span>
                 {t('verification_count')}: {cafe.verification_count}
               </span>
@@ -117,7 +117,7 @@ export default function PendingCafeCard({
         </div>
 
         {(cafe.phone || cafe.website || cafe.description) && (
-          <div className="mb-4 space-y-2 text-sm text-[var(--color-textSecondary)]">
+          <div className="mb-4 space-y-2 text-sm text-textSecondary">
             {cafe.phone && (
               <p>
                 <span className="font-medium">{t('phone')}:</span> {cafe.phone}
@@ -130,7 +130,7 @@ export default function PendingCafeCard({
                   href={cafe.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--color-primary)] hover:underline"
+                  className="text-primary hover:underline"
                 >
                   {cafe.website}
                 </a>
@@ -146,15 +146,15 @@ export default function PendingCafeCard({
         )}
 
         {cafe.navigator_id && (
-          <div className="mb-4 p-3 bg-[var(--color-primary)]/10 rounded-lg">
-            <p className="text-sm font-medium text-[var(--color-primary)] mb-1">
+          <div className="mb-4 p-3 bg-primary/10 rounded-lg">
+            <p className="text-sm font-medium text-primary mb-1">
               {t('founding_crew')}
             </p>
-            <p className="text-xs text-[var(--color-textSecondary)]">
+            <p className="text-xs text-textSecondary">
               {t('navigator')}: {cafe.navigator_id.slice(0, 8)}...
             </p>
             {cafe.vanguard_ids && cafe.vanguard_ids.length > 0 && (
-              <p className="text-xs text-[var(--color-textSecondary)]">
+              <p className="text-xs text-textSecondary">
                 {t('vanguards')}: {cafe.vanguard_ids.length}
               </p>
             )}
@@ -195,69 +195,69 @@ export default function PendingCafeCard({
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--color-surface)] rounded-lg p-6 max-w-lg w-full border border-[var(--color-border)] max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">
+          <div className="bg-surface rounded-lg p-6 max-w-lg w-full border border-border max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4 text-text">
               {t('edit_cafe_title')}
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('cafe_name')}
                 </label>
                 <input
                   type="text"
                   value={editData.name || ''}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('address')}
                 </label>
                 <input
                   type="text"
                   value={editData.address || ''}
                   onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('phone')}
                 </label>
                 <input
                   type="text"
                   value={editData.phone || ''}
                   onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('website')}
                 </label>
                 <input
                   type="text"
                   value={editData.website || ''}
                   onChange={(e) => setEditData({ ...editData, website: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('description')}
                 </label>
                 <textarea
                   value={editData.description || ''}
                   onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
                 />
               </div>
 

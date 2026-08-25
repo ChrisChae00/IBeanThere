@@ -55,7 +55,7 @@ export default function FoundingCrewAvatars({ navigator, scouts }: FoundingCrewA
 
   return (
     <div className="flex items-center gap-3">
-      <h3 className="text-base font-semibold text-[var(--color-cardTextSecondary)] leading-none translate-y-[1px]">
+      <h3 className="text-base font-semibold text-cardTextSecondary leading-none translate-y-px">
         {t('founding_crew')}:
       </h3>
 
@@ -72,10 +72,10 @@ export default function FoundingCrewAvatars({ navigator, scouts }: FoundingCrewA
                   src={member.avatar_url}
                   alt={name}
                   size={'xs'}
-                  className={isNavigator ? 'ring-2 ring-[var(--color-primary)]' : undefined}
+                  className={isNavigator ? 'ring-2 ring-primary' : undefined}
                 />
               </Tooltip>
-              <span className="text-[10px] font-medium leading-none text-[var(--color-text)]">
+              <span className="text-[10px] font-medium leading-none text-text">
                 {roleLabel}
               </span>
             </div>
