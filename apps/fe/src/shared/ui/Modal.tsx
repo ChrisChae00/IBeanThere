@@ -1,8 +1,29 @@
 'use client';
 
-import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from './base/dialog';
+import { cn } from '@/lib/cn';
+
+/*
+  Wrapper over the shadcn/Base UI dialog, keeping this repo's flat prop bag so none of
+  the 8 calling pages changed.
+
+  This is the component the whole shadcn decision was made for. The previous
+  implementation was a portalled <div role="dialog" aria-modal="true"> that locked body
+  scroll and closed on backdrop click — and did nothing else. It had no focus trap, no
+  Escape handler and no focus restore, so a keyboard or screen-reader user could tab
+  straight out of an open modal into the page behind it and never find their way back.
+  Base UI supplies all three.
+
+  MIGRATION: new code should use the compound API from '@/shared/ui/base/dialog'.
+*/
 
 type ModalSize = 'sm' | 'md' | 'lg';
 type ModalAlign = 'center' | 'top';
@@ -21,14 +42,15 @@ export interface ModalProps {
 }
 
 const sizeClasses: Record<ModalSize, string> = {
-  sm: 'max-w-md',
-  md: 'max-w-2xl',
-  lg: 'max-w-4xl'
+  sm: 'sm:max-w-md',
+  md: 'sm:max-w-2xl',
+  lg: 'sm:max-w-4xl'
 };
 
+/* Base UI centres the popup; `top` is the only call sites' other option. */
 const alignClasses: Record<ModalAlign, string> = {
-  center: 'items-center',
-  top: 'items-start pt-16'
+  center: '',
+  top: 'top-16 translate-y-0'
 };
 
 export default function Modal({
@@ -43,88 +65,40 @@ export default function Modal({
   closeButton = true,
   zIndex = 1000
 }: ModalProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const originalOverflow = document.body.style.overflow;
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen, mounted]);
-
-  if (!mounted || !isOpen) {
-    return null;
-  }
-
-  return createPortal(
-    <div
-      style={{ zIndex }}
-      className={`fixed inset-0 flex ${alignClasses[align]} justify-center px-4 sm:px-6 lg:px-8 backdrop-blur-xs bg-black/40`}
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className={`w-full ${sizeClasses[size]} relative`}
-        onClick={(e) => e.stopPropagation()}
+      <DialogContent
+        showCloseButton={closeButton}
+        style={{ zIndex }}
+        className={cn(
+          'rounded-(--card-radius) border-(--card-edge) bg-(--card-surface) p-6 sm:p-8',
+          sizeClasses[size],
+          alignClasses[align]
+        )}
       >
-        <div className="absolute inset-0 bg-background/5 blur-3xl rounded-[40px]" />
-        <div className="relative rounded-[32px] border border-border/60 bg-cardBackground shadow-[0_30px_80px_rgba(26,18,11,0.25)] transition-all duration-200">
-          <div className="p-6 sm:p-8">
-            {(title || closeButton) && (
-              <div className="mb-6 flex items-start justify-between gap-6">
-                {title && (
-                  <div>
-                    <h2
-                      id="modal-title"
-                      className="text-2xl font-semibold text-cardText"
-                    >
-                      {title}
-                    </h2>
-                    {description && (
-                      <p className="mt-2 text-cardTextSecondary">
-                        {description}
-                      </p>
-                    )}
-                  </div>
-                )}
-                {closeButton && (
-                  <button
-                    onClick={onClose}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-cardText transition hover:bg-surface/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label="Close modal"
-                  >
-                    <span aria-hidden="true">✕</span>
-                  </button>
-                )}
-              </div>
-            )}
+        {/*
+          Base UI requires a title for the accessible name. When a call site passes none,
+          it still needs one, so the header is rendered only when there is something to
+          show and the title falls back to a visually hidden node.
+        */}
+        {title ? (
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold">{title}</DialogTitle>
+            {description && <DialogDescription>{description}</DialogDescription>}
+          </DialogHeader>
+        ) : (
+          <DialogTitle className="sr-only">Dialog</DialogTitle>
+        )}
 
-            <div className="space-y-6 text-cardText">
-              {children}
-            </div>
-          </div>
+        <div className="space-y-6">{children}</div>
 
-          {footer && (
-            <div className="border-t border-border/60 bg-surface/40 px-6 py-4 sm:px-8">
-              {footer}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
+        {footer && <DialogFooter>{footer}</DialogFooter>}
+      </DialogContent>
+    </Dialog>
   );
 }
-

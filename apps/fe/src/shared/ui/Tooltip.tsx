@@ -1,6 +1,28 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import {
+  Tooltip as BaseTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from './base/tooltip';
+
+/*
+  Wrapper over the shadcn/Base UI tooltip, keeping this repo's
+  `content` / `position` / `delay` props.
+
+  The previous implementation showed its bubble on hover state only, so it was
+  unreachable by keyboard and invisible to assistive tech. Base UI's trigger responds to
+  focus as well as hover and wires aria-describedby.
+
+  The provider is mounted here rather than in the root layout: only these call sites use
+  a tooltip, and a wrapper that needs the app shell edited to work is a wrapper that
+  breaks call sites.
+
+  MIGRATION: new code should use the compound API from '@/shared/ui/base/tooltip' with a
+  single TooltipProvider higher up.
+*/
 
 export interface TooltipProps {
   content: string;
@@ -9,67 +31,20 @@ export interface TooltipProps {
   delay?: number;
 }
 
-const positionClasses = {
-  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-  left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-  right: 'left-full top-1/2 -translate-y-1/2 ml-2',
-};
-
-const arrowClasses = {
-  top: 'top-full left-1/2 -translate-x-1/2 border-t-surface border-x-transparent border-b-transparent',
-  bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-surface border-x-transparent border-t-transparent',
-  left: 'left-full top-1/2 -translate-y-1/2 border-l-surface border-y-transparent border-r-transparent',
-  right: 'right-full top-1/2 -translate-y-1/2 border-r-surface border-y-transparent border-l-transparent',
-};
-
-export default function Tooltip({ 
-  content, 
-  children, 
+export default function Tooltip({
+  content,
+  children,
   position = 'top',
-  delay = 200 
+  delay = 200
 }: TooltipProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-
-  const showTooltip = () => {
-    const id = setTimeout(() => setIsVisible(true), delay);
-    setTimeoutId(id);
-  };
-
-  const hideTooltip = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    setIsVisible(false);
-  };
-
   return (
-    <div 
-      className="relative inline-flex"
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onFocus={showTooltip}
-      onBlur={hideTooltip}
-    >
-      {children}
-      
-      {isVisible && (
-        <div 
-          className={`
-            absolute z-50 px-2.5 py-1.5 text-xs font-medium whitespace-nowrap
-            bg-surface text-text 
-            rounded-lg shadow-lg border border-border
-            animate-in fade-in-0 zoom-in-95 duration-150
-            ${positionClasses[position]}
-          `}
-          role="tooltip"
-        >
-          {content}
-          <span 
-            className={`absolute w-0 h-0 border-4 ${arrowClasses[position]}`}
-            aria-hidden="true"
-          />
-        </div>
-      )}
-    </div>
+    <TooltipProvider delay={delay}>
+      <BaseTooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>
+          {children}
+        </TooltipTrigger>
+        <TooltipContent side={position}>{content}</TooltipContent>
+      </BaseTooltip>
+    </TooltipProvider>
   );
 }
