@@ -1,8 +1,16 @@
-import os, re, sys, hashlib, urllib.request
+import os, re, sys, urllib.request
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-OUT_DIR = 'public/fonts'
+
+# Anchored to this file, not the shell's working directory. Run from the repo root and
+# relative paths would quietly build a second public/fonts there while the real one in
+# apps/fe kept serving the old faces.
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(APP_DIR, 'public', 'fonts')
+CSS_OUT = os.path.join(APP_DIR, 'src', 'styles', 'fonts.css')
+
+
 def fetch(url, ua=True):
     req = urllib.request.Request(url, headers={'User-Agent': UA} if ua else {})
     return urllib.request.urlopen(req).read()
@@ -44,15 +52,28 @@ def process(css, slug, keep_subsets=None, base=None):
             seen[full] = (name, len(data))
         name, _ = seen[full]
         out.append('@font-face {' + body.replace(url, f'/fonts/{slug}/{name}').rstrip() + '\n}')
+    # Downloads land in a directory that may still hold files from an earlier run with
+    # different weights. Prune after the fetches succeed, never before: a failed download
+    # would otherwise leave the app with no faces at all.
+    kept = {name for name, _ in seen.values()}
+    for stale in sorted(set(os.listdir(f'{OUT_DIR}/{slug}')) - kept):
+        os.remove(f'{OUT_DIR}/{slug}/{stale}')
+        print(f'{slug}: removed stale {stale}', file=sys.stderr)
+
     total = sum(s for _, s in seen.values())
     print(f'{slug}: {len(seen)} files, {total//1024} KB, {len(out)} faces', file=sys.stderr)
     return out
 
+# Ask for a weight RANGE, not a list of weights. All three families are variable, and
+# a list makes Google emit one @font-face per weight - every one of them pointing at the
+# same file. That cost 368 declarations for Hahmlet's 92 files. A range emits one face
+# per unicode-range with `font-weight: 100 900`, which is what the file actually is.
 blocks = {}
-blocks['playfair-display'] = process(gf_css('Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,700'), 'playfair-display')
-blocks['inter'] = process(gf_css('Inter:wght@400;500;600;700'), 'inter',
+blocks['playfair-display'] = process(gf_css('Playfair+Display:ital,wght@0,400..900;1,400..900'),
+                                     'playfair-display')
+blocks['inter'] = process(gf_css('Inter:wght@100..900'), 'inter',
                           keep_subsets={'latin', 'latin-ext'})
-blocks['hahmlet'] = process(gf_css('Hahmlet:wght@400;500;600;700'), 'hahmlet')
+blocks['hahmlet'] = process(gf_css('Hahmlet:wght@100..900'), 'hahmlet')
 
 pd = fetch('https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/'
            'pretendardvariable-dynamic-subset.css', ua=False).decode()
@@ -81,5 +102,5 @@ parts = [header]
 for slug, faces in blocks.items():
     parts.append(f'\n/* ---- {slug} ---- */\n')
     parts.extend(faces)
-open('src/styles/fonts.css', 'w').write('\n'.join(parts) + '\n')
+open(CSS_OUT, 'w').write('\n'.join(parts) + '\n')
 print('fonts.css written', file=sys.stderr)
