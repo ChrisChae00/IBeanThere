@@ -49,6 +49,22 @@
   --marker-user: var(--c-marker-user);
   --marker-pending: var(--state-pending);
 
+  /* ---- Typography ---- */
+  /*
+    English and Korean each get their own pair, and each stack lists the other locale's
+    face as its fallback so a stray Korean word in an English page still renders.
+
+    The weight is a token because Instrument Serif ships in one weight: asking it for
+    700 produces a synthetic bold, which is exactly the smeared look a display serif is
+    chosen to avoid. English headings sit at 400 by design; Korean headings need 700 to
+    carry the same presence.
+  */
+  --font-display: 'Instrument Serif', 'Noto Sans KR', Georgia, serif;
+  --font-display-weight: 400;
+  --font-body:
+    'Inter', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+
   /* ---- Relief shadows ---- */
   /*
     Composed once so the utilities stay readable and every state is guaranteed to share
@@ -90,4 +106,12 @@
   --input-radius: var(--radius-control);
   --input-edge: var(--edge-default);
   --input-surface: var(--surface-raised);
+}
+
+:root:lang(ko) {
+  --font-display: 'Noto Sans KR', 'Instrument Serif', sans-serif;
+  --font-display-weight: 700;
+  --font-body:
+    'Pretendard Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
 }
