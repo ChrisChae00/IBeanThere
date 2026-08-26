@@ -8,6 +8,7 @@
 
 @theme {
   --container-8xl: 90rem;
+  --font-logo: 'Playfair Display', Georgia, serif;
 
   /*
     New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
@@ -25,6 +26,7 @@
   --color-ink-on-brand: var(--ink-on-brand);
   --color-ink-on-media: var(--ink-on-media);
   --color-ink-inverse: var(--ink-inverse);
+  --color-scrim-media: var(--scrim-media);
 
   /*
     The brand colour is exposed as `brand`, not `accent`. The old palette already had an
@@ -47,6 +49,33 @@
 
   --radius-control: var(--radius-control);
   --radius-card: var(--radius-card);
+
+  /*
+    Tailwind ships `inset-shadow-2xs/xs/sm` and stops. Those three are all offset
+    downward - `inset 0 1px`, `inset 0 2px` - which describes a lip catching light
+    at the top, not a face pressed inward. These two continue the scale with the
+    other shape: no offset at all, so the falloff is equal on all four edges and
+    the depth reads as the whole surface sinking rather than one edge lifting.
+
+    Shaped after `.relief-pressed`, which is the reference for what a sunken
+    surface looks like here: a band that is solid at the rim and softens as it
+    goes in, at a reach measured in single-digit pixels rather than half the
+    control. The difference is that relief is lit - a light shadow from the top
+    left, a dark one from the bottom right - and these are not. Zero offset means
+    all four edges get the same band, so this reads as a face set into its own
+    outline rather than as a surface under a light source.
+
+    That is what the spread and blur are doing, and the order matters: the
+    positive spread sets how far the solid part reaches in, the blur softens only
+    its inner boundary. Both stay small so the middle of the control is untouched.
+
+    The colour is `--edge-subtle` - the theme's own outline, at the outline's own
+    weight. It resolves light on the light themes' dark fills and dark on Dark
+    Roast's light ones, exactly as the relief set already does, because in both
+    cases what is being drawn is the rim catching the theme's own light.
+  */
+  --inset-shadow-md: inset 0 0 8px 2px var(--edge-subtle);
+  --inset-shadow-lg: inset 0 0 12px 4px var(--edge-subtle);
 
   /*
     Legacy names, kept so unmigrated pages keep their utility classes. DELETE IN PHASE 6
@@ -415,7 +444,18 @@
     photograph.
   */
   .nav-scrim {
-    background: rgb(0 0 0 / 0.66);
+    /*
+      Tinted per theme, but from `--scrim-media` rather than `--brand`. Brand is a
+      foreground colour a dark theme has to make light - Dark Roast's is `#d4c7b8`
+      - and a scrim painted with it stops darkening anything. The scrim slot is the
+      one that is dark in all four themes and still carries each one's hue.
+
+      0.72 rather than the 0.66 a flat black needed: a tinted scrim is lighter than
+      black at the same alpha, and Morning Coffee's `#442f19` is the lightest of
+      the four. At 0.72 it still lands on the 0.396 sRGB ground that the darkest
+      `--ink-on-media` needs to clear 4.5:1, even over a blown-out frame.
+    */
+    background: color-mix(in srgb, var(--scrim-media) 72%, transparent);
     backdrop-filter: blur(3px);
     mask-image: linear-gradient(
       to bottom,
@@ -453,6 +493,47 @@
   .nav-pill {
     border-radius: var(--radius-pill);
     transition: none;
+  }
+
+  /*
+    Hover for a filled button that keeps its fill. Swapping to a second brand
+    colour reads as a different button; shading the same one reads as the same
+    button gaining depth.
+
+    The shadow has no offset, so it falls off equally from all four edges and the
+    face reads as pressed in rather than as a lip catching light along one edge.
+    That is the whole difference between this and Tailwind's own inset scale, and
+    the reason `--inset-shadow-lg` had to be defined rather than borrowed.
+
+    It is a pseudo-element rather than a `box-shadow` on the button itself
+    because the buttons that use this already spend their own `box-shadow` on
+    an outer drop shadow, and the two would collide on the same property.
+    `isolation` plus a negative z-index puts it over the fill and under the
+    label without wrapping the label.
+
+    No transition, like `.nav-pill`: the press has to land the instant the
+    pointer does, not catch up to it a beat later.
+  */
+  .btn-shade {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .btn-shade::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: var(--inset-shadow-lg);
+    opacity: 0;
+    /* No transition, same as `.nav-pill` - the press has to land under the pointer, not after it. */
+    transition: none;
+  }
+
+  .btn-shade:hover::after {
+    opacity: 1;
   }
 
   /*
@@ -506,3 +587,8 @@
 .leaflet-popup-pane {
   z-index: 40 !important;
 }
+
+.font-logo {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+

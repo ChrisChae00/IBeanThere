@@ -37,6 +37,7 @@
   --c-edge: #c2ac93;
   --c-on-brand: #f5f0e8;
   --c-on-media: #f5f0e8;
+  --c-scrim: #442f19;
   --c-on-auth: #442f19;
   --c-shadow: #8C5A3A;
   --c-star: #FFA500;
@@ -66,6 +67,7 @@
   --c-edge: #5e432d;
   --c-on-brand: #1A120B;
   --c-on-media: #e9ded2;
+  --c-scrim: #0f0906;
   --c-on-auth: #e9ded2;
   --c-shadow: #d4c7b8;
   --c-star: #FFB347;
@@ -83,24 +85,34 @@
   --relief-spread: 4px;
 }
 
+/*
+  Rebuilt around #607848 and #789048. The old brand (#5d7025) was an olive that
+  went muddy the moment it was put in a gradient - too little blue to stay green
+  as it darkened, so it slid toward brown. Those two hold the blue at 72, which
+  is what keeps the ramp between them reading as matcha rather than as khaki, and
+  the rest of the theme is derived from that pair. The brand itself then went one
+  step deeper again, to #53683e.
+*/
 [data-theme='matchaLatte'] {
-  --c-brand: #5d7025;
-  --c-brand-soft: #4c5c1e;
-  --c-accent: #a9bc71;
+  --c-brand: #53683e;
+  --c-brand-soft: #789048;
+  --c-accent: #b9cc8a;
   --c-page: #e0e8d0;
-  --c-raised: #f0f2e8;
-  --c-elevated: #f0f2e8;
-  --c-ink: #4a5c2a;
-  --c-ink-soft: #52652c;
-  --c-edge: #a9bc71;
-  --c-on-brand: #f0f2e8;
-  --c-on-media: #f0f2e8;
-  --c-on-auth: #e0e8d0;
-  --c-shadow: #5d7025;
+  --c-raised: #f4f7ea;
+  --c-elevated: #f4f7ea;
+  --c-ink: #3a4a20;
+  --c-ink-soft: #4e6130;
+  --c-edge: #c3d29b;
+  /* Lighter than the raised surface, which leaves the deepened brand at 5.8:1. */
+  --c-on-brand: #f7faf0;
+  --c-on-media: #f0f4e4;
+  --c-scrim: #2b3818;
+  --c-on-auth: #e6ecd8;
+  --c-shadow: #607848;
   --c-star: #FF8C00;
   --c-star-off: #A0A0A0;
   --c-star-off-edge: #808080;
-  --c-marker-cafe: #5d7025;
+  --c-marker-cafe: #607848;
   --c-marker-user: #E78E17;
   --c-success: #4CAF50;
   --c-warning: #FFC107;
@@ -124,6 +136,7 @@
   --c-edge: #F5E6A3;
   --c-on-brand: #FFF9F0;
   --c-on-media: #FFF9F0;
+  --c-scrim: #241d13;
   --c-on-auth: #362C1D;
   --c-shadow: #9d6345;
   --c-star: #FF7F50;

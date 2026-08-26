@@ -87,7 +87,7 @@ async def send_new_report_notification(
             <h1 style="margin: 0;">☕ New Report Submitted</h1>
         </div>
         <div class="content">
-            <p>A new report has been submitted on IBeanThere.</p>
+            <p>A new report has been submitted on ibeanthere.</p>
             
             <p>
                 <span class="badge badge-type">{target_type_display}</span>
@@ -107,7 +107,7 @@ async def send_new_report_notification(
             <a href="https://ibeanthere.app/admin/reports" class="button">View in Dashboard</a>
             
             <div class="footer">
-                <p>This is an automated notification from IBeanThere.</p>
+                <p>This is an automated notification from ibeanthere.</p>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@ async def send_new_report_notification(
         
         # Send email
         response = resend_client.Emails.send({
-            "from": "IBeanThere <notifications@ibeanthere.app>",
+            "from": "ibeanthere <notifications@ibeanthere.app>",
             "to": [settings.admin_email],
             "subject": f"[Report] New {report_type_display} - {target_type_display}",
             "html": html_content,
@@ -189,7 +189,7 @@ async def send_report_status_update(
             
             {f'<div class="notes"><strong>Admin Notes:</strong><br/>{admin_notes}</div>' if admin_notes else ''}
             
-            <p>Thank you for helping us improve IBeanThere!</p>
+            <p>Thank you for helping us improve ibeanthere!</p>
         </div>
     </div>
 </body>
@@ -197,7 +197,7 @@ async def send_report_status_update(
 """
         
         response = resend_client.Emails.send({
-            "from": "IBeanThere <notifications@ibeanthere.app>",
+            "from": "ibeanthere <notifications@ibeanthere.app>",
             "to": [reporter_email],
             "subject": f"Your Report Update - {status_display}",
             "html": html_content,

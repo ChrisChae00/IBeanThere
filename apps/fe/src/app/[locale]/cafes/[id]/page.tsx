@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: CafeDetailPageProps): Promise
     const cafe = await getCafeDetail(id);
     const t = await getTranslations('cafe.detail');
 
-    const title = `${cafe.name} - ${cafe.address || ''} | IBeanThere`;
+    const title = `${cafe.name} - ${cafe.address || ''} | ibeanthere`;
     const description = cafe.average_rating
       ? `${cafe.name} - ${t('average_rating')}: ${cafe.average_rating.toFixed(1)}/5 ${t('from')} ${cafe.log_count} ${t('coffee_logs')}`
       : `${cafe.name} - ${cafe.address || ''}`;
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: CafeDetailPageProps): Promise
     };
   } catch (error) {
     return {
-      title: 'Cafe | IBeanThere',
+      title: 'Cafe | ibeanthere',
     };
   }
 }

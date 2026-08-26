@@ -48,7 +48,7 @@ export default function ShareModal({
     setIsSharing(true);
     try {
       await navigator.share({
-        title: title || 'IBeanThere',
+        title: title || 'ibeanthere',
         text: description,
         url: fullUrl,
       });

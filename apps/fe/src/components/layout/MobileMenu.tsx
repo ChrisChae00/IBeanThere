@@ -97,7 +97,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
             <div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
               <div className="flex items-center space-x-2">
                 <Logo size="md" className="text-primary" />
-                <span className="text-lg font-bold text-text">IBeanThere</span>
+                <span className="text-lg font-bold text-text font-logo">ibeanthere</span>
               </div>
               <button
                 onClick={closeMenu}
@@ -226,7 +226,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <Link
                       href={`/${locale}/register`}
                       onClick={closeMenu}
-                      className="flex-1 bg-primary text-primaryText px-4 py-2.5 rounded-full hover:bg-secondary transition-colors font-medium text-sm text-center"
+                      className="btn-shade flex-1 bg-primary text-primaryText px-4 py-2.5 rounded-(--btn-radius) font-medium text-sm text-center"
                     >
                       {t('sign_up')}
                     </Link>

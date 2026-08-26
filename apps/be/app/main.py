@@ -18,7 +18,7 @@ if env_path.exists():
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
 
-app = FastAPI(title="IBeanThere API")
+app = FastAPI(title="ibeanthere API")
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -50,4 +50,4 @@ def health_check():
 
 @app.get("/")
 def root():
-    return {"message": "IBeanThere API", "version": "1.0.0"}
+    return {"message": "ibeanthere API", "version": "1.0.0"}

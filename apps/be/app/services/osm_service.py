@@ -14,7 +14,7 @@ class OSMService:
     
     BASE_URL = "https://nominatim.openstreetmap.org"
     HEADERS = {
-        'User-Agent': 'IBeanThere/1.0'
+        'User-Agent': 'ibeanthere/1.0'
     }
     RATE_LIMIT = 1.0  # 1 request per second
     

@@ -720,7 +720,7 @@ async def register_cafe(
         if not request.address and osm_data:
             request.address = osm_data.get('display_name', '')
 
-        # 3. Franchise check - IBeanThere only lists local, independent cafes
+        # 3. Franchise check - ibeanthere only lists local, independent cafes
         verdict = await franchise_service.classify(
             request.name,
             osm_data.get('extratags'),
@@ -733,7 +733,7 @@ async def register_cafe(
                 detail=(
                     f"{verdict.display_name} is a franchise "
                     f"({verdict.outlet_count}+ locations worldwide). "
-                    "IBeanThere is for local, independent cafes only."
+                    "ibeanthere is for local, independent cafes only."
                 )
             )
 
@@ -746,7 +746,7 @@ async def register_cafe(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
                     "Bubble tea shops, tea houses and juice bars cannot be registered. "
-                    "IBeanThere only lists cafes that serve coffee."
+                    "ibeanthere only lists cafes that serve coffee."
                 )
             )
 
@@ -982,7 +982,7 @@ async def register_cafe(
                                 insert_error)
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail="This cafe is already listed on IBeanThere. Open it from the map to drop a bean."
+                        detail="This cafe is already listed on ibeanthere. Open it from the map to drop a bean."
                     )
                 raise
 

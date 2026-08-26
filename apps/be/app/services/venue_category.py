@@ -1,7 +1,7 @@
 """
 What kind of venue is this?
 
-IBeanThere lists cafes that sell coffee. Bubble tea shops, tea houses and juice bars
+ibeanthere lists cafes that sell coffee. Bubble tea shops, tea houses and juice bars
 are out, whatever their size. The signal is OpenStreetMap's `cuisine` tag, which is
 already fetched during registration, so this costs no extra lookup.
 

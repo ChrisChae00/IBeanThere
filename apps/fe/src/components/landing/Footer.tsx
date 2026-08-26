@@ -17,7 +17,7 @@ export default async function Footer({ locale }: { locale: string }) {
           <div className="text-left">
             <div className="flex items-center space-x-1 mb-2">
               <Logo size="md" className="text-primaryText" />
-              <span className="text-2xl font-bold text-primaryText">
+              <span className="text-2xl font-bold text-primaryText font-logo">
                 {commonT('app_name')}
               </span>
             </div>

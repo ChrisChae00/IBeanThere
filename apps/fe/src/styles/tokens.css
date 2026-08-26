@@ -25,6 +25,19 @@
   --ink-on-auth: var(--c-on-auth);
   --ink-inverse: var(--c-page);
 
+  /*
+    The wash that goes over a photograph so light ink can sit on it. It is its own
+    slot and not `--brand` because the two are opposite kinds of colour: brand is a
+    foreground that `--ink-on-brand` sits on top of, so a dark theme has to make it
+    light, and a scrim is a darkener that has to stay dark in every theme or it
+    stops doing its job. Espresso is where that difference shows - its brand is
+    `#d4c7b8`, which washed the hero white.
+
+    Each theme's value is its own darkest hue rather than a shared black, so the
+    hero still reads as that theme.
+  */
+  --scrim-media: var(--c-scrim);
+
   /* ---- Layer 2: accent ---- */
   --brand: var(--c-brand);
   --brand-hover: var(--c-brand-soft);

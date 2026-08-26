@@ -12,7 +12,7 @@ export async function generateMetadata({
   const path = `/profile/${username}`;
 
   return {
-    title: `${username} | IBeanThere`,
+    title: `${username} | ibeanthere`,
     alternates: {
       canonical: buildCanonical(locale as Locale, path),
       languages: buildAlternateLanguages(path),

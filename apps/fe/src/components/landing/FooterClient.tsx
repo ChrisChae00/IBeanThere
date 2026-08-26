@@ -11,7 +11,7 @@ export default function FooterClient() {
 
   const handleShare = async () => {
     const shareData = {
-      title: 'IBeanThere',
+      title: 'ibeanthere',
       url: 'https://ibeanthere.app',
     };
 
@@ -57,7 +57,7 @@ export default function FooterClient() {
       <button
         onClick={handleShare}
         className="w-9 h-9 flex items-center justify-center rounded-full bg-primaryText/10 text-primaryText hover:bg-primaryText/20 transition-colors"
-        aria-label="Share IBeanThere"
+        aria-label="Share ibeanthere"
       >
         <ExternalLink size={16} />
       </button>

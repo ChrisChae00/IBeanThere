@@ -129,8 +129,15 @@ export default function HeroBackdrop({ locale }: HeroBackdropProps) {
           }`}
         />
 
+        {/*
+          The tinted wash reads `--scrim-media`, not `--brand`. Brand is a
+          foreground colour that a dark theme has to make light, and Dark Roast's
+          is `#d4c7b8` - as a wash that whitened the video and left the headline
+          fighting its own backdrop. The scrim slot stays dark in all four themes
+          and still carries each one's hue.
+        */}
         <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-linear-to-r from-primary/90 via-primary/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-scrim-media/30 via-scrim-media/30 to-transparent" />
       </div>
 
       {/* `mt-16` clears the fixed header the backdrop now runs behind. */}

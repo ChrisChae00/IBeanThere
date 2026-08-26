@@ -53,7 +53,7 @@ export default function Header({
   const navStateClass = (active: boolean) =>
     active
       ? 'text-ink-on-media'
-      : 'text-ink-on-media/75 hover:text-ink-on-media';
+      : 'text-ink-on-media hover:text-ink-on-media';
 
   /*
     `nav-pill` carries the hover treatment: a filled, glowing pill behind the
@@ -82,7 +82,7 @@ export default function Header({
     <header className="nav-over-media fixed top-0 left-0 right-0 z-50 motion-fade-in">
       <div
         aria-hidden
-        className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-28 -z-10"
+        className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-24 -z-10"
       />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/*
@@ -97,8 +97,8 @@ export default function Header({
           <Link href={`/${locale}`} className="flex items-center space-x-1 shrink-0">
             <Logo size="md" className="text-ink-on-media" />
             {/* Display weight is a system decision; the utility does nothing here. */}
-            <span className="text-xl text-text whitespace-nowrap">
-              iBeanThere
+            <span className="text-xl text-text whitespace-nowrap font-logo">
+              ibeanthere
             </span>
           </Link>
 
@@ -211,7 +211,7 @@ export default function Header({
                   </Link>
                   <Link
                     href={`/${locale}/register`}
-                    className="bg-primary text-primaryText px-5 rounded-(--btn-radius) font-medium h-10 flex items-center whitespace-nowrap shadow-(--ibean-shadow-warm-sm) text-sm"
+                    className="btn-shade bg-primary text-primaryText px-5 rounded-(--btn-radius) font-medium h-10 flex items-center whitespace-nowrap shadow-(--ibean-shadow-warm-sm) text-sm"
                   >
                     {t('get_started')}
                   </Link>

@@ -1,5 +1,5 @@
 <h1 align="center">
-  IBeanThere
+  ibeanthere
 </h1>
 
 <p align="center">
@@ -30,7 +30,7 @@
 
 ## About
 
-**IBeanThere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, IBeanThere relies entirely on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
+**ibeanthere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, ibeanthere relies entirely on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
 
 ### Core Philosophy
 
@@ -70,7 +70,7 @@
 
 ## Thematic Color Palettes
 
-IBeanThere supports dynamic theme switching powered by a React Context state system. Here are the curated palettes available to users:
+ibeanthere supports dynamic theme switching powered by a React Context state system. Here are the curated palettes available to users:
 
 | Theme | Preview | Primary | Background | Card BG | Text | Design Aesthetic |
 |---|---|---|---|---|---|---|

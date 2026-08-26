@@ -53,7 +53,7 @@ export function AuthLayout({
             <div className="p-2 bg-primaryText/10 rounded-xl backdrop-blur-xs">
                <Logo size="md" className="text-primaryText" />
             </div>
-            <span className="text-2xl font-bold text-primaryText tracking-tight">IBeanThere</span>
+            <span className="text-2xl font-bold text-primaryText tracking-tight font-logo">ibeanthere</span>
           </div>
         </div>
 

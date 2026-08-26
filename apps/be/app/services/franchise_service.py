@@ -30,7 +30,7 @@ OVERPASS_ENDPOINTS = [
     "https://overpass.private.coffee/api/interpreter",
 ]
 OVERPASS_HEADERS = {
-    "User-Agent": "IBeanThere/1.0 (https://github.com/ChrisChae00/IBeanThere)"
+    "User-Agent": "ibeanthere/1.0 (https://github.com/ChrisChae00/IBeanThere)"
 }
 
 FRANCHISE = "franchise"
