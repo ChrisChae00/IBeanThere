@@ -352,6 +352,65 @@
 }
 
 @layer components {
+  /*
+    Overlay header. On the landing page the header sits on top of the hero photo
+    instead of above it, so its ink has to come from `--ink-on-media` rather than
+    the theme's page ink - three of the four themes use a dark `--ink-primary`
+    that is invisible over a photograph.
+
+    The swap is done by re-pointing the shared colour vars inside the header
+    rather than by editing every control. The logo, the two switchers, the
+    profile trigger and the mobile hamburger all read `text-text` / `bg-background`
+    / `border-border` already, so they follow without knowing this state exists.
+
+    `--color-primary` is deliberately NOT re-pointed: the "get started" button is
+    opaque and keeps its brand fill, and an active nav link handles itself in
+    Header.tsx. Repointing it would make that button light-on-light.
+  */
+  .nav-over-media {
+    --color-text: var(--ink-on-media);
+    --color-textSecondary: color-mix(in srgb, var(--ink-on-media) 75%, transparent);
+    --color-background: transparent;
+    --color-surface: color-mix(in srgb, var(--ink-on-media) 14%, transparent);
+    --color-border: color-mix(in srgb, var(--ink-on-media) 32%, transparent);
+  }
+
+  /*
+    Popovers live inside the header in the DOM, so they inherit the swap above and
+    would render light ink on their own light panel. They are opaque surfaces in
+    their own right and always take the theme's page vocabulary back.
+  */
+  .nav-opaque {
+    --color-text: var(--ink-primary);
+    --color-textSecondary: var(--ink-secondary);
+    --color-background: var(--surface-page);
+    --color-surface: var(--surface-elevated);
+    --color-border: var(--edge-default);
+  }
+
+  /*
+    The scrim. Measured against the crop that sits behind it: the top 64px of the
+    hero photo is the greenhouse skylight, averaging 54-76% luminance with several
+    blown-out stretches at ~100%. CSS composites in sRGB, so black at alpha `a`
+    leaves `photo * (1 - a)`; the darkest `--ink-on-media` (#e9ded2) needs a ground
+    at or below sRGB 0.396 to clear 4.5:1, which puts the floor at a = 0.60 even
+    over the blown stretches.
+
+    It is taller than the 64px bar so the falloff happens below the text rather
+    than through it, and the blur is masked on the same curve so it does not leave
+    a hard edge across the photograph.
+  */
+  .nav-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.65),
+      rgb(0 0 0 / 0.55) 57%,
+      transparent
+    );
+    backdrop-filter: blur(3px);
+    mask-image: linear-gradient(to bottom, black 45%, transparent);
+  }
+
   .motion-fade-in {
     animation: fadeIn 300ms var(--ibean-transition) both;
   }

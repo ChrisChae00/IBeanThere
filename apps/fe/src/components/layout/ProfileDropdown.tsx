@@ -73,7 +73,7 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
 
           {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
+        <div className="nav-opaque absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
           <div className="py-1">
             {isAdmin && (
               <Link

@@ -89,7 +89,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
 
           {/* Slide-out Menu */}
           <div
-            className={`fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+            className={`nav-opaque fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
               isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
