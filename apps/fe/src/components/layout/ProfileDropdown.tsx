@@ -48,15 +48,20 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
       {/* Profile button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-full hover:bg-surface transition-colors min-h-[44px]"
+        className="nav-pill flex items-center space-x-2 px-2 h-10"
         aria-label="Profile menu"
       >
-        <Avatar 
-          src={profile?.avatar_url || undefined} 
+        <Avatar
+          src={profile?.avatar_url || undefined}
           alt={displayName}
           size="sm"
         />
-        <span className="hidden md:block text-text font-medium">
+        {/*
+          Capped and truncated: this sits in a header row whose width is already
+          accounted for, and a long display name is the one thing in it that can
+          grow without limit.
+        */}
+        <span className="hidden md:block text-text font-medium max-w-[9rem] truncate">
           {displayName}
         </span>
         <svg 

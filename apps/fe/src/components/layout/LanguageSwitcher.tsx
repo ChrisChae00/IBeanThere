@@ -1,75 +1,45 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { locales } from '@/i18n/request';
-import { useEffect, useRef } from 'react';
+import NavSelect from './NavSelect';
+
+/*
+  Full names in the panel, the code on the trigger. The globe that used to sit
+  beside it is gone: a two-letter code is already the clearest label a language
+  control can have, and the icon only widened the box.
+*/
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  ko: '한국어',
+};
 
 export default function LanguageSwitcher() {
   const pathname = usePathname();
-  const selectRef = useRef<HTMLSelectElement>(null);
-  
+  const t = useTranslations('navigation');
+
   const currentLocale = pathname.split('/')[1] || 'en';
-  
+
   const handleLanguageChange = (newLocale: string) => {
+    if (newLocale === currentLocale) return;
     const segments = pathname.split('/');
     segments[1] = newLocale;
-    const newPathname = segments.join('/');
-    window.location.href = newPathname;
+    // A full load rather than a router push: the locale decides the messages
+    // bundle, which is resolved on the server.
+    window.location.href = segments.join('/');
   };
-
-  const languageNames: Record<string, string> = {
-    en: 'English',
-    ko: '한국어'
-  };
-
-  useEffect(() => {
-    if (selectRef.current) {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.font = '14px system-ui, -apple-system, sans-serif';
-        const width = context.measureText(languageNames[currentLocale]).width;
-        selectRef.current.style.width = `${width + 54}px`;
-      }
-    }
-  }, [currentLocale, languageNames]);
 
   return (
-    <div className="relative inline-block bg-background border border-border rounded-lg hover:bg-primary transition-colors group">
-      <svg 
-        className="absolute left-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text group-hover:text-primaryText pointer-events-none transition-colors" 
-        fill="none" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        strokeWidth="2" 
-        viewBox="0 0 24 24" 
-        stroke="currentColor"
-      >
-        <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-      </svg>
-      
-      <select
-        ref={selectRef}
-        value={currentLocale}
-        onChange={(e) => handleLanguageChange(e.target.value)}
-        className="bg-transparent text-text group-hover:text-primaryText text-sm font-medium cursor-pointer focus:outline-hidden border-none pl-7 pr-[18px] py-2 leading-normal appearance-none transition-colors"
-        aria-label="Select language"
-      >
-        {locales.map((locale) => (
-          <option key={locale} value={locale}>
-            {languageNames[locale] || locale.toUpperCase()}
-          </option>
-        ))}
-      </select>
-      <svg 
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text group-hover:text-primaryText pointer-events-none transition-colors"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
+    <NavSelect
+      label={currentLocale.toUpperCase()}
+      ariaLabel={t('language')}
+      value={currentLocale}
+      onChange={handleLanguageChange}
+      options={locales.map((locale) => ({
+        value: locale,
+        label: LANGUAGE_NAMES[locale] || locale.toUpperCase(),
+      }))}
+    />
   );
 }
-

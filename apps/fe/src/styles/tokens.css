@@ -95,11 +95,12 @@
 
   /* ---- Layer 3: component ---- */
   /*
-    PROVISIONAL. Buttons went from rounded-2xl to a full pill when Phase 2b wired them to
-    this token, which is a large change to accept sight-unseen across every button in the
-    app. It was taken deliberately, but as a hold rather than a verdict: there was nothing
-    to judge it against yet. Revisit once Header + Landing exist (Phase 3) — switching to
-    `--radius-card` is this one line.
+    Settled at the pill after comparing it against `--radius-card` (16px, what buttons
+    carried as `rounded-2xl` before Phase 2b) and `--radius-control` (10px, which would
+    have matched the inputs).
+
+    Hardcoded `rounded-full` utilities elsewhere in the app do not read this token, so
+    they are migrated onto it as each file is touched.
   */
   --btn-radius: var(--radius-pill);
   --btn-height-sm: 40px;

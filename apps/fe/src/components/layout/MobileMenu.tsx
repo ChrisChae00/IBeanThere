@@ -67,7 +67,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden p-2 rounded-lg hover:bg-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+        className="xl:hidden p-2 rounded-lg hover:bg-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
         {isOpen ? (
@@ -82,14 +82,14 @@ export default function MobileMenu({ locale }: { locale: string }) {
           {/* Overlay */}
           {isOpen && (
             <div
-              className="fixed inset-0 bg-black/50 z-9998 lg:hidden"
+              className="fixed inset-0 bg-black/50 z-9998 xl:hidden"
               onClick={closeMenu}
             />
           )}
 
           {/* Slide-out Menu */}
           <div
-            className={`nav-opaque fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+            className={`nav-opaque fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out xl:hidden flex flex-col ${
               isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >

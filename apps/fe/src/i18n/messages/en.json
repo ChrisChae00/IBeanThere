@@ -1,16 +1,16 @@
 {
   "metadata": {
-    "title": "IBeanThere",
+    "title": "iBeanThere",
     "description": "Discover local cafes, log your coffee visits, and share your experiences"
   },
   
   "common": {
-      "app_name": "IBeanThere",
+      "app_name": "iBeanThere",
       "unknown": "Unknown",
       "back": "Back"
     },
     "home": {
-      "title": "IBeanThere",
+      "title": "iBeanThere",
       "description": "Coffee journaling app."
     },
     "navigation": {
@@ -48,7 +48,9 @@
       "settings": "Settings",
       "get_started": "Get Started",
       "admin_dashboard": "Admin Dashboard",
-      "learn": "Learn"
+      "learn": "Learn",
+      "theme": "Theme",
+      "language": "Language"
     },
     "drop_bean": {
       "button": "Drop Bean",
@@ -260,7 +262,7 @@
       "homescreen_android_step3": "Tap 'Add'"
     },
     "auth": {
-      "app_name": "IBeanThere",
+      "app_name": "iBeanThere",
       "login": "Log In",
       "signup": "Sign Up",
       "logout": "Log Out",
@@ -307,7 +309,7 @@
       "last_name_placeholder": "Doe",
       "google": "Google",
       "facebook": "Facebook",
-      "complete_profile_title": "Welcome to IBeanThere!",
+      "complete_profile_title": "Welcome to iBeanThere!",
       "complete_profile_subtitle": "Let's set up your profile to get started.",
       "finish_setup": "Complete Your Profile",
       "finish_setup_desc": "Please choose a username and display name.",
@@ -602,7 +604,7 @@
     
     "cafe": {
       "register": {
-        "serves_coffee_confirm": "This cafe serves coffee (required). IBeanThere only lists cafes that serve coffee.",
+        "serves_coffee_confirm": "This cafe serves coffee (required). iBeanThere only lists cafes that serve coffee.",
         "serves_coffee_required": "Please confirm that this cafe serves coffee.",
         "title": "Register New Cafe",
         "location_select": "Select Location",
@@ -714,7 +716,7 @@
         "day_saturday": "Saturday",
         "day_sunday": "Sunday",
         "view_details": "View Details",
-        "added_by_app": "Added by IBeanThere",
+        "added_by_app": "Added by iBeanThere",
         "founding_crew": "Founding Crew",
         "navigator": "Navigator",
         "scout": "Scout",
@@ -1105,7 +1107,7 @@
         },
         "content": {
           "title": "3. User Content & License",
-          "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content. However, by posting, you grant IBeanThere a perpetual, irrevocable, worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content in any media or distribution methods now known or later developed."
+          "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content. However, by posting, you grant iBeanThere a perpetual, irrevocable, worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content in any media or distribution methods now known or later developed."
         },
         "conduct": {
           "title": "4. Prohibited Conduct",
@@ -1121,11 +1123,11 @@
         },
         "liability": {
           "title": "7. Limitation of Liability",
-          "content": "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW (INCLUDING THE CONSUMER PROTECTION ACT OF ONTARIO), IBEANTHERE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID US, IF ANY, IN THE PAST SIX MONTHS OR 50 CAD, WHICHEVER IS GREATER."
+          "content": "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW (INCLUDING THE CONSUMER PROTECTION ACT OF ONTARIO), iBEANTHERE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID US, IF ANY, IN THE PAST SIX MONTHS OR 50 CAD, WHICHEVER IS GREATER."
         },
         "dispute": {
             "title": "8. Dispute Resolution & Arbitration",
-            "content": "ANY DISPUTE, CLAIM OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION OR VALIDITY THEREOF SHALL BE DETERMINED BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. YOU AND IBEANTHERE WAIVE THE RIGHT TO A TRIAL BY JURY OR TO PARTICIPATE IN A CLASS ACTION."
+            "content": "ANY DISPUTE, CLAIM OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION OR VALIDITY THEREOF SHALL BE DETERMINED BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. YOU AND iBEANTHERE WAIVE THE RIGHT TO A TRIAL BY JURY OR TO PARTICIPATE IN A CLASS ACTION."
         },
         "governing_law": {
           "title": "9. Governing Law",
@@ -1144,7 +1146,7 @@
         "title": "Privacy Policy",
         "intro": {
           "title": "1. Introduction",
-          "content": "IBeanThere respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website. Before registering, submitting any content, or otherwise engaging with us, please read and understand this Privacy Policy as well as our Terms of Service. In the course of engaging with us, you may also use third party's intellectual property, tools or resources (e.g., Supabase, Google Analytics), and such third party's privacy policy may also apply to you."
+          "content": "iBeanThere respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website. Before registering, submitting any content, or otherwise engaging with us, please read and understand this Privacy Policy as well as our Terms of Service. In the course of engaging with us, you may also use third party's intellectual property, tools or resources (e.g., Supabase, Google Analytics), and such third party's privacy policy may also apply to you."
         },
         "collection": {
           "title": "2. Information We Collect",
