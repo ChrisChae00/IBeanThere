@@ -1,48 +1,28 @@
 'use client';
 
 import { useTheme } from '@/contexts/ThemeContext';
-import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import NavSelect from './NavSelect';
 
 export default function ThemeSwitcher() {
   const { currentTheme, setTheme, availableThemes } = useTheme();
-  const selectRef = useRef<HTMLSelectElement>(null);
+  const t = useTranslations('navigation');
 
-  useEffect(() => {
-    if (selectRef.current) {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.font = '14px system-ui, -apple-system, sans-serif';
-        const width = context.measureText(currentTheme.displayName).width;
-        selectRef.current.style.width = `${width + 36}px`;
-      }
-    }
-  }, [currentTheme.displayName]);
-
+  /*
+    The trigger says "Theme", not the theme's own name. A label that changes with
+    the selection is a status readout; the panel already shows which one is
+    checked, and a fixed word keeps the bar from reflowing on every change.
+  */
   return (
-    <div className="relative inline-block bg-background border border-border rounded-lg hover:bg-primary transition-colors group">
-      <select 
-        ref={selectRef}
-        value={currentTheme.name}
-        onChange={(e) => setTheme(e.target.value)}
-        className="bg-transparent text-text group-hover:text-primaryText text-sm font-medium cursor-pointer focus:outline-hidden border-none appearance-none pl-2 pr-[18px] py-2 leading-normal transition-colors"
-        aria-label="Select theme"
-      >
-        {availableThemes.map((theme) => (
-          <option key={theme.name} value={theme.name}>
-            {theme.displayName}
-          </option>
-        ))}
-      </select>
-      <svg 
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text group-hover:text-primaryText pointer-events-none transition-colors"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
+    <NavSelect
+      label={t('theme')}
+      ariaLabel={t('theme')}
+      value={currentTheme.name}
+      onChange={setTheme}
+      options={availableThemes.map((theme) => ({
+        value: theme.name,
+        label: theme.displayName,
+      }))}
+    />
   );
 }
-

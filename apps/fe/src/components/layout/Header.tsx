@@ -23,35 +23,6 @@ export default function Header({
   const [journeyOpen, setJourneyOpen] = useState(false);
   const journeyRef = useRef<HTMLDivElement>(null);
 
-  /*
-    The header floats over the landing hero and firms up into its normal solid
-    self once the hero has scrolled past. The initial value is derived from the
-    route rather than left false, so the landing page renders in its overlay
-    state on the server and does not flash a solid bar before hydration.
-  */
-  const isLanding = pathname === `/${locale}` || pathname === `/${locale}/`;
-  const [overMedia, setOverMedia] = useState(isLanding);
-
-  useEffect(() => {
-    const hero = document.getElementById('hero');
-    if (!hero) {
-      setOverMedia(false);
-      return;
-    }
-
-    /*
-      Watching the hero itself rather than a sentinel: inset the viewport by the
-      bar's own height and the hero stops intersecting at exactly the moment its
-      last pixel passes under the bar.
-    */
-    const io = new IntersectionObserver(
-      ([entry]) => setOverMedia(entry.isIntersecting),
-      { rootMargin: '-64px 0px 0px 0px' }
-    );
-    io.observe(hero);
-    return () => io.disconnect();
-  }, [pathname]);
-
   useEffect(() => {
     if (!journeyOpen) return;
 
@@ -75,65 +46,74 @@ export default function Header({
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   /*
-    Over media an active link cannot be marked with the brand colour - Morning
-    Coffee's brown lands at 1.2:1 on the scrim - so the two states are told apart
-    by opacity of the same light ink instead. The solid state keeps the colours it
-    already had rather than inheriting the opacity trick, which would drop
-    inactive links below AA on the light themes.
+    The active link cannot be marked with the brand colour - Morning Coffee's
+    brown lands at 1.2:1 on the scrim - so the two are told apart by opacity of
+    the same light ink instead.
   */
   const navStateClass = (active: boolean) =>
-    overMedia
-      ? active
-        ? 'text-ink-on-media'
-        : 'text-ink-on-media/75 hover:text-ink-on-media'
-      : active
-        ? 'text-primary'
-        : 'text-text hover:text-primary';
+    active
+      ? 'text-ink-on-media'
+      : 'text-ink-on-media/75 hover:text-ink-on-media';
 
+  /*
+    `nav-pill` carries the hover treatment: a filled, glowing pill behind the
+    label rather than a brighter label. The horizontal padding is what gives it
+    something to fill, so it is part of the shape rather than spacing taste.
+
+    Every control in the bar is `h-10`, replacing the 44px touch minimum these
+    carried: the desktop row is pointer-only, and 44 inside a 64px bar leaves so
+    little air that the pills read as a second bar rather than as buttons. The
+    hamburger below `lg` keeps its 44.
+  */
   const navLinkClass = (href: string) =>
-    `font-medium transition-colors min-h-[44px] px-1 flex items-center text-sm ${navStateClass(isActive(href))}`;
+    `nav-pill font-medium h-10 px-3 flex items-center whitespace-nowrap text-sm ${navStateClass(isActive(href))}`;
 
   const journeyActive =
     isActive(`/${locale}/my-logs`) || isActive(`/${locale}/my-beans`);
 
+  /*
+    One treatment everywhere, not two. The bar used to swap to the theme's own
+    surface once the landing hero had scrolled past; carrying the scrim the whole
+    way keeps the glass reading as one material, and it means there is no state
+    to get wrong and no rule under the bar to divide it from the page - the
+    scrim's own falloff is the edge.
+  */
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 motion-fade-in border-b transition-[background-color,border-color,box-shadow] duration-300 ${
-        overMedia
-          ? 'nav-over-media border-transparent shadow-none'
-          : 'bg-background border-accent shadow-(--ibean-shadow-warm-sm)'
-      }`}
-    >
-      {/*
-        Kept mounted and faded so the two states cross over instead of the scrim
-        popping in and out on every pass of the hero's bottom edge.
-      */}
+    <header className="nav-over-media fixed top-0 left-0 right-0 z-50 motion-fade-in">
       <div
         aria-hidden
-        className={`nav-scrim pointer-events-none absolute inset-x-0 top-0 h-28 -z-10 transition-opacity duration-300 ${
-          overMedia ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-28 -z-10"
       />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        {/*
+          The nav follows the logo rather than sitting at the centre of the bar.
+          Centring needs the two outer blocks to be equal, and they are not: the
+          English labels are wide enough that the controls had nowhere left to go
+          and started wrapping their own text onto two lines. Nothing here may
+          shrink, so the row overflows before it deforms.
+        */}
+        <div className="flex items-center h-16 gap-2">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center space-x-1 shrink-0">
-            <Logo size="md" className={overMedia ? 'text-ink-on-media' : 'text-primary'} />
-            <span className="text-xl font-bold text-text">
-              IBeanThere
+            <Logo size="md" className="text-ink-on-media" />
+            {/* Display weight is a system decision; the utility does nothing here. */}
+            <span className="text-xl text-text whitespace-nowrap">
+              iBeanThere
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1 ml-10">
+          {/*
+            Desktop navigation. No dividers between the items any more - a fixed
+            rule between two pills makes the hovered one look boxed in rather
+            than lifted.
+          */}
+          <nav className="hidden xl:flex items-center gap-1 ml-6 shrink-0">
             <Link
               href={`/${locale}/discover/explore-map`}
               className={navLinkClass(`/${locale}/discover/explore-map`)}
             >
               {t('explore_map')}
             </Link>
-
-            <div className="h-4 w-px bg-border mx-1" />
 
             <Link
               href={`/${locale}/discover/dropbean`}
@@ -142,16 +122,12 @@ export default function Header({
               {t('dropbean')}
             </Link>
 
-            <div className="h-4 w-px bg-border mx-1" />
-
             <Link
               href={`/${locale}/discover/register-cafe`}
               className={navLinkClass(`/${locale}/discover/register-cafe`)}
             >
               {t('register_cafe')}
             </Link>
-
-            <div className="h-4 w-px bg-border mx-1" />
 
             <Link
               href={`/${locale}/learn/coffee`}
@@ -160,15 +136,14 @@ export default function Header({
               {t('learn')}
             </Link>
 
-            <div className="h-4 w-px bg-border mx-1" />
-
             {/* My Journey Dropdown */}
             <div ref={journeyRef} className="relative">
               <button
                 onClick={() => setJourneyOpen(prev => !prev)}
                 aria-expanded={journeyOpen}
                 aria-haspopup="true"
-                className={`font-medium transition-colors min-h-[44px] px-1 flex items-center gap-1 text-sm ${navStateClass(journeyActive)}`}
+                className={`nav-pill font-medium h-10 px-3 flex items-center gap-1 whitespace-nowrap text-sm ${navStateClass(journeyActive)}`}
+                data-popup-open={journeyOpen || undefined}
               >
                 {t('my_coffee_journey')}
                 <ChevronDown
@@ -177,7 +152,7 @@ export default function Header({
               </button>
 
               {journeyOpen && (
-                <div className="nav-opaque absolute left-0 top-full mt-1 w-44 bg-background border border-border rounded-xl shadow-(--ibean-shadow-warm-md) overflow-hidden z-50 motion-slide-up">
+                <div className="nav-opaque absolute left-0 top-full mt-2 w-44 bg-background border border-border rounded-(--radius-card) shadow-(--ibean-shadow-warm-md) overflow-hidden z-50 motion-slide-up">
                   <div className="py-1">
                     <Link
                       href={`/${locale}/my-logs`}
@@ -207,37 +182,42 @@ export default function Header({
             </div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <MobileMenu locale={locale} />
+          {/* `ml-auto` is what pushes this to the far edge now that the row is flex. */}
+          <div className="flex items-center justify-end gap-2 ml-auto shrink-0">
+            <MobileMenu locale={locale} />
 
-          {/* Desktop Right Side */}
-          <div className="hidden lg:flex items-center space-x-2 ml-auto">
-            <ThemeSwitcher />
-            <LanguageSwitcher />
+            <div className="hidden xl:flex items-center gap-1">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
 
-            {isLoading ? (
-              <div className="w-8 h-8 bg-surface rounded-full animate-pulse" />
-            ) : user ? (
-              <ProfileDropdown locale={locale} />
-            ) : (
-              <>
-                <Link
-                  href={`/${locale}/signin`}
-                  className={`border border-border text-text px-4 py-2 rounded-full hover:bg-surface font-medium transition-all min-h-[44px] flex items-center text-sm ${
-                    overMedia ? 'hover:border-ink-on-media' : 'hover:border-primary'
-                  }`}
-                >
-                  {t('sign_in')}
-                </Link>
-                <div className="h-6 w-px bg-border" />
-                <Link
-                  href={`/${locale}/register`}
-                  className="bg-primary text-primaryText px-5 py-2 rounded-full hover:bg-secondary transition-all font-medium min-h-[44px] flex items-center shadow-(--ibean-shadow-warm-sm) text-sm"
-                >
-                  {t('get_started')}
-                </Link>
-              </>
-            )}
+              {/*
+                The radius here reads from the button token rather than a
+                `rounded-full` utility, so these two follow whatever the token
+                settles on instead of pinning themselves to a pill.
+              */}
+              {isLoading ? (
+                <div className="w-8 h-8 bg-surface rounded-full animate-pulse ml-1" />
+              ) : user ? (
+                <div className="ml-1">
+                  <ProfileDropdown locale={locale} />
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href={`/${locale}/signin`}
+                    className="ml-1 border border-border text-text px-4 rounded-(--btn-radius) hover:bg-surface hover:border-ink-on-media font-medium transition-all h-10 flex items-center whitespace-nowrap text-sm"
+                  >
+                    {t('sign_in')}
+                  </Link>
+                  <Link
+                    href={`/${locale}/register`}
+                    className="bg-primary text-primaryText px-5 rounded-(--btn-radius) hover:bg-secondary transition-all font-medium h-10 flex items-center whitespace-nowrap shadow-(--ibean-shadow-warm-sm) text-sm"
+                  >
+                    {t('get_started')}
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

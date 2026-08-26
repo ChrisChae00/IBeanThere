@@ -373,6 +373,8 @@
     --color-background: transparent;
     --color-surface: color-mix(in srgb, var(--ink-on-media) 14%, transparent);
     --color-border: color-mix(in srgb, var(--ink-on-media) 32%, transparent);
+    /* The brand hue is invisible against the scrim; the light ink is not. */
+    --nav-hover-fill: color-mix(in srgb, var(--ink-on-media) 16%, transparent);
   }
 
   /*
@@ -400,15 +402,70 @@
     than through it, and the blur is masked on the same curve so it does not leave
     a hard edge across the photograph.
   */
+  /*
+    One falloff, not two. This used to fade in the background AND again in the
+    mask, on different curves; where the two knees landed the eye read a line
+    across the photograph. The fill is flat now and the mask alone shapes it, so
+    there is a single curve to be smooth - and the blur, which the mask also
+    feathers, falls off on exactly the same one.
+
+    The stops trace a smoothstep rather than a straight ramp. A linear fade over
+    this distance changes slope abruptly at every stop, and those slope changes
+    are what show up as banding once the bar is over a light page rather than a
+    photograph.
+  */
   .nav-scrim {
-    background: linear-gradient(
-      to bottom,
-      rgb(0 0 0 / 0.65),
-      rgb(0 0 0 / 0.55) 57%,
-      transparent
-    );
+    background: rgb(0 0 0 / 0.66);
     backdrop-filter: blur(3px);
-    mask-image: linear-gradient(to bottom, black 45%, transparent);
+    mask-image: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0%,
+      rgb(0 0 0 / 1) 40%,
+      rgb(0 0 0 / 0.94) 50%,
+      rgb(0 0 0 / 0.82) 58%,
+      rgb(0 0 0 / 0.65) 66%,
+      rgb(0 0 0 / 0.46) 74%,
+      rgb(0 0 0 / 0.29) 82%,
+      rgb(0 0 0 / 0.15) 89%,
+      rgb(0 0 0 / 0.06) 95%,
+      transparent 100%
+    );
+  }
+
+  /*
+    Nav hover. A filled pill rather than a brightening label, so the pointer's
+    position is read as an object under it instead of a change of shade.
+
+    The glow is the fill repeated as a zero-offset shadow: same colour, spread
+    outward, which bleeds the pill's edge instead of drawing one. Deliberately
+    not a border - a crisp outline snapping in under the cursor is the thing
+    this replaces.
+  */
+  /*
+    No transition in either direction. Any duration at all turns a fast sweep
+    along the row into a trail of half-faded pills that arrive after the cursor
+    has gone; instant in and instant out is what makes the pill feel stuck to
+    the pointer rather than chasing it.
+
+    Stated rather than omitted: every button and anchor already carries a 200ms
+    transition from the base layer, and this class has to turn it off.
+  */
+  .nav-pill {
+    border-radius: var(--radius-pill);
+    transition: none;
+  }
+
+  /*
+    The brand tint is the fallback rather than a declaration on `.nav-pill`: an
+    element's own custom property beats one inherited from an ancestor, so
+    setting it here would win over `.nav-over-media` and put an invisible brown
+    glow on the photo.
+  */
+  .nav-pill:hover,
+  .nav-pill[data-popup-open] {
+    background: var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
+    box-shadow: 0 0 12px 4px
+      var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
   }
 
   .motion-fade-in {
