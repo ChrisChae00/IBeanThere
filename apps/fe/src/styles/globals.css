@@ -592,3 +592,136 @@
   font-family: 'Playfair Display', Georgia, serif !important;
 }
 
+
+/*
+  Landing page.
+
+  Everything is prefixed `landing-`: these are the broadsheet's own type scales
+  and entrances, and nothing outside the landing should pick them up by accident.
+*/
+@layer components {
+  /*
+    Load-triggered entrances, done in CSS rather than in JS.
+
+    Anything above the fold must not park itself out of sight in a style the
+    HTML ships, because then the copy is invisible until the motion bundle
+    parses and hydrates -- a blank page on a cold load. A stylesheet is
+    render-blocking, so a CSS animation's from-state and its run both happen on
+    the first paint, with no JS involved and nothing to wait for.
+
+    View-triggered entrances still belong to JS: an element below the fold that
+    is invisible before hydration is invisible to the reader anyway.
+  */
+  @keyframes landingRise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes landingWordRise {
+    from { transform: translateY(110%); }
+    to { transform: none; }
+  }
+
+  .landing-rise {
+    animation: landingRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--landing-delay, 0s);
+  }
+
+  /*
+    Each word rides in its own clipping row, so it rises out of the line instead
+    of fading in place. `both` holds the from-state before the delay elapses,
+    which is what makes the stagger read as type being set.
+  */
+  /*
+    The row clips the word on its way up, so it has to be bigger than the word's
+    own box in every direction the glyphs reach past it.
+
+    Vertically: at `line-height: 0.88` the tail of a `y` or a `p` falls outside
+    the line box. Horizontally: a display serif's terminals overhang their
+    advance width, so the last letter of a word -- the `r` of "your" is the one
+    that shows it -- loses its serif to the clip.
+
+    Each padding is cancelled by an equal negative margin, so none of it reaches
+    the layout: the words still set on the same measure and the same baseline.
+  */
+  .landing-word-row {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.26em;
+    margin-bottom: -0.26em;
+    padding-inline: 0.09em;
+    margin-inline: -0.09em;
+  }
+
+  .landing-word {
+    display: inline-block;
+    animation: landingWordRise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--landing-delay, 0s);
+  }
+
+  /*
+    View-triggered word rise. The animation is declared as usual but held at its
+    first frame until an observer adds `.is-in`; `animation-play-state` is what
+    lets the trigger be a class instead of a second set of keyframes.
+
+    Only for headlines below the fold. Above the fold the animation must run on
+    load -- a paused one there is the blank-page problem again, since the
+    observer needs JS.
+  */
+  .landing-words-view .landing-word { animation-play-state: paused; }
+  .landing-words-view.is-in .landing-word { animation-play-state: running; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-rise,
+    .landing-word { animation: none; }
+    .landing-words-view .landing-word { animation-play-state: running; }
+  }
+
+  /*
+    Broadsheet display type. The project's display face at newspaper scale:
+    tight leading and negative tracking are what stop 8rem type from reading as
+    a slide deck. `text-wrap: balance` keeps a two-line headline from leaving
+    one orphaned word on line two.
+  */
+  .landing-display {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  /*
+    Micro-label. Every piece of chrome on the press variant is one of these:
+    the page has no buttons-that-look-like-buttons outside the primary action,
+    so the labels have to carry the structure.
+  */
+  .landing-micro {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  /*
+    Marquee. Duration scales with content width via `--landing-marquee-duration` so
+    a longer strip does not run faster.
+  */
+  .landing-marquee {
+    display: flex;
+    width: max-content;
+    animation: landingMarquee var(--landing-marquee-duration, 40s) linear infinite;
+  }
+
+  @keyframes landingMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-marquee { animation: none; }
+  }
+}

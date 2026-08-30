@@ -12,6 +12,7 @@ from typing import Optional, List
 from decimal import Decimal
 import re
 import math
+import time
 from app.models.cafe import (
     CafeSearchParams,
     CafeSearchResponse,
@@ -28,7 +29,7 @@ from app.core.permissions import Permission, require_permission
 from app.core.fraud_detection import check_location_consistency
 from app.utils.timezone import get_timezone_from_coords
 from supabase import Client
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dateutil import parser as date_parser
 import logging
 
@@ -439,6 +440,102 @@ async def get_pending_cafes_public(
 
     except Exception as e:
         logger.exception("Error getting pending cafes")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+# ---------------------------------------------------------------------------
+# Public aggregate stats.
+#
+# Declared before `/{cafe_identifier}` on purpose: a path parameter registered
+# first would swallow `/stats` as a cafe slug.
+#
+# Everything here is a count. No ids, no coordinates, no names, no user data --
+# nothing that is not already derivable from the public `/search` and
+# `/pending` endpoints. The series is bucketed by ISO week so a single cafe's
+# registration time cannot be read back out of it.
+# ---------------------------------------------------------------------------
+
+# One process-wide entry, so a scraped landing page costs the database at most
+# twelve reads an hour no matter how much traffic hits it. The global 60/minute
+# SlowAPI limit in main.py is the second layer.
+_STATS_TTL_SECONDS = 300
+_stats_cache: dict = {"expires_at": 0.0, "payload": None}
+
+
+def _weekly_cumulative(created_at_values: List[str], weeks: int = 26) -> List[dict]:
+    """Cumulative cafe count at the end of each of the last `weeks` ISO weeks."""
+    timestamps = []
+    for raw in created_at_values:
+        if not raw:
+            continue
+        try:
+            parsed = date_parser.parse(raw)
+        except (ValueError, TypeError, OverflowError):
+            continue
+        # A naive timestamp compares as smaller than every aware one and would
+        # silently land in the first bucket.
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        timestamps.append(parsed)
+
+    if not timestamps:
+        return []
+
+    timestamps.sort()
+    now = datetime.now(timezone.utc)
+    # Monday 00:00 UTC of the current week.
+    week_start = (now - timedelta(days=now.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    series = []
+    index = 0
+    total = 0
+    for offset in range(weeks - 1, -1, -1):
+        bucket_start = week_start - timedelta(weeks=offset)
+        # Everything registered before this bucket closes is in its total, so
+        # the line only ever climbs -- it is a running total, not a per-week bar.
+        bucket_end = bucket_start + timedelta(weeks=1)
+        while index < len(timestamps) and timestamps[index] < bucket_end:
+            index += 1
+            total += 1
+        series.append({"week": bucket_start.date().isoformat(), "cumulative": total})
+
+    return series
+
+
+@router.get("/stats")
+async def get_cafe_stats(supabase: Client = Depends(get_supabase_client)):
+    """
+    Aggregate, unauthenticated counts for the landing page.
+
+    Returns totals plus a 26-week cumulative registration series.
+    """
+    now = time.monotonic()
+    if _stats_cache["payload"] is not None and now < _stats_cache["expires_at"]:
+        return _stats_cache["payload"]
+
+    try:
+        cafes = supabase.table("cafes").select("created_at, status").execute().data or []
+        drops = supabase.table("cafe_bean_drops").select("id", count="exact").limit(1).execute()
+
+        payload = {
+            "total_cafes": len(cafes),
+            "verified_cafes": sum(1 for c in cafes if c.get("status") == "verified"),
+            "beans_dropped": drops.count or 0,
+            "series": _weekly_cumulative([c.get("created_at") for c in cafes]),
+        }
+
+        _stats_cache["payload"] = payload
+        _stats_cache["expires_at"] = now + _STATS_TTL_SECONDS
+        return payload
+    except Exception:
+        logger.exception("Error building cafe stats")
+        # A stale payload beats an error banner on the landing page.
+        if _stats_cache["payload"] is not None:
+            return _stats_cache["payload"]
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
