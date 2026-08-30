@@ -94,7 +94,8 @@
   step deeper again, to #53683e.
 */
 [data-theme='matchaLatte'] {
-  --c-brand: #53683e;
+  --c-brand: #85a035;
+  /*#85a035 / #53683e */
   --c-brand-soft: #789048;
   --c-accent: #b9cc8a;
   --c-page: #e0e8d0;
