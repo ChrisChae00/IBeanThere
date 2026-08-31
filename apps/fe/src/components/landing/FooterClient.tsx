@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ExternalLink, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { useDismissable } from './useDismissable';
 
-export default function FooterClient() {
+/*
+  Plain text, like the three links beside it. It was a circular icon button, then briefly
+  a label with a lucide share mark -- but lucide's is a node graph, not the glyph either
+  platform uses for sharing, so it read as a decoration on a row that has none. Four
+  labels of the same weight is the whole treatment.
+*/
+export function FooterShareButton() {
   const t = useTranslations('footer');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleShare = async () => {
-    const shareData = {
-      title: 'ibeanthere',
-      url: 'https://ibeanthere.app',
-    };
+    const shareData = { title: 'ibeanthere', url: 'https://ibeanthere.app' };
 
     if (navigator.share) {
       try {
@@ -32,101 +34,81 @@ export default function FooterClient() {
     }
   };
 
-  useEffect(() => {
-    if (!isPopoverOpen) return;
+  return (
+    <button
+      onClick={handleShare}
+      className="text-ink-on-brand/70 hover:text-ink-on-brand transition-colors whitespace-nowrap"
+    >
+      {t('share')}
+    </button>
+  );
+}
 
-    const handleOutside = (e: PointerEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setIsPopoverOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsPopoverOpen(false);
-    };
-
-    document.addEventListener('pointerdown', handleOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('pointerdown', handleOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isPopoverOpen]);
+export function FooterHomescreenLink() {
+  const t = useTranslations('footer');
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useDismissable(isOpen, ref, () => setIsOpen(false));
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className="relative self-start sm:self-auto" ref={ref}>
       <button
-        onClick={handleShare}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-primaryText/10 text-primaryText hover:bg-primaryText/20 transition-colors"
-        aria-label="Share ibeanthere"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+        className="text-ink-on-brand/70 underline underline-offset-2 hover:text-ink-on-brand transition-colors"
       >
-        <ExternalLink size={16} />
+        {t('homescreen_link')}
       </button>
 
-      <div className="relative" ref={popoverRef}>
-        <button
-          onClick={() => setIsPopoverOpen((v) => !v)}
-          aria-expanded={isPopoverOpen}
-          className="text-xs text-primaryText/60 underline underline-offset-2 hover:text-primaryText transition-colors"
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-labelledby="homescreen-popover-title"
+          className="absolute bottom-full left-0 mb-3 w-72 rounded-card border border-edge-default bg-surface-raised text-ink-primary shadow-(--ibean-shadow-warm-md) z-50 sm:left-auto sm:right-0"
         >
-          {t('homescreen_link')}
-        </button>
+          <div className="p-4">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <p id="homescreen-popover-title" className="font-semibold text-sm">
+                  {t('homescreen_modal_title')}
+                </p>
+                <p className="text-xs text-ink-secondary mt-0.5">
+                  {t('homescreen_modal_description')}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-(--btn-radius) bg-surface-elevated hover:bg-surface-hover transition-colors"
+                aria-label="Close"
+              >
+                <X size={12} />
+              </button>
+            </div>
 
-        {isPopoverOpen && (
-          <div
-            role="dialog"
-            aria-labelledby="homescreen-popover-title"
-            className="absolute bottom-full right-0 mb-3 w-72 rounded-2xl border border-border/60 bg-cardBackground shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50"
-          >
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div>
-                  <p id="homescreen-popover-title" className="font-semibold text-sm text-cardText">
-                    {t('homescreen_modal_title')}
-                  </p>
-                  <p className="text-xs text-cardTextSecondary mt-0.5">
-                    {t('homescreen_modal_description')}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsPopoverOpen(false)}
-                  className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-surface text-cardText hover:bg-surface/80 transition-colors"
-                  aria-label="Close"
-                >
-                  <X size={12} />
-                </button>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-semibold mb-1">{t('homescreen_ios_title')}</p>
+                <ol className="list-decimal pl-4 space-y-0.5 text-xs text-ink-secondary">
+                  <li>{t('homescreen_ios_step1')}</li>
+                  <li>{t('homescreen_ios_step2')}</li>
+                  <li>{t('homescreen_ios_step3')}</li>
+                </ol>
               </div>
 
-              <div className="space-y-3">
-                {/* iOS Safari */}
-                <div>
-                  <p className="text-xs font-semibold text-cardText mb-1">
-                    {t('homescreen_ios_title')}
-                  </p>
-                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-cardTextSecondary">
-                    <li>{t('homescreen_ios_step1')}</li>
-                    <li>{t('homescreen_ios_step2')}</li>
-                    <li>{t('homescreen_ios_step3')}</li>
-                  </ol>
-                </div>
+              <div className="border-t border-edge-subtle" />
 
-                <div className="border-t border-border/40" />
-
-                {/* Android Chrome */}
-                <div>
-                  <p className="text-xs font-semibold text-cardText mb-1">
-                    {t('homescreen_android_title')}
-                  </p>
-                  <ol className="list-decimal pl-4 space-y-0.5 text-xs text-cardTextSecondary">
-                    <li>{t('homescreen_android_step1')}</li>
-                    <li>{t('homescreen_android_step2')}</li>
-                    <li>{t('homescreen_android_step3')}</li>
-                  </ol>
-                </div>
+              <div>
+                <p className="text-xs font-semibold mb-1">{t('homescreen_android_title')}</p>
+                <ol className="list-decimal pl-4 space-y-0.5 text-xs text-ink-secondary">
+                  <li>{t('homescreen_android_step1')}</li>
+                  <li>{t('homescreen_android_step2')}</li>
+                  <li>{t('homescreen_android_step3')}</li>
+                </ol>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

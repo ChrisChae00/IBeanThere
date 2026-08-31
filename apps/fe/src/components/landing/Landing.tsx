@@ -63,6 +63,7 @@ export type LandingMessages = {
   closeLine1: string;
   closeLine2: string;
   closeNote: string;
+  closeNoteSource: string;
   closeCta: string;
   closeCtaLoggedIn: string;
   marquee: string;
@@ -622,9 +623,10 @@ function Personas({ messages }: { messages: LandingMessages }) {
       </Reveal>
 
       {/*
-        No cards, no icons, no hover-scale. Three columns of type separated by
-        rules — on this page a bordered box would be the one piece of chrome
-        that broke the metaphor.
+        No cards, no bordered box, no hover-scale on the column itself. Three
+        columns of type separated by rules; the interaction lives inside each
+        column rather than on it, so the grid never grows a shadow or a
+        background the way a card would.
       */}
       <div className="mt-px grid grid-cols-1 gap-px bg-edge-subtle md:grid-cols-3">
         {messages.personas.map((persona, index) => {
@@ -632,18 +634,32 @@ function Personas({ messages }: { messages: LandingMessages }) {
           return (
           <Reveal key={persona.title} delay={index * 0.08} className="group bg-surface-page py-10 md:px-8">
             {/*
-              `strokeWidth` 1, not lucide's 2: at the weight it ships with, the
-              glyph reads as a UI icon sitting on an editorial page. At 1 it is
-              the same hairline as the rules around it and belongs to the page.
+              The mark lifts and the rule under the heading grows in from the left --
+              a print convention (a byline mark stepping off the page) rather than a
+              UI one, which is why it is a translate and a width, never a scale. The
+              column itself does not move: only the two elements small enough that
+              their own motion doesn't read as the whole block shifting.
+
+              Both the mark and the heading go to primary ink on hover, not to brand.
+              Dark Roast sets `--c-brand` and `--c-ink-soft` to the same #d4c7b8, so a
+              brand hover over secondary ink was a no-op in that theme -- the column
+              simply did not respond. The muted/primary gap is guaranteed in all four
+              themes, since that is the gap the AA work was built on. The new rule
+              under the heading is the one element allowed to use `--brand` instead,
+              because as a fill rather than text it never depends on that gap.
             */}
             <Mark
               aria-hidden
               strokeWidth={1}
-              className="mb-6 h-8 w-8 text-ink-secondary transition-colors duration-300 group-hover:text-brand"
+              className="mb-6 h-8 w-8 text-ink-secondary transition-[color,transform] duration-300 group-hover:-translate-y-1 group-hover:text-ink-primary"
             />
-            <h3 className="landing-display text-[clamp(1.75rem,3vw,2.5rem)] transition-colors duration-300 group-hover:text-brand break-keep">
+            <h3 className="landing-display text-[clamp(1.75rem,3vw,2.5rem)] transition-colors duration-300 group-hover:text-ink-primary break-keep">
               {persona.title}
             </h3>
+            <span
+              aria-hidden
+              className="mt-3 block h-px w-8 bg-brand transition-[width] duration-300 ease-out group-hover:w-16"
+            />
             <p className="mt-4 text-base leading-relaxed text-ink-secondary break-keep">
               {persona.description}
             </p>
@@ -685,8 +701,18 @@ function ClosingAction({
           >
             {primaryLabel}
           </a>
-          <p className="max-w-md text-sm italic leading-relaxed text-ink-secondary break-keep">
+          {/*
+            The attribution floats rather than sitting in the run of text. A right float
+            placed after the quote lands flush right on whatever line the quote ends on,
+            and drops to its own right-aligned line only when that line has no room left
+            -- which is the reading either way: the quote, then its source at the far
+            end. `flow-root` is what keeps the float inside the paragraph's height.
+          */}
+          <p className="flow-root max-w-xl text-sm italic leading-relaxed text-ink-secondary break-keep">
             {messages.closeNote}
+            <span className="float-right ml-4 whitespace-nowrap not-italic">
+              {messages.closeNoteSource}
+            </span>
           </p>
         </Reveal>
       </div>

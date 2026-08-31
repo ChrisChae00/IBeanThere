@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
+import { useDismissable } from './useDismissable';
 
 interface FooterContactButtonProps {
   label: string;
@@ -12,33 +13,14 @@ export default function FooterContactButton({ label }: FooterContactButtonProps)
   const t = useTranslations('footer');
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleOutside = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-
-    document.addEventListener('pointerdown', handleOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('pointerdown', handleOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen]);
+  useDismissable(isOpen, ref, () => setIsOpen(false));
 
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
-        className="text-primaryText/70 hover:text-primaryText transition-colors whitespace-nowrap"
+        className="text-ink-on-brand/70 hover:text-ink-on-brand transition-colors whitespace-nowrap"
       >
         {label}
       </button>
@@ -47,16 +29,16 @@ export default function FooterContactButton({ label }: FooterContactButtonProps)
         <div
           role="dialog"
           aria-labelledby="contact-popover-title"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 rounded-2xl border border-border/60 bg-cardBackground shadow-[0_16px_48px_rgba(26,18,11,0.2)] z-50"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 rounded-card border border-edge-default bg-surface-raised text-ink-primary shadow-(--ibean-shadow-warm-md) z-50"
         >
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <p id="contact-popover-title" className="font-semibold text-sm text-cardText">
+              <p id="contact-popover-title" className="font-semibold text-sm">
                 {label}
               </p>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-surface text-cardText hover:bg-surface/80 transition-colors"
+                className="w-6 h-6 flex items-center justify-center rounded-(--btn-radius) bg-surface-elevated hover:bg-surface-hover transition-colors"
                 aria-label="Close"
               >
                 <X size={12} />
@@ -64,25 +46,21 @@ export default function FooterContactButton({ label }: FooterContactButtonProps)
             </div>
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-xs font-semibold text-cardText mb-1">
-                  {t('contact_email_label')}
-                </p>
+                <p className="text-xs font-semibold mb-1">{t('contact_email_label')}</p>
                 <a
                   href="mailto:ibeanthere.app@gmail.com"
-                  className="text-primary hover:underline break-all"
+                  className="text-brand hover:underline break-all"
                 >
                   ibeanthere.app@gmail.com
                 </a>
               </div>
               <div>
-                <p className="text-xs font-semibold text-cardText mb-1">
-                  {t('contact_instagram_label')}
-                </p>
+                <p className="text-xs font-semibold mb-1">{t('contact_instagram_label')}</p>
                 <a
                   href="https://www.instagram.com/ibeanthere_official?igsh=d25qMGJ6Y2cyNDBl&utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+                  className="text-brand hover:underline"
                 >
                   @ibeanthere_official
                 </a>

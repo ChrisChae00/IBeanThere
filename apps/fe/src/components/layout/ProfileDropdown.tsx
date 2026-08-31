@@ -3,13 +3,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { FileText, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { Avatar } from '@/components/ui';
+import { Avatar, CoffeeBean } from '@/shared/ui';
 
 interface ProfileDropdownProps {
   locale: string;
 }
+
+/*
+  Panel and rows come from `.menu-panel` / `.menu-item` / `.menu-mark` in
+  globals.css, which every dropdown in the app shares. Only what is specific to
+  this menu lives here: which mark each row carries, and how that mark answers a
+  hover. The movement is chosen from what the row does rather than from one shared
+  effect -- the gear turns, the exit arrow steps toward the door, the rest come
+  forward slightly -- and `group` is what lets the mark hear a hover that lands
+  anywhere on its row.
+*/
+const ITEM = 'group menu-item';
 
 export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
   const t = useTranslations('navigation');
@@ -41,7 +53,10 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
 
   if (!user) return null;
 
-  const displayName = profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+  const displayName =
+    profile?.display_name || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+
+  const close = () => setIsOpen(false);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -50,12 +65,9 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="nav-pill flex items-center space-x-2 px-2 h-10"
         aria-label="Profile menu"
+        aria-expanded={isOpen}
       >
-        <Avatar
-          src={profile?.avatar_url || undefined}
-          alt={displayName}
-          size="sm"
-        />
+        <Avatar src={profile?.avatar_url || undefined} alt={displayName} size="sm" />
         {/*
           Capped and truncated: this sits in a header row whose width is already
           accounted for, and a long display name is the one thing in it that can
@@ -64,94 +76,92 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
         <span className="hidden md:block text-text font-medium max-w-[9rem] truncate">
           {displayName}
         </span>
-        <svg 
-          className={`w-4 h-4 text-ink-secondary transition-transform ${
-            isOpen ? 'rotate-180' : ''
-          }`} 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className={`w-4 h-4 text-ink-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
-          {/* Dropdown menu */}
+      {/* Dropdown menu */}
       {isOpen && (
-        <div className="nav-opaque absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
-          <div className="py-1">
-            {isAdmin && (
-              <Link
-                href={`/${locale}/admin/dashboard`}
-                className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors font-semibold"
-                onClick={() => setIsOpen(false)}
-              >
-                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+        /*
+          `nav-opaque` stays even though every colour below is a semantic token that
+          the over-media swap never touches: `Avatar` and anything else dropped in
+          later may still read the legacy aliases, and this is the one class that
+          hands them back the theme's own vocabulary.
+        */
+        <div className="menu-panel nav-opaque absolute right-0 mt-2 w-64 z-50 motion-slide-up">
+          {/*
+            Who you are signed in as. The trigger truncates the name to fit the
+            header; this is where it is allowed the room to be read, next to the
+            address that distinguishes two accounts with the same display name.
+          */}
+          <div className="flex items-center gap-3 rounded-(--radius-control) px-3 py-2.5">
+            <Avatar src={profile?.avatar_url || undefined} alt={displayName} size="sm" />
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-medium text-ink-primary">{displayName}</span>
+              <span className="truncate text-xs text-ink-secondary">{user.email}</span>
+            </div>
+          </div>
+
+          <div className="my-1 border-t border-edge-subtle" />
+
+          {isAdmin && (
+            <>
+              <Link href={`/${locale}/admin/dashboard`} className={`${ITEM} font-semibold`} onClick={close}>
+                <ShieldCheck className="menu-mark group-hover:scale-110" />
                 {t('admin_dashboard')}
               </Link>
-            )}
-            {isAdmin && (
-              <div className="border-t border-border my-1"></div>
-            )}
-            <Link
-              href={`/${locale}/profile`}
-              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {t('profile')}
-            </Link>
-            
-            <Link
-              href={`/${locale}/my-logs`}
-              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              {tLog('my_logs')}
-            </Link>
-            
-            <Link
-              href={`/${locale}/my-beans`}
-              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {t('my_beans')}
-            </Link>
-            
-            <Link
-              href={`/${locale}/settings`}
-              className="flex items-center px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {t('settings')}
-            </Link>
-            
-            <div className="border-t border-border my-1"></div>
-            
-            <button
-              onClick={handleSignOut}
-              className="flex items-center w-full px-4 py-2 text-sm text-text hover:bg-surface transition-colors"
-            >
-              <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              {tAuth('logout')}
-            </button>
-          </div>
+              <div className="my-1 border-t border-edge-subtle" />
+            </>
+          )}
+
+          <Link href={`/${locale}/profile`} className={ITEM} onClick={close}>
+            <User className="menu-mark group-hover:scale-110" />
+            {t('profile')}
+          </Link>
+
+          <Link href={`/${locale}/my-logs`} className={ITEM} onClick={close}>
+            <FileText className="menu-mark group-hover:scale-110" />
+            {tLog('my_logs')}
+          </Link>
+
+          {/*
+            The app's own bean, not a lucide glyph. What used to sit here was a
+            wireframe globe -- the closest thing in the icon set to nothing in
+            particular -- for the page that holds the beans you have dropped.
+
+            It also sits a notch larger than the lucide marks. Those are line
+            drawings that fill their box; the bean is a solid shape with air around
+            it inside the same square, so at a matched box it reads smaller than its
+            neighbours. 1.1rem is the size it was already reaching on hover, and the
+            hover now takes the same step again from there.
+          */}
+          <Link href={`/${locale}/my-beans`} className={ITEM} onClick={close}>
+            <CoffeeBean size="inherit" className="menu-mark h-[1.1rem] w-[1.1rem] group-hover:scale-110" />
+            {t('my_beans')}
+          </Link>
+
+          <Link href={`/${locale}/settings`} className={ITEM} onClick={close}>
+            <Settings className="menu-mark group-hover:rotate-45" />
+            {t('settings')}
+          </Link>
+
+          <div className="my-1 border-t border-edge-subtle" />
+
+          {/*
+            Red on hover only, which is what the mobile menu's logout already does:
+            at rest it is one row among several, and the colour arrives at the
+            moment the row is actually about to be pressed.
+          */}
+          <button onClick={handleSignOut} className={`${ITEM} hover:text-state-danger`}>
+            <LogOut className="menu-mark group-hover:translate-x-1 group-hover:text-state-danger" />
+            {tAuth('logout')}
+          </button>
         </div>
       )}
     </div>

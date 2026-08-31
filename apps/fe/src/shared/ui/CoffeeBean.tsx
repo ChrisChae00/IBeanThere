@@ -1,5 +1,9 @@
 interface CoffeeBeanProps {
-  size?: 'sm' | 'md' | 'lg';
+  /*
+    `inherit` emits no size class, so the caller's own `w-`/`h-` governs. The menu
+    rows need it: their mark is sized off the row, not off this scale.
+  */
+  size?: 'inherit' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -8,6 +12,7 @@ export default function CoffeeBean({
   className = '' 
 }: CoffeeBeanProps) {
   const sizeClasses = {
+    inherit: '',
     sm: 'w-6 h-6',
     md: 'w-8 h-8', 
     lg: 'w-12 h-12'
@@ -15,8 +20,8 @@ export default function CoffeeBean({
 
   return (
     <svg 
-      width={size === 'sm' ? 24 : size === 'md' ? 32 : 48}
-      height={size === 'sm' ? 24 : size === 'md' ? 32 : 48}
+      width={size === 'inherit' ? 16 : size === 'sm' ? 24 : size === 'md' ? 32 : 48}
+      height={size === 'inherit' ? 16 : size === 'sm' ? 24 : size === 'md' ? 32 : 48}
       viewBox="0 0 64 64" 
       className={`${sizeClasses[size]} ${className}`}
       fill="currentColor"

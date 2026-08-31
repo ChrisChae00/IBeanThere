@@ -125,6 +125,24 @@
   --card-edge: var(--edge-default);
   --card-surface: var(--surface-raised);
 
+  /* ---- Layer 3: navigation stacking ---- */
+  /*
+    The header's own stack, written down because it spans three stacking contexts and
+    two portals, which is how it went wrong: the mobile drawer portals to `<body>` at
+    9999 and the switcher menus portal to `<body>` at 50, so a menu opened from inside
+    the drawer rendered behind the drawer that owns it.
+
+    The rule is that a popup outranks whatever opened it. These five are the only
+    layers in the nav; the rest of the app has its own numbers (modals at 1000-2000,
+    map chrome in the hundreds) and is deliberately left alone -- renumbering the nav
+    down into that range is what would start the next collision.
+  */
+  --z-nav: 50;
+  --z-nav-progress: 60;
+  --z-nav-scrim: 9998;
+  --z-nav-drawer: 9999;
+  --z-nav-popover: 10000;
+
   --input-height: 48px;
   --input-radius: var(--radius-control);
   --input-edge: var(--edge-default);

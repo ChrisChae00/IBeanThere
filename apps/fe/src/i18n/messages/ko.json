@@ -28,7 +28,6 @@
       "help": "도움말",
       "help_item_1": "자주 묻는 질문",
       "help_item_2": "문의하기",
-      "my_coffee_journey": "내 커피 여정",
       "coffee_logs_item_1": "내 기록",
       "coffee_logs_item_1_description": "커피 로그 기록 보기 및 관리",
       "coffee_logs_item_2": "통계",
@@ -47,7 +46,7 @@
       "settings": "설정",
       "get_started": "시작하기",
       "admin_dashboard": "관리자 대시보드",
-      "learn": "커피 가이드",
+      "learn": "커피 로드맵",
       "theme": "테마",
       "language": "언어"
     },
@@ -131,75 +130,37 @@
       }
     },
     "landing": {
+      "hero_line1": "좋은 카페는",
+      "hero_line2": "처음엔 다",
+      "hero_line3": "누군가의 비밀이었다",
+      "hero_lede": "<name>ibeanthere</name>는 커피가 정말 좋은 곳을 담은 지도입니다.",
+      "hero_cta": "첫 빈 드롭하기",
+      "hero_cta_logged_in": "빈 드롭하기",
+      "hero_cta_secondary": "지도 열기",
+      "index_title": "빈 하나가 자라는 과정",
+      "index_note": "다섯 단계, 카페 한 곳씩 — 콩은 당신이 계속 찾아가는 곳에서만 자랍니다.",
+      "register_title": "아직 지도에 없는 곳을 알고 계신가요?",
+      "register_lede": "직접 등록하세요. 링크 하나와 1분이면 됩니다.",
+      "register_cta": "카페 등록하기",
+      "register_note_1": "링크 하나면 끝",
+      "register_note_1_body": "구글 지도 링크만 붙여넣으세요. 이름과 주소, 영업시간, 좌표는 알아서 채워집니다.",
+      "register_note_2": "직접 가야 등록됩니다",
+      "register_note_2_body": "등록은 카페에서 50m 안에 있을 때만 됩니다. 번거로울 수 있지만, 우리 지도에 신뢰를 더하는 규칙입니다.",
+      "register_note_3": "사진은 다섯 장까지",
+      "register_note_3_body": "가게 분위기, 커피 한 잔, 앉았던 자리. 다음에 찾아올 사람은 문을 열기 전에 이미 그곳을 경험할 수 있습니다.",
+      "personas_title": "도시를 읽는 세 가지 방식",
+      "personas_note": "당신은 어느 쪽에 가까운가요?",
+      "close_line1": "첫 기록을",
+      "close_line2": "남겨보세요",
+      "close_note": "“커피 한 잔에는 빈 60알이 들어가고, 그것들은 나에게 60가지 좋은 생각을 준다.”",
+      "close_note_source": "— 베토벤",
+      "close_cta": "시작하기",
+      "close_cta_logged_in": "빈 드롭하기",
+      "marquee": "서드웨이브 · 로스터리 · 늦게까지 · 조용한 자리 · 싱글 오리진 · 핸드드립 · 동네 단골 · 숨은 곳",
       "stats": {
-        "eyebrow": "지금까지의 지도",
-        "title": "지도는 줄어들지 않습니다",
-        "subtitle": "여기 있는 카페는 전부 누군가 그 앞에 서서 등록한 곳입니다. 긁어오지도, 사오지도 않았습니다.",
         "cafes": "지도 위의 카페",
-        "verified": "커뮤니티 검증",
-        "beans": "드랍된 빈",
         "chart_label": "최근 26주 누적 카페 등록 수",
         "chart_caption": "주단위 누적 등록 수. 한 칸씩 오를 때마다 누군가 그 문을 열고 들어갔다는 뜻입니다."
-      },
-      "press": {
-        "hero_line1": "좋은 카페는",
-        "hero_line2": "처음엔 다",
-        "hero_line3": "누군가의 비밀이었다",
-        "hero_lede": "<name>ibeanthere</name>는 커피가 정말 좋은 곳을 담은 지도입니다.",
-        "hero_cta": "첫 빈 드롭하기",
-        "hero_cta_logged_in": "빈 드롭하기",
-        "hero_cta_secondary": "지도 열기",
-        "index_title": "빈 하나가 자라는 과정",
-        "index_note": "다섯 단계, 카페 한 곳씩 — 콩은 당신이 계속 찾아가는 곳에서만 자랍니다.",
-        "ledger_title": "장부",
-        "ledger_note": "무엇이 지도에 오를지 정하는 편집진은 없습니다. 누군가 문을 열고 들어갈 때 선이 움직입니다.",
-        "register_title": "아직 지도에 없는 곳을 알고 계신가요?",
-        "register_lede": "구글 지도 링크를 붙여넣으면 이름·주소·영업시간·좌표가 알아서 채워집니다. 조건은 하나, 50m 안에 있어야 합니다. 그 한 줄이 이 지도를 믿을 만하게 만듭니다.",
-        "register_lede_short": "직접 등록하세요. 링크 하나와 1분이면 됩니다.",
-        "register_cta": "카페 등록하기",
-        "register_note_1": "링크 하나, 타이핑 제로",
-        "register_note_1_body": "구글 지도 링크를 붙여넣으면 이름·주소·영업시간·좌표가 알아서 채워집니다.",
-        "register_note_2": "현장 50m 이내 위치 검증",
-        "register_note_2_body": "등록하는 순간 그 자리에 있어야 합니다. 그 한 줄이 이 지도를 믿을 만하게 만듭니다.",
-        "register_note_3": "한 곳당 사진 최대 5장",
-        "register_note_3_body": "공간, 카운터, 마음에 든 자리를 남겨주세요. 다음 사람은 알고 도착합니다.",
-        "personas_title": "도시를 읽는 세 가지 방식",
-        "personas_note": "하나만 고를 필요는 없습니다. 두 달쯤이면 대부분 셋 다가 됩니다.",
-        "close_line1": "첫 빈을",
-        "close_line2": "심어보세요",
-        "close_note": "“커피 한 잔에는 빈 60알이 들어가고, 그것들은 나에게 60가지 좋은 생각을 준다.” — 베토벤",
-        "close_cta": "시작하기",
-        "close_cta_logged_in": "빈 드롭하기",
-        "marquee": "서드웨이브 · 로스터리 · 늦게까지 · 조용한 자리 · 싱글 오리진 · 핸드드립 · 동네 단골 · 숨은 곳"
-      },
-      "hero": {
-        "title": "우리 동네 로컬 카페,<mobileBr></mobileBr> 콩 하나로 기록하다",
-        "subtitle": "나만의 최애 스팟을 심고,<mediumBr></mediumBr> 모두가 함께 만드는<mobileBr></mobileBr> 로컬 카페 지도를 경험하세요.",
-        "cta_primary": "여행 시작하기",
-        "cta_primary_logged_in": "콩 심기",
-        "cta_secondary": "카페 둘러보기",
-        "slide2_title": "콩이 자라는 걸 지켜봐요",
-        "slide2_subtitle": "카페를 방문하고 콩을 심어요. 5단계를 거쳐 성장하는 모습을 확인하세요",
-        "slide2_cta": "성장 과정 보기",
-        "slide3_title": "숨겨진 카페를 알고 있나요?",
-        "slide3_subtitle": "아직 지도에 없는 카페를 등록하고 커피 탐험가들과 공유하세요",
-        "slide3_cta": "카페 등록하기"
-      },
-      "features": {
-        "title": "완벽한 커피 여정의 동반자",
-        "subtitle": "당신의 커피 여정을 발견하고, 기록하고, 공유하는 데 필요한 모든 것",
-        "discover": {
-          "title": "숨은 명소 발견",
-          "description": "코지한 골목 카페부터 힙한 로스터리까지 내 주변 최고의 카페를 찾으세요."
-        },
-        "record": {
-          "title": "순간을 기록하기",
-          "description": "맛과 향, 그리고 사진을 남겨 나만의 커피 아카이브를 만드세요."
-        },
-        "share": {
-          "title": "함께 만드는 카페 지도",
-          "description": "당신의 최애 로컬 카페를 공유하여, 우리 모두를 위한 지도를 완성해주세요."
-        }
       },
       "beandrop_timeline": {
         "title": "콩을 심고, 자라는 걸 지켜봐요",
@@ -260,46 +221,27 @@
           "title": "큐레이터",
           "description": "경험을 엮어 컬렉션을 만들고, 다른 이들에게 최고의 길을 안내합니다."
         }
-      },
-      "cafe_register": {
-        "title": "커피 지도를 함께 만들어요",
-        "subtitle": "아직 지도에 없는 카페를 알고 있나요? 등록하고 전 세계 커피 애호가들이 숨겨진 보석을 발견하도록 도와주세요.",
-        "cta": "카페 등록하기",
-        "accordion": {
-          "auto_fill_title": "정보를 다 직접 입력해야 하나요?",
-          "auto_fill_desc": "Google Maps URL만 붙여넣으면 카페 이름, 주소, 전화번호, 웹사이트, 좌표, 영업시간이 자동으로 채워집니다. 클릭 한 번, 타이핑 없이.",
-          "verified_title": "위치 인증 기반 등록",
-          "verified_desc": "카페에서 50미터 이내에 있어야만 등록할 수 있습니다. 지도의 모든 카페가 실제로 방문한 진짜 장소임을 보장합니다.",
-          "photos_title": "사진 & 상세 정보 추가",
-          "photos_desc": "사진을 최대 5장 업로드하고 대표 이미지를 설정하세요. 영업시간, 웹사이트, 메모를 추가하면 다른 탐험가들에게 더 유용한 정보가 됩니다."
-        }
-      },
-      "cta": {
-        "title": "첫 번째 콩을 심을 준비가 되셨나요?",
-        "subtitle": "커피 여행을 기록하고 나만의 커피 숲이 자라는 것을 지켜보세요",
-        "button_primary": "시작하기",
-        "button_primary_logged_in": "콩 심기",
-        "disclaimer": "\"한잔의 커피를 만드는 60개의 원두는 나에게 60가지의 좋은 아이디어를 준다.\" - 베토벤"
       }
     },
     "footer": {
       "privacy_policy": "개인정보처리방침",
       "terms_of_service": "이용약관",
       "contact_us": "문의하기",
+      "share": "공유하기",
       "contact_email_label": "이메일",
       "contact_instagram_label": "인스타그램",
       "osm_attribution": "카페 데이터 일부는 OpenStreetMap contributors 제공",
-      "homescreen_link": "앱처럼 쉽게 들어오는 방법",
+      "homescreen_link": "앱처럼 한 번에 열기",
       "homescreen_modal_title": "홈 화면에 추가하기",
-      "homescreen_modal_description": "앱 설치 없이 홈 화면에 바로가기를 만들어 앱처럼 빠르게 접근하세요.",
-      "homescreen_ios_title": "iOS Safari",
-      "homescreen_ios_step1": "하단의 공유 버튼(□↑)을 탭하세요",
-      "homescreen_ios_step2": "'홈 화면에 추가'를 선택하세요",
-      "homescreen_ios_step3": "오른쪽 상단의 '추가'를 탭하세요",
-      "homescreen_android_title": "Android Chrome",
-      "homescreen_android_step1": "우측 상단 메뉴(⋮)를 탭하세요",
-      "homescreen_android_step2": "'홈 화면에 추가'를 선택하세요",
-      "homescreen_android_step3": "'추가'를 탭하세요"
+      "homescreen_modal_description": "ibeanthere는 브라우저에서 그대로 돌아갑니다. 한 번 추가해 두면 설치 없이도 홈 화면에서 앱처럼 열립니다.",
+      "homescreen_ios_title": "아이폰 · Safari",
+      "homescreen_ios_step1": "화면 아래 공유 버튼을 누르세요",
+      "homescreen_ios_step2": "목록을 내려 ‘홈 화면에 추가’를 고르세요",
+      "homescreen_ios_step3": "오른쪽 위 ‘추가’를 누르세요",
+      "homescreen_android_title": "안드로이드 · Chrome",
+      "homescreen_android_step1": "오른쪽 위 메뉴를 누르세요",
+      "homescreen_android_step2": "‘홈 화면에 추가’를 고르세요",
+      "homescreen_android_step3": "‘추가’를 누른 뒤 한 번 더 ‘추가’로 확인하세요"
     },
     "auth": {
       "app_name": "ibeanthere",

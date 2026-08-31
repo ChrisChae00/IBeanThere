@@ -73,7 +73,18 @@ export function GlobeCanvas({ theme }: { theme?: GlobeTheme } = {}) {
   }, [theme]);
 
   return (
-    <div className="relative mx-auto w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[460px] lg:h-[460px] flex justify-center items-center">
+    /*
+      `overflow-hidden` here, even though nothing inside is meant to be clipped: a
+      rotated element's box is its axis-aligned bounding box, which is wider and
+      taller than the element itself -- at `tiltDeg` 23 the 460px canvas below
+      measures 603px. That inflated box is invisible (the sphere is a circle, so
+      rotating it draws nothing past its own edge) but it still counts as this
+      wrapper's scrollable overflow, and without a clipping ancestor that reaches
+      all the way out to the document and widens `scrollWidth` -- the page gains a
+      few pixels of horizontal scroll that has nothing to look at. Clipping here,
+      at the one box sized to the visible globe, stops it before it can propagate.
+    */
+    <div className="relative mx-auto w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[460px] lg:h-[460px] flex justify-center items-center overflow-hidden">
       <canvas
         ref={canvasRef}
         className="w-full h-full"

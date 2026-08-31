@@ -29,7 +29,6 @@
       "help": "Help",
       "help_item_1": "FAQ",
       "help_item_2": "Contact",
-      "my_coffee_journey": "My Coffee Journey",
       "coffee_logs_item_1": "My logs",
       "coffee_logs_item_1_description": "View and manage your coffee log entries",
       "coffee_logs_item_2": "Stats",
@@ -48,7 +47,7 @@
       "settings": "Settings",
       "get_started": "Get Started",
       "admin_dashboard": "Admin Dashboard",
-      "learn": "Learn",
+      "learn": "Coffee Roadmap",
       "theme": "Theme",
       "language": "Language"
     },
@@ -132,75 +131,37 @@
       }
     },
     "landing": {
+      "hero_line1": "Every good cafe",
+      "hero_line2": "was once",
+      "hero_line3": "someone's secret",
+      "hero_lede": "<name>ibeanthere</name> is a map of where the coffee is actually good.",
+      "hero_cta": "Drop your first bean",
+      "hero_cta_logged_in": "Drop a bean",
+      "hero_cta_secondary": "Open the map",
+      "index_title": "The growth of a single bean",
+      "index_note": "Five stages, one cafe at a time — your bean grows only where you keep coming back.",
+      "register_title": "Know a place that is not on this map?",
+      "register_lede": "Add it yourself. It takes a link and a minute.",
+      "register_cta": "Register a cafe",
+      "register_note_1": "One link, zero typing",
+      "register_note_1_body": "Paste a Google Maps link. The name, address, hours and coordinates fill themselves in.",
+      "register_note_2": "Verified on location, within 50m",
+      "register_note_2_body": "You have to be standing there when you submit. That one rule is what makes the map worth trusting.",
+      "register_note_3": "Up to five photos per place",
+      "register_note_3_body": "Show the room, the counter, the seat you liked. The next person arrives knowing the place.",
+      "personas_title": "Three ways to read a city",
+      "personas_note": "Which one are you?",
+      "close_line1": "Plant your",
+      "close_line2": "first bean",
+      "close_note": "“60 beans make a cup of coffee, and they give me 60 good ideas.”",
+      "close_note_source": "— Beethoven",
+      "close_cta": "Get started",
+      "close_cta_logged_in": "Drop a bean",
+      "marquee": "Third-wave · Roastery · Late opening · Quiet corner · Single origin · Hand drip · Neighbourhood regular · Hidden gem",
       "stats": {
-        "eyebrow": "The map so far",
-        "title": "The map only grows",
-        "subtitle": "Every cafe here was registered by someone standing in front of it. Nothing is scraped, nothing is bought.",
         "cafes": "Cafes on the map",
-        "verified": "Community-verified",
-        "beans": "Beans dropped",
         "chart_label": "Cumulative cafes registered over the last 26 weeks",
         "chart_caption": "Cumulative registrations, weekly. Every step is one person who walked in and put a place on the map."
-      },
-      "press": {
-        "hero_line1": "Every good cafe",
-        "hero_line2": "was once",
-        "hero_line3": "someone's secret",
-        "hero_lede": "<name>ibeanthere</name> is a map of where the coffee is actually good.",
-        "hero_cta": "Drop your first bean",
-        "hero_cta_logged_in": "Drop a bean",
-        "hero_cta_secondary": "Open the map",
-        "index_title": "The growth of a single bean",
-        "index_note": "Five stages, one cafe at a time — your bean grows only where you keep coming back.",
-        "ledger_title": "The ledger",
-        "ledger_note": "No editorial board decides what belongs here. The line moves when someone walks in.",
-        "register_title": "Know a place that is not on this map?",
-        "register_lede": "Paste a Google Maps link and the name, address, hours and coordinates fill themselves in. You have to be within 50 metres — that is the only rule, and it is what makes the map worth trusting.",
-        "register_lede_short": "Add it yourself. It takes a link and a minute.",
-        "register_cta": "Register a cafe",
-        "register_note_1": "One link, zero typing",
-        "register_note_1_body": "Paste a Google Maps link. The name, address, hours and coordinates fill themselves in.",
-        "register_note_2": "Verified on location, within 50m",
-        "register_note_2_body": "You have to be standing there when you submit. That one rule is what makes the map worth trusting.",
-        "register_note_3": "Up to five photos per place",
-        "register_note_3_body": "Show the room, the counter, the seat you liked. The next person arrives knowing the place.",
-        "personas_title": "Three ways to read a city",
-        "personas_note": "Nobody picks one. Most people are all three by the second month.",
-        "close_line1": "Plant your",
-        "close_line2": "first bean",
-        "close_note": "“60 beans make a cup of coffee, and they give me 60 good ideas.” — Beethoven",
-        "close_cta": "Get started",
-        "close_cta_logged_in": "Drop a bean",
-        "marquee": "Third-wave · Roastery · Late opening · Quiet corner · Single origin · Hand drip · Neighbourhood regular · Hidden gem"
-      },
-      "hero": {
-        "title": "Track Your Local Cafes,<mobileBr></mobileBr> One Bean at a Time",
-        "subtitle": "Mark your favorite local spots<mediumBr></mediumBr> and help build a community<mobileBr></mobileBr> coffee map together.",
-        "cta_primary": "Start Your Journey",
-        "cta_primary_logged_in": "Drop Bean",
-        "cta_secondary": "Explore Cafes",
-        "slide2_title": "Watch Your Bean Grow",
-        "slide2_subtitle": "Drop beans at cafes and watch them grow through 5 stages",
-        "slide2_cta": "See How It Works",
-        "slide3_title": "Know a Hidden Gem?",
-        "slide3_subtitle": "Register your favorite local cafe and put it on the map",
-        "slide3_cta": "Register a Cafe"
-      },
-      "features": {
-        "title": "Your Complete Coffee Companion",
-        "subtitle": "Everything you need to discover, record, and share your coffee journey",
-        "discover": {
-          "title": "Discover Hidden Gems",
-          "description": "Find the best local cafes around you, from cozy corners to bustling roasteries."
-        },
-        "record": {
-          "title": "Log Your Moments",
-          "description": "Capture tasting notes, photos, and ratings to build your personal coffee archive."
-        },
-        "share": {
-          "title": "Build the Map Together",
-          "description": "Share your local favorites to help complete the cafe map for everyone."
-        }
       },
       "beandrop_timeline": {
         "title": "Drop a Bean, Watch It Grow",
@@ -261,46 +222,27 @@
           "title": "The Curator",
           "description": "The Guide. You weave experiences into collections, sharing the best paths with others."
         }
-      },
-      "cafe_register": {
-        "title": "Help Build the Coffee Map",
-        "subtitle": "Know a cafe that's not on the map yet? Register it and help fellow coffee lovers discover hidden gems around the world.",
-        "cta": "Register a Cafe",
-        "accordion": {
-          "auto_fill_title": "Do I really have to type everything in?",
-          "auto_fill_desc": "Just paste a Google Maps URL — the name, address, phone, website, coordinates, and opening hours are all filled in automatically. One click, zero typing.",
-          "verified_title": "Location-Verified Registration",
-          "verified_desc": "You must be within 50 meters of the cafe to register it. This ensures every cafe on the map is a real, visited place — not guesswork.",
-          "photos_title": "Add Photos & Details",
-          "photos_desc": "Upload up to 5 photos and set a main image. Add opening hours, website, and notes to make the listing useful for other explorers."
-        }
-      },
-      "cta": {
-        "title": "Ready to Plant Your First Bean?",
-        "subtitle": "Start documenting your coffee adventures and watch your personal coffee forest grow",
-        "button_primary": "Get Started",
-        "button_primary_logged_in": "Drop Bean",
-        "disclaimer": "\"60 beans make a cup of coffee, and they give me 60 good ideas.\" - Beethoven"
       }
     },
     "footer": {
       "privacy_policy": "Privacy Policy",
       "terms_of_service": "Terms of Service",
       "contact_us": "Contact Us",
+      "share": "Share",
       "contact_email_label": "Email",
       "contact_instagram_label": "Instagram",
       "osm_attribution": "Some cafe data provided by OpenStreetMap contributors",
-      "homescreen_link": "Easy access like an app",
+      "homescreen_link": "Keep it one tap away",
       "homescreen_modal_title": "Add to Home Screen",
-      "homescreen_modal_description": "No app install needed — create a shortcut on your home screen for quick, app-like access.",
-      "homescreen_ios_title": "iOS Safari",
-      "homescreen_ios_step1": "Tap the share button (□↑) at the bottom",
-      "homescreen_ios_step2": "Select 'Add to Home Screen'",
-      "homescreen_ios_step3": "Tap 'Add' in the top right",
-      "homescreen_android_title": "Android Chrome",
-      "homescreen_android_step1": "Tap the menu (⋮) at the top right",
-      "homescreen_android_step2": "Select 'Add to Home Screen'",
-      "homescreen_android_step3": "Tap 'Add'"
+      "homescreen_modal_description": "ibeanthere runs in the browser. Add it once and it opens from your home screen like an app — no install, no store.",
+      "homescreen_ios_title": "iPhone · Safari",
+      "homescreen_ios_step1": "Tap Share at the bottom of the screen",
+      "homescreen_ios_step2": "Scroll down and choose Add to Home Screen",
+      "homescreen_ios_step3": "Tap Add, top right",
+      "homescreen_android_title": "Android · Chrome",
+      "homescreen_android_step1": "Tap the menu at the top right",
+      "homescreen_android_step2": "Choose Add to Home screen",
+      "homescreen_android_step3": "Tap Add, then Add again to confirm"
     },
     "auth": {
       "app_name": "ibeanthere",

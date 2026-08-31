@@ -23,13 +23,15 @@ export default function LandingMotionRoot({ children }: { children: ReactNode })
   return (
     <div className="landing relative">
       {/*
-        Sits above the fixed header (z-50) because it is a readout, not chrome
-        to be navigated. `transformOrigin` left, so it grows from the corner.
+        Sits above the fixed header because it is a readout, not chrome to be
+        navigated -- `--z-nav-progress` is the slot directly over `--z-nav` in the
+        nav stack declared in tokens.css. `transformOrigin` left, so it grows from
+        the corner.
       */}
       <motion.div
         aria-hidden
         style={{ scaleX: progress, transformOrigin: '0% 50%' }}
-        className="fixed inset-x-0 top-0 z-[60] h-[2px] bg-brand"
+        className="fixed inset-x-0 top-0 z-(--z-nav-progress) h-[2px] bg-brand"
       />
       {children}
     </div>

@@ -47,19 +47,30 @@ export default function NavSelect({
           `align="end"` rather than the trigger's centre: these sit at the right
           edge of the bar, and a centred panel would hang off the viewport.
         */}
-        <Menu.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
+        <Menu.Positioner side="bottom" align="end" sideOffset={8} className="z-(--z-nav-popover)">
           {/*
             Portalled to the body, so it is outside the header and never inherits
             the over-media colour swap. The class is what takes the theme's own
             vocabulary back - without it a light ink lands on a light panel.
+
+            Being portalled is also why the z-index has to be the highest slot in the
+            nav stack rather than the header's own. Below `xl` these two switchers are
+            rendered inside the mobile drawer, which portals to the same place at
+            `--z-nav-drawer`; a menu that merely outranked the header opened behind the
+            panel it was opened from.
           */}
-          <Menu.Popup className="nav-opaque min-w-44 bg-background border border-border rounded-(--radius-card) shadow-(--ibean-shadow-warm-md) overflow-hidden py-1 motion-slide-up">
+          <Menu.Popup className="menu-panel nav-opaque min-w-44 motion-slide-up">
             <Menu.RadioGroup value={value} onValueChange={onChange}>
               {options.map((option) => (
                 <Menu.RadioItem
                   key={option.value}
                   value={option.value}
-                  className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-text cursor-pointer transition-colors outline-hidden data-highlighted:bg-surface data-highlighted:text-primary data-checked:text-primary"
+                  /*
+                    `justify-between` is the only thing this menu adds to the shared
+                    row: its check mark sits at the far end rather than beside the
+                    label, because the label is the choice and the mark is a state.
+                  */
+                  className="menu-item justify-between outline-hidden"
                 >
                   {option.label}
                   <Menu.RadioItemIndicator>

@@ -81,16 +81,20 @@ export default function NavigationButton({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 w-48 bg-cardBackground border border-border rounded-lg shadow-lg overflow-hidden z-1050">
-          <ul className="py-1" role="menu">
+        /*
+          The shared menu shape, same as the header's. `z-1050` stays as it is: this
+          one opens over map chrome and modals, which run in their own range.
+        */
+        <div className="menu-panel absolute left-0 top-full mt-1 w-48 z-1050 motion-slide-up">
+          <ul role="menu">
             {apps.map((app) => (
               <li key={app.id} role="none">
                 <button
                   onClick={() => handleAppClick(app.id)}
-                  className="w-full text-left px-4 py-2 text-sm text-cardText hover:bg-surface-hover transition-colors flex items-center gap-2"
+                  className="menu-item"
                   role="menuitem"
                 >
-                  <span>{t(app.labelKey)}</span>
+                  {t(app.labelKey)}
                 </button>
               </li>
             ))}

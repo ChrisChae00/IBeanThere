@@ -22,12 +22,22 @@
 
   The four themes are complete visual themes, not a light/dark pair: Dark Roast IS the
   dark mode. There is one relief set per theme, lit from its own surface.
+
+  `--c-brand-soft` is the hover of a filled brand control (`--brand-hover`, reached as
+  `bg-secondary`), and it also fills the auth panel and the secondary badge. In all three
+  the label on top is `--ink-on-brand`, so hover has to hold 4.5:1 against that ink. Every
+  theme used to move it the wrong way -- toward the ink rather than away from it -- and
+  three of four failed: Morning Coffee 3.40, Dark Roast 2.04, Vanilla Latte 2.28, Matcha
+  3.38. The rule now is one line: hover deepens the contrast it already has. A dark brand
+  gets darker, a light brand gets lighter, roughly a fifth of the way toward the theme's
+  own extreme, which is a visible step without becoming a second colour.
 */
 
 :root,
 [data-theme='morningCoffee'] {
   --c-brand: #8C5A3A;
-  --c-brand-soft: #AB7743;
+  /* Hover deepens: 5.86:1 on `--c-on-brand`. Was #AB7743, which lightened to 3.40:1. */
+  --c-brand-soft: #7f5234;
   --c-accent: #D9B896;
   --c-page: #e9d6c0;
   --c-raised: #f5f0e8;
@@ -57,7 +67,12 @@
 
 [data-theme='espresso'] {
   --c-brand: #d4c7b8;
-  --c-brand-soft: #5e432d;
+  /*
+    The one theme whose brand is light and whose ink is dark, so deepening means going
+    lighter: 12.30:1. Was #5e432d, a dark brown that inverted the button on hover and
+    left its dark label at 2.04:1.
+  */
+  --c-brand-soft: #dcd1c5;
   --c-accent: #6B4F3A;
   --c-page: #1A120B;
   --c-raised: #2A1A13;
@@ -90,13 +105,24 @@
   went muddy the moment it was put in a gradient - too little blue to stay green
   as it darkened, so it slid toward brown. Those two hold the blue at 72, which
   is what keeps the ramp between them reading as matcha rather than as khaki, and
-  the rest of the theme is derived from that pair. The brand itself then went one
-  step deeper again, to #53683e.
+  the rest of the theme is derived from that pair.
+
+  Two candidates are live here, and swapping between them means swapping three slots
+  together, not one. #85a035 is a bright green that cannot carry light ink -- it is
+  2.81:1 under #f7faf0 -- so it takes the dark-brand-light-ink arrangement Dark Roast
+  uses, inverted: dark ink on top, and hover moves lighter. #53683e is the deepened
+  green, which carries light ink at 5.82:1 and hovers darker like the other two light
+  themes. The alternate values are written beside each slot; changing one without the
+  others gives a theme that fails either at rest or on hover.
+
+  One caveat that belongs to #85a035 and not to the ink: as a filled control it sits at
+  1.97:1 against this theme's page, so the button's silhouette is faint. #53683e is
+  4.4:1 there. Text contrast passes either way; this is the button's own edge.
 */
 [data-theme='matchaLatte'] {
-  --c-brand: #85a035;
-  /*#85a035 / #53683e */
-  --c-brand-soft: #789048;
+  --c-brand: #85a035; /* alt: #53683e */
+  /* Hover moves lighter, away from the dark ink: 6.18:1. alt: #4c5f37 (6.63:1 on #f7faf0) */
+  --c-brand-soft: #93af3f;
   --c-accent: #b9cc8a;
   --c-page: #e0e8d0;
   --c-raised: #f4f7ea;
@@ -104,8 +130,11 @@
   --c-ink: #3a4a20;
   --c-ink-soft: #4e6130;
   --c-edge: #c3d29b;
-  /* Lighter than the raised surface, which leaves the deepened brand at 5.8:1. */
-  --c-on-brand: #f7faf0;
+  /*
+    Dark, because #85a035 is too bright to sit under light ink (2.81:1); this pairing is
+    5.18:1. alt: #f7faf0, which is what the deepened #53683e brand takes instead (5.82:1).
+  */
+  --c-on-brand: #1e2810;
   --c-on-media: #f0f4e4;
   --c-scrim: #2b3818;
   --c-on-auth: #e6ecd8;
@@ -127,7 +156,11 @@
 
 [data-theme='vanillaLatte'] {
   --c-brand: #362C1D;
-  --c-brand-soft: #C7A17A;
+  /*
+    Hover deepens: 14.61:1. Was #C7A17A, a caramel that read as a different colour
+    rather than a state and put its light label at 2.28:1.
+  */
+  --c-brand-soft: #2c2418;
   --c-accent: #F5E6A3;
   --c-page: #FFF8DC;
   --c-raised: #FFF9F0;

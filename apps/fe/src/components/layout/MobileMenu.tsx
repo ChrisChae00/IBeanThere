@@ -82,14 +82,14 @@ export default function MobileMenu({ locale }: { locale: string }) {
           {/* Overlay */}
           {isOpen && (
             <div
-              className="fixed inset-0 bg-black/50 z-9998 xl:hidden"
+              className="fixed inset-0 bg-black/50 z-(--z-nav-scrim) xl:hidden"
               onClick={closeMenu}
             />
           )}
 
           {/* Slide-out Menu */}
           <div
-            className={`nav-opaque fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-9999 transform transition-transform duration-300 ease-in-out xl:hidden flex flex-col ${
+            className={`nav-opaque fixed inset-y-0 right-0 w-[300px] bg-background border-l border-border z-(--z-nav-drawer) transform transition-transform duration-300 ease-in-out xl:hidden flex flex-col ${
               isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
           >
@@ -206,7 +206,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                             closeMenu();
                             window.location.href = `/${locale}`;
                           }}
-                          className="flex items-center gap-3 px-5 py-3 w-full text-text hover:bg-surface hover:text-red-500 transition-colors min-h-[48px] text-sm font-medium"
+                          className="flex items-center gap-3 px-5 py-3 w-full text-text hover:bg-surface hover:text-state-danger transition-colors min-h-[48px] text-sm font-medium"
                         >
                           <LogOut className="w-4 h-4 shrink-0" />
                           {tAuth('logout')}

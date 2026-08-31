@@ -549,6 +549,86 @@
       var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
   }
 
+  /*
+    One shape for every dropdown in the app. There are four of them -- the header's
+    journey menu, the two switchers, the profile menu, and the map-app chooser on a
+    cafe page -- and before this they each drew their own panel and their own row,
+    so a change to one silently left the other three behind.
+
+    The row is a rounded rectangle inside a padded panel, never a band running edge
+    to edge: a band reads as a list being highlighted, an inset rectangle reads as a
+    control being pointed at, which is what these are. That is also why the panel no
+    longer needs `overflow-hidden` -- it existed to stop full-bleed rows painting
+    over the panel's own rounded corners, and an inset row never reaches them.
+
+    Rows rest at secondary ink and rise to primary on hover. Not `--brand`: Dark
+    Roast sets its brand to the same value as its secondary ink, so a brand hover
+    would have been a colour change that changed no colour.
+
+    These live in `@layer components`, so a utility on any single instance still
+    wins -- that is how the logout row takes its danger colour without a variant
+    here for it.
+  */
+  .menu-panel {
+    padding: 0.25rem;
+    border: 1px solid var(--edge-default);
+    border-radius: var(--radius-card);
+    background: var(--surface-raised);
+    box-shadow: var(--ibean-shadow-warm-md);
+  }
+
+  .menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: left;
+    color: var(--ink-secondary);
+    cursor: pointer;
+  }
+
+  .menu-item:hover,
+  .menu-item[data-highlighted] {
+    background: var(--surface-hover);
+    color: var(--ink-primary);
+  }
+
+  /*
+    The row you are already on, in either vocabulary: `data-checked` is what Base UI
+    puts on the selected radio row, `is-active` is what the hand-rolled menus set
+    from the current path. Weight carries it as well as colour, so the state survives
+    a hover landing on one of its neighbours.
+  */
+  .menu-item[data-checked],
+  .menu-item.is-active {
+    color: var(--ink-primary);
+    font-weight: 500;
+  }
+
+  /*
+    A row's mark. Colour is handled here so every menu gets it for free; the movement
+    is not, because it is chosen per row from what the row does -- the gear turns, the
+    exit arrow steps toward the door -- and that belongs at the call site.
+  */
+  .menu-mark {
+    height: 1rem;
+    width: 1rem;
+    flex-shrink: 0;
+    color: var(--ink-secondary);
+    transition:
+      color var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
+
+  .menu-item:hover .menu-mark,
+  .menu-item[data-highlighted] .menu-mark {
+    color: var(--ink-primary);
+  }
+
   .motion-fade-in {
     animation: fadeIn 300ms var(--ibean-transition) both;
   }
@@ -690,6 +770,30 @@
     line-height: 0.88;
     letter-spacing: -0.035em;
     text-wrap: balance;
+  }
+
+  /*
+    Korean needs its own leading here, not a smaller version of the same number.
+
+    Measured off the shipped subsets: a Hahmlet syllable block inks from -0.106em to
+    0.796em, so it occupies 0.902em of vertical space on every line, because a syllable
+    is built to fill that square. A line box of 0.88em is smaller than the glyphs
+    standing in it, so consecutive lines meet - and the taller the type, the further
+    they run into each other. Latin gets away with the same number only because most
+    lines carry no descender and cap height stops around 0.70em.
+
+    1.06 leaves 0.158em of clear air between one line's descenders and the next line's
+    ascenders. That is a newspaper's leading, not a comfortable one, which is the point;
+    anything under 0.91 is not tight, it is broken.
+
+    The tracking eases off for the same reason. Negative tracking on Latin closes the
+    space between letterforms that are mostly vertical stems; on syllable blocks it
+    closes the space between the blocks themselves, which is the only thing separating
+    one word from the next.
+  */
+  :root:lang(ko) .landing-display {
+    line-height: 1.06;
+    letter-spacing: -0.015em;
   }
 
   /*

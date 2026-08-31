@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown } from 'lucide-react';
 import { Logo } from '@/shared/ui';
 import MobileMenu from './MobileMenu';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -20,28 +18,6 @@ export default function Header({
   const t = useTranslations('navigation');
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
-  const [journeyOpen, setJourneyOpen] = useState(false);
-  const journeyRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!journeyOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (journeyRef.current && !journeyRef.current.contains(e.target as Node)) {
-        setJourneyOpen(false);
-      }
-    };
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setJourneyOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEsc);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEsc);
-    };
-  }, [journeyOpen]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -68,9 +44,6 @@ export default function Header({
   const navLinkClass = (href: string) =>
     `nav-pill font-medium h-10 px-3 flex items-center whitespace-nowrap text-sm ${navStateClass(isActive(href))}`;
 
-  const journeyActive =
-    isActive(`/${locale}/my-logs`) || isActive(`/${locale}/my-beans`);
-
   /*
     One treatment everywhere, not two. The bar used to swap to the theme's own
     surface once the landing hero had scrolled past; carrying the scrim the whole
@@ -79,7 +52,7 @@ export default function Header({
     scrim's own falloff is the edge.
   */
   return (
-    <header className="nav-over-media fixed top-0 left-0 right-0 z-50 motion-fade-in">
+    <header className="nav-over-media fixed top-0 left-0 right-0 z-(--z-nav) motion-fade-in">
       <div
         aria-hidden
         className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-24 -z-10"
@@ -129,57 +102,18 @@ export default function Header({
               {t('register_cafe')}
             </Link>
 
+            {/*
+              No separate journey dropdown here any more. It duplicated the same two
+              links the profile menu already carries once you are signed in, and it
+              was the only bar item shown to a signed-out visitor that led straight
+              into an auth wall.
+            */}
             <Link
               href={`/${locale}/learn/coffee`}
               className={navLinkClass(`/${locale}/learn`)}
             >
               {t('learn')}
             </Link>
-
-            {/* My Journey Dropdown */}
-            <div ref={journeyRef} className="relative">
-              <button
-                onClick={() => setJourneyOpen(prev => !prev)}
-                aria-expanded={journeyOpen}
-                aria-haspopup="true"
-                className={`nav-pill font-medium h-10 px-3 flex items-center gap-1 whitespace-nowrap text-sm ${navStateClass(journeyActive)}`}
-                data-popup-open={journeyOpen || undefined}
-              >
-                {t('my_coffee_journey')}
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${journeyOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-
-              {journeyOpen && (
-                <div className="nav-opaque absolute left-0 top-full mt-2 w-44 bg-background border border-border rounded-(--radius-card) shadow-(--ibean-shadow-warm-md) overflow-hidden z-50 motion-slide-up">
-                  <div className="py-1">
-                    <Link
-                      href={`/${locale}/my-logs`}
-                      onClick={() => setJourneyOpen(false)}
-                      className={`block px-4 py-2.5 text-sm transition-colors ${
-                        isActive(`/${locale}/my-logs`)
-                          ? 'text-primary bg-surface'
-                          : 'text-text hover:bg-surface hover:text-primary'
-                      }`}
-                    >
-                      {t('coffee_logs_item_1')}
-                    </Link>
-                    <Link
-                      href={`/${locale}/my-beans`}
-                      onClick={() => setJourneyOpen(false)}
-                      className={`block px-4 py-2.5 text-sm transition-colors ${
-                        isActive(`/${locale}/my-beans`)
-                          ? 'text-primary bg-surface'
-                          : 'text-text hover:bg-surface hover:text-primary'
-                      }`}
-                    >
-                      {t('my_beans')}
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
           </nav>
 
           {/* `ml-auto` is what pushes this to the far edge now that the row is flex. */}

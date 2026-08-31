@@ -66,38 +66,39 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           locale={locale}
           stats={stats}
           messages={{
-            heroLine1: t('press.hero_line1'),
-            heroLine2: t('press.hero_line2'),
-            heroLine3: t('press.hero_line3'),
+            heroLine1: t('hero_line1'),
+            heroLine2: t('hero_line2'),
+            heroLine3: t('hero_line3'),
             /*
               Rich rather than plain: the product name inside the sentence is
               set in the display face, and a locale decides for itself where in
               the sentence that name falls -- Korean attaches its particle
               straight to it, English does not.
             */
-            heroLede: t.rich('press.hero_lede', {
+            heroLede: t.rich('hero_lede', {
               name: (chunks) => <span className="font-logo">{chunks}</span>,
             }),
-            heroCta: t('press.hero_cta'),
-            heroCtaLoggedIn: t('press.hero_cta_logged_in'),
-            heroCtaSecondary: t('press.hero_cta_secondary'),
-            indexTitle: t('press.index_title'),
-            indexNote: t('press.index_note'),
-            registerTitle: t('press.register_title'),
-            registerLede: t('press.register_lede_short'),
-            registerCta: t('press.register_cta'),
+            heroCta: t('hero_cta'),
+            heroCtaLoggedIn: t('hero_cta_logged_in'),
+            heroCtaSecondary: t('hero_cta_secondary'),
+            indexTitle: t('index_title'),
+            indexNote: t('index_note'),
+            registerTitle: t('register_title'),
+            registerLede: t('register_lede'),
+            registerCta: t('register_cta'),
             registerNotes: [1, 2, 3].map((n) => ({
-              title: t(`press.register_note_${n}`),
-              body: t(`press.register_note_${n}_body`),
+              title: t(`register_note_${n}`),
+              body: t(`register_note_${n}_body`),
             })),
-            personasTitle: t('press.personas_title'),
-            personasNote: t('press.personas_note'),
-            closeLine1: t('press.close_line1'),
-            closeLine2: t('press.close_line2'),
-            closeNote: t('press.close_note'),
-            closeCta: t('press.close_cta'),
-            closeCtaLoggedIn: t('press.close_cta_logged_in'),
-            marquee: t('press.marquee'),
+            personasTitle: t('personas_title'),
+            personasNote: t('personas_note'),
+            closeLine1: t('close_line1'),
+            closeLine2: t('close_line2'),
+            closeNote: t('close_note'),
+            closeNoteSource: t('close_note_source'),
+            closeCta: t('close_cta'),
+            closeCtaLoggedIn: t('close_cta_logged_in'),
+            marquee: t('marquee'),
             stats: { cafes: t('stats.cafes') },
             stages: STAGE_KEYS.map((key) => ({
               title: t(`beandrop_timeline.${key}.title`),
