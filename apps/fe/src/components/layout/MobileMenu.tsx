@@ -67,7 +67,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="xl:hidden p-2 rounded-lg hover:bg-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+        className="xl:hidden p-2 rounded-(--radius-control) hover:bg-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
         {isOpen ? (
@@ -97,11 +97,11 @@ export default function MobileMenu({ locale }: { locale: string }) {
             <div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
               <div className="flex items-center space-x-2">
                 <Logo size="md" className="text-primary" />
-                <span className="text-lg font-bold text-text font-logo">ibeanthere</span>
+                <span className="text-lg text-text font-logo">ibeanthere</span>
               </div>
               <button
                 onClick={closeMenu}
-                className="p-2 rounded-lg hover:bg-surface transition-colors"
+                className="p-2 rounded-(--radius-control) hover:bg-surface transition-colors"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5 text-text" />
@@ -153,7 +153,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                 </p>
                 {isLoading ? (
                   <div className="px-5 py-3">
-                    <div className="w-8 h-8 bg-surface rounded-full animate-pulse" />
+                    <div className="w-8 h-8 bg-surface rounded-(--radius-pill) animate-pulse" />
                   </div>
                 ) : user ? (
                   <>
@@ -219,7 +219,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     <Link
                       href={`/${locale}/signin`}
                       onClick={closeMenu}
-                      className="flex-1 px-4 py-2.5 text-sm text-text border border-border rounded-full hover:bg-surface hover:border-primary font-medium transition-all text-center"
+                      className="flex-1 px-4 py-2.5 text-sm text-text border border-border rounded-(--btn-radius) hover:bg-surface hover:border-primary font-medium transition-all text-center"
                     >
                       {t('sign_in')}
                     </Link>

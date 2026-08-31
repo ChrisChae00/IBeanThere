@@ -89,7 +89,7 @@ export default function AvatarUpload({
         <Avatar
           src={displayUrl}
           alt={displayName}
-          size="xl"
+          size="inherit"
           className={`${sizeClasses[size]} border-4 border-background`}
         />
 

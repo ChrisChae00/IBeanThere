@@ -130,7 +130,7 @@ export default function Header({
                 settles on instead of pinning themselves to a pill.
               */}
               {isLoading ? (
-                <div className="w-8 h-8 bg-surface rounded-full animate-pulse ml-1" />
+                <div className="w-8 h-8 bg-surface rounded-(--radius-pill) animate-pulse ml-1" />
               ) : user ? (
                 <div className="ml-1">
                   <ProfileDropdown locale={locale} />

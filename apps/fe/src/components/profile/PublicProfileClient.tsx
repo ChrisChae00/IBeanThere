@@ -196,7 +196,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
             <Avatar 
               src={profile.avatar_url} 
               alt={profile.display_name} 
-              size="xl"
+              size="inherit"
               className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-md"
             />
           </div>
