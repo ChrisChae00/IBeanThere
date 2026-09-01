@@ -26,11 +26,11 @@ export default function LocationPermissionOverlay({
   ];
 
   return (
-    <div className="relative w-full h-full bg-linear-to-br from-surface to-background rounded-xl overflow-hidden border border-border">
+    <div className="relative h-full w-full overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface-raised">
       {/* Blurred background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 30%, var(--color-primary) 0%, transparent 50%), radial-gradient(circle at 80% 70%, var(--color-accent) 0%, transparent 50%)',
+          backgroundImage: 'radial-gradient(circle at 20% 30%, var(--brand) 0%, transparent 50%), radial-gradient(circle at 80% 70%, var(--brand-muted) 0%, transparent 50%)',
           filter: 'blur(60px)'
         }} />
       </div>
@@ -40,13 +40,13 @@ export default function LocationPermissionOverlay({
         <div className="text-center px-6 py-8 max-w-md w-full">
           {/* Location Icon */}
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <LocationIcon size={40} className="text-primary" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-(--radius-pill) bg-brand/12">
+              <LocationIcon size={40} className="text-brand" />
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-text mb-3">
+          <h3 className="mb-3 text-xl text-ink-primary">
             {permissionState === 'denied' 
               ? t('location_permission_denied_title')
               : t('location_permission_title')
@@ -62,15 +62,15 @@ export default function LocationPermissionOverlay({
           {permissionState === 'denied' ? (
             <div className="animate-fade-in">
               {/* Browser Tabs */}
-              <div className="flex p-1 bg-surface-hover rounded-lg mb-4">
+              <div className="mb-4 flex gap-1 rounded-(--radius-control) border border-edge-rule p-1">
                 {browsers.map((browser) => (
                   <button
                     key={browser.id}
                     onClick={() => setActiveBrowser(browser.id)}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
                       activeBrowser === browser.id
-                        ? 'bg-surface text-text shadow-xs'
-                        : 'text-ink-secondary hover:text-text'
+                        ? 'relief-pressed bg-surface-raised text-ink-primary'
+                        : 'text-ink-secondary hover:text-ink-primary'
                     }`}
                   >
                     {browser.label}
@@ -79,14 +79,14 @@ export default function LocationPermissionOverlay({
               </div>
 
               {/* Guide Steps */}
-              <div className="bg-surface p-4 rounded-lg border border-border text-left mb-6">
-                <h4 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
+              <div className="mb-6 rounded-(--radius-control) border border-edge-rule bg-surface-raised p-4 text-left">
+                <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink-primary">
                   {t('browser_guide.title')}
                 </h4>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-ink-secondary">
                   <li>
                     {t.rich(`browser_guide.${activeBrowser}_step1`, {
-                      icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-text mx-0.5" />
+                      icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-ink-primary mx-0.5" />
                     })}
                   </li>
                   <li>{t(`browser_guide.${activeBrowser}_step2`)}</li>
@@ -96,7 +96,7 @@ export default function LocationPermissionOverlay({
               {/* Refresh Button */}
               <button
                 onClick={() => window.location.reload()}
-                className="w-full bg-primary text-primaryText px-6 py-3 rounded-full font-semibold hover:bg-secondary transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
               >
                 <RefreshIcon className="w-5 h-5" />
                 <span>{t('browser_guide.refresh_page')}</span>
@@ -116,7 +116,7 @@ export default function LocationPermissionOverlay({
               {/* CTA Button */}
               <button
                 onClick={onRequestPermission}
-                className="bg-primary text-primaryText px-8 py-3 rounded-full font-semibold hover:bg-secondary transition-colors shadow-lg min-h-[44px]"
+                className="relief-control min-h-11 rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
               >
                 {t('share_location')}
               </button>

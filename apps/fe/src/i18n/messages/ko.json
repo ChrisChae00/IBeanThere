@@ -355,6 +355,8 @@
       "refresh": "새로고침",
       "refresh_cafes": "카페 새로고침",
       "loading_cafes": "주변 카페 로딩 중...",
+      "cafes_on_map": "카페 {count}곳",
+      "nearby_now": "근처 {count}곳",
       "cafes_refreshed": "카페 목록이 새로고침되었습니다",
       "trending": "트렌딩",
       "pending": "검증 대기",

@@ -9,6 +9,12 @@
 @theme {
   --container-8xl: 90rem;
   --font-logo: 'Playfair Display', Georgia, serif;
+  /*
+    `font-sans` is the body face, so a heading that should read as data rather than as
+    a headline -- a cafe's name in a list, for one -- can opt out of the display serif
+    without naming a family.
+  */
+  --font-sans: var(--font-body);
 
   /*
     New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,

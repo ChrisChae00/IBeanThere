@@ -53,14 +53,14 @@ export default function CafeCardImage({
 
   const height = size === 'small' ? 'h-full min-h-[180px]' : 'h-full min-h-[200px]';
   const fallbackIconSize = size === 'small' ? 'w-12 h-12 md:w-16 md:h-16' : 'w-16 h-16 md:w-20 md:h-20';
-  const bgColor = showImage
-    ? size === 'small' ? 'bg-primary' : 'bg-surface/50'
-    : 'bg-accent';
+  /* Under a photo: a quiet ground for the letterboxing. Without one: the sunken
+     surface, so an image-less card reads as an empty slot rather than a coloured tile. */
+  const bgColor = showImage ? 'bg-surface-raised' : 'bg-surface-sunken';
 
   return (
     <div className={`w-full ${height} ${bgColor} flex items-center justify-center overflow-hidden shrink-0 relative`}>
       {(googlePhotoLoading || (showImage && !isLoaded)) && (
-        <div className="absolute inset-0 bg-surface animate-pulse" />
+        <div className="absolute inset-0 bg-surface-hover animate-pulse" />
       )}
       {showImage ? (
         !useNextImage ? (

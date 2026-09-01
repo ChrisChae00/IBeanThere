@@ -92,7 +92,8 @@ export default function CafeCard({
         />
       </div>
       <div className={`flex flex-col mt-auto ${s.body}`}>
-        <h3 className={`font-semibold text-text ${s.title}`} title={cafe.name}>
+        {/* A cafe's name is data, not a headline: body face, not the display serif. */}
+        <h3 className={`font-sans font-semibold text-ink-primary ${s.title}`} title={cafe.name}>
           {cafe.name}
         </h3>
         <p className={`text-xs text-ink-secondary truncate ${s.meta}`} title={cafe.address}>
@@ -101,12 +102,12 @@ export default function CafeCard({
         <div className={`flex items-center justify-between gap-2 ${s.row}`}>
           {/* Trending tag - only show for top 3 */}
           {cafe.trending_rank && cafe.trending_rank <= 3 ? (
-            <span className="bg-primary text-primaryText px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-xs">
-              🔥 {tMap('trending')}
+            <span className="landing-micro rounded-(--radius-pill) border border-brand bg-brand/12 px-3 py-1.5 text-ink-primary">
+              {tMap('trending')}
             </span>
           ) : cafe.status === 'pending' ? (
-            <span className="bg-surface-hover text-ink-secondary border border-border px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-              ⏳ {tMap('pending')}
+            <span className="landing-micro rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-ink-secondary">
+              {tMap('pending')}
             </span>
           ) : (
             <span /> /* Empty span to maintain flex layout */

@@ -8,7 +8,7 @@ import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
 import { TrendingCafesSection, CafeCard } from '@/components/cafe';
 import { CAFE_GRID_ITEMS_PER_PAGE, GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
-import { Button } from '@/shared/ui';
+import { RegisterCafeCTA } from '@/components/cafe/TrendingCafesSection';
 
 type FilterType = 'all' | 'closest' | 'most_popular';
 type GooglePhotoState = GoogleCafePhoto | null | 'loading';
@@ -139,8 +139,17 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
     setHasMore(true);
   };
 
-  /* The filled control marks the active filter; the rest stay outlined. */
-  const filterVariant = (filter: FilterType) => (activeFilter === filter ? 'primary' : 'outline');
+  /*
+    Filters carry their state in relief rather than in fill: the page's one filled
+    control is the register action, and a colour-swap hover has no room left in the
+    Matcha palette.
+  */
+  const filterClass = (filter: FilterType) =>
+    `landing-micro min-h-11 rounded-(--radius-pill) border px-5 disabled:opacity-50 ${
+      activeFilter === filter
+        ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
+        : 'relief-control border-edge-rule bg-surface-raised text-ink-secondary hover:text-ink-primary'
+    }`;
 
   return (
     <>
@@ -159,34 +168,9 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
             <TrendingCafesSection
               cafes={trendingCafes}
               locale={locale}
-              isLoading={false}
+              isLoading={isLoading && trendingCafes.length === 0}
               googlePhotos={googlePhotos}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Filter Section */}
-      <section className="py-6">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button variant={filterVariant('all')} onClick={() => setActiveFilter('all')}>
-              {t('filter_all')}
-            </Button>
-            <Button
-              variant={filterVariant('closest')}
-              onClick={() => setActiveFilter('closest')}
-              disabled={!coords}
-              title={!coords ? t('no_location') : ''}
-            >
-              {t('filter_closest')}
-            </Button>
-            <Button variant={filterVariant('most_popular')} onClick={() => setActiveFilter('most_popular')}>
-              {t('filter_most_popular')}
-            </Button>
-          </div>
-          <div className="text-center mt-4 text-sm text-ink-secondary">
-            {t('showing_cafes', { count: cafes.length })}
           </div>
         </div>
       </section>
@@ -194,24 +178,42 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       {/* Cafe Grid Section */}
       <section className="py-6">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <button onClick={() => setActiveFilter('all')} className={filterClass('all')}>
+              {t('filter_all')}
+            </button>
+            <button
+              onClick={() => setActiveFilter('closest')}
+              disabled={!coords}
+              title={!coords ? t('no_location') : ''}
+              className={filterClass('closest')}
+            >
+              {t('filter_closest')}
+            </button>
+            <button
+              onClick={() => setActiveFilter('most_popular')}
+              className={filterClass('most_popular')}
+            >
+              {t('filter_most_popular')}
+            </button>
+            <span className="landing-micro ml-auto text-ink-secondary">
+              {t('showing_cafes', { count: cafes.length })}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {isLoading ? (
               Array.from({ length: CAFE_GRID_ITEMS_PER_PAGE }).map((_, index) => (
-                <div key={index} className="bg-surface border border-border rounded-2xl overflow-hidden animate-pulse">
-                  <div className="h-44 bg-surface/50"></div>
-                  <div className="p-4">
-                    <div className="h-4 bg-surface/50 rounded-sm mb-2"></div>
-                    <div className="h-3 bg-surface/50 rounded-sm w-2/3 mb-3"></div>
-                    <div className="h-3 bg-surface/50 rounded-sm w-1/2"></div>
+                <div key={index} className="animate-pulse overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface">
+                  <div className="h-[200px] bg-surface-hover"></div>
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 rounded-sm bg-surface-hover"></div>
+                    <div className="h-3 w-2/3 rounded-sm bg-surface-hover"></div>
+                    <div className="mt-3 h-8 w-1/2 rounded-(--radius-pill) bg-surface-hover"></div>
                   </div>
                 </div>
               ))
             ) : cafes.length === 0 ? (
-              <div className="col-span-full text-center py-16 space-y-4">
-                <div className="text-lg font-medium text-ink-secondary">
-                  {tMap('no_cafes_available')}
-                </div>
-              </div>
+              <RegisterCafeCTA variant="empty" />
             ) : (
               cafes.map((cafe) => (
                 <CafeCard
@@ -233,14 +235,21 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-4 justify-center">
               {hasMore && (
-                <Button size="lg" onClick={handleLoadMore} loading={isLoadingMore}>
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="relief-control min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand disabled:opacity-60"
+                >
                   {tMap('load_more')}
-                </Button>
+                </button>
               )}
               {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
-                <Button size="lg" variant="outline" onClick={handleShowLess}>
+                <button
+                  onClick={handleShowLess}
+                  className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
+                >
                   {tMap('show_less')}
-                </Button>
+                </button>
               )}
             </div>
           </div>

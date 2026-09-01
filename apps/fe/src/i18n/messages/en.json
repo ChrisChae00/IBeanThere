@@ -359,6 +359,8 @@
       "refresh": "Refresh",
       "refresh_cafes": "Refresh cafes",
       "loading_cafes": "Loading nearby cafes...",
+      "cafes_on_map": "{count} cafes",
+      "nearby_now": "{count} nearby",
       "cafes_refreshed": "Cafes refreshed",
       "trending": "Trending",
       "pending": "Pending",

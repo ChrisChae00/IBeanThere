@@ -17,24 +17,19 @@ interface TrendingCafesSectionProps {
 const resolvedGooglePhoto = (photo?: GoogleCafePhoto | null | 'loading') =>
   photo === 'loading' ? undefined : photo;
 
-function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
+export function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
   const tMap = useTranslations('map');
   const locale = useLocale();
 
   if (variant === 'empty') {
     return (
-      <div className="col-span-1 bg-background border border-border rounded-xl p-4 hover:shadow-inset-primary transition-shadow">
-        <div className="text-center py-12 space-y-4">
-          <div className="text-lg font-medium text-ink-secondary hover:text-text transition-colors">
-            {tMap('no_cafes_available')}
-          </div>
-          <div className="text-ink-secondary font-semibold flex items-center justify-center gap-2 hover:text-text transition-colors">
-            <span className="text-2xl">🧭</span>
-            <span>{tMap('be_the_navigator')}</span>
-          </div>
+      <div className="col-span-full rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+        <div className="space-y-3 px-6 py-14 text-center">
+          <p className="landing-micro text-ink-secondary">{tMap('no_cafes_available')}</p>
+          <p className="text-xl font-semibold text-ink-primary">{tMap('be_the_navigator')}</p>
           <Link
             href={`/${locale}/discover/register-cafe`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primaryText rounded-full font-medium hover:opacity-90 transition-opacity"
+            className="relief-control inline-flex min-h-11 items-center gap-2 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
           >
             <PlusIcon size={16} />
             {tMap('register_new_cafe')}
@@ -45,13 +40,13 @@ function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
   }
 
   return (
-    <div className="bg-background border border-dashed border-border rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3 rounded-(--radius-card) border border-dashed border-edge-rule px-4 py-3">
       <p className="text-sm text-ink-secondary">
         {tMap('few_cafes_nearby')}
       </p>
       <Link
         href={`/${locale}/discover/register-cafe`}
-        className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primaryText rounded-full text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap shrink-0"
+        className="relief-control inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
       >
         <PlusIcon size={14} />
         {tMap('register_new_cafe')}
@@ -72,9 +67,9 @@ export default function TrendingCafesSection({
   const displayCafes = cafes.slice(0, TRENDING_CAFES_COUNT);
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col shadow-lg">
-      <div className="mb-6 shrink-0">
-        <h2 className="text-2xl font-bold text-text mb-2">
+    <div className="flex flex-col rounded-(--radius-card) border border-edge-rule bg-surface-raised p-6">
+      <div className="mb-6 shrink-0 border-b border-edge-rule pb-4">
+        <h2 className="mb-2 text-2xl text-ink-primary">
           {t('trending_this_week')}
         </h2>
         <p className="text-ink-secondary">
@@ -84,10 +79,12 @@ export default function TrendingCafesSection({
       <div className="grid grid-cols-1 gap-4 flex-1">
         {isLoading ? (
           Array.from({ length: TRENDING_CAFES_COUNT }).map((_, index) => (
-            <div key={index} className="bg-background border border-border rounded-xl p-4 animate-pulse">
-              <div className="w-16 h-16 bg-surface rounded-lg mb-3"></div>
-              <div className="h-4 bg-surface rounded-sm mb-2"></div>
-              <div className="h-3 bg-surface rounded-sm w-2/3"></div>
+            <div key={index} className="animate-pulse overflow-hidden rounded-(--radius-card) border border-edge-rule">
+              <div className="h-[180px] bg-surface-hover"></div>
+              <div className="space-y-2 p-3">
+                <div className="h-4 w-3/4 rounded-sm bg-surface-hover"></div>
+                <div className="h-3 w-1/2 rounded-sm bg-surface-hover"></div>
+              </div>
             </div>
           ))
         ) : displayCafes.length === 0 ? (

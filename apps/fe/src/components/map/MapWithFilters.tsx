@@ -42,7 +42,7 @@ function MapStatusBanner({
   return (
     <div
       role="status"
-      className="absolute top-2 left-1/2 -translate-x-1/2 z-(--z-map-chrome) flex items-center gap-2 rounded-(--radius-control) border border-border bg-surface px-3 py-1.5 text-xs text-ink-secondary shadow-sm"
+      className="absolute top-2 left-1/2 -translate-x-1/2 z-(--z-map-chrome) flex items-center gap-2 rounded-(--radius-pill) border border-edge-rule bg-surface-raised px-3 py-1.5 text-xs text-ink-secondary shadow-sm"
     >
       {busy && <LoadingSpinner size="sm" />}
       <span className="whitespace-nowrap">{message}</span>
@@ -50,7 +50,7 @@ function MapStatusBanner({
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-(--radius-control) px-1 font-medium text-text underline underline-offset-2 hover:opacity-80"
+          className="rounded-(--radius-control) px-1 font-medium text-ink-primary underline underline-offset-2 hover:opacity-80"
         >
           {retryLabel}
         </button>
@@ -393,7 +393,7 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
         {/* Left side: Title and Subtitle */}
         <div className="flex-1 min-w-0">
           {mapTitle && (
-            <h2 className="text-2xl font-bold text-text mb-2 sm:whitespace-nowrap">
+            <h2 className="mb-2 text-2xl text-ink-primary sm:whitespace-nowrap">
               {mapTitle}
             </h2>
           )}
@@ -408,21 +408,21 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
             <button
               onClick={handleRefreshCafes}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface border border-border rounded-lg hover:bg-surface-hover transition-colors shrink-0"
+              className="relief-control flex min-h-11 shrink-0 items-center gap-2 rounded-(--radius-pill) border border-edge-rule px-4 text-ink-primary disabled:opacity-60"
               title={t('refresh_cafes')}
               disabled={isLoading}
             >
-              <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span className="text-xs sm:text-sm whitespace-nowrap">{t('refresh')}</span>
+              <RefreshIcon className="w-4 h-4 shrink-0" />
+              <span className="landing-micro whitespace-nowrap">{t('refresh')}</span>
             </button>
           </div>
           {/* Results Info - Compact */}
-          <div className="flex items-center gap-2 text-xs text-ink-secondary text-right mt-2">
-            <span>
-              {allCafes.length} cafes
+          <div className="mt-2 flex items-center gap-2 text-right text-ink-secondary">
+            <span className="landing-micro">
+              {t('cafes_on_map', { count: allCafes.length })}
               {isTracking && nearbyStays.length > 0 && (
-                <span className="ml-2 text-primary">
-                  · {nearbyStays.length} nearby
+                <span className="ml-2 text-ink-primary">
+                  · {t('nearby_now', { count: nearbyStays.length })}
                 </span>
               )}
             </span>
@@ -448,14 +448,14 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
             permissionState={locationPermission}
           />
         ) : !center ? (
-          <div className="border border-border rounded-xl overflow-hidden h-full flex items-center justify-center bg-surface">
+          <div className="flex h-full items-center justify-center overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface-raised">
             <div className="text-center">
               <LoadingSpinner size="lg" />
               <p className="text-ink-secondary mt-4 text-sm">{t('loading_location')}</p>
             </div>
           </div>
         ) : (
-          <div className="border border-border rounded-xl overflow-hidden h-full relative">
+          <div className="relative h-full overflow-hidden rounded-(--radius-card) border border-edge-rule">
             <MapStatusBanner
               message={
                 isLoading ? t('loading_cafes')
