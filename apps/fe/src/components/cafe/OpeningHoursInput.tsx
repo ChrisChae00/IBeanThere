@@ -85,13 +85,13 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
   if (!showHours) {
     return (
       <div>
-        <label className="block text-sm font-semibold text-text mb-2">
+        <label className="mb-2 block text-sm font-semibold text-ink-primary">
           {t('opening_hours_label')}
         </label>
         <button
           type="button"
           onClick={handleToggle}
-          className="px-4 py-2.5 border border-border rounded-lg text-text hover:bg-surface transition-colors min-h-[44px]"
+          className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-ink-primary"
         >
           + {t('opening_hours_toggle')}
         </button>
@@ -102,7 +102,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold text-text">
+        <label className="block text-sm font-semibold text-ink-primary">
           {t('opening_hours_label')}
         </label>
         <button
@@ -123,14 +123,14 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         <button
           type="button"
           onClick={applyToWeekdays}
-          className="text-xs px-3 py-1.5 bg-surface rounded-lg text-text hover:bg-border transition-colors"
+          className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
         >
           {t('apply_to_all_weekdays')}
         </button>
         <button
           type="button"
           onClick={applyToAllDays}
-          className="text-xs px-3 py-1.5 bg-surface rounded-lg text-text hover:bg-border transition-colors"
+          className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
         >
           {t('apply_to_all_days')}
         </button>
@@ -144,7 +144,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
 
           return (
             <div key={day} className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="w-20 sm:w-24 text-xs sm:text-sm text-text font-medium">
+              <div className="w-20 text-xs font-medium text-ink-primary sm:w-24 sm:text-sm">
                 {t(`day_${day}` as any)}
               </div>
 
@@ -153,9 +153,9 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                   type="checkbox"
                   checked={dayHours.closed}
                   onChange={(e) => handleDayChange(day, 'closed', e.target.checked)}
-                  className="w-4 h-4 rounded-sm border-border text-primary focus:ring-2 focus:ring-primary"
+                  className="h-4 w-4 rounded-sm border-edge-rule accent-[var(--brand)] focus:ring-2 focus:ring-brand"
                 />
-                <span className="text-xs sm:text-sm text-text">{t('closed')}</span>
+                <span className="text-xs text-ink-primary sm:text-sm">{t('closed')}</span>
               </label>
 
               {!dayHours.closed && (
@@ -164,14 +164,14 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
                     type="time"
                     value={dayHours.open}
                     onChange={(e) => handleDayChange(day, 'open', e.target.value)}
-                    className="w-[100px] sm:w-auto px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text text-sm min-h-[40px]"
+                    className="min-h-11 w-[100px] rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
                   />
                   <span className="text-ink-secondary">-</span>
                   <input
                     type="time"
                     value={dayHours.close}
                     onChange={(e) => handleDayChange(day, 'close', e.target.value)}
-                    className="w-[100px] sm:w-auto px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text text-sm min-h-[40px]"
+                    className="min-h-11 w-[100px] rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
                   />
                 </>
               )}

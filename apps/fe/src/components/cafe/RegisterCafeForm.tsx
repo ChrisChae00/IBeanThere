@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { registerCafe, searchLocationByPostcode, reverseGeocodeLocation, lookupGoogleMapsUrl } from '@/lib/api/cafes';
 import { isAuthError } from '@/lib/api/client';
@@ -436,8 +437,8 @@ export default function RegisterCafeForm({
           <ErrorAlert message={error} />
           
           {/* Google Maps Auto Fill */}
-          <div className="bg-surface border border-border p-4 rounded-xl shadow-xs mb-6">
-            <label className="block text-sm font-bold text-text mb-2">
+          <div className="mb-6 rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4">
+            <label className="mb-2 block text-sm font-semibold text-ink-primary">
               {t('google_maps_url_label')}
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -446,7 +447,7 @@ export default function RegisterCafeForm({
                 name="source_url"
                 value={formData.source_url}
                 onChange={handleInputChange}
-                className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-ink-secondary/80 min-h-[44px]"
+                className="min-h-11 flex-1 rounded-(--input-radius) border border-edge-rule bg-surface px-4 text-ink-primary placeholder-ink-secondary/80 focus:outline-hidden focus:ring-2 focus:ring-brand"
                 placeholder={t('google_maps_url_placeholder')}
               />
               <Button
@@ -467,7 +468,7 @@ export default function RegisterCafeForm({
           {/* Location Selection */}
           <div className="flex flex-col gap-3">
             <div>
-              <label className="block text-sm font-semibold text-text mb-1">
+              <label className="mb-1 block text-sm font-semibold text-ink-primary">
                 {t('location_select')}
               </label>
               <p className="text-sm text-ink-secondary">
@@ -495,40 +496,41 @@ export default function RegisterCafeForm({
             </div>
             
             {/* Postcode Search Fallback */}
-            <details className="group border border-border rounded-lg bg-surface shadow-xs">
-              <summary className="text-sm font-medium cursor-pointer p-3 text-text hover:bg-border/30 transition-colors list-none flex items-center justify-between">
+            <details className="group rounded-(--radius-control) border border-edge-rule bg-surface-raised">
+              <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-sm font-medium text-ink-primary transition-colors hover:bg-surface-hover">
                 <span>{t('postcode_label')}</span>
                 <span className="opacity-60 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
-              <div className="p-3 pt-1 border-t border-border">
+              <div className="border-t border-edge-rule p-3 pt-1">
                 <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <div className="flex gap-2 flex-1">
-                    <select
-                      value={selectedCountry}
-                      onChange={(e) => setSelectedCountry(e.target.value)}
-                      className="px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text h-[40px] text-sm appearance-none cursor-pointer pr-8 w-28"
-                      disabled={isDetectingCountry}
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 8px center',
-                        backgroundSize: '12px 12px',
-                        backgroundClip: 'padding-box'
-                      }}
-                    >
-                      <option value="">{t('country_select')}</option>
-                      {countries.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      {/* The arrow is an icon, not a data-URI with a colour baked into it. */}
+                      <ChevronDown
+                        size={14}
+                        aria-hidden
+                        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-ink-secondary"
+                      />
+                      <select
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        className="h-11 w-28 cursor-pointer appearance-none rounded-(--input-radius) border border-edge-rule bg-surface pl-3 pr-8 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
+                        disabled={isDetectingCountry}
+                      >
+                        <option value="">{t('country_select')}</option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <input
                       type="text"
                       name="postcode"
                       value={formData.postcode}
                       onChange={handleInputChange}
-                      className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary bg-background text-text placeholder-ink-secondary/80 h-[40px] text-sm"
+                      className="h-11 flex-1 rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary placeholder-ink-secondary/80 focus:outline-hidden focus:ring-2 focus:ring-brand"
                       placeholder={t('postcode_placeholder')}
                     />
                   </div>
@@ -537,7 +539,7 @@ export default function RegisterCafeForm({
                     onClick={handlePostcodeSearch}
                     disabled={!formData.postcode.trim()}
                     loading={isSearchingPostcode}
-                    className="whitespace-nowrap h-[40px] px-4 text-sm w-full sm:w-auto"
+                    className="h-11 w-full whitespace-nowrap px-4 text-sm sm:w-auto"
                   >
                     {t('search_postcode')}
                   </Button>
@@ -632,9 +634,9 @@ export default function RegisterCafeForm({
               type="checkbox"
               checked={servesCoffee}
               onChange={(e) => setServesCoffee(e.target.checked)}
-              className="mt-0.5 w-4 h-4 shrink-0 accent-primary"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
             />
-            <span className="text-sm text-text">
+            <span className="text-sm text-ink-primary">
               {t('serves_coffee_confirm')}
             </span>
           </label>

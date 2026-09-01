@@ -62,7 +62,7 @@ export default function NavigationButton({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 bg-surface text-cardText hover:bg-surface-hover border border-border rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
+        className={`relief-control flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

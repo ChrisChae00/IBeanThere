@@ -33,7 +33,7 @@ const sizeStyles: Record<CafeCardSize, {
   image: 'small' | 'large';
 }> = {
   sm: {
-    frame: 'bg-background h-full',
+    frame: 'bg-surface h-full',
     radius: 'rounded-xl',
     body: 'p-3',
     title: 'text-base mb-0.5 line-clamp-1',

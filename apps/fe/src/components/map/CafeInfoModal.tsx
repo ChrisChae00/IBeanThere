@@ -50,18 +50,19 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   return (
     <div className="fixed inset-0 z-(--z-map-modal) flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div
-        className="relative bg-cardBackground rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-cardBackground border-b border-border px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-bold text-cardText line-clamp-1 flex-1 pr-4">{cafe.name}</h2>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-edge-rule bg-surface-raised px-6 py-4">
+          {/* The name is data, not a headline -- body face, like the cards. */}
+          <h2 className="line-clamp-1 flex-1 pr-4 font-sans text-xl font-semibold text-ink-primary">{cafe.name}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-surface transition-colors shrink-0"
+            className="shrink-0 rounded-(--radius-control) p-2 transition-colors hover:bg-surface-hover"
             aria-label={t('close')}
           >
             <svg
-              className="w-5 h-5 text-cardText"
+              className="h-5 w-5 text-ink-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,7 +74,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
 
         {/* Cafe Image */}
         {cafe.main_image && (
-          <div className="w-full h-40 bg-surface overflow-hidden">
+          <div className="h-40 w-full overflow-hidden bg-surface-sunken">
             <img
               src={cafe.main_image}
               alt={cafe.name}
@@ -89,12 +90,12 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               <Badge
                 variant={cafe.status === 'verified' ? 'success' : 'info'}
                 size="sm"
-                className="border border-border"
+                className="border border-edge-rule"
               >
                 {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
               </Badge>
               {cafe.status !== 'verified' && cafe.verification_count && (
-                <span className="text-sm text-cardTextSecondary">
+                <span className="text-sm text-ink-secondary">
                   {t('verifications', { count: cafe.verification_count })}
                 </span>
               )}
@@ -102,8 +103,8 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           </div>
           
           {/* Drop Bean Action */}
-          <div className="bg-surface/50 p-4 rounded-xl border border-border flex items-center justify-between gap-4">
-            <div className="text-sm font-medium text-cardText">
+          <div className="flex items-center justify-between gap-4 rounded-(--radius-card) border border-edge-rule p-4">
+            <div className="text-sm font-medium text-ink-primary">
               {t('visited_this_cafe')}
             </div>
             <DropBeanButton
@@ -118,8 +119,8 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           {/* Address + Google Maps Link */}
           {cafe.address && (
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-cardTextSecondary">{t('address')}</h3>
-              <p className="text-cardText">{cafe.address}</p>
+              <h3 className="text-sm font-semibold text-ink-secondary">{t('address')}</h3>
+              <p className="text-ink-primary">{cafe.address}</p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <a
                   href={
@@ -129,7 +130,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-hover border border-border rounded-lg text-xs font-medium text-cardText transition-colors"
+                  className="relief-control inline-flex min-h-11 items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule px-4 text-xs font-medium text-ink-primary"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
@@ -146,10 +147,10 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           {/* Phone */}
           {cafe.phoneNumber && (
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-cardTextSecondary">{t('phone')}</h3>
+              <h3 className="text-sm font-semibold text-ink-secondary">{t('phone')}</h3>
               <a
                 href={`tel:${cafe.phoneNumber}`}
-                className="text-cardText hover:underline"
+                className="text-ink-primary hover:underline"
               >
                 {cafe.phoneNumber}
               </a>
@@ -159,12 +160,12 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           {/* Website */}
           {cafe.website && (
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-cardTextSecondary">{t('website')}</h3>
+              <h3 className="text-sm font-semibold text-ink-secondary">{t('website')}</h3>
               <a
                 href={cafe.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-cardText hover:underline break-all"
+                className="break-all text-ink-primary hover:underline"
               >
                 {cafe.website}
               </a>
@@ -175,13 +176,13 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           {cafe.businessHours && Object.keys(cafe.businessHours).length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+                <h3 className="text-sm font-semibold text-ink-secondary">{t('opening_hours')}</h3>
                 {todayHours && !todayHours.closed && (
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       isOpenNow(cafe.businessHours, cafe.timezone)
-                        ? 'bg-success/10 text-success'
-                        : 'bg-error/10 text-error'
+                        ? 'bg-state-success/12 text-state-success'
+                        : 'bg-state-danger/12 text-state-danger'
                     }`}
                   >
                     {isOpenNow(cafe.businessHours, cafe.timezone) ? t('open_now') : t('closed_now')}
@@ -193,7 +194,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               {todayHours && (
                 <button
                   onClick={() => setShowAllHours(!showAllHours)}
-                  className="w-full p-3 bg-surface rounded-lg border border-border hover:bg-primary hover:text-primaryText transition-colors"
+                  className="relief-control w-full rounded-(--radius-control) border border-edge-rule p-3 text-ink-primary"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">
@@ -220,7 +221,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
 
               {/* All Week Hours */}
               {showAllHours && (
-                <div className="space-y-2 pt-2 border-t border-border">
+                <div className="space-y-2 border-t border-edge-rule pt-2">
                   {daysOfWeek.map((day) => {
                     const hours = cafe.businessHours?.[day];
                     if (!hours) return null;
@@ -230,13 +231,13 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
                         <span
                           className={`${
                             day === today
-                              ? 'font-semibold text-cardText'
-                              : 'text-cardTextSecondary'
+                              ? 'font-semibold text-ink-primary'
+                              : 'text-ink-secondary'
                           }`}
                         >
                           {getDayName(day)}
                         </span>
-                        <span className="text-cardText">
+                        <span className="text-ink-primary">
                           {hours.closed
                             ? t('closed')
                             : `${formatTime(hours.open)} - ${formatTime(hours.close)}`}
@@ -251,15 +252,15 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
 
           {!cafe.businessHours && (
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
-              <p className="text-sm text-cardText">{t('no_hours_available')}</p>
+              <h3 className="text-sm font-semibold text-ink-secondary">{t('opening_hours')}</h3>
+              <p className="text-sm text-ink-primary">{t('no_hours_available')}</p>
             </div>
           )}
 
           <div className="space-y-2">
             <Link
               href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary text-primaryText rounded-lg hover:opacity-90 transition-opacity min-h-[44px]"
+              className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-4 font-semibold text-ink-on-brand"
               onClick={onClose}
             >
               {t('view_details')}

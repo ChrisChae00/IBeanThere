@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { MapPin, Search } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
 import { useAuth } from '@/hooks/useAuth';
 import { searchCafes } from '@/lib/api/cafes';
@@ -99,22 +100,22 @@ export default function NearbyPage(
   }, [coords]);
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-surface-page">
       {/* Page Title Section with Gradient - matching explore-map */}
-      <section className="pt-6 pb-4 bg-linear-to-b from-background to-surface/30">
+      <section className="pt-10 pb-4">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
+              <h1 className="landing-display text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
                 {t('title')}
               </h1>
-              <p className="text-xl text-ink-secondary">
+              <p className="mt-3 text-lg text-ink-secondary">
                 {t('subtitle')}
               </p>
             </div>
             <Link
               href={`/${locale}/discover/explore-map`}
-              className="bg-surface text-text border border-border px-6 py-3 rounded-full font-semibold hover:bg-surface/80 transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
+              className="relief-control flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-6 font-semibold text-ink-primary"
             >
               {t('view_cafe_map')}
             </Link>
@@ -125,14 +126,26 @@ export default function NearbyPage(
       {/* Main Content Section */}
       <section className="py-6 pb-20">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          {error && (
+            <div className="mb-6 flex items-center justify-between gap-4 rounded-(--radius-card) border border-edge-rule bg-surface-raised px-5 py-4">
+              <p className="text-sm text-state-danger">{t('load_error')}</p>
+              <button
+                onClick={() => coords && fetchNearbyCafes(coords.latitude, coords.longitude)}
+                className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
+              >
+                {t('retry')}
+              </button>
+            </div>
+          )}
+
           {/* Location Permission Required */}
           {!coords && !locationLoading && !locationRequested && (
-            <div className="bg-surface border border-border rounded-2xl p-8 text-center">
-              <div className="text-4xl mb-4">📍</div>
-              <h2 className="text-xl font-semibold text-text mb-2">
+            <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-8 text-center">
+              <MapPin size={36} className="mx-auto mb-4 text-ink-secondary" strokeWidth={1.5} />
+              <h2 className="mb-2 text-xl text-ink-primary">
                 {t('location_required')}
               </h2>
-              <p className="text-textSecondary mb-6">
+              <p className="text-ink-secondary mb-6">
                 {t('enable_location_hint')}
               </p>
               <Button
@@ -149,30 +162,30 @@ export default function NearbyPage(
           {(isLoading || locationLoading) && (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
               <LoadingSpinner size="lg" />
-              <p className="text-textSecondary">{t('loading')}</p>
+              <p className="text-ink-secondary">{t('loading')}</p>
             </div>
           )}
 
           {/* No Cafes Found */}
           {!isLoading && !locationLoading && locationRequested && cafes.length === 0 && (
-            <div className="bg-surface border border-border rounded-2xl p-8 text-center">
-              <div className="text-4xl mb-4">🔍</div>
-              <h2 className="text-xl font-semibold text-text mb-2">
+            <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-8 text-center">
+              <Search size={36} className="mx-auto mb-4 text-ink-secondary" strokeWidth={1.5} />
+              <h2 className="mb-2 text-xl text-ink-primary">
                 {t('no_cafes')}
               </h2>
-              <p className="text-textSecondary mb-6">
+              <p className="text-ink-secondary mb-6">
                 {t('no_cafes_hint')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href={`/${locale}/discover/explore-map`}
-                  className="px-6 py-3 bg-primary text-primaryText rounded-full font-medium hover:bg-secondary transition-colors"
+                  className="relief-control inline-flex min-h-11 items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
                 >
                   {t('view_cafe_map')}
                 </Link>
                 <Link
                   href={`/${locale}/discover/register-cafe`}
-                  className="px-6 py-3 border border-border text-text rounded-full font-medium hover:bg-surface transition-colors"
+                  className="relief-control inline-flex min-h-11 items-center rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
                 >
                   {t('register_new_cafe')}
                 </Link>
@@ -184,10 +197,10 @@ export default function NearbyPage(
           {!isLoading && cafes.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-text">
+                <h2 className="text-2xl text-ink-primary">
                   {t('cafes_within_50m')}
                 </h2>
-                <span className="text-textSecondary">
+                <span className="text-ink-secondary">
                   {t('cafe_count', { count: cafes.length })}
                 </span>
               </div>
@@ -195,7 +208,7 @@ export default function NearbyPage(
                 {cafes.map((cafe) => (
                   <div
                     key={cafe.id}
-                    className="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 hover:shadow-lg transition-all"
+                    className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-5 transition-shadow hover:shadow-inset-primary"
                   >
                     <div className="flex flex-col h-full">
                       <div className="flex-1">
@@ -203,29 +216,29 @@ export default function NearbyPage(
                           href={`/${locale}/cafes/${cafe.slug || cafe.id}`}
                           className="block"
                         >
-                          <h3 className="text-lg font-semibold text-text hover:text-primary transition-colors line-clamp-1">
+                          <h3 className="line-clamp-1 font-sans text-lg font-semibold text-ink-primary transition-colors hover:text-brand">
                             {cafe.name}
                           </h3>
                         </Link>
                         {cafe.address && (
-                          <p className="text-sm text-textSecondary line-clamp-2 mt-2">
+                          <p className="text-sm text-ink-secondary line-clamp-2 mt-2">
                             {cafe.address}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3">
-                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                          <span className="landing-micro rounded-(--radius-pill) border border-brand bg-brand/12 px-3 py-1.5 text-ink-primary">
                             {t('m_away', { distance: Math.round(cafe.distance) })}
                           </span>
                           {cafe.status === 'verified' && (
-                            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 rounded-full">
-                              ✓ Verified
+                            <span className="landing-micro rounded-(--radius-pill) bg-state-success/12 px-3 py-1.5 text-state-success">
+                              {t('verified')}
                             </span>
                           )}
                         </div>
                       </div>
                       
                       {/* Drop Bean Button */}
-                      <div className="mt-4 pt-4 border-t border-border">
+                      <div className="mt-4 border-t border-edge-rule pt-4">
                         {user ? (
                           <DropBeanButton
                             cafeId={cafe.id}
@@ -237,7 +250,7 @@ export default function NearbyPage(
                         ) : (
                           <Link
                             href={`/${locale}/signin`}
-                            className="block w-full px-4 py-2 bg-primary text-primaryText rounded-lg font-medium text-sm text-center hover:bg-secondary transition-colors"
+                            className="relief-control flex min-h-11 w-full items-center justify-center rounded-(--btn-radius) bg-brand px-4 text-sm font-semibold text-ink-on-brand"
                           >
                             {t('sign_in_to_drop')}
                           </Link>
