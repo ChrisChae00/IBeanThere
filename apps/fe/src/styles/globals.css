@@ -638,6 +638,44 @@
   }
 }
 
+/*
+  Leaflet paints its popup and controls white. Its stylesheet is imported from the map
+  component, so it lands after this file and outside any cascade layer -- which beats a
+  layered rule whatever its specificity. Hence `!important`, the same escape the z-index
+  overrides below already use. Without this the popup content, which reads theme tokens,
+  puts light ink on white paper in the dark themes.
+*/
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--surface-raised) !important;
+  color: var(--ink-primary) !important;
+  box-shadow: var(--shadow-marker) !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--ink-secondary) !important;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--surface-raised) !important;
+  color: var(--ink-primary) !important;
+  border-bottom-color: var(--edge-default) !important;
+}
+
+.leaflet-bar a:hover {
+  background: var(--surface-hover) !important;
+}
+
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface-raised) 85%, transparent) !important;
+  color: var(--ink-secondary) !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--ink-secondary) !important;
+}
+
 /* Leaflet Map z-index fixes */
 .leaflet-container {
   z-index: 0 !important;

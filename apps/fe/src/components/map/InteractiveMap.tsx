@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,7 +10,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
 import { createCustomMarkerIcon, createUserLocationIcon, createSelectedLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
-import { useTheme } from '@/contexts/ThemeContext';
 import { UserLocationIcon } from '@/shared/ui';
 
 // ─── Map Resize Handler ─────────────────────────────────────
@@ -89,28 +88,11 @@ function MapResizeHandler() {
 
 // ─── Utilities ──────────────────────────────────────────────
 
-function getCSSVariable(name: string, fallback: string = ''): string {
-  if (typeof window !== 'undefined') {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim() || fallback;
-  }
-  return fallback;
-}
-
-// Fix for default marker icon in React Leaflet
-// _getIconUrl is a private property in Leaflet types but exists at runtime
-// We need to delete it to prevent SSR/hydration issues with default icons
-if (typeof window !== 'undefined') {
-  if ('_getIconUrl' in L.Icon.Default.prototype) {
-    delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-  }
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  });
-}
+/*
+  Every marker on this map supplies its own divIcon, so Leaflet's default icon is never
+  reached. The old override pointed it at unpkg, which the app's CSP img-src blocks —
+  deleting the override is the fix, not allowlisting a CDN we do not use.
+*/
 
 function BoundsUpdater({ 
   onBoundsChanged 
@@ -339,10 +321,10 @@ function ClusterLayer({
       const unknownText = tCommon('unknown');
       const checkInText = cafe.verification_count && cafe.verification_count > 1 ? t('check_ins') : t('check_in');
       
-      const textSecondaryColor = getCSSVariable('--color-text-secondary', '#666');
-      const borderColor = getCSSVariable('--color-border', '#e5e7eb');
-      const primaryColor = getCSSVariable('--color-primary', '#3b82f6');
-      
+      const textSecondaryColor = 'var(--ink-secondary)';
+      const borderColor = 'var(--edge-default)';
+      const primaryColor = 'var(--brand)';
+
       const popupContent = `
         <div style="padding: 8px; min-width: 200px;">
           <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
@@ -385,20 +367,17 @@ function MapContent({
   cafes,
   userLocation,
   selectedLocation,
-  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
   center,
   zoom,
   forceCenterUpdate,
-  fitToMarkers,
-  useClustering
+  fitToMarkers
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
   selectedLocation?: { lat: number; lng: number };
-  userMarkerPalette?: string;
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;
@@ -406,16 +385,9 @@ function MapContent({
   zoom: number;
   forceCenterUpdate?: boolean;
   fitToMarkers?: boolean;
-  useClustering: boolean;
 }) {
   const map = useMap();
-  const { currentTheme } = useTheme();
-  const [markerKey, setMarkerKey] = useState(0);
   const t = useTranslations('map');
-
-  useEffect(() => {
-    setMarkerKey(prev => prev + 1);
-  }, [currentTheme.name]);
 
   useEffect(() => {
     if (!fitToMarkers || cafes.length === 0) return;
@@ -431,19 +403,17 @@ function MapContent({
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
-      {useClustering && <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />}
+      <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
       {userLocation && (
         <Marker
-          key={`user-${markerKey}`}
           position={[userLocation.lat, userLocation.lng]}
-          icon={createUserLocationIcon(userMarkerPalette)}
+          icon={createUserLocationIcon()}
         >
           <Popup>{t('current_location')}</Popup>
         </Marker>
       )}
       {selectedLocation && (
         <Marker
-          key={`selected-${markerKey}`}
           position={[selectedLocation.lat, selectedLocation.lng]}
           icon={selectedMarkerIcon}
         >
@@ -460,7 +430,6 @@ export default function InteractiveMap({
   zoom,
   userLocation,
   selectedLocation,
-  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
@@ -473,10 +442,7 @@ export default function InteractiveMap({
   onLocationClick?: () => void;
 }) {
   const t = useTranslations('map');
-  const tCommon = useTranslations('common');
   const centerLatLng: [number, number] = [center.lat, center.lng];
-
-  const shouldUseClustering = cafes.length >= 5;
 
   return (
     <div className="relative w-full h-full min-h-[500px] z-0">
@@ -484,7 +450,7 @@ export default function InteractiveMap({
       {onLocationClick && (
         <button
           onClick={onLocationClick}
-          className="absolute top-4 right-4 z-1000 bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
+          className="absolute top-4 right-4 z-(--z-map-chrome) bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
           title={t('location_button')}
         >
           <UserLocationIcon size={32} color="var(--color-text)" />
@@ -510,7 +476,6 @@ export default function InteractiveMap({
           cafes={cafes} 
           userLocation={userLocation}
           selectedLocation={selectedLocation}
-          userMarkerPalette={userMarkerPalette}
           onMarkerClick={onMarkerClick}
           onBoundsChanged={onBoundsChanged}
           onMapClick={onMapClick}
@@ -518,120 +483,8 @@ export default function InteractiveMap({
           zoom={zoom}
           forceCenterUpdate={forceCenterUpdate}
           fitToMarkers={fitToMarkers}
-          useClustering={shouldUseClustering}
         />
 
-        {!shouldUseClustering && cafes.map((cafe) => {
-          const markerState = getMarkerState(cafe);
-          return (
-            <Marker
-              key={cafe.id}
-              position={[cafe.latitude, cafe.longitude]}
-              icon={createCustomMarkerIcon(markerState)}
-              eventHandlers={{
-                click: () => {
-                  onMarkerClick?.(cafe);
-                }
-              }}
-            >
-              <Popup>
-                <div 
-                  style={{
-                    padding: '8px',
-                    minWidth: '200px'
-                  }}
-                >
-                  <h3 style={{ fontWeight: 600, fontSize: '16px', marginBottom: '4px' }}>{cafe.name}</h3>
-                  <p 
-                    style={{ 
-                      fontSize: '14px', 
-                      color: getCSSVariable('--color-text-secondary', '#666'),
-                      marginBottom: '4px'
-                    }}
-                  >
-                    {cafe.address}
-                  </p>
-                  {cafe.rating && (
-                    <p style={{ fontSize: '14px', marginBottom: '4px' }}>⭐ {cafe.rating.toFixed(1)}</p>
-                  )}
-                  {cafe.status === 'verified' && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <p 
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          color: getCSSVariable('--color-primary', '#3b82f6')
-                        }}
-                      >
-                        {t('verified')}
-                      </p>
-                      {cafe.foundingCrew?.navigator && (
-                        <p 
-                          style={{
-                            fontSize: '12px',
-                            color: getCSSVariable('--color-text-secondary', '#666')
-                          }}
-                        >
-                          {t('navigator')}: {cafe.foundingCrew.navigator.username || tCommon('unknown')}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {cafe.status === 'pending' && cafe.verification_count && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <p 
-                        style={{
-                          fontSize: '12px',
-                          color: getCSSVariable('--color-text-secondary', '#666')
-                        }}
-                      >
-                        {cafe.verification_count} {cafe.verification_count > 1 ? t('check_ins') : t('check_in')}
-                      </p>
-                    </div>
-                  )}
-                  {cafe.source_url && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <a 
-                        href={cafe.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: '12px',
-                          color: getCSSVariable('--color-primary', '#3b82f6'),
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        <span>📍</span>
-                        <span style={{ textDecoration: 'underline' }}>View on Google Maps</span>
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
       </MapContainer>
     </div>
   );

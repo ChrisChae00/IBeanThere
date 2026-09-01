@@ -6,8 +6,9 @@ import MapSection from '@/components/map/MapSection';
 import { getGoogleCafePhoto, getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
 import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
-import { TrendingCafesSection, CafeGridCard } from '@/components/cafe';
+import { TrendingCafesSection, CafeCard } from '@/components/cafe';
 import { CAFE_GRID_ITEMS_PER_PAGE, GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
+import { Button } from '@/shared/ui';
 
 type FilterType = 'all' | 'closest' | 'most_popular';
 type GooglePhotoState = GoogleCafePhoto | null | 'loading';
@@ -138,12 +139,8 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
     setHasMore(true);
   };
 
-  const filterButtonClass = (filter: FilterType) =>
-    `px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-      activeFilter === filter
-        ? 'bg-primary text-primaryText'
-        : 'bg-surface text-text border border-border hover:bg-surface/80'
-    }`;
+  /* The filled control marks the active filter; the rest stay outlined. */
+  const filterVariant = (filter: FilterType) => (activeFilter === filter ? 'primary' : 'outline');
 
   return (
     <>
@@ -173,26 +170,20 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       <section className="py-6">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-3 justify-center">
-            <button
-              onClick={() => setActiveFilter('all')}
-              className={filterButtonClass('all')}
-            >
+            <Button variant={filterVariant('all')} onClick={() => setActiveFilter('all')}>
               {t('filter_all')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={filterVariant('closest')}
               onClick={() => setActiveFilter('closest')}
               disabled={!coords}
-              className={`${filterButtonClass('closest')} ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={!coords ? t('no_location') : ''}
             >
               {t('filter_closest')}
-            </button>
-            <button
-              onClick={() => setActiveFilter('most_popular')}
-              className={filterButtonClass('most_popular')}
-            >
+            </Button>
+            <Button variant={filterVariant('most_popular')} onClick={() => setActiveFilter('most_popular')}>
               {t('filter_most_popular')}
-            </button>
+            </Button>
           </div>
           <div className="text-center mt-4 text-sm text-ink-secondary">
             {t('showing_cafes', { count: cafes.length })}
@@ -223,7 +214,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               </div>
             ) : (
               cafes.map((cafe) => (
-                <CafeGridCard
+                <CafeCard
                   key={cafe.id}
                   cafe={cafe}
                   locale={locale}
@@ -242,21 +233,14 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-4 justify-center">
               {hasMore && (
-                <button
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                  className="bg-primary text-primaryText px-8 py-4 rounded-full font-semibold text-lg hover:bg-secondary transition-colors shadow-lg min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
+                <Button size="lg" onClick={handleLoadMore} loading={isLoadingMore}>
                   {tMap('load_more')}
-                </button>
+                </Button>
               )}
               {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
-                <button
-                  onClick={handleShowLess}
-                  className="border border-border text-text px-8 py-4 rounded-full font-semibold text-lg hover:bg-surface transition-colors min-h-[44px]"
-                >
+                <Button size="lg" variant="outline" onClick={handleShowLess}>
                   {tMap('show_less')}
-                </button>
+                </Button>
               )}
             </div>
           </div>

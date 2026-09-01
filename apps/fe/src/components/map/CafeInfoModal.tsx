@@ -48,7 +48,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   const todayHours = getTodayHours();
 
   return (
-    <div className="fixed inset-0 z-1001 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-(--z-map-modal) flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div
         className="relative bg-cardBackground rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}

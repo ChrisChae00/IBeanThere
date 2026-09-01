@@ -5,9 +5,10 @@ import { ThemePalette } from './types';
   same names, and reach the app as CSS custom properties — a theme switch is one
   attribute on <html>, not forty inline style writes.
 
-  Anything that needs a theme's actual colour in JavaScript should read the published
-  token (see `getCSSVariable` in `lib/markerStyles.ts`) rather than re-importing values
-  here, so there is only ever one source of truth per colour.
+  Anything that needs a theme's colour outside a stylesheet should write `var(--token)`
+  into the markup it builds (see `lib/markerStyles.ts`) rather than resolving the value
+  in JavaScript or re-importing it here: a resolved value freezes whichever theme was
+  active at the time, a `var()` follows the theme on its own.
 */
 export const themes: Record<string, ThemePalette> = {
   morningCoffee: { name: 'morningCoffee', displayName: 'Morning Coffee' },

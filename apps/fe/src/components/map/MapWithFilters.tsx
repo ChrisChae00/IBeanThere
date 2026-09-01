@@ -20,23 +20,52 @@ import { CafeMapData } from '@/types/map';
 
 import { API_BASE_URL, apiFetch } from '@/lib/api/client';
 
-function getCSSVariable(name: string, fallback: string = ''): string {
-  if (typeof window !== 'undefined') {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim() || fallback;
-  }
-  return fallback;
+/*
+  One banner for every state the map can be in: searching, showing the trending
+  fallback, or failed. The three used to be separate overlays -- and the failure had no
+  overlay at all, because `useMapData` keeps the previous results on error, so a failed
+  search looked exactly like a successful one that found the same cafes.
+*/
+function MapStatusBanner({
+  message,
+  busy,
+  onRetry,
+  retryLabel
+}: {
+  message: string | null;
+  busy?: boolean;
+  onRetry?: () => void;
+  retryLabel: string;
+}) {
+  if (!message) return null;
+
+  return (
+    <div
+      role="status"
+      className="absolute top-2 left-1/2 -translate-x-1/2 z-(--z-map-chrome) flex items-center gap-2 rounded-(--radius-control) border border-border bg-surface px-3 py-1.5 text-xs text-ink-secondary shadow-sm"
+    >
+      {busy && <LoadingSpinner size="sm" />}
+      <span className="whitespace-nowrap">{message}</span>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-(--radius-control) px-1 font-medium text-text underline underline-offset-2 hover:opacity-80"
+        >
+          {retryLabel}
+        </button>
+      )}
+    </div>
+  );
 }
 
 interface MapWithFiltersProps {
   locale: string;
-  userMarkerPalette?: string;
   mapTitle?: string;
   mapSubtitle?: string;
 }
 
-export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, mapSubtitle }: MapWithFiltersProps) {
+export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWithFiltersProps) {
   const t = useTranslations('map');
 
   const { coords, getCurrentLocation, error: locationError } = useLocation();
@@ -403,10 +432,7 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
               title={t('location_button')}
               disabled={!coords}
             >
-              <UserLocationIcon 
-                size={32} 
-                color={getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A'} 
-              />
+              <UserLocationIcon size={32} color="var(--marker-user)" />
             </button>
           </div>
         </div>
@@ -430,30 +456,27 @@ export default function MapWithFilters({ locale, userMarkerPalette, mapTitle, ma
           </div>
         ) : (
           <div className="border border-border rounded-xl overflow-hidden h-full relative">
-            {isTrendingFallback && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-1000 bg-surface border border-border rounded-lg px-3 py-1.5 shadow-sm text-xs text-ink-secondary whitespace-nowrap">
-                {t('trending_fallback_banner')}
-              </div>
-            )}
+            <MapStatusBanner
+              message={
+                isLoading ? t('loading_cafes')
+                : error ? t('search_error')
+                : isTrendingFallback ? t('trending_fallback_banner')
+                : null
+              }
+              busy={isLoading}
+              onRetry={error && !isLoading ? handleRefreshCafes : undefined}
+              retryLabel={t('retry')}
+            />
             <InteractiveMap
               cafes={allCafes}
               center={center}
               zoom={14}
               userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
-              userMarkerPalette={userMarkerPalette}
               onMarkerClick={handleCafeClick}
               onBoundsChanged={isTrendingFallback ? undefined : handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
               fitToMarkers={isTrendingFallback}
             />
-            {isLoading && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-1000 bg-surface px-4 py-2 rounded-lg shadow-lg">
-                <div className="flex items-center gap-2">
-                  <LoadingSpinner size="sm" />
-                  <span className="text-text">{t('loading_cafes')}</span>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

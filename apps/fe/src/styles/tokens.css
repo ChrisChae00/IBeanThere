@@ -61,6 +61,12 @@
   --marker-cafe: var(--c-marker-cafe);
   --marker-user: var(--c-marker-user);
   --marker-pending: var(--state-pending);
+  /*
+    The ring and the count sit on the marker against OpenStreetMap's tiles, which stay
+    light in every theme, so both are fixed rather than theme-derived -- a dark theme's
+    on-brand ink would put a dark ring on a dark pin and lose the cut-out entirely.
+  */
+  --marker-ring: #ffffff;
 
   /* ---- Typography ---- */
   /*
@@ -99,6 +105,13 @@
       var(--relief-blur) var(--relief-light),
     inset var(--relief-spread) var(--relief-spread) var(--relief-blur)
       var(--relief-dark);
+
+  /*
+    Map markers sit on OpenStreetMap's own tiles, which stay light whatever the theme, so
+    this one shadow is deliberately not theme-derived: `--c-shadow` is a light colour in
+    the dark themes and would paint a halo instead of a shadow. One offset, fixed.
+  */
+  --shadow-marker: 0 2px 4px rgb(0 0 0 / 0.3);
 
   /* ---- Radius ---- */
   /* Two values and a pill. Anything that needs a third is asking the wrong question. */
@@ -142,6 +155,14 @@
   --z-nav-scrim: 9998;
   --z-nav-drawer: 9999;
   --z-nav-popover: 10000;
+
+  /*
+    Map chrome sits above Leaflet's own controls, which globals.css pins at 1000, and
+    below the nav band. The cafe modal sits above the chrome that opened it -- same
+    rule as the nav: a popup outranks whatever opened it.
+  */
+  --z-map-chrome: 1100;
+  --z-map-modal: 1200;
 
   --input-height: 48px;
   --input-radius: var(--radius-control);

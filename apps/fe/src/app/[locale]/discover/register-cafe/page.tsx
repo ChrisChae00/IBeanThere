@@ -20,15 +20,6 @@ const InteractiveMap = dynamic(() => import('@/components/map/InteractiveMap'), 
   ),
 });
 
-function getCSSVariable(name: string, fallback: string = ''): string {
-  if (typeof window !== 'undefined') {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim() || fallback;
-  }
-  return fallback;
-}
-
 export default function RegisterCafePage() {
   const params = useParams();
   const locale = params.locale as string;
@@ -121,10 +112,7 @@ export default function RegisterCafePage() {
                     title={tMap('location_button')}
                     disabled={!coords}
                   >
-                    <UserLocationIcon 
-                      size={32} 
-                      color={getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A'} 
-                    />
+                    <UserLocationIcon size={32} color="var(--marker-user)" />
                   </button>
                 </div>
               </div>

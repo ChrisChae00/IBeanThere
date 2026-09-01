@@ -72,7 +72,6 @@ export interface MapProps {
   zoom: number;
   userLocation?: { lat: number; lng: number };
   selectedLocation?: { lat: number; lng: number };
-  userMarkerPalette?: string;
   onMarkerClick?: (cafe: CafeMapData) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;

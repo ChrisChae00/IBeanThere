@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
-import TrendingCafeCard from './TrendingCafeCard';
+import CafeCard from './CafeCard';
 import { TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
 import { PlusIcon } from '@/components/ui';
 
@@ -11,7 +11,6 @@ interface TrendingCafesSectionProps {
   cafes: TrendingCafeResponse[];
   locale: string;
   isLoading: boolean;
-  onCheckIn?: (cafeId: string) => void;
   googlePhotos?: Record<string, GoogleCafePhoto | null | 'loading'>;
 }
 
@@ -65,7 +64,6 @@ export default function TrendingCafesSection({
   cafes,
   locale,
   isLoading,
-  onCheckIn,
   googlePhotos = {},
 }: TrendingCafesSectionProps) {
   const t = useTranslations('discover.explore_map');
@@ -97,11 +95,11 @@ export default function TrendingCafesSection({
         ) : (
           <>
             {displayCafes.map((cafe) => (
-              <TrendingCafeCard
+              <CafeCard
+                size="sm"
                 key={cafe.id}
                 cafe={cafe}
                 locale={locale}
-                onCheckIn={onCheckIn}
                 googlePhoto={resolvedGooglePhoto(googlePhotos[cafe.id])}
                 googlePhotoLoading={googlePhotos[cafe.id] === 'loading'}
               />
