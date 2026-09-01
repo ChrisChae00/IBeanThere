@@ -82,6 +82,10 @@ Rules:
   decisions.
 - **Never encode meaning in colour alone.** Pending vs verified is a dashed vs solid
   border first, a colour second.
+- **A state colour is emphasis, not a text colour.** `--state-success` and
+  `--state-danger` over their own 12% tint measure 2.4-3.5:1 in three of the four
+  themes. Set the label in `--ink-primary` and let the state colour be a dot beside it;
+  the same goes for failure messages.
 
 ## 5. Structure
 
