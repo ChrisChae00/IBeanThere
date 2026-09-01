@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Logo } from '@/shared/ui';
 import { FooterHomescreenLink, FooterShareButton } from './FooterClient';
 import FooterContactButton from './FooterContactButton';
+import WaveDivider from './WaveDivider';
 
 /*
   Two bands split by a hairline: identity and destinations on top, the small print
@@ -24,6 +25,14 @@ export default async function Footer({ locale }: { locale: string }) {
 
   return (
     <footer className="bg-brand text-ink-on-brand">
+      {/*
+        The brand band starts as a wave rather than a ruled edge, on every page and not
+        only the landing. It sits in the footer's own flow: hanging it above the footer
+        in a negative layer does not work, because a page's own background is an in-flow
+        block background and paints over anything in a negative layer. In flow it is
+        always visible, and there is nothing for it to overlap in the first place.
+      */}
+      <WaveDivider from="var(--surface-page)" to="var(--brand)" />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">

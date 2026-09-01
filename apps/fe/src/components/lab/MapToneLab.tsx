@@ -76,42 +76,6 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
         )}
       </section>
 
-      {/* Filter row */}
-      <section className="mx-auto w-full max-w-[1400px] px-6 py-6 md:px-10">
-        {press ? (
-          <div className="flex flex-wrap items-center gap-6 border-b border-edge-subtle pb-3">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`landing-micro min-h-11 border-b-2 pb-1 transition-colors ${
-                  activeFilter === f
-                    ? 'border-brand text-ink-primary'
-                    : 'border-transparent text-ink-secondary hover:text-ink-primary'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-            <span className="landing-micro ml-auto text-ink-secondary">
-              {gridCafes.length} listed
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {FILTERS.map((f) => (
-              <Button
-                key={f}
-                variant={activeFilter === f ? 'primary' : 'outline'}
-                onClick={() => setActiveFilter(f)}
-              >
-                {f}
-              </Button>
-            ))}
-          </div>
-        )}
-      </section>
-
       {/* Map */}
       <section className="mx-auto w-full max-w-[1400px] px-6 md:px-10">
         <div
@@ -138,6 +102,34 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
           <h2 className="mb-6 text-2xl font-semibold text-ink-primary">On the map this week</h2>
         )}
 
+        {/* Filters sit with the list they filter, not with the map. */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          {FILTERS.map((f) =>
+            press ? (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`landing-micro min-h-11 rounded-(--radius-control) border px-4 transition-colors ${
+                  activeFilter === f
+                    ? 'border-brand bg-brand/10 text-ink-primary'
+                    : 'border-edge-rule text-ink-secondary hover:border-brand hover:text-ink-primary'
+                }`}
+              >
+                {f}
+              </button>
+            ) : (
+              <Button
+                key={f}
+                variant={activeFilter === f ? 'primary' : 'outline'}
+                onClick={() => setActiveFilter(f)}
+              >
+                {f}
+              </Button>
+            )
+          )}
+          <span className="landing-micro ml-auto text-ink-secondary">{gridCafes.length} listed</span>
+        </div>
+
         {gridCafes.length === 0 ? (
           press ? (
             <div className="border-t border-edge-default pt-6">
@@ -163,7 +155,7 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
           <div
             className={
               press
-                ? 'grid grid-cols-1 gap-px bg-edge-subtle md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                ? 'grid grid-cols-1 gap-px border border-edge-rule bg-edge-rule md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
                 : 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
             }
           >

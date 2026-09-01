@@ -74,10 +74,12 @@ export default function CafeCard({
       <Link
         href={cafePath}
         aria-label={cafe.name}
-        className={`absolute inset-0 z-20 ${s.radius} focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand`}
+        /* `inherit` so the focus ring and the hover shade follow whatever radius the
+           card is actually wearing, including none. */
+        className="absolute inset-0 z-20 rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand" 
       />
       {/* Hover shadow overlay - renders on top of all content */}
-      <div className={`absolute inset-0 ${s.radius} pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10`} />
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
 
       <div className="overflow-hidden flex-1 flex flex-col">
         <CafeCardImage

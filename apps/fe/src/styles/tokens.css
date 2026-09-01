@@ -47,6 +47,13 @@
   --edge-subtle: color-mix(in srgb, var(--c-edge) 50%, transparent);
   --edge-default: var(--c-edge);
   --edge-strong: var(--c-brand);
+  /*
+    A rule that has to stay visible on every theme. The edge slots are surface-derived,
+    so on the dark themes they sit within ~1.2:1 of the panel they divide and disappear;
+    this one comes off the ink instead, which is the one colour guaranteed to contrast
+    with the surface it is printed on.
+  */
+  --edge-rule: color-mix(in srgb, var(--ink-primary) 18%, transparent);
 
   /* ---- Layer 2: state ---- */
   --state-success: var(--c-success);
