@@ -1120,8 +1120,13 @@
             "title": "10. Changes to Terms",
             "content": "We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
         },
+        "google_maps": {
+          "title": "11. Google Maps Content",
+          "content": "Google Maps content is owned by Google or third-party rights holders. ibeanthere does not claim ownership of these photos. Your use of this content is subject to the Google Maps Platform Terms of Service.",
+          "link_label": "Google Maps Platform Terms of Service"
+        },
         "contact": {
-          "title": "11. Contact Us",
+          "title": "12. Contact Us",
           "content": "If you have any questions about these Terms, please contact us at ibeanthere.app@gmail.com."
         }
       },
@@ -1186,8 +1191,13 @@
           "title": "13. Changes to Privacy Policy",
           "content": "We may amend this Privacy Policy from time to time as we add new products and services, as we improve our current offerings, and as technologies change. If we make a change to this Privacy Policy, this will be reflected in the above Last Update date. We encourage you to check back periodically. If we make any material or substantive changes in this Privacy Policy, we will notify you by posting a clear and conspicuous notice of these changes on the Website and in this Privacy Policy."
         },
+        "google_maps": {
+          "title": "14. Google Maps Photos",
+          "content": "When a Google photo is displayed, we send the cafe's Place ID to Google. Your browser may connect directly to a Google image host, which can disclose your IP address and browser information to Google.",
+          "link_label": "Google Privacy Policy"
+        },
         "contact": {
-          "title": "14. Contact Us",
+          "title": "15. Contact Us",
           "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: ibeanthere.app@gmail.com"
         }
       }

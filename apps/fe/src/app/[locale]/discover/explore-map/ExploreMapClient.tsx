@@ -3,13 +3,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import MapSection from '@/components/map/MapSection';
-import { getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
-import { TrendingCafeResponse } from '@/types/api';
+import { getGoogleCafePhoto, getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
+import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
 import { TrendingCafesSection, CafeGridCard } from '@/components/cafe';
-import { CAFE_GRID_ITEMS_PER_PAGE, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
+import { CAFE_GRID_ITEMS_PER_PAGE, GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
 
 type FilterType = 'all' | 'closest' | 'most_popular';
+type GooglePhotoState = GoogleCafePhoto | null | 'loading';
+
+const resolvedGooglePhoto = (photo?: GooglePhotoState) =>
+  photo === 'loading' ? undefined : photo;
 
 // Sorting happens on the server: the grid only ever holds the pages fetched so
 // far, so sorting client-side would only reorder those and leave later pages
@@ -39,11 +43,37 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const [hasMore, setHasMore] = useState(initialCafes.length === CAFE_GRID_ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [googlePhotos, setGooglePhotos] = useState<Record<string, GooglePhotoState>>({});
+  const requestedGooglePhotos = useRef(new Set<string>());
 
   const location = useMemo(
     () => (coords ? { lat: coords.latitude, lng: coords.longitude } : undefined),
     [coords]
   );
+
+  useEffect(() => {
+    const remaining = GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT - requestedGooglePhotos.current.size;
+    if (remaining <= 0) return;
+
+    const candidates = [...trendingCafes, ...cafes].filter(
+      (cafe, index, all) =>
+        !cafe.main_image && !cafe.image &&
+        !requestedGooglePhotos.current.has(cafe.id) &&
+        all.findIndex((item) => item.id === cafe.id) === index
+    ).slice(0, remaining);
+    if (!candidates.length) return;
+
+    candidates.forEach((cafe) => requestedGooglePhotos.current.add(cafe.id));
+    setGooglePhotos((current) => ({
+      ...current,
+      ...Object.fromEntries(candidates.map((cafe) => [cafe.id, 'loading'])),
+    }));
+    candidates.forEach((cafe) => {
+      getGoogleCafePhoto(cafe.id).then((photo) => {
+        setGooglePhotos((current) => ({ ...current, [cafe.id]: photo }));
+      });
+    });
+  }, [trendingCafes, cafes]);
 
   // Refresh the trending panel once coordinates arrive so it shows local results
   useEffect(() => {
@@ -133,6 +163,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               cafes={trendingCafes}
               locale={locale}
               isLoading={false}
+              googlePhotos={googlePhotos}
             />
           </div>
         </div>
@@ -196,6 +227,8 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                   key={cafe.id}
                   cafe={cafe}
                   locale={locale}
+                  googlePhoto={resolvedGooglePhoto(googlePhotos[cafe.id])}
+                  googlePhotoLoading={googlePhotos[cafe.id] === 'loading'}
                 />
               ))
             )}

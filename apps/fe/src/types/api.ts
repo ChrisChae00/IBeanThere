@@ -63,6 +63,17 @@ export interface TrendingCafeResponse {
   main_image?: string;
 }
 
+export interface GoogleCafePhoto {
+  image_url: string;
+  source_url: string;
+  provider: 'Google Maps';
+  author_attributions: Array<{
+    display_name?: string;
+    uri?: string;
+    photo_uri?: string;
+  }>;
+}
+
 export interface CafeRegistrationRequest {
   name: string;
   latitude: number;
@@ -440,5 +451,4 @@ export interface ShareTokenResponse {
   share_token: string;
   share_url: string;
 }
-
 

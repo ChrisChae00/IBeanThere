@@ -114,9 +114,13 @@ snaps to the building or the road, so two cafes in one building would claim it a
 collide. `google_place_id` comes only from a server-side Places lookup — a
 client-supplied id could squat the unique index on a place it does not own.
 
-NULL in either column is normal, not a gap to backfill: a brand new local cafe is in
-neither dataset. The UNIQUE indexes are partial (`WHERE ... IS NOT NULL`), so NULLs
-never collide. `source_url` is unique too, but only against the identical string —
+NULL in either column is normal: a brand new local cafe may be in neither dataset. The
+photo fallback has one narrow exception: its administrator script attempts to backfill
+`google_place_id` only for existing cafes that have no cafe or public visit image. It
+does not make an external ID mandatory or perform a general identity backfill. See
+[Google Place Photo card fallback](./google-place-photo-fallback.md). The UNIQUE indexes
+are partial (`WHERE ... IS NOT NULL`), so NULLs never collide. `source_url` is unique too,
+but only against the identical string —
 two different URLs pointing at one place are caught by `google_place_id`, not here.
 It is stored only when a server-side lookup resolved the submitted URL to a place
 within 100 m of the coordinates being registered; otherwise the row keeps no URL at
@@ -159,13 +163,14 @@ leaves those rows alone.
 Today a `pending` cafe becomes `verified` after three different users drop a bean
 there, which says people showed up, not that the place exists. The next rework asks
 Google or OSM whether a pending row is a real venue: a hit stores the id and confirms
-it, a miss goes to a review queue, and the three-person condition goes away. This
-change only opens the columns; it does not build that pipeline, and it does not
-backfill ids onto existing rows.
+it, a miss goes to a review queue, and the three-person condition goes away. The
+photo-card work does not build that confirmation pipeline. Its Place ID backfill is
+limited to image-less cafes and does not change verification status.
 
 ## Maintenance scripts
 
-`apps/be/scripts/` (not tracked in git):
+`apps/be/scripts/` is ignored by default. Operational files explicitly unignored for
+this feature are tracked; older maintenance scripts remain local unless already in Git.
 
 - `purge_franchise_cafes.py` — sweeps OSM by region, matches rows to nodes by proximity
   and name, applies both rules, and records traits on survivors. Dry run by default;
@@ -185,6 +190,9 @@ backfill ids onto existing rows.
   that migration 013 dropped (the view now sets `security_invoker`, the function does
   not).
 - `test_cafe_dedupe.py` — the identity rules, no DB needed.
+- `backfill_google_place_ids.py` — dry-run-first, IDs-only lookup for image-less cafes;
+  requires `--limit` and writes only with `--apply`.
+- `migrations/015_google_photo_usage.sql` — atomic Pacific-month Place Photo cap.
 - `test_franchise_classifier.py`, `test_venue_category.py` — the classifier checks.
 
 Overpass rate-limits aggressively and will refuse a host that queries too hard; the

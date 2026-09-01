@@ -46,4 +46,8 @@ apps/be/
 ## Database Migrations
 
 Numbered SQL files in `apps/be/scripts/migrations/`, applied by hand through the Supabase
-SQL editor. Latest: `011_add_venue_category.sql`.
+SQL editor. Latest: `015_google_photo_usage.sql`.
+
+The latest migration and its endpoint support an optional, disabled-by-default Google
+photo fallback for explore cards. See [Google Place Photo card fallback](./google-place-photo-fallback.md)
+for the data flow, billing guard, backfill, and activation gates.

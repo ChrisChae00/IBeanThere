@@ -38,7 +38,9 @@
 - **Pioneer System (Gamification):** The first to check-in becomes the **Navigator**. The 2nd and 3rd become **Scouts**. Get permanently recorded in the cafe's history!
 - **Community Verification:** A registered cafe only becomes strictly "verified" once 3 independent users visit and review it.
 - **Local Coffee Only:** Franchises and non-coffee venues are turned away at registration. The map is for independent cafes that actually serve coffee.
-- **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Google Maps API required).
+- **Cost-Controlled Maps:** OpenStreetMap + Leaflet remain the map. An optional,
+  disabled-by-default Google Place Photo fallback can enrich image-less explore cards
+  behind per-page and monthly hard caps.
 
 ---
 
@@ -50,6 +52,9 @@
 - **Algorithmic Curation:** Chains (100+ locations worldwide) and non-coffee venues (bubble tea, tea houses, juice bars) are rejected at registration, judged from OpenStreetMap brand and cuisine data rather than a hardcoded brand list — so the rule holds in any market. See [Cafe Curation Rules](./docs/architecture/cafe-curation.md).
 - **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes, plus per-brand and per-cafe overrides when the algorithm gets one wrong.
 - **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
+- **Bounded Photo Fallback:** Image-less explore cards may use short-lived Google Place
+  Photos after first-party and public visit images, without persisting or mixing them
+  into the OSM map. See [Google Place Photo card fallback](./docs/architecture/google-place-photo-fallback.md).
 
 ### Advanced Coffee Journaling
 - **Geo-fenced Check-ins:** Visit tracking activates when your location is within 100m.
@@ -233,7 +238,7 @@ npm run dev
 | Module            | Purpose                              | Key Endpoints                                                    |
 | ----------------- | ------------------------------------ | ---------------------------------------------------------------- |
 | **Auth**          | User session and profile metadata    | `/auth/me`, `/auth/verify`                                       |
-| **Cafes**         | Discovery, Geocoding, Verification   | `GET /cafes`, `POST /cafes/register`, `GET /cafes/admin/pending` |
+| **Cafes**         | Discovery, Geocoding, Verification   | `GET /cafes`, `POST /cafes/register`, `GET /cafes/admin/pending`, `GET /cafes/{id}/google-photo` |
 | **Visits & Logs** | Journaling and physical check-ins    | `POST /cafes/{id}/visit`, `POST /cafes/{id}/log`                 |
 | **Users**         | Public profiles, badges              | `GET /users/profile/{name}`                                      |
 | **Collections**   | Custom groupings of cafes (My Beans) | `GET /collections`, `POST /collections`                          |

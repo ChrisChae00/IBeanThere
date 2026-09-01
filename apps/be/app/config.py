@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 
@@ -12,6 +13,8 @@ class Settings(BaseSettings):
     
     # Google Places API
     google_places_api_key: Optional[str] = None
+    google_place_photo_enabled: bool = False
+    google_place_photo_monthly_cap: int = Field(default=900, ge=1)
 
     # Reverse proxies whose X-Forwarded-For we trust. Render only reaches the
     # container through its load balancer, so trusting private ranges is enough.

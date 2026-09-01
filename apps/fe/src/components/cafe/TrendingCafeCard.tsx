@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { TrendingCafeResponse } from '@/types/api';
+import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import CafeCardImage from './CafeCardImage';
 import DropBeanButton from './DropBeanButton';
 import { getCafePath } from '@/lib/utils/slug';
@@ -12,9 +12,11 @@ interface TrendingCafeCardProps {
   cafe: TrendingCafeResponse;
   locale: string;
   onCheckIn?: (cafeId: string) => void;
+  googlePhoto?: GoogleCafePhoto | null;
+  googlePhotoLoading?: boolean;
 }
 
-export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps) {
+export default function TrendingCafeCard({ cafe, locale, googlePhoto, googlePhotoLoading }: TrendingCafeCardProps) {
   const tMap = useTranslations('map');
   
   const cafeImage = cafe.main_image || cafe.image;
@@ -25,15 +27,13 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
   const longitude = typeof cafe.longitude === 'string' ? parseFloat(cafe.longitude) : cafe.longitude;
 
   return (
-    <Link 
-      href={cafePath}
-      className="group bg-background border border-border rounded-xl overflow-hidden transition-shadow flex flex-col h-full cursor-pointer relative"
-    >
+    <article className="group bg-background border border-border rounded-xl overflow-hidden transition-shadow flex flex-col h-full relative">
+      <Link href={cafePath} aria-label={cafe.name} className="absolute inset-0 z-20 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand" />
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
       
       <div className="overflow-hidden flex-1 flex flex-col">
-        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" />
+        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="small" googlePhoto={googlePhoto} googlePhotoLoading={googlePhotoLoading} locale={locale} />
       </div>
       <div className="flex flex-col mt-auto p-3">
         <h3 className="text-base font-semibold text-text mb-0.5 line-clamp-1" title={cafe.name}>
@@ -51,7 +51,7 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
           ) : (
             <span /> /* Empty span to maintain flex layout */
           )}
-          <div onClick={(e) => e.preventDefault()}>
+          <div className="relative z-30">
             <DropBeanButton
               cafeId={cafe.id}
               cafeLat={latitude}
@@ -62,7 +62,6 @@ export default function TrendingCafeCard({ cafe, locale }: TrendingCafeCardProps
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
-

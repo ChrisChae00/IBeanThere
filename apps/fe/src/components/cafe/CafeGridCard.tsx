@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { TrendingCafeResponse } from '@/types/api';
+import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import CafeCardImage from './CafeCardImage';
 import DropBeanButton from './DropBeanButton';
 import { getCafePath } from '@/lib/utils/slug';
@@ -11,29 +11,24 @@ import { extractCity } from '@/lib/utils/address';
 interface CafeGridCardProps {
   cafe: TrendingCafeResponse;
   locale: string;
+  googlePhoto?: GoogleCafePhoto | null;
+  googlePhotoLoading?: boolean;
 }
 
-export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
+export default function CafeGridCard({ cafe, locale, googlePhoto, googlePhotoLoading }: CafeGridCardProps) {
   const tMap = useTranslations('map');
   
   const cafeImage = cafe.main_image || cafe.image;
   const cafePath = getCafePath(cafe, locale);
 
-  const handleDropBeanClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   return (
-    <Link 
-      href={cafePath}
-      className="group bg-surface border border-border rounded-2xl overflow-hidden transition-shadow cursor-pointer flex flex-col relative"
-    >
+    <article className="group bg-surface border border-border rounded-2xl overflow-hidden transition-shadow flex flex-col relative">
+      <Link href={cafePath} aria-label={cafe.name} className="absolute inset-0 z-20 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand" />
       {/* Hover shadow overlay - renders on top of all content */}
       <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity shadow-inset-primary z-10" />
       
       <div className="bg-primary flex-1 flex flex-col">
-        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" />
+        <CafeCardImage imageUrl={cafeImage} alt={cafe.name} size="large" googlePhoto={googlePhoto} googlePhotoLoading={googlePhotoLoading} locale={locale} />
       </div>
       <div className="p-4 mt-auto">
         <h3 className="text-sm font-semibold text-text mb-1.5 line-clamp-2" title={cafe.name}>
@@ -55,7 +50,7 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
           ) : (
             <span /> /* Empty span to maintain flex layout */
           )}
-          <div onClick={handleDropBeanClick}>
+          <div className="relative z-30">
             <DropBeanButton
               cafeId={cafe.id}
               cafeLat={cafe.latitude}
@@ -66,7 +61,6 @@ export default function CafeGridCard({ cafe, locale }: CafeGridCardProps) {
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
-

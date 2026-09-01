@@ -25,6 +25,7 @@ export default async function PrivacyPage({
     'retention',
     'rights',
     'changes',
+    'google_maps',
     'contact'
   ];
 
@@ -38,7 +39,7 @@ export default async function PrivacyPage({
         <div className="bg-background p-4 rounded-sm border border-border mb-8 text-sm text-ink-secondary">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
-            {tLegal('last_updated', { date: '2026-01-19' })}
+            {tLegal('last_updated', { date: '2026-08-31' })}
           </p>
         </div>
 
@@ -73,6 +74,16 @@ export default async function PrivacyPage({
             <div key={section}>
               <h2 className="text-xl font-semibold mb-3">{t(`${section}.title`)}</h2>
               <p className="whitespace-pre-wrap">{t(`${section}.content`)}</p>
+              {section === 'google_maps' ? (
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  {t('google_maps.link_label')}
+                </a>
+              ) : null}
             </div>
           ))}
         </div>

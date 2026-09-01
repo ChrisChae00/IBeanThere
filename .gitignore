@@ -63,8 +63,17 @@ Thumbs.db
 # Project-specific
 map-feature-implementation.plan.md
 VISITS_AND_TRENDING.md
-apps/be/scripts/
+apps/be/scripts/*
+!apps/be/scripts/backfill_google_place_ids.py
+!apps/be/scripts/migrations/
+apps/be/scripts/migrations/*
+!apps/be/scripts/migrations/015_google_photo_usage.sql
 /docs/
+!docs/
+docs/*
+!docs/architecture/
+docs/architecture/*
+!docs/architecture/google-place-photo-fallback.md
 
 # Temporary/Development files
 *.tmp

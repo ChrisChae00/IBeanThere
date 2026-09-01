@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
@@ -197,6 +197,20 @@ export async function getTrendingCafes(
   } catch (error) {
     console.error('Error fetching trending cafes:', error);
     return [];
+  }
+}
+
+export async function getGoogleCafePhoto(cafeId: string): Promise<GoogleCafePhoto | null> {
+  try {
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/google-photo`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    if (response.status === 204 || response.status === 429 || response.status === 502) return null;
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
   }
 }
 

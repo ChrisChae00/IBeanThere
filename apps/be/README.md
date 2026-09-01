@@ -7,7 +7,12 @@
 ## Migrations
 
 Numbered SQL files in `scripts/migrations/`, applied by hand through the Supabase SQL
-editor in order. Latest: `014_cafe_identity_uniques.sql`.
+editor in order. Latest: `015_google_photo_usage.sql`.
+
+Migration 015 adds the atomic monthly reservation guard for the disabled-by-default
+Google Place Photo card fallback. Apply it before enabling the backend flag. Full
+configuration, backfill, rollout, monitoring, and rollback instructions are in
+[Google Place Photo card fallback](../../docs/architecture/google-place-photo-fallback.md).
 
 ## Cafe curation
 
@@ -25,10 +30,11 @@ that have none. All of it lives in `app/services/cafe_dedupe.py`; registration, 
 seed scripts and `scripts/dedupe_cafes.py` share it. Rationale and the rules are in
 [docs/architecture/cafe-curation.md](../../docs/architecture/cafe-curation.md).
 
-Checks (no pytest, plain scripts):
+Checks (no pytest):
 
 ```bash
 python scripts/test_venue_category.py
 python scripts/test_franchise_classifier.py       # add --live to hit Overpass
 python scripts/test_cafe_dedupe.py                # identity rules, no DB
+python -m unittest discover -s tests -p 'test_*google_place*.py' -v
 ```

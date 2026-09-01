@@ -6,7 +6,8 @@ Cafe API endpoints for UGC verification system.
 - Get cafe details (with Founding Crew info)
 """
 
-from fastapi import APIRouter, Query, HTTPException, status, Depends, Body
+from fastapi import APIRouter, Query, HTTPException, status, Depends, Body, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from decimal import Decimal
@@ -27,15 +28,128 @@ from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
 from app.core.permissions import Permission, require_permission
 from app.core.fraud_detection import check_location_consistency
+from app.core.rate_limit import limiter
+from app.config import settings
+from app.services.google_places_service import GooglePlacesService
 from app.utils.timezone import get_timezone_from_coords
 from supabase import Client
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
+import httpx
 from dateutil import parser as date_parser
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+PHOTO_SKU = "place_photo"
+
+
+def _google_billing_month(now: Optional[datetime] = None) -> str:
+    pacific = (now or datetime.now(timezone.utc)).astimezone(
+        ZoneInfo("America/Los_Angeles")
+    )
+    return pacific.strftime("%Y-%m-01")
+
+
+def _reserve_photo_slot(supabase: Client) -> int:
+    result = supabase.rpc(
+        "reserve_google_api_slot",
+        {
+            "p_sku": PHOTO_SKU,
+            "p_billing_month": _google_billing_month(),
+            "p_cap": settings.google_place_photo_monthly_cap,
+        },
+    ).execute()
+    count = int(result.data or 0)
+    if count in (720, 810, 900):
+        logger.warning(
+            "google_place_photo_usage_threshold",
+            extra={"sku": PHOTO_SKU, "reserved_count": count},
+        )
+    return count
+
+
+@router.get("/{cafe_id}/google-photo")
+@limiter.limit("12/minute")
+async def get_google_photo(cafe_id: str, request: Request):
+    """Return a fresh Google photo URI for explore cards only."""
+    no_store = {"Cache-Control": "no-store"}
+    if not settings.google_place_photo_enabled or not settings.google_places_api_key:
+        return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+    try:
+        supabase = get_supabase_client()
+        cafe_result = supabase.table("cafes").select("*").eq("id", cafe_id).limit(1).execute()
+        cafe = (cafe_result.data or [None])[0]
+        if not cafe:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "Cafe not found"},
+                headers=no_store,
+            )
+        if cafe.get("main_image") or cafe.get("image"):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        visit_result = supabase.table("cafe_visits").select("photo_urls").eq(
+            "cafe_id", cafe_id
+        ).eq("is_public", True).not_.is_("photo_urls", "null").order(
+            "visited_at", desc=True
+        ).execute()
+        if any((row.get("photo_urls") or []) for row in (visit_result.data or [])):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        place_id = cafe.get("google_place_id")
+        if not place_id:
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        service = GooglePlacesService(settings.google_places_api_key)
+        photo = await service.get_first_photo(place_id)
+        if not photo or not photo.get("googleMapsUri"):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        if _reserve_photo_slot(supabase) == 0:
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={"detail": "PHOTO_MONTHLY_CAP_REACHED"},
+                headers=no_store,
+            )
+
+        image_url = await service.get_photo_uri(photo["name"])
+        attributions = [
+            {
+                "display_name": item.get("displayName"),
+                "uri": item.get("uri"),
+                "photo_uri": item.get("photoUri"),
+            }
+            for item in (photo.get("authorAttributions") or [])
+        ]
+        return JSONResponse(
+            content={
+                "image_url": image_url,
+                "source_url": photo["googleMapsUri"],
+                "provider": "Google Maps",
+                "author_attributions": attributions,
+            },
+            headers=no_store,
+        )
+    except HTTPException:
+        raise
+    except (httpx.HTTPError, ValueError):
+        logger.warning("Google Place Photo request failed", exc_info=True)
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content={"detail": "GOOGLE_PLACE_PHOTO_FAILED"},
+            headers=no_store,
+        )
+    except Exception:
+        logger.exception("Google Place Photo endpoint failed")
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content={"detail": "GOOGLE_PLACE_PHOTO_FAILED"},
+            headers=no_store,
+        )
 
 def slugify(name: str) -> str:
     slug = name.lower().strip()
