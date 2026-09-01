@@ -24,7 +24,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      `img-src 'self' data: blob: https://storage.googleapis.com https://${supabaseHost} https://*.tile.openstreetmap.org`,
+      `img-src 'self' data: blob: https://storage.googleapis.com https://${supabaseHost} https://*.tile.openstreetmap.org https://*.googleusercontent.com`,
       `connect-src 'self' ${apiOrigin} https://${supabaseHost} https://*.supabase.co https://*.tile.openstreetmap.org`,
       "worker-src blob:",
       "font-src 'self' data:",
@@ -58,6 +58,14 @@ module.exports = withBundleAnalyzer(withNextIntl({
         hostname: supabaseHost,
         port: '',
         pathname: '/storage/**',
+      },
+      // OSM seed rows point at Commons. Anything outside this list falls back to a
+      // plain <img> in CafeCardImage rather than throwing inside next/image.
+      {
+        protocol: 'https',
+        hostname: 'commons.wikimedia.org',
+        port: '',
+        pathname: '/wiki/Special:FilePath/**',
       },
     ],
     minimumCacheTTL: 2592000,

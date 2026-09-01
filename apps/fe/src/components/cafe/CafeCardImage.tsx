@@ -13,6 +13,24 @@ interface CafeCardImageProps {
   locale?: string;
 }
 
+// Cafe rows carry arbitrary OSM `image` URLs, and next/image throws a runtime error on
+// any host missing from next.config's remotePatterns. Keep this list in sync with it;
+// anything else renders as a plain <img> and degrades to the placeholder on error.
+const OPTIMIZED_IMAGE_HOSTS = [
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^https?:\/\//, '').split('/')[0],
+  'storage.googleapis.com',
+  'commons.wikimedia.org',
+].filter(Boolean);
+
+function isOptimizable(url: string): boolean {
+  if (url.startsWith('/')) return true;
+  try {
+    return OPTIMIZED_IMAGE_HOSTS.includes(new URL(url).host);
+  } catch {
+    return false;
+  }
+}
+
 export default function CafeCardImage({
   imageUrl,
   alt,
@@ -26,6 +44,7 @@ export default function CafeCardImage({
   const resolvedImageUrl = imageUrl || googlePhoto?.image_url;
   const isGooglePhoto = !imageUrl && Boolean(googlePhoto);
   const showImage = resolvedImageUrl && !imageError;
+  const useNextImage = !isGooglePhoto && Boolean(resolvedImageUrl && isOptimizable(resolvedImageUrl));
 
   useEffect(() => {
     setImageError(false);
@@ -44,7 +63,7 @@ export default function CafeCardImage({
         <div className="absolute inset-0 bg-surface animate-pulse" />
       )}
       {showImage ? (
-        isGooglePhoto ? (
+        !useNextImage ? (
           <img
             src={resolvedImageUrl}
             alt={alt}

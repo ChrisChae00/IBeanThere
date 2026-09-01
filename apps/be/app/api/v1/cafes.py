@@ -831,7 +831,7 @@ async def get_cafe_details(cafe_identifier: str):
         # 1. Navigator
         if cafe.get("navigator_id"):
             try:
-                nav_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", cafe["navigator_id"]).single().execute()
+                nav_user = supabase.table("users").select("user_id:id, username, display_name, avatar_url").eq("id", cafe["navigator_id"]).single().execute()
                 if nav_user.data:
                     founding_crew["navigator"] = nav_user.data
             except Exception:
@@ -842,7 +842,7 @@ async def get_cafe_details(cafe_identifier: str):
             vanguards = []
             for vanguard in cafe["vanguard_ids"]:
                 try:
-                    van_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", vanguard["user_id"]).single().execute()
+                    van_user = supabase.table("users").select("user_id:id, username, display_name, avatar_url").eq("id", vanguard["user_id"]).single().execute()
                     if van_user.data:
                         vanguard_data = van_user.data
                         vanguard_data["role"] = vanguard.get("role")
