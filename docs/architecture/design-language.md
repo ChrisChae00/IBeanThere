@@ -85,6 +85,18 @@ Rules:
 
 ## 5. Structure
 
+The Discover surfaces were built twice — once quiet, once editorial — and the editorial
+one shipped (2026-09-01). What that settled, for every page that follows:
+
+- A page opens with a broadsheet masthead and a rule under it, not a gradient band.
+- Panels are framed: `--radius-card`, one `--edge-rule` hairline, no drop shadow.
+- Controls are pills. State is depth (`relief-control` at rest, `relief-pressed` when
+  active), not a colour swap; the filled control is the page's one primary action.
+- Meta rows — counts, statuses, badges — are `.landing-micro`, never emoji.
+- Names of things (a cafe, a person) are set in the body face. The display serif is for
+  the page's own voice, not for data.
+
+
 - **A rule before a card.** Grids are `gap-px` over `bg-edge-subtle`, so the gap itself
   is the hairline. Reach for a card only when the thing genuinely lifts off the page.
 - **No panel inside a panel.** One elevation step per region.
