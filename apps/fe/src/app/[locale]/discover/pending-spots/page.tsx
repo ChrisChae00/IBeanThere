@@ -181,7 +181,7 @@ export default function PendingSpotsPage() {
               </div>
             ) : error ? (
               <div className="text-center py-12">
-                <div className="mb-4 text-lg font-medium text-state-danger">
+                <div className="mb-4 text-lg font-medium text-ink-primary">
                   {error}
                 </div>
                 <button

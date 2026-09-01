@@ -177,14 +177,25 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-ink-secondary">{t('opening_hours')}</h3>
+                {/*
+                  The state colour is the dot, not the label: `--state-*` on its own tint
+                  measures 2.4-3.5:1 in three of the four themes, so the word itself is
+                  set in ink and the colour is left to carry emphasis.
+                */}
                 {todayHours && !todayHours.closed && (
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`landing-micro flex items-center gap-1.5 rounded-(--radius-pill) px-3 py-1.5 text-ink-primary ${
                       isOpenNow(cafe.businessHours, cafe.timezone)
-                        ? 'bg-state-success/12 text-state-success'
-                        : 'bg-state-danger/12 text-state-danger'
+                        ? 'bg-state-success/12'
+                        : 'bg-state-danger/12'
                     }`}
                   >
+                    <span
+                      aria-hidden
+                      className={`h-1.5 w-1.5 rounded-(--radius-pill) ${
+                        isOpenNow(cafe.businessHours, cafe.timezone) ? 'bg-state-success' : 'bg-state-danger'
+                      }`}
+                    />
                     {isOpenNow(cafe.businessHours, cafe.timezone) ? t('open_now') : t('closed_now')}
                   </span>
                 )}

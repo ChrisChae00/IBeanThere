@@ -128,7 +128,7 @@ export default function NearbyPage(
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           {error && (
             <div className="mb-6 flex items-center justify-between gap-4 rounded-(--radius-card) border border-edge-rule bg-surface-raised px-5 py-4">
-              <p className="text-sm text-state-danger">{t('load_error')}</p>
+              <p className="text-sm text-ink-primary">{t('load_error')}</p>
               <button
                 onClick={() => coords && fetchNearbyCafes(coords.latitude, coords.longitude)}
                 className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
@@ -230,7 +230,8 @@ export default function NearbyPage(
                             {t('m_away', { distance: Math.round(cafe.distance) })}
                           </span>
                           {cafe.status === 'verified' && (
-                            <span className="landing-micro rounded-(--radius-pill) bg-state-success/12 px-3 py-1.5 text-state-success">
+                            <span className="landing-micro flex items-center gap-1.5 rounded-(--radius-pill) bg-state-success/12 px-3 py-1.5 text-ink-primary">
+                              <span aria-hidden className="h-1.5 w-1.5 rounded-(--radius-pill) bg-state-success" />
                               {t('verified')}
                             </span>
                           )}
