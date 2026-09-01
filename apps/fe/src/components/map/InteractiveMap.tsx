@@ -461,7 +461,8 @@ export default function InteractiveMap({
         center={centerLatLng}
         zoom={zoom}
         maxZoom={19}
-        className="h-full w-full rounded-xl"
+        /* The frame owns the corner; a hardcoded radius here fights every panel it sits in. */
+        className="h-full w-full rounded-[inherit]"
         scrollWheelZoom={true}
         zoomControl={true}
         style={{ zIndex: 0 }}

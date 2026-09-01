@@ -70,7 +70,7 @@ export default function CafeCard({
   const longitude = typeof cafe.longitude === 'string' ? parseFloat(cafe.longitude) : cafe.longitude;
 
   return (
-    <article className={`group ${s.frame} border border-border ${s.radius} overflow-hidden transition-shadow flex flex-col relative`}>
+    <article className={`group ${s.frame} border border-edge-rule ${s.radius} overflow-hidden transition-shadow flex flex-col relative`}>
       <Link
         href={cafePath}
         aria-label={cafe.name}

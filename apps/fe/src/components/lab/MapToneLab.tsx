@@ -49,7 +49,6 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
       {press && (
         /* Scoped to the lab so it disappears with it. */
         <style>{`
-          .tone-press article { border-color: transparent; border-radius: 0; }
           .tone-press .custom-cluster-icon > div {
             font-family: var(--font-display);
             border-width: 1px;
@@ -64,7 +63,7 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
             <h1 className="landing-display mt-3 text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
               Every cafe within reach
             </h1>
-            <div className="mt-6 border-t border-edge-default" />
+            <div className="mt-6 border-t border-edge-rule" />
           </>
         ) : (
           <>
@@ -78,13 +77,7 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
 
       {/* Map */}
       <section className="mx-auto w-full max-w-[1400px] px-6 md:px-10">
-        <div
-          className={
-            press
-              ? 'h-[520px] border-y border-edge-default'
-              : 'h-[520px] overflow-hidden rounded-(--radius-card) border border-edge-default bg-surface-raised'
-          }
-        >
+        <div className="mt-8 h-[520px] overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface-raised">
           <InteractiveMap cafes={cafes} center={CENTER} zoom={13} />
         </div>
         <p className="landing-micro mt-3 text-ink-secondary">
@@ -109,10 +102,10 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
-                className={`landing-micro min-h-11 rounded-(--radius-control) border px-4 transition-colors ${
+                className={`landing-micro min-h-11 rounded-(--radius-pill) border px-5 ${
                   activeFilter === f
-                    ? 'border-brand bg-brand/10 text-ink-primary'
-                    : 'border-edge-rule text-ink-secondary hover:border-brand hover:text-ink-primary'
+                    ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
+                    : 'relief-control border-edge-rule bg-surface-raised text-ink-secondary hover:text-ink-primary'
                 }`}
               >
                 {f}
@@ -155,7 +148,7 @@ export default function MapToneLab({ tone }: { tone: Tone }) {
           <div
             className={
               press
-                ? 'grid grid-cols-1 gap-px border border-edge-rule bg-edge-rule md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                ? 'grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
                 : 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
             }
           >
