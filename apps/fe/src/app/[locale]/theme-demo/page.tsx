@@ -42,65 +42,25 @@ const DOMAIN = [
 ] as const;
 
 /*
-  Matcha Latte carries two brand candidates in `themes.css`, and swapping between them
-  means swapping three slots together: a bright green cannot carry light ink, so it
-  takes dark ink and hovers lighter, while the deepened green takes light ink and hovers
-  darker. This toggle writes the whole triple onto `:root` so every row below re-measures
-  against the candidate rather than against the comment beside the slot.
+  Brand candidates for Matcha Latte, each one a brand and the ink that sits on it —
+  the only two values being judged. Hover is derived rather than authored: the theme's
+  rule is that hover deepens the contrast the pair already has, and on a light theme
+  that is the brand a step toward black. Authoring it per candidate would be a third
+  number to keep in sync for no decision it changes.
 
+  The toggle writes these onto `:root` inline, so every measurement below re-runs
+  against the candidate rather than against the comment beside the slot in `themes.css`.
   It is an override on top of whatever theme is active, which is why it is spelled out
-  as the Matcha triple and not as a generic "brand candidate": applied under another
-  theme it would just paint that theme green.
+  as the Matcha pair and not as a generic "brand candidate": applied under another theme
+  it would just paint that theme green.
 */
 const MATCHA_CANDIDATES = {
-  bright: {
-    label: '#85a035 — bright, dark ink (shipped)',
-    slots: {
-      '--c-brand': '#85a035',
-      '--c-brand-soft': '#93af3f',
-      '--c-on-brand': '#1e2810',
-    },
-  },
-  deep: {
-    label: '#53683e — deepened, light ink (alt)',
-    slots: {
-      '--c-brand': '#53683e',
-      '--c-brand-soft': '#4c5f37',
-      '--c-on-brand': '#f7faf0',
-    },
-  },
-  /*
-    #8AA730 as asked, with the whitest ink its own hue allows. It is here to be looked
-    at rather than to be chosen: at 0.33 relative luminance the green is too bright to
-    carry any white-family ink — pure #ffffff is 2.74:1 on it, and tinting the ink
-    toward the brand only lowers that. No white exists that passes; the ceiling is the
-    green, not the ink.
-  */
-  asked: {
-    label: '#8AA730 + white ink — as asked (fails)',
-    slots: {
-      '--c-brand': '#8AA730',
-      '--c-brand-soft': '#779029',
-      '--c-on-brand': '#f8faf2',
-    },
-  },
-  /*
-    The same hue and saturation as #8AA730 (74.6deg, 0.55) taken down to 0.29 HSL
-    lightness, which is the point where the brand-tinted white clears 4.5:1 with a
-    margin rather than on the line. It also lifts the filled control's silhouette over
-    the page from 2.17:1 to 4.20:1, which is the other thing the bright green cannot do.
-  */
-  asked_deepened: {
-    label: '#5f7321 — #8AA730 hue, deep enough for white ink',
-    slots: {
-      '--c-brand': '#5f7321',
-      '--c-brand-soft': '#51621c',
-      '--c-on-brand': '#f8faf2',
-    },
-  },
+  a: { label: 'A — #53813e / #e6e7d9', brand: '#53813e', ink: '#e6e7d9' },
+  b: { label: 'B — #556B2F / #F6E7C6', brand: '#556B2F', ink: '#F6E7C6' },
+  c: { label: 'C — #556B2F / #FFFDD0', brand: '#556B2F', ink: '#FFFDD0' },
 } as const;
 type CandidateKey = keyof typeof MATCHA_CANDIDATES;
-const SLOT_NAMES = Object.keys(MATCHA_CANDIDATES.bright.slots);
+const SLOT_NAMES = ['--c-brand', '--c-brand-soft', '--c-on-brand'];
 
 /** The tile ground under a map marker. OpenStreetMap stays light in every theme. */
 const OSM_TILE = '#f2efe9';
@@ -257,9 +217,10 @@ export default function ThemeDemoPage() {
     const root = document.documentElement;
     for (const name of SLOT_NAMES) root.style.removeProperty(name);
     if (key) {
-      for (const [name, value] of Object.entries(MATCHA_CANDIDATES[key].slots)) {
-        root.style.setProperty(name, value);
-      }
+      const { brand, ink } = MATCHA_CANDIDATES[key];
+      root.style.setProperty('--c-brand', brand);
+      root.style.setProperty('--c-brand-soft', `color-mix(in srgb, ${brand} 88%, black)`);
+      root.style.setProperty('--c-on-brand', ink);
     }
     setCandidate(key);
   }
@@ -301,11 +262,11 @@ export default function ThemeDemoPage() {
       </header>
 
       <Section
-        title="Candidates — matchaLatte brand triple"
-        note="themes.css keeps two brand candidates for this theme, and two more live here while they are being judged. They swap as a triple (--c-brand, --c-brand-soft, --c-on-brand): the bright green cannot carry light ink, so it takes dark ink and hovers lighter. Applied here as a :root override, so every measurement below re-runs against the candidate."
+        title="Candidates — matchaLatte brand and ink"
+        note="A brand and the ink on it. Hover is derived — the brand a step toward black, which is what deepening means on a light theme — so each candidate is the two values actually under judgement. Applied as a :root override, so every measurement below re-runs against the candidate."
       >
         <div className="flex flex-wrap gap-2">
-          {([null, 'bright', 'deep', 'asked', 'asked_deepened'] as const).map((key) => (
+          {([null, 'a', 'b', 'c'] as const).map((key) => (
             <button
               key={key ?? 'off'}
               onClick={() => chooseCandidate(key)}
