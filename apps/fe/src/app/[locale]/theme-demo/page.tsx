@@ -41,37 +41,6 @@ const DOMAIN = [
   '--marker-cafe', '--marker-user', '--marker-pending', '--marker-ring',
 ] as const;
 
-/*
-  Brand candidates for Matcha Latte, each one a brand and the ink that sits on it —
-  the only two values being judged. Hover is derived rather than authored: the theme's
-  rule is that hover deepens the contrast the pair already has, and on a light theme
-  that is the brand a step toward black. Authoring it per candidate would be a third
-  number to keep in sync for no decision it changes.
-
-  The toggle writes these onto `:root` inline, so every measurement below re-runs
-  against the candidate rather than against the comment beside the slot in `themes.css`.
-  It is an override on top of whatever theme is active, which is why it is spelled out
-  as the Matcha pair and not as a generic "brand candidate": applied under another theme
-  it would just paint that theme green.
-*/
-const MATCHA_CANDIDATES = {
-  a: { label: 'A — #53813e / #e6e7d9', brand: '#53813e', ink: '#e6e7d9' },
-  b: { label: 'B — #556B2F / #F6E7C6', brand: '#556B2F', ink: '#F6E7C6' },
-  c: { label: 'C — #556B2F / #FFFDD0', brand: '#556B2F', ink: '#FFFDD0' },
-  /*
-    D and its two repairs come from the same matcha palette. `Matcha #6B8E23` is a
-    shade too light to carry `Milk Foam #F4F1E8` (3.37:1), so the palette's own
-    `Dark Matcha #4C5E24` is here as E, and D2 is #6B8E23 taken down 18% in HSL
-    lightness — the least movement that clears 4.5 with margin while still reading as
-    the palette's mid green rather than its dark one.
-  */
-  d: { label: 'D — #6B8E23 / #F4F1E8 (palette Matcha / Milk Foam)', brand: '#6B8E23', ink: '#F4F1E8' },
-  d2: { label: 'D2 — #58741d / #F4F1E8 (same hue, deep enough)', brand: '#58741d', ink: '#F4F1E8' },
-  e: { label: 'E — #4C5E24 / #F4F1E8 (palette Dark Matcha)', brand: '#4C5E24', ink: '#F4F1E8' },
-} as const;
-type CandidateKey = keyof typeof MATCHA_CANDIDATES;
-const SLOT_NAMES = ['--c-brand', '--c-brand-soft', '--c-on-brand'];
-
 /** The tile ground under a map marker. OpenStreetMap stays light in every theme. */
 const OSM_TILE = '#f2efe9';
 
@@ -134,10 +103,9 @@ function readToken(name: string): string {
 
 function Swatch({ token, signature }: { token: string; signature: string }) {
   const [value, setValue] = useState('');
-  // `signature` is not read in the body - it is here so switching theme or candidate
-  // re-runs the read. Without it the swatch repaints (the background is a live var)
-  // while the value printed under it stays on the first theme, which is worse than
-  // showing nothing.
+  // `signature` is not read in the body - it is here so switching themes re-runs the
+  // read. Without it the swatch repaints (the background is a live var) while the value
+  // printed under it stays on the first theme, which is worse than showing nothing.
   useEffect(() => setValue(readToken(token)), [token, signature]);
 
   return (
@@ -172,8 +140,7 @@ function ContrastRow({ label, fg, bg, signature, min = 4.5, note }: {
   note?: string;
 }) {
   const [ratio, setRatio] = useState<number | null>(null);
-  // Same as Swatch: `signature` is the trigger, not an input. A stale ratio here would
-  // report a pass for a theme that fails.
+  // Same as Swatch: `signature` is the trigger, not an input.
   useEffect(() => setRatio(contrast(fg, bg)), [fg, bg, signature]);
 
   const passes = ratio !== null && ratio >= min;
@@ -214,31 +181,9 @@ function Section({ title, note, children }: {
 export default function ThemeDemoPage() {
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const themeKey = currentTheme.name;
-  const [candidate, setCandidate] = useState<CandidateKey | null>(null);
-  const signature = `${themeKey}:${candidate ?? 'off'}`;
-
-  /*
-    The override is written in the click handler, not in an effect: child effects run
-    before the parent's, so a row measured itself against the old brand and printed the
-    previous candidate's ratio next to the new candidate's swatch — a stale number that
-    reads as a real measurement.
-  */
-  function chooseCandidate(key: CandidateKey | null) {
-    const root = document.documentElement;
-    for (const name of SLOT_NAMES) root.style.removeProperty(name);
-    if (key) {
-      const { brand, ink } = MATCHA_CANDIDATES[key];
-      root.style.setProperty('--c-brand', brand);
-      root.style.setProperty('--c-brand-soft', `color-mix(in srgb, ${brand} 88%, black)`);
-      root.style.setProperty('--c-on-brand', ink);
-    }
-    setCandidate(key);
-  }
-
-  // Leaving the page never strands an override on `:root`.
-  useEffect(() => () => {
-    for (const name of SLOT_NAMES) document.documentElement.style.removeProperty(name);
-  }, []);
+  // Every read below re-runs when this changes; a stale ratio would report a pass
+  // for a theme that fails.
+  const signature = themeKey;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -255,9 +200,7 @@ export default function ThemeDemoPage() {
           {availableThemes.map((theme) => (
             <button
               key={theme.name}
-              // Switching themes drops the candidate override: it is Matcha's brand
-              // triple, and left on under another theme it just paints that theme green.
-              onClick={() => { chooseCandidate(null); setTheme(theme.name); }}
+              onClick={() => setTheme(theme.name)}
               className={`rounded-(--radius-pill) px-5 py-2.5 text-left text-sm font-medium transition-transform active:translate-y-px ${
                 theme.name === currentTheme.name
                   ? 'relief-pressed bg-surface-raised text-ink-primary'
@@ -270,27 +213,6 @@ export default function ThemeDemoPage() {
           ))}
         </div>
       </header>
-
-      <Section
-        title="Candidates — matchaLatte brand and ink"
-        note="A brand and the ink on it. Hover is derived — the brand a step toward black, which is what deepening means on a light theme — so each candidate is the two values actually under judgement. Applied as a :root override, so every measurement below re-runs against the candidate."
-      >
-        <div className="flex flex-wrap gap-2">
-          {([null, 'a', 'b', 'c', 'd', 'd2', 'e'] as const).map((key) => (
-            <button
-              key={key ?? 'off'}
-              onClick={() => chooseCandidate(key)}
-              className={`rounded-(--radius-pill) px-5 py-2.5 text-sm font-medium ${
-                candidate === key
-                  ? 'relief-pressed bg-surface-raised text-ink-primary'
-                  : 'relief-raised bg-surface-raised text-ink-secondary'
-              }`}
-            >
-              {key === null ? 'off — theme as authored' : MATCHA_CANDIDATES[key].label}
-            </button>
-          ))}
-        </div>
-      </Section>
 
       <Section title="Surfaces">
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-6">
@@ -387,7 +309,7 @@ export default function ThemeDemoPage() {
 
       <Section
         title="Contrast — non-text (3:1)"
-        note="Boundaries, not labels: a filled control's silhouette, a pin on the map. WCAG asks 3:1 of the ones that carry meaning. Hairlines are reported without a verdict - they are decoration, and a divider held to 3:1 becomes a border. The known miss is --brand against --surface-page on matchaLatte's shipped brand: switch the candidate above to watch it resolve."
+        note="Boundaries, not labels: a filled control's silhouette, a pin on the map. WCAG asks 3:1 of the ones that carry meaning. Hairlines are reported without a verdict - they are decoration, and a divider held to 3:1 becomes a border. matchaLatte's brand is a deliberate exception - see themes.css."
       >
         <div className="grid gap-3 md:grid-cols-2">
           <ContrastRow signature={signature} min={0} label="--edge-rule / --surface-raised" fg="var(--edge-rule)" bg="var(--surface-raised)" note="hairline" />

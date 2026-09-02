@@ -99,27 +99,14 @@
 }
 
 /*
-  Rebuilt around #607848 and #789048. The old brand (#5d7025) was an olive that
-  went muddy the moment it was put in a gradient - too little blue to stay green
-  as it darkened, so it slid toward brown. Those two hold the blue at 72, which
-  is what keeps the ramp between them reading as matcha rather than as khaki, and
-  the rest of the theme is derived from that pair.
-
-  Two candidates are live here, and swapping between them means swapping three slots
-  together, not one. #85a035 is a bright green that cannot carry light ink -- it is
-  2.81:1 under #f7faf0 -- so it takes the dark-brand-light-ink arrangement Dark Roast
-  uses, inverted: dark ink on top, and hover moves lighter. #53683e is the deepened
-  green, which carries light ink at 5.82:1 and hovers darker like the other two light
-  themes. The alternate values are written beside each slot; changing one without the
-  others gives a theme that fails either at rest or on hover.
-
-  One caveat that belongs to #85a035 and not to the ink: as a filled control it sits at
-  1.97:1 against this theme's page, so the button's silhouette is faint. #53683e is
-  4.4:1 there. Text contrast passes either way; this is the button's own edge.
+  Built around the matcha palette's own greens rather than a derived ramp: the brand is
+  its mid green and the ink on it is the palette's lightest cream. The pairing is
+  3.37:1, below AA, and is kept deliberately -- it was read on screen and judged legible
+  at the sizes it is used, so the number is a known exception here and not an oversight
+  to "fix" on sight. Every other pairing in this theme clears AA and stays that way.
 */
 [data-theme='matchaLatte'] {
-  --c-brand: #85a035; /* alt: #53683e */
-  /* Hover moves lighter, away from the dark ink: 6.18:1. alt: #4c5f37 (6.63:1 on #f7faf0) */
+  --c-brand: #6B8E23;
   --c-brand-soft: #93af3f;
   --c-accent: #b9cc8a;
   --c-page: #e0e8d0;
@@ -128,12 +115,8 @@
   --c-ink: #3a4a20;
   --c-ink-soft: #4e6130;
   --c-edge: #c3d29b;
-  /*
-    Dark, because #85a035 is too bright to sit under light ink (2.81:1); this pairing is
-    5.18:1. alt: #f7faf0, which is what the deepened #53683e brand takes instead (5.82:1).
-  */
-  --c-on-brand: #1e2810;
-  --c-on-media: #f0f4e4;
+  --c-on-brand: #F4F1E8;
+  --c-on-media: #F4F1E8;
   --c-scrim: #2b3818;
   --c-on-auth: #e6ecd8;
   --c-shadow: #607848;
