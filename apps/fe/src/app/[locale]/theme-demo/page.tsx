@@ -69,6 +69,35 @@ const MATCHA_CANDIDATES = {
       '--c-on-brand': '#f7faf0',
     },
   },
+  /*
+    #8AA730 as asked, with the whitest ink its own hue allows. It is here to be looked
+    at rather than to be chosen: at 0.33 relative luminance the green is too bright to
+    carry any white-family ink — pure #ffffff is 2.74:1 on it, and tinting the ink
+    toward the brand only lowers that. No white exists that passes; the ceiling is the
+    green, not the ink.
+  */
+  asked: {
+    label: '#8AA730 + white ink — as asked (fails)',
+    slots: {
+      '--c-brand': '#8AA730',
+      '--c-brand-soft': '#779029',
+      '--c-on-brand': '#f8faf2',
+    },
+  },
+  /*
+    The same hue and saturation as #8AA730 (74.6deg, 0.55) taken down to 0.29 HSL
+    lightness, which is the point where the brand-tinted white clears 4.5:1 with a
+    margin rather than on the line. It also lifts the filled control's silhouette over
+    the page from 2.17:1 to 4.20:1, which is the other thing the bright green cannot do.
+  */
+  asked_deepened: {
+    label: '#5f7321 — #8AA730 hue, deep enough for white ink',
+    slots: {
+      '--c-brand': '#5f7321',
+      '--c-brand-soft': '#51621c',
+      '--c-on-brand': '#f8faf2',
+    },
+  },
 } as const;
 type CandidateKey = keyof typeof MATCHA_CANDIDATES;
 const SLOT_NAMES = Object.keys(MATCHA_CANDIDATES.bright.slots);
@@ -273,10 +302,10 @@ export default function ThemeDemoPage() {
 
       <Section
         title="Candidates — matchaLatte brand triple"
-        note="themes.css keeps two brand candidates for this theme. They swap as a triple (--c-brand, --c-brand-soft, --c-on-brand): the bright green cannot carry light ink, so it takes dark ink and hovers lighter. Applied here as a :root override, so every measurement below re-runs against the candidate."
+        note="themes.css keeps two brand candidates for this theme, and two more live here while they are being judged. They swap as a triple (--c-brand, --c-brand-soft, --c-on-brand): the bright green cannot carry light ink, so it takes dark ink and hovers lighter. Applied here as a :root override, so every measurement below re-runs against the candidate."
       >
         <div className="flex flex-wrap gap-2">
-          {([null, 'bright', 'deep'] as const).map((key) => (
+          {([null, 'bright', 'deep', 'asked', 'asked_deepened'] as const).map((key) => (
             <button
               key={key ?? 'off'}
               onClick={() => chooseCandidate(key)}
