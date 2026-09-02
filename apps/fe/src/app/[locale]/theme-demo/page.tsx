@@ -58,6 +58,16 @@ const MATCHA_CANDIDATES = {
   a: { label: 'A — #53813e / #e6e7d9', brand: '#53813e', ink: '#e6e7d9' },
   b: { label: 'B — #556B2F / #F6E7C6', brand: '#556B2F', ink: '#F6E7C6' },
   c: { label: 'C — #556B2F / #FFFDD0', brand: '#556B2F', ink: '#FFFDD0' },
+  /*
+    D and its two repairs come from the same matcha palette. `Matcha #6B8E23` is a
+    shade too light to carry `Milk Foam #F4F1E8` (3.37:1), so the palette's own
+    `Dark Matcha #4C5E24` is here as E, and D2 is #6B8E23 taken down 18% in HSL
+    lightness — the least movement that clears 4.5 with margin while still reading as
+    the palette's mid green rather than its dark one.
+  */
+  d: { label: 'D — #6B8E23 / #F4F1E8 (palette Matcha / Milk Foam)', brand: '#6B8E23', ink: '#F4F1E8' },
+  d2: { label: 'D2 — #58741d / #F4F1E8 (same hue, deep enough)', brand: '#58741d', ink: '#F4F1E8' },
+  e: { label: 'E — #4C5E24 / #F4F1E8 (palette Dark Matcha)', brand: '#4C5E24', ink: '#F4F1E8' },
 } as const;
 type CandidateKey = keyof typeof MATCHA_CANDIDATES;
 const SLOT_NAMES = ['--c-brand', '--c-brand-soft', '--c-on-brand'];
@@ -266,7 +276,7 @@ export default function ThemeDemoPage() {
         note="A brand and the ink on it. Hover is derived — the brand a step toward black, which is what deepening means on a light theme — so each candidate is the two values actually under judgement. Applied as a :root override, so every measurement below re-runs against the candidate."
       >
         <div className="flex flex-wrap gap-2">
-          {([null, 'a', 'b', 'c'] as const).map((key) => (
+          {([null, 'a', 'b', 'c', 'd', 'd2', 'e'] as const).map((key) => (
             <button
               key={key ?? 'off'}
               onClick={() => chooseCandidate(key)}
