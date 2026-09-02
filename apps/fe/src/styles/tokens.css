@@ -15,7 +15,13 @@
   --surface-elevated: var(--c-elevated);
   --surface-sunken: color-mix(in srgb, var(--c-page) 92%, var(--c-ink));
   --surface-hover: color-mix(in srgb, var(--c-raised) 88%, var(--c-ink));
-  --surface-inverse: var(--c-ink);
+  /*
+    The inverted band defaults to the ink, which is the one slot guaranteed to contrast
+    with every surface in the theme. A theme can name `--c-inverse` to take it off that
+    default: on a dark theme the ink is a near-white, and a full-width block of it is a
+    lamp rather than a band.
+  */
+  --surface-inverse: var(--c-inverse, var(--c-ink));
 
   /* ---- Layer 2: ink ---- */
   --ink-primary: var(--c-ink);

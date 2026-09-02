@@ -65,7 +65,7 @@
 }
 
 [data-theme='espresso'] {
-  --c-brand: #d4c7b8;
+  --c-brand: #b79d85;
   /*
     The one theme whose brand is light and whose ink is dark, so deepening means going
     lighter: 12.30:1. Was #5e432d, a dark brown that inverted the button on hover and
@@ -76,13 +76,19 @@
   --c-page: #1A120B;
   --c-raised: #2A1A13;
   --c-elevated: #3C2A21;
-  --c-ink: #e9ded2;
+  --c-ink: #e8ddd2;
   --c-ink-soft: #d4c7b8;
+  /*
+    The inverted band, dimmed off the ink: at the ink's own value it is a near-white
+    plate in a theme whose page is #1A120B. This is the theme's existing warm mid tone,
+    so it is one fewer colour in the file, and the dark ink on it still reads at 11.15:1.
+  */
+  --c-inverse: #d4c7b8;
   --c-edge: #5e432d;
   --c-on-brand: #1A120B;
-  --c-on-media: #e9ded2;
+  --c-on-media: #e8ddd2;
   --c-scrim: #0f0906;
-  --c-on-auth: #e9ded2;
+  --c-on-auth: #e8ddd2;
   --c-shadow: #d4c7b8;
   --c-star: #FFB347;
   --c-star-off: #808080;
