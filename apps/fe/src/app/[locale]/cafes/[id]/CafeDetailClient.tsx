@@ -74,7 +74,8 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
       {/* Cafe Info Section Card */}
       <div className="mb-6 p-6 bg-cardBackground rounded-lg shadow-(--color-cardShadow)">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-2">
-          <h1 className="text-3xl font-bold text-cardText wrap-break-word">{cafe.name}</h1>
+          {/* A cafe's name is data, not the page's own voice: body face, like the cards. */}
+          <h1 className="font-sans text-3xl font-bold text-cardText wrap-break-word">{cafe.name}</h1>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* Collection Save Buttons */}
             <SaveButtons

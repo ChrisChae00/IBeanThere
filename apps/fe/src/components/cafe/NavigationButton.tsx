@@ -90,9 +90,11 @@ export default function NavigationButton({
       {isOpen && (
         /*
           The shared menu shape, same as the header's. `z-1050` stays as it is: this
-          one opens over map chrome and modals, which run in their own range.
+          one opens over map chrome and modals, which run in their own range. It is as
+          wide as the button it hangs from -- a fixed 12rem panel under a compact
+          control read as a second, unrelated thing.
         */
-        <div className="menu-panel absolute left-0 top-full mt-1 w-48 z-1050 motion-slide-up">
+        <div className="menu-panel absolute left-0 top-full mt-1 w-full z-1050 motion-slide-up">
           <ul role="menu">
             {apps.map((app) => (
               <li key={app.id} role="none">

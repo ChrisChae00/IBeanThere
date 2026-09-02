@@ -98,12 +98,14 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
               {t('status_pending')}
             </span>
           )}
+          {/* Sized to the badge beside it, not to its own 44px target -- the target is
+              restored by the invisible band, the way the map links do it. */}
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-(--radius-pill) bg-scrim-media text-ink-on-media"
+            className="relative flex h-7 w-7 items-center justify-center rounded-(--radius-pill) bg-scrim-media text-ink-on-media before:absolute before:-inset-2 before:content-['']"
             aria-label={t('close')}
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
