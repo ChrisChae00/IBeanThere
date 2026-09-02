@@ -179,6 +179,8 @@ export default function Landing({
 
       <Personas messages={messages} />
 
+      <WaveDivider from="var(--surface-page)" to="var(--surface-raised)" />
+
       <ClosingAction
         messages={messages}
         primaryHref={primaryHref}
@@ -679,9 +681,11 @@ function ClosingAction({
   primaryLabel: string;
 }) {
   return (
-    /* Page ground, not the raised surface: the footer's own wave pours out of this
-       section now, and it can only meet one colour. */
-    <section className="bg-surface-page">
+    /* The closing block is the one raised surface on the page -- without it the
+       section reads as a continuation of the personas above. The footer's wave
+       pours out of the page ground, so this section pours itself back down to it
+       first rather than handing the footer a colour it cannot know about. */
+    <section className="bg-surface-raised">
       <div className={`${MEASURE} py-24 md:py-32`}>
         <h2 className="landing-display text-[clamp(3rem,10vw,9rem)] break-keep">
           <span className="block">
@@ -714,6 +718,7 @@ function ClosingAction({
           </p>
         </Reveal>
       </div>
+      <WaveDivider from="var(--surface-raised)" to="var(--surface-page)" />
     </section>
   );
 }

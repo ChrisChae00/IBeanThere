@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { NavigationApp, getNavigationApps, openNavigation } from '@/lib/utils/navigation';
+import { CAFE_ACTION_CLASS } from './cafeActionClass';
 
 interface NavigationButtonProps {
   latitude: number;
@@ -52,7 +53,9 @@ export default function NavigationButton({
     setIsOpen(false);
   };
 
-  const buttonPadding = size === 'sm' ? 'px-3 py-1.5' : 'px-4 py-2';
+  /* `sm` is the compact pair shared with the Google Maps link (`CAFE_ACTION_CLASS`);
+     `md` keeps the full-height pill for the places that use it on its own. */
+  const buttonPadding = size === 'sm' ? 'px-3 py-1.5' : 'min-h-11 px-5';
   const fontSize = size === 'sm' ? 'text-xs' : 'text-sm';
   const iconSize = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
 
@@ -62,7 +65,11 @@ export default function NavigationButton({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`relief-control flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`}
+        className={
+          size === 'sm'
+            ? `${CAFE_ACTION_CLASS} ${fontSize}`
+            : `relief-control flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`
+        }
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

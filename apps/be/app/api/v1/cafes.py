@@ -471,6 +471,68 @@ async def search_cafes(
             detail="An unexpected error occurred. Please try again."
         )
 
+@router.get("/search/text", response_model=CafeSearchResponse)
+async def search_cafes_by_text(
+    q: str = Query(..., min_length=2, max_length=100, description="Name or address fragment"),
+    limit: int = Query(default=20, ge=1, le=50, description="Maximum results")
+):
+    """
+    Find cafes by name or address, anywhere.
+
+    The map's own search is bounded by whatever area has been loaded; this one is not,
+    so a reader can look up a cafe they have not navigated to yet. Ordered by name so
+    repeated queries return a stable list.
+    """
+    try:
+        supabase = get_supabase_client()
+
+        # `%` and `,` would otherwise be read as PostgREST pattern and argument
+        # separators rather than as characters the reader typed.
+        term = q.strip().replace("%", "").replace(",", " ")
+        if len(term) < 2:
+            return CafeSearchResponse(cafes=[], total_count=0)
+
+        result = supabase.table("cafes").select("*").or_(
+            f"name.ilike.%{term}%,address.ilike.%{term}%"
+        ).order("name").limit(limit).execute()
+
+        formatted_cafes = [
+            {
+                "id": cafe.get("id", ""),
+                "name": cafe.get("name", ""),
+                "slug": cafe.get("slug"),
+                "address": cafe.get("address"),
+                "latitude": Decimal(str(cafe.get("latitude", 0))),
+                "longitude": Decimal(str(cafe.get("longitude", 0))),
+                "phone": cafe.get("phone"),
+                "website": cafe.get("website"),
+                "description": cafe.get("description"),
+                "source_type": cafe.get("source_type"),
+                "source_url": cafe.get("source_url"),
+                "business_hours": cafe.get("business_hours"),
+                "status": cafe.get("status", "pending"),
+                "verification_count": cafe.get("verification_count", 1),
+                "verified_at": cafe.get("verified_at"),
+                "admin_verified": cafe.get("admin_verified", False),
+                "navigator_id": cafe.get("navigator_id"),
+                "vanguard_ids": cafe.get("vanguard_ids", []),
+                "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
+                "updated_at": cafe.get("updated_at"),
+                "main_image": cafe.get("main_image"),
+            }
+            for cafe in (result.data or [])
+        ]
+
+        return CafeSearchResponse(cafes=formatted_cafes, total_count=len(formatted_cafes))
+
+    except Exception:
+        logger.exception("Error in search_cafes_by_text")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
 @router.get("/pending", response_model=CafeSearchResponse)
 async def get_pending_cafes_public(
     supabase: Client = Depends(get_supabase_client)

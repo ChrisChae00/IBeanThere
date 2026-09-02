@@ -252,3 +252,22 @@ export async function searchCafes(
 
   return handleResponse<CafeSearchResponse>(response);
 }
+
+/**
+ * Find cafes by name or address across the whole database, not only the area the map
+ * has loaded. Returns an empty list on failure -- the caller is a search box, and a
+ * thrown error there would take the map down with it.
+ */
+export async function searchCafesByText(query: string, limit = 20): Promise<CafeSearchResponse['cafes']> {
+  try {
+    const response = await apiFetch(
+      `${API_BASE_URL}/api/v1/cafes/search/text?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    if (!response.ok) return [];
+    const result = await handleResponse<CafeSearchResponse>(response);
+    return result.cafes || [];
+  } catch (error) {
+    console.error('Error searching cafes by text:', error);
+    return [];
+  }
+}

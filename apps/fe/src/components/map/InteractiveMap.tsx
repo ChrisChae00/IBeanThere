@@ -225,16 +225,19 @@ function MapCenterController({
 function ClusterLayer({
   cafes,
   onMarkerClick,
-  map
+  map,
+  selectedCafeId
 }: {
   cafes: CafeMapData[];
   onMarkerClick?: (cafe: CafeMapData) => void;
   map: L.Map;
+  selectedCafeId?: string | null;
 }) {
   const clusterGroupRef = useRef<any>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const t = useTranslations('map');
-  const tCommon = useTranslations('common');
+  /* The selected pin has to be repainted without rebuilding every marker, so the
+     markers are addressable by cafe id. */
+  const markersByIdRef = useRef<Map<string, L.Marker>>(new Map());
 
   useEffect(() => {
     if (!map) return;
@@ -302,13 +305,14 @@ function ClusterLayer({
 
     clusterGroupRef.current.clearLayers();
     markersRef.current = [];
+    markersByIdRef.current.clear();
 
     const newMarkers: L.Marker[] = [];
 
     cafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
       const marker = L.marker([cafe.latitude, cafe.longitude], {
-        icon: createCustomMarkerIcon(markerState),
+        icon: createCustomMarkerIcon(markerState, cafe.id === selectedCafeId),
         cafeData: cafe
       } as any);
 
@@ -316,49 +320,27 @@ function ClusterLayer({
         onMarkerClick?.(cafe);
       });
 
-      const verifiedText = t('verified');
-      const navigatorText = t('navigator');
-      const unknownText = tCommon('unknown');
-      const checkInText = cafe.verification_count && cafe.verification_count > 1 ? t('check_ins') : t('check_in');
-      
-      const textSecondaryColor = 'var(--ink-secondary)';
-      const borderColor = 'var(--edge-default)';
-      const primaryColor = 'var(--brand)';
-
-      const popupContent = `
-        <div style="padding: 8px; min-width: 200px;">
-          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
-          <p style="font-size: 14px; color: ${textSecondaryColor}; margin-bottom: 4px;">${cafe.address}</p>
-          ${cafe.rating ? `<p style="font-size: 14px; margin-bottom: 4px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
-          ${cafe.status === 'verified' ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; font-weight: 600; color: ${primaryColor};">${verifiedText}</p>
-              ${cafe.foundingCrew?.navigator ? `<p style="font-size: 12px; color: ${textSecondaryColor};">${navigatorText}: ${cafe.foundingCrew.navigator.username || unknownText}</p>` : ''}
-            </div>
-          ` : ''}
-          ${cafe.status === 'pending' && cafe.verification_count ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
-            </div>
-          ` : ''}
-          ${cafe.source_url ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <a href="${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: ${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                <span>📍</span>
-                <span style="text-decoration: underline;">View on Google Maps</span>
-              </a>
-            </div>
-          ` : ''}
-        </div>
-      `;
-
-      marker.bindPopup(popupContent);
+      /* No `bindPopup`: the details open in the panel anchored beside the pin, and a
+         Leaflet popup on top of it was a second card saying the same thing. */
       newMarkers.push(marker);
+      markersByIdRef.current.set(cafe.id, marker);
     });
 
     clusterGroupRef.current.addLayers(newMarkers);
     markersRef.current = newMarkers;
+    // `selectedCafeId` is deliberately not a dependency: selecting a pin repaints two
+    // icons below, rather than rebuilding every marker on the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cafes, onMarkerClick]);
+
+  useEffect(() => {
+    markersByIdRef.current.forEach((marker, id) => {
+      const cafe = (marker.options as any).cafeData as CafeMapData;
+      marker.setIcon(createCustomMarkerIcon(getMarkerState(cafe), id === selectedCafeId));
+      if (id === selectedCafeId) marker.setZIndexOffset(1000);
+      else marker.setZIndexOffset(0);
+    });
+  }, [selectedCafeId, cafes]);
 
   return null;
 }
@@ -373,12 +355,16 @@ function MapContent({
   center,
   zoom,
   forceCenterUpdate,
-  fitToMarkers
+  fitToMarkers,
+  selectedCafe,
+  onSelectedPointChange
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
   selectedLocation?: { lat: number; lng: number };
   onMarkerClick?: (cafe: CafeMapData) => void;
+  selectedCafe?: CafeMapData | null;
+  onSelectedPointChange?: (point: { x: number; y: number } | null) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;
   center: { lat: number; lng: number };
@@ -395,6 +381,51 @@ function MapContent({
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
   }, [fitToMarkers, cafes, map]);
 
+  /*
+    A tapped pin moves to a known place -- against the left edge, halfway down -- so the
+    card that opens has the rest of the frame to fill and the pin is never underneath it.
+    Same move on a phone; only the card's placement differs there.
+  */
+  const selectedId = selectedCafe?.id;
+  const selectedLat = selectedCafe?.latitude;
+  const selectedLng = selectedCafe?.longitude;
+  useEffect(() => {
+    if (selectedLat === undefined || selectedLng === undefined) return;
+
+    const size = map.getSize();
+    const target = L.point(Math.max(size.x * 0.18, 72), size.y * 0.5);
+    const delta = map.latLngToContainerPoint([selectedLat, selectedLng]).subtract(target);
+    if (Math.abs(delta.x) > 2 || Math.abs(delta.y) > 2) {
+      map.panBy(delta, { animate: true });
+    }
+    // Only when the selection changes: panning re-runs this effect through `map` moves
+    // otherwise, and the pin would be dragged back every time the reader moved the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  /*
+    The details panel is positioned in the map's own pixel space, so it has to be told
+    where the pin is now -- after every pan, zoom and resize, not only on the click.
+  */
+  useEffect(() => {
+    if (!onSelectedPointChange) return;
+    if (!selectedCafe) {
+      onSelectedPointChange(null);
+      return;
+    }
+
+    const report = () => {
+      const point = map.latLngToContainerPoint([selectedCafe.latitude, selectedCafe.longitude]);
+      onSelectedPointChange({ x: point.x, y: point.y });
+    };
+
+    report();
+    map.on('move zoom resize', report);
+    return () => {
+      map.off('move zoom resize', report);
+    };
+  }, [map, selectedCafe, onSelectedPointChange]);
+
   const selectedMarkerIcon = createSelectedLocationIcon(36);
 
   return (
@@ -403,7 +434,12 @@ function MapContent({
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
-      <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />
+      <ClusterLayer
+        cafes={cafes}
+        onMarkerClick={onMarkerClick}
+        map={map}
+        selectedCafeId={selectedCafe?.id ?? null}
+      />
       {userLocation && (
         <Marker
           position={[userLocation.lat, userLocation.lng]}
@@ -435,11 +471,15 @@ export default function InteractiveMap({
   onMapClick,
   forceCenterUpdate,
   fitToMarkers,
-  onLocationClick
+  onLocationClick,
+  selectedCafe,
+  onSelectedPointChange
 }: MapProps & {
   forceCenterUpdate?: boolean;
   fitToMarkers?: boolean;
   onLocationClick?: () => void;
+  selectedCafe?: CafeMapData | null;
+  onSelectedPointChange?: (point: { x: number; y: number } | null) => void;
 }) {
   const t = useTranslations('map');
   const centerLatLng: [number, number] = [center.lat, center.lng];
@@ -484,6 +524,8 @@ export default function InteractiveMap({
           zoom={zoom}
           forceCenterUpdate={forceCenterUpdate}
           fitToMarkers={fitToMarkers}
+          selectedCafe={selectedCafe}
+          onSelectedPointChange={onSelectedPointChange}
         />
 
       </MapContainer>

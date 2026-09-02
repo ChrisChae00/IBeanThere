@@ -262,6 +262,40 @@
 }
 
 @layer components {
+  /*
+    A scroll region inside a small panel: the bar itself is chrome the reader did not
+    ask for, so it stays out of the layout and only shows as a thin mark while the
+    pointer is over the region. Firefox gets the thin variant; it has no hover form.
+  */
+  .scrollbar-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-quiet:hover {
+    scrollbar-color: var(--edge-rule) transparent;
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--radius-pill);
+  }
+
+  .scrollbar-quiet:hover::-webkit-scrollbar-thumb {
+    background-color: var(--edge-rule);
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
   .type-display {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);

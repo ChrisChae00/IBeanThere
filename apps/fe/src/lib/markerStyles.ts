@@ -16,26 +16,35 @@ import { CafeMarkerState } from '@/types/map';
 const MARKER_SHADOW = 'box-shadow: var(--shadow-marker);';
 const PIN_SHADOW = 'filter: drop-shadow(0 2px 4px var(--c-shadow));';
 
-export function createCustomMarkerIcon(state: CafeMarkerState): L.DivIcon {
+/*
+  `selected` is a size and a halo, not a colour: the reader has to be able to see which
+  pin they just tapped among a hundred identical ones, and the pin's colour already
+  carries verified-vs-pending. The halo is drawn as a second ring outside the pin so the
+  pin itself keeps its size relationship with the rest.
+*/
+export function createCustomMarkerIcon(state: CafeMarkerState, selected = false): L.DivIcon {
   const verified = state === 'verified';
+  const size = selected ? 44 : 32;
 
   const iconHtml = `
     <div style="
-      width: 32px;
-      height: 32px;
+      width: ${size}px;
+      height: ${size}px;
       background-color: ${verified ? 'var(--marker-cafe)' : 'var(--marker-pending)'};
-      border: 2px ${verified ? 'solid' : 'dashed'} ${verified ? 'var(--marker-ring)' : 'var(--marker-cafe)'};
+      border: ${selected ? 3 : 2}px ${verified ? 'solid' : 'dashed'} ${verified ? 'var(--marker-ring)' : 'var(--marker-cafe)'};
       border-radius: 50%;
       ${MARKER_SHADOW}
+      ${selected ? 'outline: 3px solid var(--marker-user); outline-offset: 2px;' : ''}
+      transition: width 120ms ease-out, height 120ms ease-out;
     "></div>
   `;
 
   return L.divIcon({
     html: iconHtml,
-    className: 'custom-cafe-marker',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
+    className: selected ? 'custom-cafe-marker custom-cafe-marker--selected' : 'custom-cafe-marker',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -size]
   });
 }
 

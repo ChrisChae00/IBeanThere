@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { getTrendingCafes } from '@/lib/api/cafes';
 import ExploreMapClient from './ExploreMapClient';
-import { PlusIcon } from '@/components/ui';
 import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
 import { CAFE_GRID_ITEMS_PER_PAGE } from '@/lib/constants/cafe';
 
@@ -47,23 +45,10 @@ export default async function ExploreMapPage({
       {/* Page Title Section — rendered on server, no JS needed */}
       <section className="pt-10 pb-4">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <h1 className="landing-display text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
-                {t('title')}
-              </h1>
-              <p className="mt-3 text-lg text-ink-secondary">
-                {t('subtitle')}
-              </p>
-            </div>
-            <Link
-              href={`/${locale}/discover/register-cafe`}
-              className="relief-control flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
-            >
-              <PlusIcon className="text-xl font-bold" />
-              {t('be_navigator')}
-            </Link>
-          </div>
+          <h1 className="landing-display text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
+            {t('title')}
+          </h1>
+          <p className="mt-3 text-lg text-ink-secondary">{t('subtitle')}</p>
         </div>
         {/* The rule under the masthead, the way the landing sets a section off. */}
         <div className="max-w-8xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">

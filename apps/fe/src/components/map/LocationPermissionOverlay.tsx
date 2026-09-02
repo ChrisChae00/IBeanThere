@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { LocationIcon } from '@/shared/ui';
 import { RefreshIcon, InfoIcon } from '@/components/ui';
 
 interface LocationPermissionOverlayProps {
@@ -12,6 +11,13 @@ interface LocationPermissionOverlayProps {
 
 type BrowserType = 'chrome' | 'safari' | 'firefox';
 
+/*
+  This stands in the map's frame, so it is the map's panel and nothing more: the eyebrow,
+  the heading, the sentence, one action. The 80px brand disc and the blurred radial
+  gradient behind it are gone -- neither carried information, and the disc read as a
+  status badge on a screen that has no status to report. The browser guide is a rule and
+  a list rather than a bordered box, because the frame around it is already the panel.
+*/
 export default function LocationPermissionOverlay({
   onRequestPermission,
   permissionState
@@ -25,52 +31,32 @@ export default function LocationPermissionOverlay({
     { id: 'firefox', label: t('browser_guide.firefox') },
   ];
 
+  const denied = permissionState === 'denied';
+
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface-raised">
-      {/* Blurred background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 30%, var(--brand) 0%, transparent 50%), radial-gradient(circle at 80% 70%, var(--brand-muted) 0%, transparent 50%)',
-          filter: 'blur(60px)'
-        }} />
-      </div>
+    <div className="h-full overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+      <div className="mx-auto flex min-h-full max-w-md flex-col justify-center px-6 py-10 sm:px-10">
+        <p className="landing-micro text-ink-secondary">{t('location_sharing')}</p>
+        <h3 className="mt-3 text-2xl text-ink-primary">
+          {denied ? t('location_permission_denied_title') : t('location_permission_title')}
+        </h3>
+        <p className="mt-2 leading-relaxed text-ink-secondary">
+          {t('location_permission_reason')}
+        </p>
 
-      {/* Content */}
-      <div className="relative h-full flex items-center justify-center overflow-y-auto">
-        <div className="text-center px-6 py-8 max-w-md w-full">
-          {/* Location Icon */}
-          <div className="mb-6 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-(--radius-pill) bg-brand/12">
-              <LocationIcon size={40} className="text-brand" />
-            </div>
-          </div>
-
-          {/* Title */}
-          <h3 className="mb-3 text-xl text-ink-primary">
-            {permissionState === 'denied' 
-              ? t('location_permission_denied_title')
-              : t('location_permission_title')
-            }
-          </h3>
-
-          {/* Description */}
-          <p className="text-ink-secondary mb-6 leading-relaxed">
-            {t('location_permission_reason')}
-          </p>
-
-          {/* Permission Denied Guide */}
-          {permissionState === 'denied' ? (
-            <div className="animate-fade-in">
-              {/* Browser Tabs */}
-              <div className="mb-4 flex gap-1 rounded-(--radius-control) border border-edge-rule p-1">
+        {denied ? (
+          <>
+            <div className="mt-8 border-t border-edge-rule pt-6">
+              <div className="flex flex-wrap gap-2">
                 {browsers.map((browser) => (
                   <button
                     key={browser.id}
                     onClick={() => setActiveBrowser(browser.id)}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                    aria-pressed={activeBrowser === browser.id}
+                    className={`landing-micro min-h-11 rounded-(--radius-pill) border px-4 ${
                       activeBrowser === browser.id
-                        ? 'relief-pressed bg-surface-raised text-ink-primary'
-                        : 'text-ink-secondary hover:text-ink-primary'
+                        ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
+                        : 'relief-control border-edge-rule text-ink-secondary hover:text-ink-primary'
                     }`}
                   >
                     {browser.label}
@@ -78,51 +64,38 @@ export default function LocationPermissionOverlay({
                 ))}
               </div>
 
-              {/* Guide Steps */}
-              <div className="mb-6 rounded-(--radius-control) border border-edge-rule bg-surface-raised p-4 text-left">
-                <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink-primary">
-                  {t('browser_guide.title')}
-                </h4>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-ink-secondary">
-                  <li>
-                    {t.rich(`browser_guide.${activeBrowser}_step1`, {
-                      icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-ink-primary mx-0.5" />
-                    })}
-                  </li>
-                  <li>{t(`browser_guide.${activeBrowser}_step2`)}</li>
-                </ol>
-              </div>
-
-              {/* Refresh Button */}
-              <button
-                onClick={() => window.location.reload()}
-                className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
-              >
-                <RefreshIcon className="w-5 h-5" />
-                <span>{t('browser_guide.refresh_page')}</span>
-              </button>
+              <h4 className="landing-micro mt-6 text-ink-secondary">
+                {t('browser_guide.title')}
+              </h4>
+              <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-ink-secondary">
+                <li>
+                  {t.rich(`browser_guide.${activeBrowser}_step1`, {
+                    icon: () => <InfoIcon size={16} className="inline-block align-text-bottom text-ink-primary mx-0.5" />
+                  })}
+                </li>
+                <li>{t(`browser_guide.${activeBrowser}_step2`)}</li>
+              </ol>
             </div>
-          ) : (
-            <>
-              {/* Info message for prompt state */}
-              {permissionState === 'prompt' && (
-                <div className="mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
-                  <p className="text-sm text-ink-secondary">
-                    {t('browser_settings_guide')}
-                  </p>
-                </div>
-              )}
 
-              {/* CTA Button */}
-              <button
-                onClick={onRequestPermission}
-                className="relief-control min-h-11 rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
-              >
-                {t('share_location')}
-              </button>
-            </>
-          )}
-        </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="relief-control mt-8 inline-flex min-h-11 w-fit items-center gap-2 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+            >
+              <RefreshIcon className="h-4 w-4" />
+              <span>{t('browser_guide.refresh_page')}</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onRequestPermission}
+              className="relief-control mt-8 inline-flex min-h-11 w-fit items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+            >
+              {t('share_location')}
+            </button>
+            <p className="mt-3 text-sm text-ink-secondary">{t('browser_settings_guide')}</p>
+          </>
+        )}
       </div>
     </div>
   );

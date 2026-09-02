@@ -80,6 +80,13 @@ Rules:
 - **Domain colours have their own slots** — `--marker-cafe`, `--marker-user`,
   `--marker-pending`, `--star-*`. Reading `--brand` for a map pin couples two unrelated
   decisions.
+- **A badge that claims something is painted; a badge that qualifies is not.** Trending
+  is `--brand-hover` under `--ink-on-brand`; pending, verified and the rest sit on
+  `--scrim-media` in `--ink-on-media`, or do not exist at all. A row that says the same
+  word on every second card carries no information -- delete it rather than style it.
+- **Domain markers are fixed where their ground is fixed.** `--marker-user` is one
+  colour in all four themes: it sits on OpenStreetMap's tiles, which stay light, and it
+  is the one pin a reader has to find at a glance.
 - **Never encode meaning in colour alone.** Pending vs verified is a dashed vs solid
   border first, a colour second.
 - **A state colour is emphasis, not a text colour.** `--state-success` and
@@ -106,6 +113,24 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **No panel inside a panel.** One elevation step per region.
 - **Three radii exist**: `--radius-control` (10px), `--radius-card` (16px),
   `--radius-pill`. A literal `rounded-xl` in new code is a mistake.
+- **Controls that act on one region live in one group at its edge, not on top of it.**
+  The map's four verbs are a single button group above the frame (`-space-x-px`, pill
+  ends, a tooltip each). A control laid over the thing it changes covers the change.
+  Name the group's ends explicitly: `first:`/`last:` match every button when each one is
+  the only child of its own tooltip wrapper.
+- **A detail card opens beside what it describes, not in the middle of the screen.** On
+  the map the pin is panned to a known place first and the card takes the empty half of
+  the frame. Whether it goes beside or above is decided by whether it *fits*
+  (`pin.x + halfPin + gap + cardWidth <= frameWidth - margin`), never by viewport width:
+  a wide screen can still be a narrow column.
+- **A card positioned inside a clipped frame caps its height against its own top**
+  (`frameHeight - top - margin`), and observes its height rather than measuring it once.
+  Content that grows after placement -- a disclosure opening -- otherwise runs under the
+  frame's clip, where scrolling cannot reach it.
+- **Scroll regions inside small panels use `.scrollbar-quiet`**: no layout width, a
+  hairline thumb on hover only.
+- **A link out of the app is a small control** (`CAFE_ACTION_CLASS`, 30px), and it keeps
+  the 44px target with an invisible band, not by growing.
 - **Popovers sit above whatever opened them.** The `--z-*` stack in `tokens.css` is the
   whole ordering; add a band, do not add a bigger number.
 - **Elevation is `--relief-shadow-*` or a named `--shadow-*`.** An inline `boxShadow`
@@ -132,7 +157,8 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 
 - Body text 4.5:1, non-text (button fill against the page, focus rings, marker against
   the map) 3:1 — in **all four themes**, measured, not eyeballed.
-- Interactive targets are at least 44×44, even when the visible chrome is smaller.
+- Interactive targets are at least 44×44, even when the visible chrome is smaller -- a
+  `before:` band restores the target without inflating the button.
 - Focus rings are never removed. `focus-visible` styling is part of the component, not
   an afterthought.
 - Every icon-only control has a localised accessible name.

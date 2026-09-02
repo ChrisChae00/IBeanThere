@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import MapSection from '@/components/map/MapSection';
-import { getGoogleCafePhoto, getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
+import Link from 'next/link';
+import { getGoogleCafePhoto, getTrendingCafes, searchCafesByText, type TrendingSortBy } from '@/lib/api/cafes';
+import { PlusIcon, SearchIcon } from '@/shared/ui';
 import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
 import { TrendingCafesSection, CafeCard } from '@/components/cafe';
@@ -45,6 +47,9 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [googlePhotos, setGooglePhotos] = useState<Record<string, GooglePhotoState>>({});
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<TrendingCafeResponse[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const requestedGooglePhotos = useRef(new Set<string>());
 
   const location = useMemo(
@@ -140,6 +145,52 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   };
 
   /*
+    The grid searches every cafe, not the pages it happens to hold: a name the reader
+    types is a name they expect to find whether or not it has been paged in yet. An
+    active search replaces the grid, so the sort filters and the pager step aside.
+  */
+  const term = query.trim();
+  useEffect(() => {
+    if (term.length < 2) {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      searchCafesByText(term, CAFE_GRID_ITEMS_PER_PAGE).then((cafes) => {
+        if (cancelled) return;
+        setSearchResults(
+          cafes.map((cafe) => ({
+            id: cafe.id || '',
+            slug: cafe.slug,
+            name: cafe.name || '',
+            address: cafe.address || '',
+            latitude: Number(cafe.latitude) || 0,
+            longitude: Number(cafe.longitude) || 0,
+            status: cafe.status,
+            view_count_14d: 0,
+            visit_count_14d: 0,
+            trending_score: 0,
+            main_image: cafe.main_image,
+          }))
+        );
+        setIsSearching(false);
+      });
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [term]);
+
+  const gridCafes = searchResults ?? cafes;
+  const gridLoading = searchResults ? isSearching : isLoading;
+
+  /*
     Filters carry their state in relief rather than in fill: the page's one filled
     control is the register action, and a colour-swap hover has no room left in the
     Matcha palette.
@@ -178,30 +229,55 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       {/* Cafe Grid Section */}
       <section className="py-6">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex flex-wrap items-center gap-2">
-            <button onClick={() => setActiveFilter('all')} className={filterClass('all')}>
-              {t('filter_all')}
-            </button>
-            <button
-              onClick={() => setActiveFilter('closest')}
-              disabled={!coords}
-              title={!coords ? t('no_location') : ''}
-              className={filterClass('closest')}
-            >
-              {t('filter_closest')}
-            </button>
-            <button
-              onClick={() => setActiveFilter('most_popular')}
-              className={filterClass('most_popular')}
-            >
-              {t('filter_most_popular')}
-            </button>
-            <span className="landing-micro ml-auto text-ink-secondary">
-              {t('showing_cafes', { count: cafes.length })}
-            </span>
+          {/*
+            The sorts on the left, the two things a reader does with the grid on the
+            right: find one cafe, or add the one that is missing. The old "showing N"
+            count said nothing the grid was not already showing.
+          */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setActiveFilter('all')} className={filterClass('all')}>
+                {t('filter_all')}
+              </button>
+              <button
+                onClick={() => setActiveFilter('closest')}
+                disabled={!coords}
+                title={!coords ? t('no_location') : ''}
+                className={filterClass('closest')}
+              >
+                {t('filter_closest')}
+              </button>
+              <button
+                onClick={() => setActiveFilter('most_popular')}
+                className={filterClass('most_popular')}
+              >
+                {t('filter_most_popular')}
+              </button>
+            </div>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <label className="relative flex items-center">
+                <SearchIcon size={16} className="pointer-events-none absolute left-3 text-ink-secondary" />
+                <span className="sr-only">{tMap('filters.search')}</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={tMap('filters.search_placeholder')}
+                  className="h-11 w-56 rounded-(--radius-pill) border border-edge-rule bg-surface-raised pl-9 pr-3 text-sm text-ink-primary placeholder:text-ink-secondary focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+                />
+              </label>
+              <Link
+                href={`/${locale}/discover/register-cafe`}
+                className="btn-shade flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
+              >
+                <PlusIcon size={16} />
+                {tMap('register_new_cafe')}
+              </Link>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {isLoading ? (
+            {gridLoading ? (
               Array.from({ length: CAFE_GRID_ITEMS_PER_PAGE }).map((_, index) => (
                 <div key={index} className="animate-pulse overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface">
                   <div className="h-[200px] bg-surface-hover"></div>
@@ -212,10 +288,10 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                   </div>
                 </div>
               ))
-            ) : cafes.length === 0 ? (
+            ) : gridCafes.length === 0 ? (
               <RegisterCafeCTA variant="empty" />
             ) : (
-              cafes.map((cafe) => (
+              gridCafes.map((cafe) => (
                 <CafeCard
                   key={cafe.id}
                   cafe={cafe}
@@ -230,7 +306,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       </section>
 
       {/* Load More Section */}
-      {!isLoading && (hasMore || cafes.length > CAFE_GRID_ITEMS_PER_PAGE) ? (
+      {!searchResults && !isLoading && (hasMore || cafes.length > CAFE_GRID_ITEMS_PER_PAGE) ? (
         <section className="py-6">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-4 justify-center">

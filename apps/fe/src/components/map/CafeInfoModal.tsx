@@ -1,27 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
 import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
-import { Badge } from '@/shared/ui';
-import { Button } from '@/shared/ui';
 
-import DropBeanButton from '../cafe/DropBeanButton';
-import NavigationButton from '../cafe/NavigationButton';
+import CafeCardImage from '../cafe/CafeCardImage';
+import CafeMapActions from '../cafe/CafeMapActions';
 
 interface CafeInfoModalProps {
   cafe: CafeMapData;
   onClose: () => void;
 }
 
+/*
+  The card that opens beside the pin. It is positioned by whoever renders it -- on the
+  map that is next to the marker, so the reader keeps the place they tapped in view.
+
+  It opens with the photograph, name over it, the way a listing does; a verified cafe
+  carries no badge at all, because the pin already draws it differently and a row that
+  says "Verified" on every second card is a row of nothing. Dropping a bean happens on
+  the cafe's own page: this card answers "which place is this", not "log a visit".
+*/
 export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   const t = useTranslations('cafe.modal');
   const params = useParams();
   const locale = params.locale as string;
   const [showAllHours, setShowAllHours] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // A card opened for a different cafe starts at the top, not wherever the last one was
+  // left -- the browser keeps the scroll offset of the element it is reusing.
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [cafe.id]);
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const today = getCurrentDayInTimezone(cafe.timezone);
@@ -47,239 +61,195 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
 
   const todayHours = getTodayHours();
 
+  /* One scroll region, not two: a scrolling body inside a fixed frame put the first line
+     of the address under the photograph the moment anything took focus. */
   return (
-    <div className="fixed inset-0 z-(--z-map-modal) flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
-      <div
-        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-edge-rule bg-surface-raised px-6 py-4">
-          {/* The name is data, not a headline -- body face, like the cards. */}
-          <h2 className="line-clamp-1 flex-1 pr-4 font-sans text-xl font-semibold text-ink-primary">{cafe.name}</h2>
+    <div
+      ref={scrollRef}
+      /* Scroll anchoring off: the photograph settles into place after mount, and Chrome
+         "helpfully" scrolls the card to keep the shifted content still -- which put the
+         first line of the address behind the image every time. */
+      style={{ overflowAnchor: 'none' }}
+      className="scrollbar-quiet max-h-[inherit] w-full overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised shadow-(--relief-shadow-lifted)"
+    >
+      <div className="relative">
+        {/* The card image component owns the placeholder, so a cafe with no photograph
+            gets the same quiet slot it gets in the grid. */}
+        {/* `overflow-hidden`: the card image sets a 200px min-height of its own, and
+            without a clip here it spills 40px over the address below it. */}
+        <div className="h-40 overflow-hidden">
+          <CafeCardImage imageUrl={cafe.main_image} alt={cafe.name} size="large" locale={locale} />
+        </div>
+
+        {/* A gradient, not a flat scrim: the name needs the bottom edge dark enough to
+            read against any photograph, and the top of the image should stay the image. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
+          style={{ background: 'linear-gradient(to top, var(--scrim-media), transparent)' }}
+        />
+        <h2 className="absolute bottom-3 left-4 right-4 line-clamp-2 font-sans text-lg font-semibold text-ink-on-media">
+          {cafe.name}
+        </h2>
+
+        <div className="absolute top-3 right-3 flex items-center gap-2">
+          {cafe.status !== 'verified' && (
+            <span className="landing-micro rounded-(--radius-pill) bg-scrim-media px-3 py-1.5 text-ink-on-media">
+              {t('status_pending')}
+            </span>
+          )}
           <button
             onClick={onClose}
-            className="shrink-0 rounded-(--radius-control) p-2 transition-colors hover:bg-surface-hover"
+            className="flex h-9 w-9 items-center justify-center rounded-(--radius-pill) bg-scrim-media text-ink-on-media"
             aria-label={t('close')}
           >
-            <svg
-              className="h-5 w-5 text-ink-primary"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
+      </div>
 
-        {/* Cafe Image */}
-        {cafe.main_image && (
-          <div className="h-40 w-full overflow-hidden bg-surface-sunken">
-            <img
-              src={cafe.main_image}
-              alt={cafe.name}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+      <div className="space-y-4 px-5 py-4">
+        {/* Address + the two ways out to a map */}
+        {cafe.address && (
+          <div className="space-y-1">
+            <h3 className="landing-micro text-ink-secondary">{t('address')}</h3>
+            <p className="text-sm text-ink-primary">{cafe.address}</p>
           </div>
         )}
 
-        <div className="px-6 py-4 space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Badge
-                variant={cafe.status === 'verified' ? 'success' : 'info'}
-                size="sm"
-                className="border border-edge-rule"
-              >
-                {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
-              </Badge>
-              {cafe.status !== 'verified' && cafe.verification_count && (
-                <span className="text-sm text-ink-secondary">
-                  {t('verifications', { count: cafe.verification_count })}
+        <CafeMapActions
+          name={cafe.name}
+          address={cafe.address}
+          latitude={cafe.latitude}
+          longitude={cafe.longitude}
+          sourceUrl={cafe.source_url}
+        />
+
+        {/* Phone */}
+        {cafe.phoneNumber && (
+          <div className="space-y-1">
+            <h3 className="landing-micro text-ink-secondary">{t('phone')}</h3>
+            <a href={`tel:${cafe.phoneNumber}`} className="text-sm text-ink-primary hover:underline">
+              {cafe.phoneNumber}
+            </a>
+          </div>
+        )}
+
+        {/* Website */}
+        {cafe.website && (
+          <div className="space-y-1">
+            <h3 className="landing-micro text-ink-secondary">{t('website')}</h3>
+            <a
+              href={cafe.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block break-all text-sm text-ink-primary hover:underline"
+            >
+              {cafe.website}
+            </a>
+          </div>
+        )}
+
+        {/* Opening Hours */}
+        {cafe.businessHours && Object.keys(cafe.businessHours).length > 0 ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="landing-micro text-ink-secondary">{t('opening_hours')}</h3>
+              {/*
+                The state colour is the dot, not the label: `--state-*` on its own tint
+                measures 2.4-3.5:1 in three of the four themes, so the word itself is
+                set in ink and the colour is left to carry emphasis.
+              */}
+              {todayHours && !todayHours.closed && (
+                <span
+                  className={`landing-micro flex items-center gap-1.5 rounded-(--radius-pill) px-3 py-1.5 text-ink-primary ${
+                    isOpenNow(cafe.businessHours, cafe.timezone)
+                      ? 'bg-state-success/12'
+                      : 'bg-state-danger/12'
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`h-1.5 w-1.5 rounded-(--radius-pill) ${
+                      isOpenNow(cafe.businessHours, cafe.timezone) ? 'bg-state-success' : 'bg-state-danger'
+                    }`}
+                  />
+                  {isOpenNow(cafe.businessHours, cafe.timezone) ? t('open_now') : t('closed_now')}
                 </span>
               )}
             </div>
-          </div>
-          
-          {/* Drop Bean Action */}
-          <div className="flex items-center justify-between gap-4 rounded-(--radius-card) border border-edge-rule p-4">
-            <div className="text-sm font-medium text-ink-primary">
-              {t('visited_this_cafe')}
-            </div>
-            <DropBeanButton
-              cafeId={cafe.id}
-              cafeLat={cafe.latitude}
-              cafeLng={cafe.longitude}
-              size="sm"
-              showGrowthInfo={true}
-            />
-          </div>
 
-          {/* Address + Google Maps Link */}
-          {cafe.address && (
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-ink-secondary">{t('address')}</h3>
-              <p className="text-ink-primary">{cafe.address}</p>
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <a
-                  href={
-                    cafe.source_url && cafe.source_url.startsWith('https://www.google.com/maps')
-                      ? cafe.source_url
-                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${cafe.name}, ${cafe.address || `${cafe.latitude},${cafe.longitude}`}`)}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relief-control inline-flex min-h-11 items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule px-4 text-xs font-medium text-ink-primary"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                  </svg>
-                  <span>{t('google_maps')}</span>
-                </a>
-                {cafe.latitude && cafe.longitude && (
-                  <NavigationButton latitude={cafe.latitude} longitude={cafe.longitude} size="sm" />
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Phone */}
-          {cafe.phoneNumber && (
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-ink-secondary">{t('phone')}</h3>
-              <a
-                href={`tel:${cafe.phoneNumber}`}
-                className="text-ink-primary hover:underline"
+            {todayHours && (
+              <button
+                onClick={() => setShowAllHours(!showAllHours)}
+                className="relief-control w-full rounded-(--radius-control) border border-edge-rule p-3 text-sm text-ink-primary"
               >
-                {cafe.phoneNumber}
-              </a>
-            </div>
-          )}
-
-          {/* Website */}
-          {cafe.website && (
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-ink-secondary">{t('website')}</h3>
-              <a
-                href={cafe.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-all text-ink-primary hover:underline"
-              >
-                {cafe.website}
-              </a>
-            </div>
-          )}
-
-          {/* Opening Hours */}
-          {cafe.businessHours && Object.keys(cafe.businessHours).length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-ink-secondary">{t('opening_hours')}</h3>
-                {/*
-                  The state colour is the dot, not the label: `--state-*` on its own tint
-                  measures 2.4-3.5:1 in three of the four themes, so the word itself is
-                  set in ink and the colour is left to carry emphasis.
-                */}
-                {todayHours && !todayHours.closed && (
-                  <span
-                    className={`landing-micro flex items-center gap-1.5 rounded-(--radius-pill) px-3 py-1.5 text-ink-primary ${
-                      isOpenNow(cafe.businessHours, cafe.timezone)
-                        ? 'bg-state-success/12'
-                        : 'bg-state-danger/12'
-                    }`}
-                  >
-                    <span
-                      aria-hidden
-                      className={`h-1.5 w-1.5 rounded-(--radius-pill) ${
-                        isOpenNow(cafe.businessHours, cafe.timezone) ? 'bg-state-success' : 'bg-state-danger'
-                      }`}
-                    />
-                    {isOpenNow(cafe.businessHours, cafe.timezone) ? t('open_now') : t('closed_now')}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">
+                    {t('today')} ({getDayName(today)})
                   </span>
-                )}
-              </div>
-
-              {/* Today's Hours - Clickable Dropdown */}
-              {todayHours && (
-                <button
-                  onClick={() => setShowAllHours(!showAllHours)}
-                  className="relief-control w-full rounded-(--radius-control) border border-edge-rule p-3 text-ink-primary"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {t('today')} ({getDayName(today)})
+                  <div className="flex items-center gap-2">
+                    <span>
+                      {todayHours.closed
+                        ? t('closed')
+                        : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span>
-                        {todayHours.closed
-                          ? t('closed')
-                          : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
-                      </span>
-                      <svg
-                        className={`w-4 h-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                    <svg
+                      className={`h-4 w-4 transition-transform ${showAllHours ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
-                </button>
-              )}
-
-              {/* All Week Hours */}
-              {showAllHours && (
-                <div className="space-y-2 border-t border-edge-rule pt-2">
-                  {daysOfWeek.map((day) => {
-                    const hours = cafe.businessHours?.[day];
-                    if (!hours) return null;
-
-                    return (
-                      <div key={day} className="flex items-center justify-between text-sm py-2">
-                        <span
-                          className={`${
-                            day === today
-                              ? 'font-semibold text-ink-primary'
-                              : 'text-ink-secondary'
-                          }`}
-                        >
-                          {getDayName(day)}
-                        </span>
-                        <span className="text-ink-primary">
-                          {hours.closed
-                            ? t('closed')
-                            : `${formatTime(hours.open)} - ${formatTime(hours.close)}`}
-                        </span>
-                      </div>
-                    );
-                  })}
                 </div>
-              )}
-            </div>
-          )}
+              </button>
+            )}
 
-          {!cafe.businessHours && (
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-ink-secondary">{t('opening_hours')}</h3>
-              <p className="text-sm text-ink-primary">{t('no_hours_available')}</p>
-            </div>
-          )}
+            {showAllHours && (
+              <div className="space-y-2 border-t border-edge-rule pt-2">
+                {daysOfWeek.map((day) => {
+                  const hours = cafe.businessHours?.[day];
+                  if (!hours) return null;
 
-          <div className="space-y-2">
-            <Link
-              href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}
-              className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-4 font-semibold text-ink-on-brand"
-              onClick={onClose}
-            >
-              {t('view_details')}
-            </Link>
+                  return (
+                    <div key={day} className="flex items-center justify-between py-1.5 text-sm">
+                      <span
+                        className={
+                          day === today ? 'font-semibold text-ink-primary' : 'text-ink-secondary'
+                        }
+                      >
+                        {getDayName(day)}
+                      </span>
+                      <span className="text-ink-primary">
+                        {hours.closed
+                          ? t('closed')
+                          : `${formatTime(hours.open)} - ${formatTime(hours.close)}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="space-y-1">
+            <h3 className="landing-micro text-ink-secondary">{t('opening_hours')}</h3>
+            <p className="text-sm text-ink-primary">{t('no_hours_available')}</p>
+          </div>
+        )}
+
+        <Link
+          href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}
+          className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-4 font-semibold text-ink-on-brand"
+          onClick={onClose}
+        >
+          {t('view_details')}
+        </Link>
       </div>
     </div>
   );
 }
-

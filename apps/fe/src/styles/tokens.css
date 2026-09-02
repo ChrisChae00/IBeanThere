@@ -66,7 +66,13 @@
   --star-empty: var(--c-star-off);
   --star-empty-edge: var(--c-star-off-edge);
   --marker-cafe: var(--c-marker-cafe);
-  --marker-user: var(--c-marker-user);
+  /*
+    The user pin is fixed, not theme-derived: it marks "you are here" on OpenStreetMap's
+    tiles, which stay light in every theme, and it is the one pin a reader has to find
+    at a glance. Letting it change hue per theme made it read as a different kind of
+    marker in each one.
+  */
+  --marker-user: #D24C28;
   --marker-pending: var(--state-pending);
   /*
     The ring and the count sit on the marker against OpenStreetMap's tiles, which stay

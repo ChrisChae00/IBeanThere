@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { LoadingSpinner, RefreshIcon, UserLocationIcon } from '@/shared/ui';
+import { LoadingSpinner } from '@/shared/ui';
 const InteractiveMap = dynamic(() => import('./InteractiveMap'), {
   loading: () => <div className="h-full w-full flex items-center justify-center"><LoadingSpinner /></div>,
   ssr: false
 });
 import LocationPermissionOverlay from './LocationPermissionOverlay';
+import { MapControlGroup, MAP_FILTER_IDS, type MapFilterId } from './MapFilters';
 
 import CafeInfoModal from './CafeInfoModal';
 import { useLocation } from '@/hooks/useLocation';
@@ -19,6 +20,8 @@ import { useToast } from '@/contexts/ToastContext';
 import { CafeMapData } from '@/types/map';
 
 import { API_BASE_URL, apiFetch } from '@/lib/api/client';
+import { calculateDistance } from '@/lib/utils/checkIn';
+import { getTrendingCafes } from '@/lib/api/cafes';
 
 /*
   One banner for every state the map can be in: searching, showing the trending
@@ -59,6 +62,76 @@ function MapStatusBanner({
   );
 }
 
+
+/*
+  The card opens beside the pin, not in the middle of the screen: what was tapped has to
+  stay in view. It sits above the pin where there is room and below it otherwise, and is
+  held inside the frame horizontally so it never hangs off the map's edge.
+*/
+const CARD_WIDTH = 340;
+const CARD_GAP = 14;
+const FRAME_MARGIN = 12;
+/* Half the selected pin's icon, so the card clears the pin instead of touching it. */
+const PIN_HALF_WIDTH = 22;
+
+/* A pin panned off the map takes its card with it, rather than leaving the card pinned
+   to the frame's edge pointing at nothing. */
+function isPointInFrame(point: { x: number; y: number }, frame: HTMLElement | null) {
+  if (!frame) return true;
+  return point.x >= 0 && point.x <= frame.clientWidth && point.y >= 0 && point.y <= frame.clientHeight;
+}
+
+function cardPosition(
+  point: { x: number; y: number },
+  frame: HTMLElement | null,
+  cardHeight: number
+): React.CSSProperties {
+  const width = frame?.clientWidth ?? CARD_WIDTH;
+  const height = frame?.clientHeight ?? 0;
+
+  /*
+    The pin has been panned to the lower left, so wherever the card actually fits to the
+    right of it, that is where it goes -- clear of the pin, centred on it vertically.
+    The test is whether it fits, not how wide the viewport is: the map is one column of
+    a two-column page, so a wide screen does not mean a wide frame.
+  */
+  const left = point.x + PIN_HALF_WIDTH + CARD_GAP;
+  if (left + CARD_WIDTH <= width - FRAME_MARGIN) {
+    const room = Math.max(height - FRAME_MARGIN * 2, 220);
+    /* Before the first measurement the card fills the room and is pinned to the top;
+       once its height is known it is centred on the pin. */
+    const resolvedHeight = Math.min(cardHeight || room, room);
+    const top = Math.min(
+      Math.max(point.y - resolvedHeight / 2, FRAME_MARGIN),
+      Math.max(height - resolvedHeight - FRAME_MARGIN, FRAME_MARGIN)
+    );
+
+    /*
+      The cap is the room left *below the card's own top*, not the whole frame: a card
+      that grows after it is placed -- opening the week's hours does exactly that -- would
+      otherwise run past the bottom of the map, where the frame clips it and the rest of
+      the record cannot be reached at all.
+    */
+    return { left, top, maxHeight: Math.max(height - top - FRAME_MARGIN, 220) };
+  }
+
+  /* No room beside it: the card keeps the pin's own column, above or below. */
+  const halfCard = Math.min(CARD_WIDTH, width - FRAME_MARGIN * 2) / 2;
+  const minLeft = halfCard + FRAME_MARGIN;
+  const maxLeft = Math.max(width - halfCard - FRAME_MARGIN, minLeft);
+  const columnLeft = Math.min(Math.max(point.x, minLeft), maxLeft);
+
+  const roomAbove = point.y - FRAME_MARGIN * 2;
+  const above = roomAbove > 260;
+
+  return {
+    left: columnLeft,
+    top: above ? point.y - CARD_GAP : point.y + CARD_GAP,
+    transform: above ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
+    maxHeight: Math.max((above ? roomAbove : height - point.y - CARD_GAP * 2), 220),
+  };
+}
+
 interface MapWithFiltersProps {
   locale: string;
   mapTitle?: string;
@@ -75,8 +148,34 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
   
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedCafe, setSelectedCafe] = useState<CafeMapData | null>(null);
+  /* Where the selected pin currently is, in the map's pixel space, so the card can open
+     beside it and stay there while the map moves under it. */
+  const [selectedPoint, setSelectedPoint] = useState<{ x: number; y: number } | null>(null);
+  const mapFrameRef = useRef<HTMLDivElement>(null);
+  /*
+    Centring the card on the pin needs its height, and the card is as tall as the cafe's
+    own record -- and taller again the moment the week's hours are opened. So it is
+    observed, not measured once.
+  */
+  const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null);
+  const [cardHeight, setCardHeight] = useState(0);
+
+  useEffect(() => {
+    if (!cardNode) {
+      setCardHeight(0);
+      return;
+    }
+
+    const observer = new ResizeObserver(() => setCardHeight(cardNode.offsetHeight));
+    observer.observe(cardNode);
+    return () => observer.disconnect();
+  }, [cardNode]);
 
   const [trackingEnabled, setTrackingEnabled] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<Set<MapFilterId>>(new Set());
+  /* null until the reader asks for trending: the list is a second request, and most
+     visits never turn the filter on. */
+  const [trendingIds, setTrendingIds] = useState<Set<string> | null>(null);
 
   const [forceCenterUpdate, setForceCenterUpdate] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
@@ -88,6 +187,13 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
 
   const MIN_CAFE_COUNT = 9;
   const EXPANDED_RADIUS = 150000; // 150km
+  const LOCAL_RADIUS = 5000; // 5km — walking-and-a-bit, which is what "local" means here
+  /*
+    Trending is "trending around here", not "trending anywhere": a global top-50 matched
+    nearly every pin on the map and the filter said nothing. It needs a shared location,
+    the way the local filter does.
+  */
+  const TRENDING_POOL = 10;
 
   // Dynamic search based on visible area with debouncing
   const handleBoundsChanged = useCallback((bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => {
@@ -384,61 +490,109 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
       showToast(t('cafes_refreshed'), 'success');
     }
   }, [center, clearCache, searchCafes, showToast, t]);
-  
+
+  // Fetched once, the first time the trending filter is switched on.
+  useEffect(() => {
+    if (!activeFilters.has('trending') || trendingIds || !coords) return;
+
+    let cancelled = false;
+    getTrendingCafes(TRENDING_POOL, 0, { lat: coords.latitude, lng: coords.longitude }, 'trending')
+      .then((list) => {
+        if (!cancelled) setTrendingIds(new Set(list.map((cafe) => cafe.id)));
+      })
+      .catch(() => {
+        if (!cancelled) setTrendingIds(new Set());
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFilters, trendingIds, coords]);
+
+  const matchesFilter = useCallback((cafe: CafeMapData, filter: MapFilterId) => {
+    switch (filter) {
+      case 'local':
+        return !!coords && calculateDistance(coords.latitude, coords.longitude, cafe.latitude, cafe.longitude) <= LOCAL_RADIUS;
+      case 'verified':
+        return cafe.status === 'verified';
+      case 'trending':
+        // Before the list arrives nothing is known to be trending, so nothing passes --
+        // showing every pin would say "these are all trending", which is worse than a
+        // moment of emptiness.
+        return !!trendingIds?.has(cafe.id);
+    }
+  }, [coords, trendingIds]);
+
+  // Conditions narrow together; none set means the map is unfiltered.
+  const visibleCafes = allCafes.filter((cafe) =>
+    [...activeFilters].every((filter) => matchesFilter(cafe, filter))
+  );
+
+  const filterCounts = Object.fromEntries(
+    MAP_FILTER_IDS.map((filter) => [filter, allCafes.filter((cafe) => matchesFilter(cafe, filter)).length])
+  ) as Record<MapFilterId, number>;
+
+  const toggleFilter = (filter: MapFilterId) => {
+    setActiveFilters((current) => {
+      const next = new Set(current);
+      if (!next.delete(filter)) next.add(filter);
+      return next;
+    });
+  };
+
+  // Escape closes the card, the way it closed the dialog this replaced.
+  useEffect(() => {
+    if (!selectedCafe) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedCafe(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedCafe]);
+
+  const handleSearchSelect = (cafe: CafeMapData) => {
+    setCenter({ lat: cafe.latitude, lng: cafe.longitude });
+    setForceCenterUpdate(true);
+    setTimeout(() => setForceCenterUpdate(false), 100);
+    handleCafeClick(cafe);
+  };
 
   return (
     <div className="flex-1 flex flex-col relative">
-      {/* Header: Title/Subtitle on top, Controls below on small screens */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
-        {/* Left side: Title and Subtitle */}
-        <div className="flex-1 min-w-0">
-          {mapTitle && (
-            <h2 className="mb-2 text-2xl text-ink-primary sm:whitespace-nowrap">
-              {mapTitle}
-            </h2>
-          )}
-          {mapSubtitle && (
-            <p className="text-ink-secondary sm:whitespace-nowrap">
-              {mapSubtitle}
-            </p>
-          )}
-        </div>
-        {/* Right side: Controls and Results Info */}
-        <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
-          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-            <button
-              onClick={handleRefreshCafes}
-              className="relief-control flex min-h-11 shrink-0 items-center gap-2 rounded-(--radius-pill) border border-edge-rule px-4 text-ink-primary disabled:opacity-60"
-              title={t('refresh_cafes')}
-              disabled={isLoading}
-            >
-              <RefreshIcon className="w-4 h-4 shrink-0" />
-              <span className="landing-micro whitespace-nowrap">{t('refresh')}</span>
-            </button>
-          </div>
-          {/* Results Info - Compact */}
-          <div className="mt-2 flex items-center gap-2 text-right text-ink-secondary">
-            <span className="landing-micro">
-              {t('cafes_on_map', { count: allCafes.length })}
-              {isTracking && nearbyStays.length > 0 && (
-                <span className="ml-2 text-ink-primary">
-                  · {t('nearby_now', { count: nearbyStays.length })}
-                </span>
-              )}
-            </span>
-            <button
-              onClick={handleLocationClick}
-              className="flex items-center justify-center hover:opacity-80 transition-opacity"
-              title={t('location_button')}
-              disabled={!coords}
-            >
-              <UserLocationIcon size={32} color="var(--marker-user)" />
-            </button>
-          </div>
+      {/*
+        The masthead carries the words only. The controls that act on the map now live on
+        the map, where the thing they change is: a header rail of buttons made the reader
+        look away from the map to operate it, and put a lifted pill next to a heading.
+      */}
+      <div className="mb-3">
+        {mapTitle && <h2 className="text-2xl text-ink-primary">{mapTitle}</h2>}
+        {mapSubtitle && <p className="mt-1 text-ink-secondary">{mapSubtitle}</p>}
+
+        {/* The count and the three things that change it share one line. */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="landing-micro text-ink-secondary">
+            {activeFilters.size > 0
+              ? t('cafes_shown', { shown: visibleCafes.length, total: allCafes.length })
+              : t('cafes_on_map', { count: allCafes.length })}
+            {isTracking && nearbyStays.length > 0 && (
+              <span className="ml-2 text-ink-primary">
+                · {t('nearby_now', { count: nearbyStays.length })}
+              </span>
+            )}
+          </p>
+          <MapControlGroup
+            active={activeFilters}
+            onToggle={toggleFilter}
+            counts={filterCounts}
+            localDisabled={!coords}
+            trendingDisabled={!coords}
+            onLocate={handleLocationClick}
+            onRefresh={handleRefreshCafes}
+            refreshDisabled={isLoading}
+            onSelectCafe={handleSearchSelect}
+          />
         </div>
       </div>
-
-
 
       {/* Map */}
       <div className="flex-1 min-h-[400px]">
@@ -455,7 +609,7 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
             </div>
           </div>
         ) : (
-          <div className="relative h-full overflow-hidden rounded-(--radius-card) border border-edge-rule">
+          <div ref={mapFrameRef} className="relative h-full overflow-hidden rounded-(--radius-card) border border-edge-rule">
             <MapStatusBanner
               message={
                 isLoading ? t('loading_cafes')
@@ -468,7 +622,7 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
               retryLabel={t('retry')}
             />
             <InteractiveMap
-              cafes={allCafes}
+              cafes={visibleCafes}
               center={center}
               zoom={14}
               userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
@@ -476,20 +630,25 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
               onBoundsChanged={isTrendingFallback ? undefined : handleBoundsChanged}
               forceCenterUpdate={forceCenterUpdate}
               fitToMarkers={isTrendingFallback}
+              selectedCafe={selectedCafe}
+              onSelectedPointChange={setSelectedPoint}
             />
+
+            {selectedCafe && selectedPoint && isPointInFrame(selectedPoint, mapFrameRef.current) && (
+              <div
+                ref={setCardNode}
+                className="absolute z-(--z-map-modal) w-[340px] max-w-[calc(100%-1.5rem)]"
+                style={cardPosition(selectedPoint, mapFrameRef.current, cardHeight)}
+              >
+                <CafeInfoModal cafe={selectedCafe} onClose={() => setSelectedCafe(null)} />
+              </div>
+            )}
           </div>
         )}
       </div>
 
 
 
-      {/* Cafe Info Modal */}
-      {selectedCafe && (
-        <CafeInfoModal
-          cafe={selectedCafe}
-          onClose={() => setSelectedCafe(null)}
-        />
-      )}
     </div>
   );
 }

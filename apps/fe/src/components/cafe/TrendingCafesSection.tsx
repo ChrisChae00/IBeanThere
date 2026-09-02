@@ -91,11 +91,12 @@ export default function TrendingCafesSection({
           <RegisterCafeCTA variant="empty" />
         ) : (
           <>
-            {displayCafes.map((cafe) => (
+            {displayCafes.map((cafe, index) => (
               <CafeCard
                 size="sm"
                 key={cafe.id}
                 cafe={cafe}
+                trendingRank={index + 1}
                 locale={locale}
                 googlePhoto={resolvedGooglePhoto(googlePhotos[cafe.id])}
                 googlePhotoLoading={googlePhotos[cafe.id] === 'loading'}
