@@ -72,7 +72,14 @@ Rules:
   own extreme. A hover that moves toward the label is how three of four themes failed AA.
 - **Hover and press are carried by relief, not by a colour swap** (`relief-control`,
   `.btn-shade`). Matcha Latte has no lighter brand shade left that still holds a legible
-  label, so a colour-based hover would have to break either contrast or the theme.
+  label, so a colour-based hover would have to break either contrast or the theme. That
+  theme's `--c-brand-soft` is currently the old lighter shade under the new cream ink and
+  so moves the wrong way (2.20:1, below its own rest state); it is knowingly left, and
+  deepening it is the fix if it ever matters.
+- **The inverted band is its own slot on a dark theme.** `--surface-inverse` defaults to
+  the ink, which is right on a light theme and wrong on a dark one -- there the ink is a
+  near-white, and a full-width block of it is a lamp. A theme names `--c-inverse` to take
+  it off that default (Dark Roast does); the other three inherit the ink.
 - **Darkening overlays use `--scrim-media`, never `--brand`.** In dark themes the brand
   is a *light* foreground colour; painting a scrim with it removes the darkening.
 - **State colours come from `--state-*`.** A raw Tailwind palette class
@@ -156,7 +163,14 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 ## 7. Accessibility
 
 - Body text 4.5:1, non-text (button fill against the page, focus rings, marker against
-  the map) 3:1 — in **all four themes**, measured, not eyeballed.
+  the map) 3:1 — in **all four themes**, measured, not eyeballed. Measure on
+  `/[locale]/theme-demo`, which reads the live cascade; the numbers written into docs are
+  snapshots, not the source.
+- **Two exceptions are on the record, and neither is an oversight to fix on sight.**
+  Matcha Latte's label on its brand is 3.37:1: the pair was read on screen and kept
+  (`themes.css` says so beside the slot). `--marker-pending` is 2.21:1 on the map tiles
+  in every theme; the white `--marker-ring` is what draws its edge. Anything else below
+  the threshold is a bug.
 - Interactive targets are at least 44×44, even when the visible chrome is smaller -- a
   `before:` band restores the target without inflating the button.
 - Focus rings are never removed. `focus-visible` styling is part of the component, not
