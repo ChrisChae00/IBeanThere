@@ -70,12 +70,24 @@ Rules:
 - **Hover widens the contrast a surface already has**; it does not move toward the ink.
   Dark brand goes darker, light brand goes lighter, about a fifth toward that theme's
   own extreme. A hover that moves toward the label is how three of four themes failed AA.
-- **Hover and press are carried by relief, not by a colour swap** (`relief-control`,
-  `.btn-shade`). Matcha Latte has no lighter brand shade left that still holds a legible
-  label, so a colour-based hover would have to break either contrast or the theme. That
-  theme's `--c-brand-soft` is currently the old lighter shade under the new cream ink and
-  so moves the wrong way (2.20:1, below its own rest state); it is knowingly left, and
-  deepening it is the fix if it ever matters.
+- **State is the fill, not depth** (2026-09-02). A control is a rule and a fill; hover
+  inverts the fill. The neumorphic relief that used to carry hover and press is gone —
+  no soft double shadow, no 1px lift, no brand glow, nothing that reads as floating off
+  the page. Nothing in a control moves either: no `translate`, no `scale`.
+- **Three button shapes, and they are classes, not re-typed utility strings.**
+  `btn-fill` (brand fill, `.btn-shade` press) is the page's one primary action;
+  `btn-line` draws its rule in the current ink and fills with that ink on hover;
+  `control-flat` is the same idea for a control that owns a surface, with `.is-active`
+  for the selected member of a group. Size stays at the call site — a 52px hero CTA and
+  a 30px inline link are the same shape at different scales.
+- **`btn-line` needs to be told what is behind it.** Its hover fill cannot be
+  `currentColor`: the same rule changes `color`, so the label ends up painted in its own
+  background. `--btn-line-ink` is the ink it draws with, `--btn-line-on` the surface
+  behind it; a section on another ground sets the pair once (the landing's dark band
+  does) instead of every button on it re-specifying its hover.
+- **Matcha Latte's `--c-brand-soft` is knowingly wrong.** It is the old lighter shade
+  under the new cream ink, so hover measures 2.20:1 — below its own rest state.
+  Deepening it is the fix if it ever matters.
 - **The inverted band is its own slot on a dark theme.** `--surface-inverse` defaults to
   the ink, which is right on a light theme and wrong on a dark one -- there the ink is a
   near-white, and a full-width block of it is a lamp. A theme names `--c-inverse` to take
@@ -108,8 +120,10 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 
 - A page opens with a broadsheet masthead and a rule under it, not a gradient band.
 - Panels are framed: `--radius-card`, one `--edge-rule` hairline, no drop shadow.
-- Controls are pills. State is depth (`relief-control` at rest, `relief-pressed` when
-  active), not a colour swap; the filled control is the page's one primary action.
+- Controls are pills. State is the fill — `control-flat` at rest, `.is-active` (brand
+  fill) when selected — and the filled control is the page's one primary action. An
+  active control takes the brand, never a 12% wash of it: a tint is a lit background,
+  not a chosen state.
 - Meta rows — counts, statuses, badges — are `.landing-micro`, never emoji.
 - Names of things (a cafe, a person) are set in the body face. The display serif is for
   the page's own voice, not for data.
@@ -140,8 +154,11 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   the 44px target with an invisible band, not by growing.
 - **Popovers sit above whatever opened them.** The `--z-*` stack in `tokens.css` is the
   whole ordering; add a band, do not add a bigger number.
-- **Elevation is `--relief-shadow-*` or a named `--shadow-*`.** An inline `boxShadow`
-  string is not theme-aware and cannot be.
+- **Elevation is one named token or nothing.** `--shadow-panel` for a floating panel,
+  `--shadow-marker` for a pin on the map; both are fixed rather than theme-derived,
+  because the themes' own shadow colours are light in the dark themes and would paint a
+  halo. Cards and controls carry no shadow at all. An inline `boxShadow` string is not
+  theme-aware and cannot be.
 
 ## 6. Motion
 
@@ -179,12 +196,27 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - Verify in English first: Korean labels run ~90px narrower and will pass a layout that
   English breaks.
 
+## 7.1 Traps found the hard way
+
+- **A `--color-*` bridge entry is what makes a token a utility.** `border-edge-rule` was
+  written across the app for weeks and was never a class: `--color-edge-rule` was missing
+  from the `@theme` block in `globals.css`, so Tailwind generated nothing and every one
+  of those borders fell back to `currentColor` at full ink strength. When a token looks
+  ignored, check the bridge before checking the value.
+- **A component-layer rule loses to a shadcn utility.** The base button ships
+  `border-transparent` and `hover:bg-muted` as utilities; `control-flat` had to move into
+  `@layer utilities` to win.
+- **Child effects run before the parent's.** A control whose colours are set by a parent
+  effect measures the *old* values, which is how a swatch showed one colour and the
+  number beside it another. Write that kind of change in the event handler.
+
 ## 8. Banned
 
 | Banned | Use instead |
 |---|---|
 | `bg-primary`, `text-primaryText`, `cardBackground`, `cardText*`, `text-textSecondary`, any `--color-*` | The semantic tokens in `tokens.css`. The alias layer is deleted in Phase 6 |
-| `--ibean-*` outside the legacy utilities | `--relief-shadow-*`, `--radius-*`, spacing utilities |
+| `--ibean-*` outside the legacy utilities | `--shadow-panel`, `--radius-*`, spacing utilities |
+| `relief-control`, `relief-raised`, `relief-pressed`, any soft double shadow or hover lift | `control-flat`, `btn-line`, `btn-fill` |
 | Hardcoded hex, `rgba()`, inline `boxShadow`, arbitrary `rounded-[…]`/`h-[…]` | Tokens |
 | Emoji standing in for an icon (🔥 ⏳ ☕️ 📍) | `lucide-react`, or a `.landing-micro` word |
 | Hand-rolled button classes | `shared/ui/Button` (`variant`, `size` already exist) |

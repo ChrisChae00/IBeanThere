@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
   Wrapper over the shadcn card. Keeps this repo's `variant` / `padding` / `header` /
   `footer` props so no calling page changed.
 
-  Cards stay FLAT — no relief (decision #7). Relief is for interactive controls only;
+  Cards stay FLAT — no shadow (decision #7). Depth is not part of this system;
   spreading it to cards is what makes neumorphism read as muddy, and the low-contrast
   surfaces it produces fail WCAG.
 

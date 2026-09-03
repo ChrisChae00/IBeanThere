@@ -47,14 +47,14 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 /*
-  Hover and press are carried by relief, not by a colour swap. That is not a style
-  preference: Matcha Latte's green has no lighter shade left that still holds a legible
-  label, so a colour-based hover would have to break either contrast or the theme
-  (Phase 1). `relief-control` already handles hover, active and reduced-motion, so the
-  variant's own colour-shifting hover is cancelled here — tailwind-merge lets the later
-  class win.
+  State is carried by the fill, not by depth. An outline control inverts on hover
+  (`control-flat`); a filled one presses inward (`btn-shade`) and keeps its brand fill,
+  which is why the two are not the same class — putting `control-flat` on a filled
+  button would repaint the fill it is supposed to keep. The variant's own
+  colour-shifting hover is cancelled either way; tailwind-merge lets the later class win.
 */
-const reliefOverrides = 'relief-control rounded-(--btn-radius) font-semibold gap-2';
+const shape = 'rounded-(--btn-radius) font-semibold gap-2';
+const FILLED: ButtonVariant[] = ['primary', 'danger'];
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -80,7 +80,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         variant={variantMap[variant]}
         disabled={isDisabled}
         className={cn(
-          reliefOverrides,
+          shape,
+          FILLED.includes(variant) ? 'btn-shade' : 'control-flat',
           sizeClasses[size],
           fullWidth && 'w-full',
           isDisabled && 'opacity-60 cursor-not-allowed shadow-none',

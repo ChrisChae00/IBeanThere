@@ -11,8 +11,8 @@ import { useTheme } from '@/contexts/ThemeContext';
   missing or resolves to nothing, it shows up here as blank instead of silently
   inheriting somewhere in a feature page.
 
-  This is also where relief gets tuned: the shadow values per theme cannot be judged by
-  reading CSS.
+  This is also where the control surface is judged: hover and press states cannot be read
+  off a stylesheet.
 
   Names on this page are the names in the code — the token as it is written in
   `tokens.css` and the theme as it is keyed in `palettes.ts` (`espresso`, not
@@ -192,8 +192,8 @@ export default function ThemeDemoPage() {
         <p className="mt-2 max-w-2xl text-ink-secondary">
           Read live from the cascade, not from a palette object. Names are the ones in the
           code: tokens as written in <code>tokens.css</code>, themes as keyed in{' '}
-          <code>palettes.ts</code>. Switch themes to tune relief and confirm every pairing
-          still clears its threshold.
+          <code>palettes.ts</code>. Switch themes and confirm every pairing still clears
+          its threshold.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-2">
@@ -201,10 +201,8 @@ export default function ThemeDemoPage() {
             <button
               key={theme.name}
               onClick={() => setTheme(theme.name)}
-              className={`rounded-(--radius-pill) px-5 py-2.5 text-left text-sm font-medium transition-transform active:translate-y-px ${
-                theme.name === currentTheme.name
-                  ? 'relief-pressed bg-surface-raised text-ink-primary'
-                  : 'relief-raised bg-surface-raised text-ink-secondary'
+              className={`control-flat rounded-(--radius-pill) px-5 py-2.5 text-left text-sm font-medium ${
+                theme.name === currentTheme.name ? 'is-active' : ''
               }`}
             >
               <code>{theme.name}</code>
@@ -324,32 +322,29 @@ export default function ThemeDemoPage() {
       </Section>
 
       <Section
-        title="Relief"
-        note="Controls only. Cards and sections stay flat — this is the whole neumorphism budget. Hover and press the first control: state is carried by depth, not by a colour swap."
+        title="Controls"
+        note="Flat. A control is a rule and a fill, and state is the fill inverting — hover the outline control, then the selected one. Nothing lifts, nothing glows: no shadow and no transform anywhere in this row."
       >
         <div className="flex flex-wrap items-center gap-6 rounded-(--radius-card) bg-surface-raised p-8">
-          <button className="relief-control rounded-(--btn-radius) bg-surface-raised px-6 py-3 text-ink-primary">
-            relief-control
+          <button className="control-flat rounded-(--btn-radius) px-6 py-3">
+            control-flat
           </button>
-          <button className="relief-raised rounded-(--btn-radius) bg-surface-raised px-6 py-3 text-ink-primary">
-            relief-raised
+          <button className="control-flat is-active rounded-(--btn-radius) px-6 py-3">
+            control-flat is-active
           </button>
-          <button className="relief-pressed rounded-(--btn-radius) bg-surface-raised px-6 py-3 text-ink-primary">
-            relief-pressed
-          </button>
-          <button
-            className="relief-control rounded-(--btn-radius) px-6 py-3 font-semibold"
-            style={{ background: 'var(--brand)', color: 'var(--ink-on-brand)' }}
-          >
-            --brand / --ink-on-brand
+          <button className="btn-shade rounded-(--btn-radius) bg-brand px-6 py-3 font-semibold text-ink-on-brand">
+            btn-shade on --brand
           </button>
           <input
-            className="relief-pressed rounded-(--input-radius) bg-surface-raised px-4 text-ink-primary outline-hidden"
+            className="rounded-(--input-radius) border border-edge-rule bg-surface-raised px-4 text-ink-primary outline-hidden focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
             style={{ height: 'var(--input-height)' }}
             placeholder="--input-height / --input-radius"
           />
-          <div className="relief-raised grid size-12 place-items-center rounded-(--radius-pill) bg-surface-raised text-ink-primary">
+          <div className="grid size-12 place-items-center rounded-(--radius-pill) border border-edge-rule bg-surface-raised text-ink-primary">
             &#9733;
+          </div>
+          <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised px-6 py-3 text-ink-primary shadow-(--shadow-panel)">
+            --shadow-panel (floating panels only)
           </div>
         </div>
       </Section>

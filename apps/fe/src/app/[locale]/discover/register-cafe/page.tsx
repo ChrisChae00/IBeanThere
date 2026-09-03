@@ -136,7 +136,7 @@ export default function RegisterCafePage() {
                       {!locationLoading && !locationError && (
                         <button
                           onClick={() => getCurrentLocation().catch(() => {})}
-                          className="relief-control mt-4 min-h-11 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
+                          className="btn-shade mt-4 min-h-11 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
                         >
                           {tMap('share_location')}
                         </button>

@@ -70,7 +70,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
          "helpfully" scrolls the card to keep the shifted content still -- which put the
          first line of the address behind the image every time. */
       style={{ overflowAnchor: 'none' }}
-      className="scrollbar-quiet max-h-[inherit] w-full overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised shadow-(--relief-shadow-lifted)"
+      className="scrollbar-quiet max-h-[inherit] w-full overflow-y-auto rounded-(--radius-card) border border-edge-rule bg-surface-raised shadow-(--shadow-panel)"
     >
       <div className="relative">
         {/* The card image component owns the placeholder, so a cafe with no photograph
@@ -186,7 +186,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
             {todayHours && (
               <button
                 onClick={() => setShowAllHours(!showAllHours)}
-                className="relief-control w-full rounded-(--radius-control) border border-edge-rule p-3 text-sm text-ink-primary"
+                className="control-flat w-full rounded-(--radius-control) border border-edge-rule p-3 text-sm text-ink-primary"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
@@ -246,7 +246,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
 
         <Link
           href={cafe.slug ? `/${locale}/cafes/${cafe.slug}` : `/${locale}/cafes/${cafe.id}`}
-          className="relief-control flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-4 font-semibold text-ink-on-brand"
+          className="btn-shade flex min-h-11 w-full items-center justify-center gap-2 rounded-(--btn-radius) bg-brand px-4 font-semibold text-ink-on-brand"
           onClick={onClose}
         >
           {t('view_details')}

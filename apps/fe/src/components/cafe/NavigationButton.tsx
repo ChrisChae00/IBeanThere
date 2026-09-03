@@ -68,7 +68,7 @@ export default function NavigationButton({
         className={
           size === 'sm'
             ? `${CAFE_ACTION_CLASS} ${fontSize}`
-            : `relief-control flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`
+            : `control-flat flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`
         }
         aria-expanded={isOpen}
         aria-haspopup="true"

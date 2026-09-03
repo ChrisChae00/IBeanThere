@@ -13,6 +13,12 @@ interface CollectionSelectorModalProps {
   cafeId: string;
   cafeName: string;
   onSaveComplete?: () => void;
+  /*
+    Set when the picker was opened right after a one-press save, which files the cafe
+    under "Saved for later" first. Picking a real list then *moves* it: the default is
+    where a cafe waits until it is filed, not a copy to leave behind.
+  */
+  moveOutOfSaveLater?: boolean;
 }
 
 /**
@@ -25,6 +31,7 @@ export default function CollectionSelectorModal({
   cafeId,
   cafeName,
   onSaveComplete,
+  moveOutOfSaveLater = false,
 }: CollectionSelectorModalProps) {
   const t = useTranslations('collections');
   
@@ -69,6 +76,44 @@ export default function CollectionSelectorModal({
     fetchData();
   }, [isOpen, cafeId, t]);
 
+  /*
+    The count beside a list is what the reader just changed, so it moves with the tick
+    rather than waiting for the next fetch — a list that says 0 right after you filed
+    something into it reads as a failed save.
+  */
+  const bumpCount = useCallback((collectionId: string, delta: number) => {
+    setCollections((prev) =>
+      prev.map((c) =>
+        c.id === collectionId ? { ...c, item_count: Math.max(0, c.item_count + delta) } : c,
+      ),
+    );
+  }, []);
+
+  /*
+    The default list is only vacated when the reader files the cafe somewhere real —
+    never when they un-tick a list, which would leave the cafe saved nowhere without
+    them asking for that.
+  */
+  const leaveSaveLater = useCallback(async (chosenId: string) => {
+    if (!moveOutOfSaveLater) return;
+    const saveLater = collections.find((c) => c.icon_type === 'save_later');
+    if (!saveLater || saveLater.id === chosenId) return;
+    if (!savedCollectionIds.has(saveLater.id)) return;
+
+    setSavedCollectionIds((prev) => {
+      const next = new Set(prev);
+      next.delete(saveLater.id);
+      return next;
+    });
+    bumpCount(saveLater.id, -1);
+    try {
+      await removeCafeFromCollection(saveLater.id, cafeId);
+    } catch {
+      setSavedCollectionIds((prev) => new Set(prev).add(saveLater.id));
+      bumpCount(saveLater.id, 1);
+    }
+  }, [cafeId, collections, moveOutOfSaveLater, savedCollectionIds]);
+
   const handleToggleCollection = useCallback(async (collectionId: string) => {
     if (isSaving) return;
     
@@ -87,10 +132,12 @@ export default function CollectionSelectorModal({
     });
     
     try {
+      bumpCount(collectionId, isCurrentlySaved ? -1 : 1);
       if (isCurrentlySaved) {
         await removeCafeFromCollection(collectionId, cafeId);
       } else {
         await addCafeToCollection(collectionId, cafeId);
+        await leaveSaveLater(collectionId);
       }
     } catch (err) {
       // Revert on error
@@ -103,11 +150,12 @@ export default function CollectionSelectorModal({
         }
         return next;
       });
+      bumpCount(collectionId, isCurrentlySaved ? 1 : -1);
       setError(t('save_failed'));
     } finally {
       setIsSaving(false);
     }
-  }, [cafeId, isSaving, savedCollectionIds, t]);
+  }, [cafeId, isSaving, savedCollectionIds, leaveSaveLater, bumpCount, t]);
 
   const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim() || isCreating) return;
@@ -120,10 +168,11 @@ export default function CollectionSelectorModal({
         icon_type: 'custom',
       });
       
-      // Add cafe to new collection
+      // A list made from this picker is made *for* this cafe, so it is filed at once.
       await addCafeToCollection(newCollection.id, cafeId);
+      await leaveSaveLater(newCollection.id);
       
-      setCollections(prev => [...prev, newCollection]);
+      setCollections(prev => [...prev, { ...newCollection, item_count: 1 }]);
       setSavedCollectionIds(prev => new Set([...prev, newCollection.id]));
       setNewCollectionName('');
       setShowNewForm(false);
@@ -132,7 +181,7 @@ export default function CollectionSelectorModal({
     } finally {
       setIsCreating(false);
     }
-  }, [cafeId, newCollectionName, isCreating, t]);
+  }, [cafeId, newCollectionName, isCreating, leaveSaveLater, t]);
 
   const handleClose = useCallback(() => {
     onSaveComplete?.();
@@ -240,13 +289,16 @@ export default function CollectionSelectorModal({
 
               {/* New collection form */}
               {showNewForm ? (
-                <div className="flex items-center gap-2 px-3 py-2">
+                /* Wraps rather than overflowing: on a phone the input plus two
+                   buttons is wider than the sheet, and the row used to push Create
+                   and Cancel off the screen. */
+                <div className="flex flex-wrap items-center gap-2 px-3 py-2">
                   <input
                     type="text"
                     value={newCollectionName}
                     onChange={e => setNewCollectionName(e.target.value)}
                     placeholder={t('collection_name_placeholder')}
-                    className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary sm:w-auto"
                     autoFocus
                     onKeyDown={e => {
                       if (e.key === 'Enter') handleCreateCollection();

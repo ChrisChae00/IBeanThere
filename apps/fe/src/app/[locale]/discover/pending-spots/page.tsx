@@ -133,7 +133,7 @@ export default function PendingSpotsPage() {
             </div>
             <Link
               href={`/${locale}/discover/register-cafe`}
-              className="relief-control flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+              className="btn-shade flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
             >
               <PlusIcon size={20} />
               {t('register_new')}
@@ -157,8 +157,8 @@ export default function PendingSpotsPage() {
                 disabled={mode === 'nearby' && !coords}
                 className={`landing-micro min-h-11 rounded-(--radius-pill) border px-5 disabled:opacity-50 ${
                   sortMode === mode
-                    ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
-                    : 'relief-control border-edge-rule bg-surface-raised text-ink-secondary hover:text-ink-primary'
+                    ? 'control-flat is-active'
+                    : 'control-flat'
                 }`}
               >
                 {label}
@@ -186,7 +186,7 @@ export default function PendingSpotsPage() {
                 </div>
                 <button
                   onClick={loadPendingCafes}
-                  className="relief-control min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+                  className="btn-shade min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
                 >
                   {t('retry')}
                 </button>
@@ -200,7 +200,7 @@ export default function PendingSpotsPage() {
                 <p className="mx-auto max-w-md text-ink-secondary">{t('empty_hint')}</p>
                 <Link
                   href={`/${locale}/discover/register-cafe`}
-                  className="relief-control inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
+                  className="btn-shade inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
                 >
                   {t('register_new')}
                 </Link>

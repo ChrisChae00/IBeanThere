@@ -115,7 +115,7 @@ export default function NearbyPage(
             </div>
             <Link
               href={`/${locale}/discover/explore-map`}
-              className="relief-control flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-6 font-semibold text-ink-primary"
+              className="control-flat flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-6 font-semibold text-ink-primary"
             >
               {t('view_cafe_map')}
             </Link>
@@ -131,7 +131,7 @@ export default function NearbyPage(
               <p className="text-sm text-ink-primary">{t('load_error')}</p>
               <button
                 onClick={() => coords && fetchNearbyCafes(coords.latitude, coords.longitude)}
-                className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
+                className="control-flat min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
               >
                 {t('retry')}
               </button>
@@ -179,13 +179,13 @@ export default function NearbyPage(
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href={`/${locale}/discover/explore-map`}
-                  className="relief-control inline-flex min-h-11 items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+                  className="btn-shade inline-flex min-h-11 items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
                 >
                   {t('view_cafe_map')}
                 </Link>
                 <Link
                   href={`/${locale}/discover/register-cafe`}
-                  className="relief-control inline-flex min-h-11 items-center rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
+                  className="control-flat inline-flex min-h-11 items-center rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
                 >
                   {t('register_new_cafe')}
                 </Link>
@@ -251,7 +251,7 @@ export default function NearbyPage(
                         ) : (
                           <Link
                             href={`/${locale}/signin`}
-                            className="relief-control flex min-h-11 w-full items-center justify-center rounded-(--btn-radius) bg-brand px-4 text-sm font-semibold text-ink-on-brand"
+                            className="btn-shade flex min-h-11 w-full items-center justify-center rounded-(--btn-radius) bg-brand px-4 text-sm font-semibold text-ink-on-brand"
                           >
                             {t('sign_in_to_drop')}
                           </Link>

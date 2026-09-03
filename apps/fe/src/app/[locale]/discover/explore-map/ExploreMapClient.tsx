@@ -191,15 +191,13 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const gridLoading = searchResults ? isSearching : isLoading;
 
   /*
-    Filters carry their state in relief rather than in fill: the page's one filled
-    control is the register action, and a colour-swap hover has no room left in the
-    Matcha palette.
+    Filters carry their state in the fill: the selected one takes the brand, the rest are
+    a rule and ink. The page's one filled control is still the register action -- a
+    selected filter is a state, not a second primary.
   */
   const filterClass = (filter: FilterType) =>
-    `landing-micro min-h-11 rounded-(--radius-pill) border px-5 disabled:opacity-50 ${
-      activeFilter === filter
-        ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
-        : 'relief-control border-edge-rule bg-surface-raised text-ink-secondary hover:text-ink-primary'
+    `landing-micro min-h-11 rounded-(--radius-pill) px-5 disabled:opacity-50 control-flat ${
+      activeFilter === filter ? 'is-active' : ''
     }`;
 
   return (
@@ -314,7 +312,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="relief-control min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand disabled:opacity-60"
+                  className="btn-shade min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand disabled:opacity-60"
                 >
                   {tMap('load_more')}
                 </button>
@@ -322,7 +320,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
                 <button
                   onClick={handleShowLess}
-                  className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
+                  className="control-flat min-h-11 rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
                 >
                   {tMap('show_less')}
                 </button>

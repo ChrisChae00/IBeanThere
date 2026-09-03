@@ -91,7 +91,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         <button
           type="button"
           onClick={handleToggle}
-          className="relief-control min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-ink-primary"
+          className="control-flat min-h-11 rounded-(--btn-radius) border border-edge-rule px-4 text-ink-primary"
         >
           + {t('opening_hours_toggle')}
         </button>

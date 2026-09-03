@@ -12,6 +12,13 @@ interface FoundingCrewMember {
 }
 
 interface FoundingCrewAvatarsProps {
+  /*
+    `stack` is the form the crew takes over a photograph: overlapping avatars, no
+    heading, no role captions -- the names are in the tooltips. Reading order runs
+    left to right, so the leftmost avatar overlaps the one after it rather than
+    being buried under it, which is the opposite of what a default stack does.
+  */
+  variant?: 'row' | 'stack';
   navigator?: {
     user_id: string;
     username?: string;
@@ -27,7 +34,7 @@ interface FoundingCrewAvatarsProps {
   }>;
 }
 
-export default function FoundingCrewAvatars({ navigator, scouts }: FoundingCrewAvatarsProps) {
+export default function FoundingCrewAvatars({ navigator, scouts, variant = 'row' }: FoundingCrewAvatarsProps) {
   const t = useTranslations('cafe.modal');
   const tCommon = useTranslations('common');
 
@@ -52,6 +59,36 @@ export default function FoundingCrewAvatars({ navigator, scouts }: FoundingCrewA
         return t('scout');
     }
   };
+
+  if (variant === 'stack') {
+    return (
+      <div className="flex -space-x-2.5">
+        {members.map((member, index) => {
+          const name = member.display_name || member.username || tCommon('unknown');
+          return (
+            <div
+              key={member.user_id}
+              /* Descending, so the first avatar sits on top of the second. */
+              style={{ zIndex: members.length - index }}
+              className="relative"
+            >
+              <Tooltip content={`${name} · ${getRoleLabel(member.role)}`} position="bottom">
+                <Avatar
+                  src={member.avatar_url}
+                  alt={name}
+                  size="sm"
+                  /* The ring is what separates one avatar from the one it overlaps
+                     and from the photograph underneath, so it is the media ink
+                     rather than a surface colour. */
+                  className="ring-2 ring-ink-on-media/80 transition-transform duration-200 hover:-translate-y-0.5"
+                />
+              </Tooltip>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3">

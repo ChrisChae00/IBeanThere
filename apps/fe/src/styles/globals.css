@@ -47,6 +47,13 @@
   --color-edge-subtle: var(--edge-subtle);
   --color-edge-default: var(--edge-default);
   --color-edge-strong: var(--edge-strong);
+  /*
+    Missing until now, which meant every `border-edge-rule` in the app was not a class
+    at all: the utility was never generated, the border fell back to `currentColor`,
+    and the hairline the design language asks for was being drawn at full ink strength.
+    Adding it makes those borders the rule they were written to be.
+  */
+  --color-edge-rule: var(--edge-rule);
 
   --color-state-success: var(--state-success);
   --color-state-warning: var(--state-warning);
@@ -63,13 +70,11 @@
     other shape: no offset at all, so the falloff is equal on all four edges and
     the depth reads as the whole surface sinking rather than one edge lifting.
 
-    Shaped after `.relief-pressed`, which is the reference for what a sunken
-    surface looks like here: a band that is solid at the rim and softens as it
-    goes in, at a reach measured in single-digit pixels rather than half the
-    control. The difference is that relief is lit - a light shadow from the top
-    left, a dark one from the bottom right - and these are not. Zero offset means
-    all four edges get the same band, so this reads as a face set into its own
-    outline rather than as a surface under a light source.
+    A band that is solid at the rim and softens as it goes in, at a reach measured
+    in single-digit pixels rather than half the control. Zero offset means all four
+    edges get the same band, so this reads as a face set into its own outline rather
+    than as a surface under a light source — which is the whole difference between
+    this and the lit relief the controls used to carry.
 
     That is what the spread and blur are doing, and the order matters: the
     positive spread sets how far the solid part reaches in, the blur softens only
@@ -369,54 +374,103 @@
   }
 }
 
-@layer components {
+@layer utilities {
   /*
-    Neumorphic relief. Deliberately scoped to interactive controls — buttons, toggles,
-    tabs, chips, the search field. Cards, sections and bento cells stay flat, because
-    relief everywhere is what makes neumorphism read as muddy rather than tactile, and
-    low-contrast card surfaces fail WCAG.
+    Flat controls. A control is a rule and a fill, never a raised plate: state is carried
+    by inverting the fill, which is the one move that reads the same in all four themes
+    and needs no shadow to be legible. The neumorphic relief this replaced signalled
+    state with a soft double shadow and a 1px lift, which made every button look like it
+    was floating slightly off the page.
 
-    Each theme supplies its own light/dark pair from its own surface, so Dark Roast gets
-    a genuinely dark relief rather than an inverted light one.
+    `control-flat` is the outline control - hairline rule, page-level fill, ink label -
+    and it inverts on hover. `.is-active` marks the selected member of a group, which
+    takes the brand fill rather than a tint: a 12% wash of the brand is a lit background,
+    not a chosen state.
 
-    `relief-control` is what a button uses: it carries hover and active itself, so a
-    control signals state through depth instead of swapping colour. That matters beyond
-    style — Matcha Latte's green has no lighter shade left that still carries a legible
-    label, so a colour-based hover would have to break either contrast or the theme.
+    The three button shapes are `btn-fill` (the page's one primary action),
+    `btn-line` (a rule in the current ink that inverts on hover) and `control-flat`
+    (the same idea for a control that owns a surface rather than sitting on one).
+    Size stays at the call site — height, padding and type differ per context and are
+    not what makes these one family.
+
+    Nothing here moves: no `translate`, no `scale`. Colour is the whole vocabulary.
+
+    In the utilities layer, not components: the shadcn button ships `border-transparent`
+    and a `hover:bg-muted` as utilities, and a components-layer rule loses to both no
+    matter how it is written.
   */
-  .relief-raised {
-    box-shadow: var(--relief-shadow-raised);
-  }
-
-  .relief-pressed {
-    box-shadow: var(--relief-shadow-pressed);
-  }
-
-  .relief-control {
-    box-shadow: var(--relief-shadow-raised);
+  .control-flat {
+    border: 1px solid var(--edge-rule);
+    background-color: var(--surface-raised);
+    color: var(--ink-primary);
     transition:
-      box-shadow var(--ibean-transition),
-      transform var(--ibean-transition);
+      background-color var(--ibean-transition),
+      border-color var(--ibean-transition),
+      color var(--ibean-transition);
   }
 
-  .relief-control:hover {
-    box-shadow: var(--relief-shadow-lifted);
-    transform: translateY(-1px);
+  .control-flat:hover:not(:disabled),
+  .control-flat[aria-expanded='true'] {
+    background-color: var(--ink-primary);
+    border-color: var(--ink-primary);
+    color: var(--surface-raised);
   }
 
-  .relief-control:active {
-    box-shadow: var(--relief-shadow-pressed);
-    transform: translateY(0);
+  .control-flat.is-active,
+  .control-flat[aria-pressed='true'] {
+    background-color: var(--brand);
+    border-color: var(--brand);
+    color: var(--ink-on-brand);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .relief-control {
-      transition: none;
-    }
+  /*
+    The selected control keeps its fill on hover. Inverting it too would make the
+    strongest state in the group read as a hover of the weakest.
+  */
+  .control-flat.is-active:hover:not(:disabled) {
+    background-color: var(--brand);
+    border-color: var(--brand);
+    color: var(--ink-on-brand);
+  }
 
-    .relief-control:hover {
-      transform: none;
-    }
+  /*
+    The primary action: brand fill, and a press that sinks into it rather than
+    swapping to a second colour.
+  */
+  .btn-fill {
+    background-color: var(--brand);
+    color: var(--ink-on-brand);
+  }
+
+  /*
+    The secondary action, and the one shape that works on a photograph, a dark band
+    and a card without being re-specified: it draws its rule in whatever ink it has
+    inherited, and hover fills with that same ink.
+
+    Which colour the label flips to cannot be derived — it is the surface *behind* the
+    button, which the button cannot see. `--btn-line-on` carries it, defaulting to the
+    raised surface because that is where most of them sit; a section on another ground
+    sets the variable once rather than every button on it re-specifying its hover.
+  */
+  .btn-line {
+    border: 1px solid currentColor;
+    background-color: transparent;
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition);
+  }
+
+  /*
+    The fill is a variable, not `currentColor`: this rule also changes `color`, and
+    `background-color: currentColor` resolves against the *new* colour — the label ends
+    up painted in its own background. `--btn-line-ink` is the ink the button draws with,
+    `--btn-line-on` the surface behind it; a section on another ground sets the pair
+    once instead of every button on it re-specifying its hover.
+  */
+  .btn-line:hover:not(:disabled) {
+    background-color: var(--btn-line-ink, var(--ink-primary));
+    border-color: var(--btn-line-ink, var(--ink-primary));
+    color: var(--btn-line-on, var(--surface-raised));
   }
 }
 

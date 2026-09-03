@@ -29,7 +29,7 @@ export function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
           <p className="text-xl font-semibold text-ink-primary">{tMap('be_the_navigator')}</p>
           <Link
             href={`/${locale}/discover/register-cafe`}
-            className="relief-control inline-flex min-h-11 items-center gap-2 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
+            className="btn-shade inline-flex min-h-11 items-center gap-2 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
           >
             <PlusIcon size={16} />
             {tMap('register_new_cafe')}
@@ -46,7 +46,7 @@ export function RegisterCafeCTA({ variant }: { variant: 'empty' | 'minimal' }) {
       </p>
       <Link
         href={`/${locale}/discover/register-cafe`}
-        className="relief-control inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
+        className="control-flat inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-(--btn-radius) border border-edge-rule px-4 text-sm font-medium text-ink-primary"
       >
         <PlusIcon size={14} />
         {tMap('register_new_cafe')}

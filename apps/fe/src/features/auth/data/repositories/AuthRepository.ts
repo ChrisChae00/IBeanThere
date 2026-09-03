@@ -74,6 +74,7 @@ export class AuthRepository implements IAuthRepository {
         display_name: data.display_name || data.username,
         username: data.username,
         avatar_url: data.avatar_url || undefined,
+        role: data.role,
       });
     } catch (error) {
       return failure(error instanceof Error ? error : new Error('Unknown error'));

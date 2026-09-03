@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { HeartIcon, BookmarkIcon, AddToCollectionIcon } from '@/shared/ui';
+import { HeartIcon, BookmarkIcon } from '@/shared/ui';
 import { toggleFavourite, toggleSaveForLater, getCafeSaveStatus } from '@/lib/api/collections';
 import { isAuthError } from '@/lib/api/client';
 import type { CafeSaveStatus } from '@/types/api';
@@ -13,19 +13,36 @@ interface SaveButtonsProps {
   onOpenCollectionSelector?: () => void;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  /*
+    Bumped when something outside these buttons has changed what is saved — closing the
+    list picker, above all. Without it the bookmark keeps the state it had when it
+    opened the picker, so un-ticking every list there left a filled bookmark on a cafe
+    saved nowhere.
+  */
+  syncToken?: number;
 }
 
-/**
- * SaveButtons component for cafe detail page.
- * Contains Favourite, Save for Later, and Add to Collection buttons.
- * Fetches save status on mount if initialStatus is not provided.
- */
+/*
+  Two controls, not three. Saving used to be a bookmark *and* a separate
+  "add to collection" button, which asked the reader to decide which kind of saving
+  they meant before they had saved anything.
+
+  Now the bookmark is the whole gesture: one press files the cafe under "Saved for
+  later" and opens the list picker on top of that. Choosing another list moves it
+  there — the default is not left behind as a second copy — and closing the picker
+  without choosing leaves it saved. Pressing it again reopens the picker; unfiling is
+  done by unticking there, where the reader can see what they are removing.
+
+  The heart is a separate mark, not a filing, and nothing here touches it: a place you
+  like stays liked whether or not it is in any list.
+*/
 export default function SaveButtons({
   cafeId,
   initialStatus,
   onOpenCollectionSelector,
   size = 'md',
   className = '',
+  syncToken = 0,
 }: SaveButtonsProps) {
   const t = useTranslations('collections');
   
@@ -35,15 +52,32 @@ export default function SaveButtons({
   const [isFetching, setIsFetching] = useState(!initialStatus);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch save status on mount if initialStatus is not provided
+  // Fetch on mount, and again whenever `syncToken` says the state is stale.
   useEffect(() => {
-    if (initialStatus) {
+    if (initialStatus && syncToken === 0) {
       setIsFetching(false);
       return;
     }
 
+
     const fetchStatus = async () => {
       try {
+        /*
+          The session is read straight from the Supabase client — a local cookie read —
+          rather than waiting on the auth context, whose `isLoading` only clears after
+          it has also fetched the user's profile from the backend. Waiting for that put
+          a second round trip in front of this one, and a saved cafe showed an empty
+          bookmark for the whole of it.
+        */
+        const { createClient } = await import('@/shared/lib/supabase/client');
+        const { data: { session } } = await createClient().auth.getSession();
+
+        if (!session) {
+          setIsFavourited(false);
+          setIsSaved(false);
+          return;
+        }
+
         const status = await getCafeSaveStatus(cafeId);
         setIsFavourited(status.is_favourited);
         setIsSaved(status.is_saved);
@@ -58,7 +92,7 @@ export default function SaveButtons({
     };
 
     fetchStatus();
-  }, [cafeId, initialStatus]);
+  }, [cafeId, initialStatus, syncToken]);
 
   const iconSize = size === 'sm' ? 18 : size === 'lg' ? 28 : 24;
   
@@ -104,14 +138,26 @@ export default function SaveButtons({
     setIsQuickSaving(true);
     setError(null);
 
-    // Optimistic update
-    setIsSaved(prev => !prev);
+    /*
+      A filled bookmark opens the picker rather than unsaving. Unsaving from here would
+      have to guess what the reader meant — clear the default list, or every list the
+      cafe is filed in — and either guess throws away filing they did on purpose. The
+      picker shows them what is ticked and lets them untick it.
+    */
+    if (isSaved) {
+      setIsQuickSaving(false);
+      onOpenCollectionSelector?.();
+      return;
+    }
+
+    setIsSaved(true);
 
     try {
       await toggleSaveForLater(cafeId);
+      // The picker opens on top of a save that has already happened.
+      onOpenCollectionSelector?.();
     } catch (err) {
-      // Revert on error
-      setIsSaved(prev => !prev);
+      setIsSaved(false);
       if (isAuthError(err)) {
         setError('login_required');
       } else {
@@ -120,13 +166,7 @@ export default function SaveButtons({
     } finally {
       setIsQuickSaving(false);
     }
-  }, [cafeId, isQuickSaving]);
-
-  const handleAddToCollection = useCallback(() => {
-    if (onOpenCollectionSelector) {
-      onOpenCollectionSelector();
-    }
-  }, [onOpenCollectionSelector]);
+  }, [cafeId, isQuickSaving, isSaved, onOpenCollectionSelector]);
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
@@ -158,8 +198,8 @@ export default function SaveButtons({
             ? 'text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100' 
             : 'text-textSecondary hover:text-blue-500 hover:bg-blue-50'
         }`}
-        title={isSaved ? t('remove_save') : t('save_later')}
-        aria-label={isSaved ? t('remove_save') : t('save_later')}
+        title={isSaved ? t('edit_saved') : t('save_later')}
+        aria-label={isSaved ? t('edit_saved') : t('save_later')}
       >
         <BookmarkIcon 
           filled={isSaved} 
@@ -167,18 +207,6 @@ export default function SaveButtons({
           color={isSaved ? '#3b82f6' : undefined}
         />
       </button>
-
-      {/* Add to Collection Button */}
-      {onOpenCollectionSelector && (
-        <button
-          onClick={handleAddToCollection}
-          className={`${buttonBaseClass} ${buttonSizeClass} text-textSecondary hover:text-primary hover:bg-primary/10`}
-          title={t('add_to_collection')}
-          aria-label={t('add_to_collection')}
-        >
-          <AddToCollectionIcon size={iconSize} />
-        </button>
-      )}
 
       {/* Error tooltip */}
       {error && (

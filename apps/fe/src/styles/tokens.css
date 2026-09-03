@@ -110,20 +110,14 @@
     Composed once so the utilities stay readable and every state is guaranteed to share
     one light source: highlight up-left, shadow down-right.
   */
-  --relief-shadow-raised:
-    calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
-      var(--relief-blur) var(--relief-light),
-    var(--relief-spread) var(--relief-spread) var(--relief-blur) var(--relief-dark);
-  --relief-shadow-lifted:
-    calc(var(--relief-spread) * -1.4) calc(var(--relief-spread) * -1.4)
-      calc(var(--relief-blur) * 1.5) var(--relief-light),
-    calc(var(--relief-spread) * 1.4) calc(var(--relief-spread) * 1.4)
-      calc(var(--relief-blur) * 1.5) var(--relief-dark);
-  --relief-shadow-pressed:
-    inset calc(var(--relief-spread) * -1) calc(var(--relief-spread) * -1)
-      var(--relief-blur) var(--relief-light),
-    inset var(--relief-spread) var(--relief-spread) var(--relief-blur)
-      var(--relief-dark);
+  /*
+    A floating panel - a popover, the cafe card over the map - is separated from what it
+    covers by one plain drop shadow. It is fixed rather than theme-derived for the same
+    reason the marker shadow is: the themes' own shadow colours are light in the dark
+    themes and would paint a halo. The neumorphic pair this replaced lit the panel from
+    the top left, which read as an embossed plate rather than as something in front.
+  */
+  --shadow-panel: 0 12px 28px -10px rgb(0 0 0 / 0.28);
 
   /*
     Map markers sit on OpenStreetMap's own tiles, which stay light whatever the theme, so

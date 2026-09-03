@@ -21,7 +21,7 @@
   they do not change per theme and a slot for them would be four identical entries.)
 
   The four themes are complete visual themes, not a light/dark pair: Dark Roast IS the
-  dark mode. There is one relief set per theme, lit from its own surface.
+  dark mode.
 
   `--c-brand-soft` is the hover of a filled brand control (`--brand-hover`, reached as
   `bg-secondary`), and it also fills the auth panel and the secondary badge. In all three
@@ -58,10 +58,6 @@
   --c-warning: #FFC107;
   --c-danger: #F44336;
 
-  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
-  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
-  --relief-blur: 12px;
-  --relief-spread: 5px;
 }
 
 [data-theme='espresso'] {
@@ -98,10 +94,6 @@
   --c-warning: #FFA726;
   --c-danger: #EF5350;
 
-  --relief-light: color-mix(in srgb, var(--c-elevated) 70%, white);
-  --relief-dark: color-mix(in srgb, var(--c-shadow) 55%, transparent);
-  --relief-blur: 10px;
-  --relief-spread: 4px;
 }
 
 /*
@@ -134,10 +126,6 @@
   --c-warning: #FFC107;
   --c-danger: #F44336;
 
-  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
-  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
-  --relief-blur: 12px;
-  --relief-spread: 5px;
 }
 
 [data-theme='vanillaLatte'] {
@@ -167,10 +155,6 @@
   --c-warning: #FFC107;
   --c-danger: #F44336;
 
-  --relief-light: color-mix(in srgb, var(--c-raised) 70%, white);
-  --relief-dark: color-mix(in srgb, var(--c-shadow) 35%, transparent);
-  --relief-blur: 12px;
-  --relief-spread: 5px;
 }
 
 /*

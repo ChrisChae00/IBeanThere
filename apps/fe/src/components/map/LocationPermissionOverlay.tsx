@@ -55,8 +55,8 @@ export default function LocationPermissionOverlay({
                     aria-pressed={activeBrowser === browser.id}
                     className={`landing-micro min-h-11 rounded-(--radius-pill) border px-4 ${
                       activeBrowser === browser.id
-                        ? 'relief-pressed border-brand bg-brand/12 text-ink-primary'
-                        : 'relief-control border-edge-rule text-ink-secondary hover:text-ink-primary'
+                        ? 'control-flat is-active'
+                        : 'control-flat'
                     }`}
                   >
                     {browser.label}
@@ -79,7 +79,7 @@ export default function LocationPermissionOverlay({
 
             <button
               onClick={() => window.location.reload()}
-              className="relief-control mt-8 inline-flex min-h-11 w-fit items-center gap-2 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+              className="btn-shade mt-8 inline-flex min-h-11 w-fit items-center gap-2 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
             >
               <RefreshIcon className="h-4 w-4" />
               <span>{t('browser_guide.refresh_page')}</span>
@@ -89,7 +89,7 @@ export default function LocationPermissionOverlay({
           <>
             <button
               onClick={onRequestPermission}
-              className="relief-control mt-8 inline-flex min-h-11 w-fit items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+              className="btn-shade mt-8 inline-flex min-h-11 w-fit items-center rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
             >
               {t('share_location')}
             </button>

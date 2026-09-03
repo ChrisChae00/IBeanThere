@@ -23,7 +23,7 @@ export const MAP_FILTER_IDS: MapFilterId[] = ['local', 'verified', 'trending'];
 function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`w-72 max-w-[calc(100vw-3rem)] rounded-(--radius-card) border border-edge-rule bg-surface-raised p-2 shadow-(--relief-shadow-lifted) ${className}`}
+      className={`w-72 max-w-[calc(100vw-3rem)] rounded-(--radius-card) border border-edge-rule bg-surface-raised p-2 shadow-(--shadow-panel) ${className}`}
     >
       {children}
     </div>
@@ -93,7 +93,7 @@ export function MapControlGroup({
               onClick={() => setOpenPanel((current) => (current === 'filter' ? null : 'filter'))}
               aria-expanded={open}
               aria-label={filterLabel}
-              className={`${GROUP_BUTTON} ${active.size > 0 ? 'relief-pressed bg-brand/12' : ''}`}
+              className={`${GROUP_BUTTON} ${active.size > 0 ? 'is-active' : ''}`}
             >
               <FunnelIcon />
             </TooltipTrigger>

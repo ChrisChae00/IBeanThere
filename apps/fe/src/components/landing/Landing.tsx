@@ -265,7 +265,7 @@ function LandingHero({
               */}
               <a
                 href={primaryHref}
-                className="landing-micro inline-flex min-h-[52px] items-center rounded-control bg-brand px-8 text-ink-on-brand shadow-[0_8px_24px_-6px_var(--brand)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="landing-micro inline-flex min-h-[52px] items-center btn-fill btn-shade rounded-control px-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 {primaryLabel}
               </a>
@@ -465,8 +465,9 @@ const EMPHASIS_OPACITY = 'calc(0.45 + 0.55 * var(--emphasis))';
 function RegisterSection({ messages, locale }: { messages: LandingMessages; locale: string }) {
   return (
     // The dark editorial break. Full-bleed on purpose: it is the page turning
-    // over, so it must not sit inside the measure.
-    <section className="bg-surface-inverse text-ink-inverse">
+    // over, so it must not sit inside the measure. It also names the surface a
+    // `btn-line` on it flips to, which is this band rather than a card.
+    <section className="bg-surface-inverse text-ink-inverse [--btn-line-ink:var(--ink-inverse)] [--btn-line-on:var(--surface-inverse)]">
       <div className={`${MEASURE} py-24 md:py-32`}>
         {/*
           The globe column has to be at least as wide as the canvas it holds:
@@ -551,7 +552,7 @@ function RegisterSection({ messages, locale }: { messages: LandingMessages; loca
 
             <a
               href={`/${locale}/discover/register-cafe`}
-              className="landing-micro mt-10 inline-flex min-h-[52px] items-center rounded-control border border-current px-8 transition-colors duration-200 hover:bg-ink-inverse hover:text-ink-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+              className="landing-micro btn-line mt-10 inline-flex min-h-[52px] items-center rounded-control px-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
             >
               {messages.registerCta}
             </a>
@@ -699,7 +700,7 @@ function ClosingAction({
         <Reveal delay={0.2} className="mt-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <a
             href={primaryHref}
-            className="landing-micro inline-flex min-h-[56px] w-fit items-center rounded-control bg-brand px-10 text-ink-on-brand shadow-[0_8px_24px_-6px_var(--brand)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="landing-micro inline-flex min-h-[56px] w-fit items-center btn-fill btn-shade rounded-control px-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             {primaryLabel}
           </a>

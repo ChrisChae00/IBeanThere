@@ -10,9 +10,20 @@ import CafeMapActions from './CafeMapActions';
 
 interface CafeInfoSectionProps {
   cafe: CafeMapData | CafeDetailResponse;
+  /*
+    The detail page shows the crew over the photograph instead, where they read as
+    the people behind the place rather than as another labelled field.
+  */
+  showFoundingCrew?: boolean;
+  /** Sits on the address line, right-aligned — the page's primary action. */
+  action?: React.ReactNode;
 }
 
-export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
+export default function CafeInfoSection({
+  cafe,
+  showFoundingCrew = true,
+  action,
+}: CafeInfoSectionProps) {
   const t = useTranslations('cafe.modal');
   const tCommon = useTranslations('common');
   const [showAllHours, setShowAllHours] = useState(false);
@@ -64,10 +75,16 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
 
   const sourceType = 'source_type' in cafe ? cafe.source_type : undefined;
 
+  /*
+    Field labels are set in the body face, not the display serif: they name the parts
+    of a record -- address, website, hours -- and the serif is the page's own voice,
+    which a label does not speak in.
+  */
   return (
     <div className="space-y-4">
+      {action && !cafe.address && <div className="flex justify-end">{action}</div>}
       {/* Founding Crew Section */}
-      {foundingCrew && (foundingCrew.navigator || scouts.length > 0) && (
+      {showFoundingCrew && foundingCrew && (foundingCrew.navigator || scouts.length > 0) && (
         <FoundingCrewAvatars
           navigator={foundingCrew.navigator}
           scouts={scouts}
@@ -101,9 +118,20 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
 
       {/* Address + Google Maps Link */}
       {cafe.address && (
-        <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-cardTextSecondary">{t('address')}</h3>
-          <p className="text-cardText">{cafe.address}</p>
+        <div className="relative space-y-1">
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('address')}</h3>
+          <p className="text-cardText sm:pr-44">{cafe.address}</p>
+          {/*
+            The action rides the address line rather than the name -- the name is what
+            the page is about, the address is where you would go, and the button is what
+            you do when you get there -- but it is taken out of the flow to do it. In the
+            flow, a 48px control on the same row as a 20px heading opened a gap under the
+            address that the text had no reason to carry. Below `sm` it goes back into
+            the flow, where a floated control would land on the address itself.
+          */}
+          {action && (
+            <div className="pt-2 sm:absolute sm:right-0 sm:top-0 sm:pt-0">{action}</div>
+          )}
           <div className="pt-1">
             <CafeMapActions
               name={cafe.name}
@@ -119,7 +147,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {/* Phone */}
       {phoneNumber && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-cardTextSecondary">{t('phone')}</h3>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('phone')}</h3>
           <a
             href={`tel:${phoneNumber}`}
             className="text-cardText hover:underline"
@@ -132,7 +160,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {/* Website */}
       {website && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-cardTextSecondary">{t('website')}</h3>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('website')}</h3>
           <a
             href={website}
             target="_blank"
@@ -148,7 +176,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {businessHours && Object.keys(businessHours).length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+            <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
             {todayHours && !todayHours.closed && (
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
@@ -224,7 +252,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
 
       {!businessHours && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
           <p className="text-sm text-cardText">{t('no_hours_available')}</p>
         </div>
       )}
