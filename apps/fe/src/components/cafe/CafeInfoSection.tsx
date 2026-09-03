@@ -15,14 +15,11 @@ interface CafeInfoSectionProps {
     the people behind the place rather than as another labelled field.
   */
   showFoundingCrew?: boolean;
-  /** Sits on the address line, right-aligned — the page's primary action. */
-  action?: React.ReactNode;
 }
 
 export default function CafeInfoSection({
   cafe,
   showFoundingCrew = true,
-  action,
 }: CafeInfoSectionProps) {
   const t = useTranslations('cafe.modal');
   const tCommon = useTranslations('common');
@@ -82,7 +79,6 @@ export default function CafeInfoSection({
   */
   return (
     <div className="space-y-4">
-      {action && !cafe.address && <div className="flex justify-end">{action}</div>}
       {/* Founding Crew Section */}
       {showFoundingCrew && foundingCrew && (foundingCrew.navigator || scouts.length > 0) && (
         <FoundingCrewAvatars
@@ -118,20 +114,9 @@ export default function CafeInfoSection({
 
       {/* Address + Google Maps Link */}
       {cafe.address && (
-        <div className="relative space-y-1">
+        <div className="space-y-1">
           <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('address')}</h3>
-          <p className="text-cardText sm:pr-44">{cafe.address}</p>
-          {/*
-            The action rides the address line rather than the name -- the name is what
-            the page is about, the address is where you would go, and the button is what
-            you do when you get there -- but it is taken out of the flow to do it. In the
-            flow, a 48px control on the same row as a 20px heading opened a gap under the
-            address that the text had no reason to carry. Below `sm` it goes back into
-            the flow, where a floated control would land on the address itself.
-          */}
-          {action && (
-            <div className="pt-2 sm:absolute sm:right-0 sm:top-0 sm:pt-0">{action}</div>
-          )}
+          <p className="text-cardText">{cafe.address}</p>
           <div className="pt-1">
             <CafeMapActions
               name={cafe.name}

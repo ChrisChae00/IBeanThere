@@ -44,5 +44,4 @@ export { default as ImageGalleryPreview } from './ImageGalleryPreview';
 export { default as ImageGalleryModal } from './ImageGalleryModal';
 export { default as HeartIcon } from './HeartIcon';
 export { default as BookmarkIcon } from './BookmarkIcon';
-export { default as AddToCollectionIcon } from './AddToCollectionIcon';
 export { default as ShareIcon } from './ShareIcon';
