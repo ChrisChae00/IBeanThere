@@ -414,7 +414,8 @@
       "edge_step1": "Click the lock icon 🔒 in the address bar",
       "edge_step2": "Select 'Permissions' and allow Location",
       "refresh_page": "Refresh Page"
-    }
+    },
+    "gesture_hint": "Use two fingers to move the map"
   },
   "visit": {
     "nearby_cafes_found": "Nearby cafes found",
@@ -704,7 +705,10 @@
       "quick_fill_locked": "Name and address come from Google. Discard to enter them yourself.",
       "range_from": "From",
       "range_to": "to",
-      "apply_to_range": "Apply to range"
+      "apply_to_range": "Apply to range",
+      "hours_applied_all": "Applied to every day",
+      "hours_applied_range": "Applied {from} to {to}",
+      "address_search_success": "Pin moved to that address"
     },
     "modal": {
       "title": "Cafe Information",

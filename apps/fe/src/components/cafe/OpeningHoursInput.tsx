@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/contexts/ToastContext';
 import { BusinessHours } from '@/types/map';
 
 interface OpeningHoursInputProps {
@@ -35,7 +36,12 @@ function DaySelect({
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value as typeof DAYS[number])}
-        className="cursor-pointer appearance-none rounded-(--radius-pill) border border-edge-rule bg-surface-raised py-1.5 pl-3 pr-7 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
+        /*
+          Content width, not a share of the row: a select sizes itself to its widest
+          option, so both pickers stay the same width whichever day is chosen and
+          neither carries empty space beside the word.
+        */
+        className="control-flat cursor-pointer appearance-none rounded-(--radius-pill) py-1.5 pl-3 pr-6 text-center text-sm"
       >
         {DAYS.map((day) => (
           <option key={day} value={day}>
@@ -49,6 +55,7 @@ function DaySelect({
 
 export default function OpeningHoursInput({ value, onChange }: OpeningHoursInputProps) {
   const t = useTranslations('cafe.register');
+  const { showToast } = useToast();
   const [showHours, setShowHours] = useState(!!value && Object.keys(value).length > 0);
   const [rangeStart, setRangeStart] = useState<typeof DAYS[number]>('monday');
   const [rangeEnd, setRangeEnd] = useState<typeof DAYS[number]>('friday');
@@ -115,6 +122,10 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
     }
 
     onChange(updatedHours);
+    showToast(t('hours_applied_range', {
+      from: t(`day_${rangeStart}` as any),
+      to: t(`day_${rangeEnd}` as any)
+    }), 'success', 1400);
   };
 
   const applyToAllDays = () => {
@@ -128,6 +139,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
     });
     
     onChange(updatedHours);
+    showToast(t('hours_applied_all'), 'success', 1400);
   };
 
   if (!showHours) {
@@ -166,28 +178,36 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         {t('opening_hours_hint')}
       </p>
 
-      {/* Quick Actions */}
+      {/*
+        On a phone this is three stacked rows -- copy Monday everywhere, pick a range,
+        apply it -- because four controls on one line there leaves each of them too
+        narrow to read. From `sm` it is the single line it was.
+      */}
+      {/*
+        No viewport breakpoints anywhere in this section: the form is a column beside
+        the map, so on a tablet it is narrow while the viewport is wide. These rows
+        wrap on their own width instead.
+      */}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={applyToAllDays}
-          className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
+          className="control-flat rounded-(--radius-pill) px-3 py-1.5 text-sm"
         >
           {t('apply_to_all_days')}
         </button>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <DaySelect value={rangeStart} onChange={setRangeStart} label={t('range_from')} />
-          <span className="text-xs text-ink-secondary">{t('range_to')}</span>
-          <DaySelect value={rangeEnd} onChange={setRangeEnd} label={t('range_to')} />
-          <button
-            type="button"
-            onClick={applyToRange}
-            className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
-          >
-            {t('apply_to_range')}
-          </button>
-        </div>
+        <DaySelect value={rangeStart} onChange={setRangeStart} label={t('range_from')} />
+        <span className="text-xs text-ink-secondary">{t('range_to')}</span>
+        <DaySelect value={rangeEnd} onChange={setRangeEnd} label={t('range_to')} />
+
+        <button
+          type="button"
+          onClick={applyToRange}
+          className="control-flat rounded-(--radius-pill) px-3 py-1.5 text-sm"
+        >
+          {t('apply_to_range')}
+        </button>
       </div>
 
       {/* Days */}
@@ -197,37 +217,47 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
           if (!dayHours) return null;
 
           return (
-            <div key={day} className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="w-20 text-xs font-medium text-ink-primary sm:w-24 sm:text-sm">
+            <div
+              key={day}
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-edge-rule pb-3 last:border-0 last:pb-0"
+            >
+              <span className="w-20 shrink-0 text-sm font-medium text-ink-primary">
                 {t(`day_${day}` as any)}
-              </div>
+              </span>
 
-              <label className="flex items-center gap-2">
+              <label className="flex shrink-0 items-center gap-2">
                 <input
                   type="checkbox"
                   checked={dayHours.closed}
                   onChange={(e) => handleDayChange(day, 'closed', e.target.checked)}
-                  className="h-4 w-4 rounded-sm border-edge-rule accent-[var(--brand)] focus:ring-2 focus:ring-brand"
+                  className="h-4 w-4 rounded-sm border-edge-rule accent-[var(--brand)]"
                 />
-                <span className="text-xs text-ink-primary sm:text-sm">{t('closed')}</span>
+                <span className="text-sm text-ink-primary">{t('closed')}</span>
               </label>
 
+              {/*
+                Fluid, not a fixed 100px: a 12-hour locale renders "06:00 PM" and the
+                fixed width cut the meridiem off, so 18:00 read as 06:00. The pair keeps
+                a floor so it drops to its own line rather than squeezing the clocks.
+              */}
               {!dayHours.closed && (
-                <>
+                <div className="flex min-w-[15rem] flex-1 items-center gap-2">
                   <input
                     type="time"
+                    aria-label={`${t(`day_${day}` as any)} ${t('open_time')}`}
                     value={dayHours.open}
                     onChange={(e) => handleDayChange(day, 'open', e.target.value)}
-                    className="min-h-11 w-[100px] rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
+                    className="min-h-11 w-full min-w-0 rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
                   />
-                  <span className="text-ink-secondary">-</span>
+                  <span className="shrink-0 text-ink-secondary">-</span>
                   <input
                     type="time"
+                    aria-label={`${t(`day_${day}` as any)} ${t('close_time')}`}
                     value={dayHours.close}
                     onChange={(e) => handleDayChange(day, 'close', e.target.value)}
-                    className="min-h-11 w-[100px] rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
+                    className="min-h-11 w-full min-w-0 rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
                   />
-                </>
+                </div>
               )}
             </div>
           );

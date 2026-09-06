@@ -412,7 +412,8 @@
       "edge_step1": "주소창의 자물쇠 아이콘 🔒 클릭",
       "edge_step2": "'권한' 메뉴에서 위치를 허용하세요",
       "refresh_page": "페이지 새로고침"
-    }
+    },
+    "gesture_hint": "두 손가락으로 지도를 움직이세요"
   },
   "visit": {
     "nearby_cafes_found": "근처 카페 발견",
@@ -702,7 +703,10 @@
       "quick_fill_locked": "이름과 주소는 Google에서 가져온 값입니다. 직접 입력하려면 지우세요.",
       "range_from": "시작 요일",
       "range_to": "부터",
-      "apply_to_range": "선택 구간에 적용"
+      "apply_to_range": "선택 구간에 적용",
+      "hours_applied_all": "모든 요일에 적용했습니다",
+      "hours_applied_range": "{from}부터 {to}까지 적용했습니다",
+      "address_search_success": "핀을 그 주소로 옮겼습니다"
     },
     "modal": {
       "title": "카페 정보",

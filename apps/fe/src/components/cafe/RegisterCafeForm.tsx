@@ -185,7 +185,7 @@ export default function RegisterCafeForm({
           setFormData(prev => ({ ...prev, address: result.display_name }));
         }
         setLocationMode('postcode');
-        showToast(t('postcode_search_success'), 'success');
+        showToast(t('postcode_search_success'), 'success', 1400);
       } else {
         setError(t('postcode_not_found'));
       }
@@ -220,6 +220,7 @@ export default function RegisterCafeForm({
         setFormData(prev => ({ ...prev, address: result.display_name || prev.address }));
         setAddressFetched(true);
         setLocationMode('postcode');
+        showToast(t('address_search_success'), 'success', 1400);
       } else {
         setError(t('address_search_not_found'));
       }
@@ -246,7 +247,7 @@ export default function RegisterCafeForm({
     if (cached) {
       if (cached.success && cached.data) {
         applyLookupData(cached);
-        showToast(t('google_maps_auto_fill_success'), 'success');
+        showToast(t('google_maps_auto_fill_success'), 'success', 1400);
       }
       return;
     }
