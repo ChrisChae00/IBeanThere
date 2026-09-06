@@ -17,7 +17,7 @@
     "clsx": "^2.1.1",
     "cobe": "^2.0.1",
     "framer-motion": "^12.38.0",
-    "heic2any": "^0.0.4",
+    "heic-to": "^1.5.2",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.556.0",
