@@ -22,7 +22,7 @@ from app.models.cafe import (
     GooglePlacesLookupRequest,
     GooglePlacesLookupResponse
 )
-from app.services.osm_service import OSMService
+from app.services.osm_service import OSMService, format_address
 from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, require_admin_role
@@ -983,14 +983,24 @@ async def register_cafe(
             float(request.longitude)
         )
         
-        if not osm_data or not osm_data.get('road'):
+        # A silent map service is not a verdict about the place. Reading None as
+        # "does not exist" told people standing inside a real cafe that their cafe was
+        # not on the map, and the franchise and coffee-only checks below both read this
+        # same payload — so an outage has to stop the registration, not pass it.
+        if osm_data is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The map service is not responding right now. Please try again in a moment."
+            )
+
+        if not osm_data.get('road'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid location: This location does not exist on the map"
             )
         
         # Auto-complete address from OSM if not provided
-        if not request.address and osm_data:
+        if not request.address:
             request.address = osm_data.get('display_name', '')
 
         # 3. Franchise check - ibeanthere only lists local, independent cafes
@@ -1580,7 +1590,9 @@ async def search_osm_location(
         return {
             "lat": float(first_result.get("lat", 0)),
             "lng": float(first_result.get("lon", 0)),
-            "display_name": first_result.get("display_name", "")
+            # Same postal shape the reverse lookup returns, so a searched address and a
+            # pinned one cannot be told apart once they are stored.
+            "display_name": format_address(first_result)
         }
         
     except HTTPException:
