@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -15,18 +15,15 @@ import { UserLocationIcon } from '@/shared/ui';
 // ─── Map Resize Handler ─────────────────────────────────────
 
 /** Tailwind `lg` breakpoint — matches the 2-column grid in explore-map */
-const LG_BREAKPOINT = '(min-width: 1024px)';
-
 /**
- * Watches the map container for size changes and calls
- * `map.invalidateSize()` so Leaflet re-renders tiles to fill
- * the new container dimensions.
+ * Watches the map container for size changes and calls `map.invalidateSize()` so
+ * Leaflet re-renders tiles to fill the new dimensions.
  *
- * - **lg+ (2-column layout)**: Uses `ResizeObserver` because
- *   the TrendingCafesSection can change the map container height.
- * - **< lg (single-column)**: The map has a fixed height so
- *   continuous observation is skipped. Only the initial
- *   invalidateSize fires to handle dynamic-import timing.
+ * Observed at every width, not only in the two-column layout: the map's height is
+ * viewport-relative on a phone (`45svh`, which changes when the browser's own chrome
+ * collapses) and settles a frame or two after mount inside a flex column. A map that
+ * measured itself once keeps requesting tiles for the size it had then, which is what
+ * leaves the grey L-shape around whatever did load.
  */
 function MapResizeHandler() {
   const map = useMap();
@@ -43,43 +40,18 @@ function MapResizeHandler() {
     const container = map.getContainer();
     if (!container) return;
 
-    // Initial invalidateSize after dynamic import settles (all screen sizes)
+    // The dynamic import can settle after the first measurement.
     const initialTimer = setTimeout(() => {
       map.invalidateSize({ animate: false, pan: false });
     }, 300);
 
-    // Only observe continuous resizes on lg+ (2-column layout)
-    const mql = window.matchMedia(LG_BREAKPOINT);
-    let observer: ResizeObserver | null = null;
-
-    const startObserving = () => {
-      if (observer) return;
-      observer = new ResizeObserver(() => invalidate());
-      observer.observe(container);
-    };
-
-    const stopObserving = () => {
-      observer?.disconnect();
-      observer = null;
-    };
-
-    // React to viewport crossing the lg breakpoint
-    const handleBreakpointChange = (e: MediaQueryListEvent | MediaQueryList) => {
-      if (e.matches) {
-        startObserving();
-      } else {
-        stopObserving();
-      }
-    };
-
-    handleBreakpointChange(mql);
-    mql.addEventListener('change', handleBreakpointChange);
+    const observer = new ResizeObserver(() => invalidate());
+    observer.observe(container);
 
     return () => {
       clearTimeout(initialTimer);
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      stopObserving();
-      mql.removeEventListener('change', handleBreakpointChange);
+      observer.disconnect();
     };
   }, [map, invalidate]);
 
@@ -345,6 +317,98 @@ function ClusterLayer({
   return null;
 }
 
+/*
+  A full-width map on a phone is a scroll trap: every drag over it pans the map, so the
+  page under it can never be reached. The fix is the one Google's own embeds use — the
+  map does not take a gesture until the reader shows they meant it for the map.
+
+    one finger   -> the page scrolls, and a hint says how to move the map
+    two fingers  -> the map pans
+    tap          -> still places the pin, which is what this page is for
+    wheel        -> scrolls the page; only ctrl/cmd + wheel zooms
+
+  Leaflet's own handlers are toggled rather than the events being swallowed, so the map
+  keeps its inertia, its double-tap zoom and its keyboard panning.
+*/
+function GestureGate({ onHint }: { onHint: (visible: boolean) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+    /* The wheel rule is worth having on a desktop too: a tall page with a map in it
+       otherwise stops scrolling wherever the pointer happens to be. */
+    map.scrollWheelZoom.disable();
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        map.scrollWheelZoom.enable();
+      } else {
+        map.scrollWheelZoom.disable();
+      }
+    };
+    container.addEventListener('wheel', onWheel, { passive: true });
+
+    if (!isTouch) {
+      return () => {
+        container.removeEventListener('wheel', onWheel);
+      };
+    }
+
+    map.dragging.disable();
+
+    let hintTimer: ReturnType<typeof setTimeout> | undefined;
+    const showHint = () => {
+      onHint(true);
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => onHint(false), 1600);
+    };
+
+    let touchStartedAt: { x: number; y: number } | null = null;
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length >= 2) {
+        map.dragging.enable();
+        clearTimeout(hintTimer);
+        onHint(false);
+        return;
+      }
+      map.dragging.disable();
+      /* A tap is not a drag attempt, so the hint waits to see whether the finger moves. */
+      touchStartedAt = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || !touchStartedAt) return;
+      const moved =
+        Math.abs(event.touches[0].clientX - touchStartedAt.x) +
+        Math.abs(event.touches[0].clientY - touchStartedAt.y);
+      if (moved > 12) showHint();
+    };
+
+    const onTouchEnd = () => {
+      touchStartedAt = null;
+      map.dragging.disable();
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      clearTimeout(hintTimer);
+      container.removeEventListener('wheel', onWheel);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('touchend', onTouchEnd);
+      map.dragging.enable();
+      map.scrollWheelZoom.enable();
+    };
+  }, [map, onHint]);
+
+  return null;
+}
+
 function MapContent({
   cafes,
   userLocation,
@@ -483,9 +547,14 @@ export default function InteractiveMap({
 }) {
   const t = useTranslations('map');
   const centerLatLng: [number, number] = [center.lat, center.lng];
+  const [gestureHint, setGestureHint] = useState(false);
 
   return (
-    <div className="relative w-full h-full min-h-[500px] z-0">
+    /*
+      Shorter than the viewport on a phone, so there is always page above and below the
+      map to scroll by hand; the 500px floor returns once there is room for it.
+    */
+    <div className="relative z-0 h-full min-h-[45svh] w-full sm:min-h-[500px]">
       {/* Location button overlay on map */}
       {onLocationClick && (
         <button
@@ -503,15 +572,24 @@ export default function InteractiveMap({
         maxZoom={19}
         /* The frame owns the corner; a hardcoded radius here fights every panel it sits in. */
         className="h-full w-full rounded-[inherit]"
-        scrollWheelZoom={true}
+        /* Off at mount; `GestureGate` turns it on for ctrl/cmd + wheel only. */
+        scrollWheelZoom={false}
         zoomControl={true}
         style={{ zIndex: 0 }}
       >
+        {/*
+          The OSM Foundation runs these tiles for its own services; a third-party app
+          living on them is against the tile usage policy, and the limit is per IP —
+          which means one shared campus or office network, not one user. Swap this URL
+          for a real provider before launch. See docs/HANDOFF.md §4.14.
+        */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
+
+        <GestureGate onHint={setGestureHint} />
 
         <MapContent 
           cafes={cafes} 
@@ -528,7 +606,27 @@ export default function InteractiveMap({
           onSelectedPointChange={onSelectedPointChange}
         />
 
+        <MapGestureHint visible={gestureHint} label={t('gesture_hint')} />
       </MapContainer>
+    </div>
+  );
+}
+
+/*
+  Inside the map so it is clipped by the frame, and `pointer-events-none` so it never
+  eats the gesture it is explaining.
+*/
+function MapGestureHint({ visible, label }: { visible: boolean; label: string }) {
+  return (
+    <div
+      aria-hidden={!visible}
+      className={`pointer-events-none absolute inset-0 z-(--z-map-chrome) flex items-center justify-center bg-scrim-media/60 transition-opacity duration-200 ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      <p className="landing-micro rounded-(--radius-pill) bg-surface-raised px-4 py-2 text-ink-primary">
+        {label}
+      </p>
     </div>
   );
 }
