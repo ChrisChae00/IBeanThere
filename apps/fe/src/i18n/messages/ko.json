@@ -5,7 +5,8 @@
   },
   "common": {
     "app_name": "ibeanthere",
-    "unknown": "알 수 없음"
+    "unknown": "알 수 없음",
+    "back": "뒤로"
   },
   "home": {
     "title": "ibeanthere",
@@ -430,6 +431,7 @@
   },
   "errors": {
     "network": "네트워크 오류가 발생했습니다. 다시 시도해주세요.",
+    "not_authenticated": "로그인이 필요합니다.",
     "unknown": "오류가 발생했습니다. 다시 시도해주세요.",
     "passwords_not_match": "비밀번호가 일치하지 않습니다",
     "terms_required": "이용약관에 동의해주세요",
@@ -898,6 +900,7 @@
       "furniture_comfort": "가구 편의성",
       "furniture_comfort_placeholder": "테이블 높이, 의자 편안함 등",
       "environment_factors": "환경 요소",
+      "noise_rating": "소음 평점",
       "noise_level": "소음",
       "noise_level_quiet": "조용함",
       "noise_level_moderate": "적당함",

@@ -433,6 +433,7 @@
   },
   "errors": {
     "network": "Network error. Please try again.",
+    "not_authenticated": "Please sign in to continue.",
     "unknown": "An error occurred. Please try again.",
     "passwords_not_match": "Passwords do not match",
     "terms_required": "Please agree to the terms and conditions",
@@ -902,6 +903,7 @@
       "furniture_comfort": "Furniture Comfort",
       "furniture_comfort_placeholder": "Table height, chair comfort, etc.",
       "environment_factors": "Environment Factors",
+      "noise_rating": "Noise Rating",
       "noise_level": "Noise Level",
       "noise_level_quiet": "Quiet",
       "noise_level_moderate": "Moderate",

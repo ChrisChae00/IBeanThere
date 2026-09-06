@@ -327,7 +327,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
                       : collection.name}
                   </span>
                   <span className="text-sm text-ink-secondary">
-                    {tCollections('items', { count: collection.item_count || 0 })}
+                    {tCollections('cafes', { count: collection.item_count || 0 })}
                   </span>
                 </div>
                 <svg

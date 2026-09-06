@@ -13,7 +13,9 @@ interface UseOAuthSignInReturn {
 }
 
 export function useOAuthSignIn(): UseOAuthSignInReturn {
-  const t = useTranslations('auth');
+  // The `auth.errors` block is empty in both catalogs; the shared `errors` one is
+  // where every other caller reads this message from.
+  const t = useTranslations('errors');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -47,7 +49,7 @@ export function useOAuthSignIn(): UseOAuthSignInReturn {
         setError(translateError(error.message));
       }
     } catch (err) {
-      setError(t('errors.unknown'));
+      setError(t('unknown'));
     } finally {
       setIsLoading(false);
     }
