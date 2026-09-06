@@ -148,6 +148,19 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   (`frameHeight - top - margin`), and observes its height rather than measuring it once.
   Content that grows after placement -- a disclosure opening -- otherwise runs under the
   frame's clip, where scrolling cannot reach it.
+- **A name holds one line and ends in an ellipsis.** A cafe's name is data of unknown
+  length; letting it wrap makes every card in a row a different height. `truncate`, with
+  the full string on `title` and on the page the card opens.
+- **A hint under a field starts where the field's text starts.** The input pads its text
+  by `px-4`, so the line explaining it does too, or it reads as belonging to the form
+  rather than to the field.
+- **A panel that hangs over something closes on a click outside it, not on unhover** —
+  and on `pointerdown`, so the same press still reaches the map or link underneath.
+  Escape closes it too.
+- **A field showing an answer rather than taking one is `readOnly`, not disabled**: it
+  stays selectable and focusable, and `read-only:` styling is on the `Input` primitive so
+  no caller repeats it. Reverting such a field is a reset of the whole form, never an
+  unlock — half of one source with half of another is a record that matches neither.
 - **Scroll regions inside small panels use `.scrollbar-quiet`**: no layout width, a
   hairline thumb on hover only.
 - **A link out of the app is a small control** (`CAFE_ACTION_CLASS`, 30px), and it keeps
