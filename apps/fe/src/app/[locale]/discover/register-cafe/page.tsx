@@ -115,7 +115,7 @@ export default function RegisterCafePage() {
                   onClick={handleReturnToCurrentLocation}
                   aria-label={t('return_to_current_location')}
                   title={t('return_to_current_location')}
-                  className="flex h-11 w-11 items-center justify-center rounded-(--radius-pill) border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised"
+                  className="flex h-11 w-11 items-center justify-center rounded-(--radius-pill) border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover active:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised"
                   disabled={!coords}
                 >
                   <UserLocationIcon size={20} color="var(--marker-user)" />

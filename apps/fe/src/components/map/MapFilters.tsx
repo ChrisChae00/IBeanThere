@@ -38,7 +38,7 @@ function Panel({ children, className = '' }: { children: React.ReactNode; classN
 /* 40px under `sm` so four of these and the map's title still share one line on a
    phone; the 44px target is kept by the group's own vertical padding on that row. */
 const GROUP_BUTTON =
-  'flex h-10 w-10 items-center justify-center border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised sm:h-11 sm:w-11';
+  'flex h-10 w-10 items-center justify-center border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover active:bg-surface-hover focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised sm:h-11 sm:w-11';
 const GROUP_START = 'rounded-l-(--radius-pill)';
 const GROUP_END = 'rounded-r-(--radius-pill)';
 
@@ -173,7 +173,7 @@ export function MapControlGroup({
                       aria-pressed={selected}
                       title={disabled ? t('local_needs_location') : undefined}
                       aria-disabled={disabled}
-                      className="flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-2.5 text-left hover:bg-surface-hover disabled:opacity-50 disabled:hover:bg-transparent"
+                      className="flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-2.5 text-left hover:bg-surface-hover active:bg-surface-hover disabled:opacity-50 disabled:hover:bg-transparent"
                     >
                       <span className="text-sm text-ink-primary">{t(id)}</span>
                       <span className="flex items-center gap-2">
@@ -291,7 +291,7 @@ function MapSearchPanel({ onSelect }: { onSelect: (cafe: CafeMapData) => void })
               <button
                 type="button"
                 onClick={() => onSelect(cafe)}
-                className="w-full rounded-(--radius-control) px-3 py-2.5 text-left hover:bg-surface-hover"
+                className="w-full rounded-(--radius-control) px-3 py-2.5 text-left hover:bg-surface-hover active:bg-surface-hover"
               >
                 <span className="block truncate text-sm text-ink-primary">{cafe.name}</span>
                 <span className="block truncate text-xs text-ink-secondary">{cafe.address}</span>

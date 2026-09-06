@@ -416,7 +416,13 @@
       color var(--ibean-transition);
   }
 
+  /*
+    `:active` alongside `:hover` everywhere below, because a phone has no hover: the
+    only signal that a tap landed is the state it takes while the finger is down. A
+    control whose whole vocabulary is colour has to spend it here too.
+  */
   .control-flat:hover:not(:disabled),
+  .control-flat:active:not(:disabled),
   .control-flat[aria-expanded='true'] {
     background-color: var(--ink-primary);
     border-color: var(--ink-primary);
@@ -434,7 +440,8 @@
     The selected control keeps its fill on hover. Inverting it too would make the
     strongest state in the group read as a hover of the weakest.
   */
-  .control-flat.is-active:hover:not(:disabled) {
+  .control-flat.is-active:hover:not(:disabled),
+  .control-flat.is-active:active:not(:disabled) {
     background-color: var(--brand);
     border-color: var(--brand);
     color: var(--ink-on-brand);
@@ -474,7 +481,8 @@
     `--btn-line-on` the surface behind it; a section on another ground sets the pair
     once instead of every button on it re-specifying its hover.
   */
-  .btn-line:hover:not(:disabled) {
+  .btn-line:hover:not(:disabled),
+  .btn-line:active:not(:disabled) {
     background-color: var(--btn-line-ink, var(--ink-primary));
     border-color: var(--btn-line-ink, var(--ink-primary));
     color: var(--btn-line-on, var(--surface-raised));
@@ -633,7 +641,8 @@
     transition: none;
   }
 
-  .btn-shade:hover::after {
+  .btn-shade:hover::after,
+  .btn-shade:active::after {
     opacity: 1;
   }
 
@@ -644,6 +653,7 @@
     glow on the photo.
   */
   .nav-pill:hover,
+  .nav-pill:active,
   .nav-pill[data-popup-open] {
     background: var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
     box-shadow: 0 0 12px 4px
