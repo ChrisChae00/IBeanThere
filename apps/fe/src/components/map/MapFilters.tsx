@@ -35,8 +35,10 @@ function Panel({ children, className = '' }: { children: React.ReactNode; classN
   explicitly rather than with `first:`/`last:`: each button is the only child of its own
   tooltip wrapper, so both pseudo-classes match every one of them.
 */
+/* 40px under `sm` so four of these and the map's title still share one line on a
+   phone; the 44px target is kept by the group's own vertical padding on that row. */
 const GROUP_BUTTON =
-  'flex h-11 w-11 items-center justify-center border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised';
+  'flex h-10 w-10 items-center justify-center border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised sm:h-11 sm:w-11';
 const GROUP_START = 'rounded-l-(--radius-pill)';
 const GROUP_END = 'rounded-r-(--radius-pill)';
 
@@ -67,12 +69,39 @@ export function MapControlGroup({
      the map they operate on. */
   const [openPanel, setOpenPanel] = useState<'search' | 'filter' | null>(null);
   const open = openPanel === 'filter';
+  const groupRef = useRef<HTMLDivElement>(null);
+
+  /*
+    A panel hanging over the map has to close when the reader goes back to the map,
+    and the gesture that means "go back to it" is a click, not the pointer leaving.
+    `pointerdown` rather than `click` so the panel is gone before the map handles the
+    press underneath it — otherwise the first click outside only dismisses.
+  */
+  useEffect(() => {
+    if (!openPanel) return;
+
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!groupRef.current?.contains(event.target as Node)) {
+        setOpenPanel(null);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpenPanel(null);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePress);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePress);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [openPanel]);
 
   const filterLabel = active.size > 0 ? t('active', { count: active.size }) : t('label');
 
   return (
     <TooltipProvider delay={200}>
-      <div className="relative">
+      <div className="relative" ref={groupRef}>
         <div className="inline-flex -space-x-px">
           <Tooltip>
             <TooltipTrigger

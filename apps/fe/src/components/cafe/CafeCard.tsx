@@ -36,14 +36,14 @@ const sizeStyles: Record<CafeCardSize, {
     frame: 'bg-surface h-full',
     radius: 'rounded-(--radius-card)',
     body: 'p-4',
-    title: 'text-sm line-clamp-1',
+    title: 'text-sm',
     image: 'small'
   },
   lg: {
     frame: 'bg-surface',
     radius: 'rounded-(--radius-card)',
     body: 'p-5',
-    title: 'text-base line-clamp-2',
+    title: 'text-base',
     image: 'large'
   }
 };
@@ -105,12 +105,17 @@ export default function CafeCard({
       </div>
       {/* Place, then name. The card lists a cafe; acting on it happens on its page. */}
       <div className={`mt-auto flex flex-col ${s.body}`}>
-        <p className="landing-micro text-ink-secondary truncate" title={cafe.address}>
+        <p className="landing-micro truncate text-ink-secondary" title={cafe.address}>
           {extractCity(cafe.address)}
         </p>
-        {/* A cafe's name is data, not a headline: body face, not the display serif. */}
+        {/*
+          A cafe's name is data, not a headline: body face, not the display serif. It
+          holds one line and ends in an ellipsis when there is more, so every card in a
+          row is the same height and the grid keeps its baseline. The full name is on
+          the card's `title` and on the page the card opens.
+        */}
         <h3
-          className={`mt-2 font-sans font-semibold leading-snug text-ink-primary ${s.title}`}
+          className={`mt-2 truncate font-sans font-semibold leading-snug text-ink-primary ${s.title}`}
           title={cafe.name}
         >
           {cafe.name}

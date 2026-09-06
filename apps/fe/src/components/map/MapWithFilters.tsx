@@ -565,21 +565,13 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
         look away from the map to operate it, and put a lifted pill next to a heading.
       */}
       <div className="mb-3">
-        {mapTitle && <h2 className="text-2xl text-ink-primary">{mapTitle}</h2>}
-        {mapSubtitle && <p className="mt-1 text-ink-secondary">{mapSubtitle}</p>}
-
-        {/* The count and the three things that change it share one line. */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="landing-micro text-ink-secondary">
-            {activeFilters.size > 0
-              ? t('cafes_shown', { shown: visibleCafes.length, total: allCafes.length })
-              : t('cafes_on_map', { count: allCafes.length })}
-            {isTracking && nearbyStays.length > 0 && (
-              <span className="ml-2 text-ink-primary">
-                · {t('nearby_now', { count: nearbyStays.length })}
-              </span>
-            )}
-          </p>
+        {/*
+          Title and controls share the headline's line, so the count no longer holds a
+          row of its own and the map gets that height back. The count sits under the
+          group it describes.
+        */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          {mapTitle && <h2 className="text-xl text-ink-primary sm:text-2xl">{mapTitle}</h2>}
           <MapControlGroup
             active={activeFilters}
             onToggle={toggleFilter}
@@ -592,6 +584,18 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
             onSelectCafe={handleSearchSelect}
           />
         </div>
+        {mapSubtitle && <p className="mt-1 text-ink-secondary">{mapSubtitle}</p>}
+
+        <p className="landing-micro mt-2 text-ink-secondary sm:text-right">
+          {activeFilters.size > 0
+            ? t('cafes_shown', { shown: visibleCafes.length, total: allCafes.length })
+            : t('cafes_on_map', { count: allCafes.length })}
+          {isTracking && nearbyStays.length > 0 && (
+            <span className="ml-2 text-ink-primary">
+              · {t('nearby_now', { count: nearbyStays.length })}
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Map */}
