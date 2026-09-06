@@ -24,6 +24,10 @@ interface RegisterCafeFormProps {
 
 type LocationMode = 'current' | 'map' | 'postcode';
 
+/* Three is what someone standing in a cafe will actually take; the rest come later
+   from the cafe's own page. */
+const MAX_PHOTOS = 3;
+
 export default function RegisterCafeForm({
   initialLocation,
   userLocation: providedUserLocation,
@@ -35,7 +39,7 @@ export default function RegisterCafeForm({
   const { showToast } = useToast();
   const { user } = useAuth();
   
-  const { coords, getCurrentLocation, isLoading: locationLoading } = useLocation();
+  const { coords } = useLocation();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -54,6 +58,7 @@ export default function RegisterCafeForm({
   const [locationMode, setLocationMode] = useState<LocationMode>('current');
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchingPostcode, setIsSearchingPostcode] = useState(false);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [error, setError] = useState('');
   const [distance, setDistance] = useState<number | null>(null);
   const [isValidDistance, setIsValidDistance] = useState(false);
@@ -64,6 +69,9 @@ export default function RegisterCafeForm({
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [servesCoffee, setServesCoffee] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  /* Google filled the identity fields; they are its answer until the user drops it. */
+  const [lookupApplied, setLookupApplied] = useState(false);
   const lookupCacheRef = useRef<Record<string, import('@/types/api').GooglePlacesLookupResult>>({});
   
   const userLocation = providedUserLocation || (coords ? { lat: coords.latitude, lng: coords.longitude } : null);
@@ -155,16 +163,6 @@ export default function RegisterCafeForm({
     setError('');
   };
   
-  const handleLocationModeChange = (mode: LocationMode) => {
-    setLocationMode(mode);
-    setError('');
-    
-    if (mode === 'current' && coords) {
-      setCafeLocation({ lat: coords.latitude, lng: coords.longitude });
-      setAddressFetched(false); // Reset to allow address auto-update
-    }
-  };
-  
   const handlePostcodeSearch = async () => {
     if (!formData.postcode.trim()) {
       setError(t('postcode_required'));
@@ -199,6 +197,40 @@ export default function RegisterCafeForm({
     }
   };
   
+  /*
+    Nominatim's policy forbids a request per keystroke, so the address field searches
+    on a press, not while typing. What comes back moves the pin, which is what the
+    100 m check reads — a searched address the user is not standing at will fail it,
+    and that is the intended answer, not a bug.
+  */
+  const handleAddressSearch = async () => {
+    const query = formData.address.trim();
+    if (!query || isSearchingAddress) return;
+
+    setIsSearchingAddress(true);
+    setError('');
+    try {
+      const result = await searchLocationByPostcode(
+        query,
+        userLocation || undefined,
+        selectedCountry || undefined
+      );
+      if (result) {
+        setCafeLocation({ lat: result.lat, lng: result.lng });
+        setFormData(prev => ({ ...prev, address: result.display_name || prev.address }));
+        setAddressFetched(true);
+        setLocationMode('postcode');
+      } else {
+        setError(t('address_search_not_found'));
+      }
+    } catch (err) {
+      console.error('Address search error:', err);
+      setError(t('address_search_failed'));
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
   const handleGooglePlacesLookup = async () => {
     const trimmedUrl = formData.source_url.trim();
     if (!trimmedUrl) {
@@ -257,6 +289,8 @@ export default function RegisterCafeForm({
   const applyLookupData = (result: import('@/types/api').GooglePlacesLookupResult) => {
     if (!result.data) return;
 
+    setLookupApplied(true);
+
     setFormData(prev => ({
       ...prev,
       name: result.data!.name || prev.name,
@@ -278,6 +312,24 @@ export default function RegisterCafeForm({
         document.getElementById('opening-hours-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 100);
     }
+  };
+
+  /*
+    Discarding is a reset, not an unlock: half of Google's answer left in the fields
+    with the other half retyped is a record that matches neither source. Uploaded
+    photos survive — they are the user's own and already in storage.
+  */
+  const handleDiscardLookup = () => {
+    setLookupApplied(false);
+    setFormData({ name: '', address: '', phone: '', website: '', postcode: '', source_url: '' });
+    setBusinessHours(undefined);
+    setAddressFetched(false);
+    setDetailsOpen(false);
+    setError('');
+    lookupCacheRef.current = {};
+    /* Back to where the map put them, which is what the 100 m check reads. */
+    setCafeLocation(initialLocation || (coords ? { lat: coords.latitude, lng: coords.longitude } : null));
+    setLocationMode(initialLocation ? 'map' : 'current');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -361,11 +413,6 @@ export default function RegisterCafeForm({
     }
   };
   
-  const handleCurrentLocationClick = () => {
-    getCurrentLocation();
-    handleLocationModeChange('current');
-  };
-  
   useEffect(() => {
     if (initialLocation) {
       setCafeLocation(initialLocation);
@@ -431,237 +478,262 @@ export default function RegisterCafeForm({
     }
   }, [locationMode, coords, cafeLocation, addressFetched]);
   
+  /* Opened by the lookup when it actually has something to show there. */
+  const detailsFilled = Boolean(formData.phone || formData.website || businessHours);
+
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit} className="space-y-6">
-          <ErrorAlert message={error} />
-          
-          {/* Google Maps Auto Fill */}
-          <div className="mb-6 rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4">
-            <label className="mb-2 block text-sm font-semibold text-ink-primary">
-              {t('google_maps_url_label')}
-            </label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="url"
-                name="source_url"
-                value={formData.source_url}
-                onChange={handleInputChange}
-                className="min-h-11 flex-1 rounded-(--input-radius) border border-edge-rule bg-surface px-4 text-ink-primary placeholder-ink-secondary/80 focus:outline-hidden focus:ring-2 focus:ring-brand"
-                placeholder={t('google_maps_url_placeholder')}
-              />
+        <ErrorAlert message={error} />
+
+        {/*
+          The Google link is a tool, not a field: it fills the form below rather than
+          being one of its answers, so it sits above the form's own rule.
+        */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="source_url" className="text-sm font-semibold text-ink-primary">
+            {t('quick_fill_label')}
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              id="source_url"
+              type="url"
+              name="source_url"
+              value={formData.source_url}
+              onChange={handleInputChange}
+              placeholder={t('google_maps_url_placeholder')}
+              readOnly={lookupApplied}
+            />
+            {lookupApplied ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDiscardLookup}
+                /* Discarding throws work away, so it is painted as the destructive
+                   verb it is. Hover is the outline control's own, unchanged. */
+                className="w-full whitespace-nowrap border-state-danger text-state-danger sm:w-auto"
+              >
+                {t('quick_fill_discard')}
+              </Button>
+            ) : (
               <Button
                 type="button"
                 onClick={handleGooglePlacesLookup}
                 disabled={!formData.source_url.trim()}
                 loading={isLookingUp}
-                className="whitespace-nowrap w-full sm:w-auto"
+                className="w-full whitespace-nowrap sm:w-auto"
               >
                 {isLookingUp ? t('google_maps_auto_fill_loading') : t('google_maps_auto_fill')}
               </Button>
-            </div>
-            <p className="text-xs text-ink-secondary mt-2">
-              {t('google_maps_url_hint')}
-            </p>
+            )}
           </div>
-          
-          {/* Location Selection */}
-          <div className="flex flex-col gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-ink-primary">
-                {t('location_select')}
-              </label>
-              <p className="text-sm text-ink-secondary">
-                {t('select_on_map_hint')}
-              </p>
-              
-              <div className="flex flex-col gap-1.5 mt-2">
+          {/* Indented to the field's own text, so a hint reads as belonging to it. */}
+          <p className="px-4 text-xs text-ink-secondary">
+            {lookupApplied ? t('quick_fill_locked') : t('quick_fill_hint')}
+          </p>
+        </div>
 
-                {/* GPS Accuracy Indicator */}
-                {locationMode === 'current' && coords && coords.accuracy && (
-                  <div className={`text-xs font-medium px-2.5 py-1.5 rounded-md flex flex-col justify-center ${
-                    coords.accuracy > 50
-                      ? 'bg-error/10 text-error'
-                      : coords.accuracy > 20
-                      ? 'bg-accent/10 text-accent'
-                      : 'bg-success/10 text-success'
-                  }`}>
-                    <div>{t('location_accuracy')}: {t('location_accuracy_meters', { accuracy: Math.round(coords.accuracy) })}</div>
-                    {coords.accuracy > 50 && (
-                      <div className="opacity-80 mt-0.5">{t('location_accuracy_low_warning')}</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Postcode Search Fallback */}
-            <details className="group rounded-(--radius-control) border border-edge-rule bg-surface-raised">
-              <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-sm font-medium text-ink-primary transition-colors hover:bg-surface-hover">
-                <span>{t('postcode_label')}</span>
-                <span className="opacity-60 text-xs transition-transform group-open:rotate-180">▼</span>
-              </summary>
-              <div className="border-t border-edge-rule p-3 pt-1">
-                <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                  <div className="flex gap-2 flex-1">
-                    <div className="relative">
-                      {/* The arrow is an icon, not a data-URI with a colour baked into it. */}
-                      <ChevronDown
-                        size={14}
-                        aria-hidden
-                        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-ink-secondary"
-                      />
-                      <select
-                        value={selectedCountry}
-                        onChange={(e) => setSelectedCountry(e.target.value)}
-                        className="h-11 w-28 cursor-pointer appearance-none rounded-(--input-radius) border border-edge-rule bg-surface pl-3 pr-8 text-sm text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
-                        disabled={isDetectingCountry}
-                      >
-                        <option value="">{t('country_select')}</option>
-                        {countries.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <input
-                      type="text"
-                      name="postcode"
-                      value={formData.postcode}
-                      onChange={handleInputChange}
-                      className="h-11 flex-1 rounded-(--input-radius) border border-edge-rule bg-surface px-3 text-sm text-ink-primary placeholder-ink-secondary/80 focus:outline-hidden focus:ring-2 focus:ring-brand"
-                      placeholder={t('postcode_placeholder')}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={handlePostcodeSearch}
-                    disabled={!formData.postcode.trim()}
-                    loading={isSearchingPostcode}
-                    className="h-11 w-full whitespace-nowrap px-4 text-sm sm:w-auto"
-                  >
-                    {t('search_postcode')}
-                  </Button>
-                </div>
-              </div>
-            </details>
-            
+        <div className="border-t border-edge-rule" />
 
-          </div>
-          
+        {/*
+          Name and address are the two fields the duplicate check and the map identity
+          are built on, so while they are Google's answer they are shown, not edited.
+          Editing one of them by hand would produce a row that claims a Google identity
+          it no longer matches.
+        */}
+        <Input
+          label={t('name_label')}
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          placeholder={t('name_placeholder')}
+          readOnly={lookupApplied}
+          required
+        />
 
-          <Input
-            label={`${t('name_label')} *`}
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder={t('name_placeholder')}
-            required
-          />
-          
-          <div>
+        <div>
+          <label htmlFor="address" className="mb-2 block text-sm font-semibold text-ink-primary">
+            {t('address_label')}
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
-              label={t('address_label')}
+              id="address"
               name="address"
               value={formData.address}
               onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddressSearch();
+                }
+              }}
               placeholder={t('address_placeholder')}
+              readOnly={lookupApplied}
             />
-            {addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-ink-secondary">
-                {t('address_auto_filled')}
-              </p>
-            )}
-            {!addressFetched && formData.address && (
-              <p className="mt-2 text-xs text-ink-secondary">
-                {t('address_edit_hint')}
-              </p>
-            )}
-
-            {/* Distance Indicator */}
-            {distance !== null && (
-              <div className={`mt-2 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center gap-1.5 ${
-                isValidDistance
-                  ? 'bg-success/10 text-success'
-                  : 'bg-error/10 text-error'
-              }`}>
-                <span className="shrink-0">{t('distance')}: {Math.round(distance)}m</span>
-                <span className="opacity-90">{isValidDistance ? `(${t('within_range')})` : `(${t('out_of_range')})`}</span>
-              </div>
+            {!lookupApplied && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddressSearch}
+                disabled={!formData.address.trim()}
+                loading={isSearchingAddress}
+                className="w-full whitespace-nowrap sm:w-auto"
+              >
+                {t('address_search')}
+              </Button>
             )}
           </div>
-          
-          <Input
-            label={t('phone_label')}
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            placeholder={t('phone_placeholder')}
-          />
-          
-          <Input
-            label={t('website_label')}
-            type="url"
-            name="website"
-            value={formData.website}
-            onChange={handleInputChange}
-            placeholder={t('website_placeholder')}
-          />
+          {formData.address && (
+            <p className="mt-2 px-4 text-xs text-ink-secondary">
+              {addressFetched ? t('address_auto_filled') : t('address_edit_hint')}
+            </p>
+          )}
 
-          {/* Opening Hours */}
-          <div id="opening-hours-section">
-          <OpeningHoursInput
-            value={businessHours}
-            onChange={setBusinessHours}
-          />
-          </div>
+          {/*
+            One proximity readout, not two. Distance is what decides whether the form
+            can be submitted; GPS accuracy only explains a distance that looks wrong,
+            so it is a note under it rather than a badge of its own.
+          */}
+          {distance !== null && (
+            <p
+              className={`landing-micro mt-3 px-4 ${isValidDistance ? 'text-state-success' : 'text-state-danger'}`}
+            >
+              {isValidDistance
+                ? t('location_status_ok', { distance: Math.round(distance) })
+                : t('location_status_far', { distance: Math.round(distance) })}
+            </p>
+          )}
+          {coords?.accuracy != null && coords.accuracy > 50 && (
+            <p className="mt-1 px-4 text-xs text-ink-secondary">
+              {t('location_accuracy_note', { accuracy: Math.round(coords.accuracy) })}
+            </p>
+          )}
+        </div>
 
-          {/* Photo Upload */}
-          <PhotoUploadWithMain
-            photos={photos}
-            onChange={setPhotos}
-            mainIndex={mainImageIndex}
-            onMainIndexChange={setMainImageIndex}
-            userId={user?.id || ''}
-            maxPhotos={5}
-          />
-          
-          {/* Coffee confirmation — the app only lists cafes that serve coffee */}
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={servesCoffee}
-              onChange={(e) => setServesCoffee(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
-            />
-            <span className="text-sm text-ink-primary">
-              {t('serves_coffee_confirm')}
+        {/* Everything a cafe page can live without on the day it is registered. */}
+        {/* A rule and a row, not a box: the form is already inside one panel. */}
+        <details
+          className="group border-t border-edge-rule"
+          open={detailsOpen || detailsFilled}
+          onToggle={(e) => setDetailsOpen((e.currentTarget as HTMLDetailsElement).open)}
+        >
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3 text-sm font-medium text-ink-primary">
+            <span>
+              {t('details_toggle')}
+              <span className="ml-2 font-normal text-ink-secondary">{t('details_hint')}</span>
             </span>
-          </label>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={onCancel}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              loading={isLoading}
-              disabled={!isValidDistance || !formData.name.trim() || !servesCoffee}
-            >
-              {t('submit')}
-            </Button>
+            <ChevronDown size={16} aria-hidden className="shrink-0 text-ink-secondary transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="flex flex-col gap-6 pb-2">
+            <Input
+              label={t('phone_label')}
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder={t('phone_placeholder')}
+            />
+            <Input
+              label={t('website_label')}
+              type="url"
+              name="website"
+              value={formData.website}
+              onChange={handleInputChange}
+              placeholder={t('website_placeholder')}
+            />
+            <div id="opening-hours-section">
+              <OpeningHoursInput value={businessHours} onChange={setBusinessHours} />
+            </div>
           </div>
-        </form>
+        </details>
+
+        {/* Photos stay in the open: they are the one optional thing worth doing while standing there. */}
+        <PhotoUploadWithMain
+          photos={photos}
+          onChange={setPhotos}
+          mainIndex={mainImageIndex}
+          onMainIndexChange={setMainImageIndex}
+          userId={user?.id || ''}
+          maxPhotos={MAX_PHOTOS}
+        />
+
+        {/* Coffee confirmation — the app only lists cafes that serve coffee */}
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={servesCoffee}
+            onChange={(e) => setServesCoffee(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+          />
+          <span className="text-sm text-ink-primary">{t('serves_coffee_confirm')}</span>
+        </label>
+
+        {/*
+          The postcode path cannot pass the 100m check today; it is kept, closed, for
+          when registering somewhere you are not becomes allowed.
+        */}
+        <details className="group border-t border-edge-rule">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3 text-sm text-ink-secondary">
+            <span>{t('postcode_fallback')}</span>
+            <ChevronDown size={16} aria-hidden className="shrink-0 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="pb-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative">
+                {/* The arrow is an icon, not a data-URI with a colour baked into it. */}
+                <ChevronDown
+                  size={14}
+                  aria-hidden
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-secondary"
+                />
+                <select
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="h-12 w-full cursor-pointer appearance-none rounded-2xl border border-border bg-cardBackground pl-4 pr-9 text-sm text-cardText sm:w-36"
+                  disabled={isDetectingCountry}
+                  aria-label={t('country_select')}
+                >
+                  <option value="">{t('country_select')}</option>
+                  {countries.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Input
+                name="postcode"
+                value={formData.postcode}
+                onChange={handleInputChange}
+                placeholder={t('postcode_placeholder')}
+              />
+              <Button
+                type="button"
+                onClick={handlePostcodeSearch}
+                disabled={!formData.postcode.trim()}
+                loading={isSearchingPostcode}
+                className="w-full whitespace-nowrap sm:w-auto"
+              >
+                {t('search_postcode')}
+              </Button>
+            </div>
+          </div>
+        </details>
+
+        <div className="flex gap-4 pt-2">
+          <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+            {t('cancel')}
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1"
+            loading={isLoading}
+            disabled={!isValidDistance || !formData.name.trim() || !servesCoffee}
+          >
+            {t('submit')}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
-

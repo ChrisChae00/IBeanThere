@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BusinessHours } from '@/types/map';
 
@@ -11,9 +12,46 @@ interface OpeningHoursInputProps {
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
+function DaySelect({
+  value,
+  onChange,
+  label
+}: {
+  value: typeof DAYS[number];
+  onChange: (day: typeof DAYS[number]) => void;
+  label: string;
+}) {
+  const t = useTranslations('cafe.register');
+
+  return (
+    <span className="relative inline-flex">
+      {/* The arrow is an icon, not a data-URI with a colour baked into it. */}
+      <ChevronDown
+        size={12}
+        aria-hidden
+        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-secondary"
+      />
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value as typeof DAYS[number])}
+        className="cursor-pointer appearance-none rounded-(--radius-pill) border border-edge-rule bg-surface-raised py-1.5 pl-3 pr-7 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
+      >
+        {DAYS.map((day) => (
+          <option key={day} value={day}>
+            {t(`day_${day}` as any)}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
 export default function OpeningHoursInput({ value, onChange }: OpeningHoursInputProps) {
   const t = useTranslations('cafe.register');
   const [showHours, setShowHours] = useState(!!value && Object.keys(value).length > 0);
+  const [rangeStart, setRangeStart] = useState<typeof DAYS[number]>('monday');
+  const [rangeEnd, setRangeEnd] = useState<typeof DAYS[number]>('friday');
 
   // Sync showHours when value is set externally (e.g. Google Maps auto-fill)
   useEffect(() => {
@@ -56,16 +94,26 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
     onChange(updatedHours);
   };
 
-  const applyToWeekdays = () => {
-    if (!value || !value.monday) return;
-    
-    const mondayHours = value.monday;
+  /*
+    A range copies the hours of the day it starts on, the same way "apply to all"
+    copies Monday's: the first day of a run is the one somebody has just filled in,
+    and the rest of the run follows it. The range wraps, so Friday-to-Monday is four
+    days, not an empty selection.
+  */
+  const applyToRange = () => {
+    if (!value) return;
+
+    const startIndex = DAYS.indexOf(rangeStart);
+    const endIndex = DAYS.indexOf(rangeEnd);
+    const source = value[rangeStart];
+    if (!source) return;
+
+    const span = (endIndex - startIndex + DAYS.length) % DAYS.length;
     const updatedHours = { ...value };
-    
-    ['tuesday', 'wednesday', 'thursday', 'friday'].forEach((day) => {
-      updatedHours[day] = { ...mondayHours };
-    });
-    
+    for (let step = 0; step <= span; step += 1) {
+      updatedHours[DAYS[(startIndex + step) % DAYS.length]] = { ...source };
+    }
+
     onChange(updatedHours);
   };
 
@@ -119,14 +167,7 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
       </p>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={applyToWeekdays}
-          className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
-        >
-          {t('apply_to_all_weekdays')}
-        </button>
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={applyToAllDays}
@@ -134,6 +175,19 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         >
           {t('apply_to_all_days')}
         </button>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <DaySelect value={rangeStart} onChange={setRangeStart} label={t('range_from')} />
+          <span className="text-xs text-ink-secondary">{t('range_to')}</span>
+          <DaySelect value={rangeEnd} onChange={setRangeEnd} label={t('range_to')} />
+          <button
+            type="button"
+            onClick={applyToRange}
+            className="rounded-(--radius-pill) border border-edge-rule px-3 py-1.5 text-xs text-ink-primary transition-colors hover:bg-surface-hover"
+          >
+            {t('apply_to_range')}
+          </button>
+        </div>
       </div>
 
       {/* Days */}

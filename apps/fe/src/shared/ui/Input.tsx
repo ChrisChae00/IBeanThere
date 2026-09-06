@@ -20,8 +20,10 @@ export interface InputProps extends Omit<InputElementProps, 'size'> {
   fullWidth?: boolean;
 }
 
+/* `read-only:` so a field that is showing an answer rather than taking one looks
+   like it — the caller sets `readOnly`, the styling does not have to be repeated. */
 const baseFieldClasses =
-  'w-full rounded-2xl border bg-cardBackground text-cardText placeholder:text-cardTextSecondary focus:outline-hidden transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
+  'w-full rounded-2xl border bg-cardBackground text-cardText placeholder:text-cardTextSecondary focus:outline-hidden transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] read-only:opacity-70 read-only:cursor-default read-only:focus:ring-0';
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
   (
