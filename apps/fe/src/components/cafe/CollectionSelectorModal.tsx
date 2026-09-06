@@ -196,7 +196,7 @@ export default function CollectionSelectorModal({
       return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
     }
     return (
-      <div className={`w-5 h-5 rounded-full bg-primary ${
+      <div className={`w-5 h-5 rounded-full bg-brand ${
         isSelected ? '' : 'opacity-40'
       }`} />
     );
@@ -215,7 +215,7 @@ export default function CollectionSelectorModal({
     <Modal isOpen={isOpen} onClose={handleClose} title={t('save_to')}>
       <div className="min-h-[200px]">
         {/* Cafe name header */}
-        <p className="text-sm text-textSecondary mb-4 truncate">
+        <p className="text-sm text-ink-secondary mb-4 truncate">
           {cafeName}
         </p>
 
@@ -224,7 +224,7 @@ export default function CollectionSelectorModal({
             <LoadingSpinner size="md" />
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500">
+          <div className="text-center py-8 text-state-danger">
             {error}
           </div>
         ) : (
@@ -244,8 +244,8 @@ export default function CollectionSelectorModal({
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left
                       transition-colors duration-150
                       ${isSelected 
-                        ? 'bg-primary/10' 
-                        : 'hover:bg-background'
+                        ? 'bg-brand/12' 
+                        : 'hover:bg-surface-hover'
                       }
                       disabled:opacity-50
                     `}
@@ -255,12 +255,12 @@ export default function CollectionSelectorModal({
                       w-5 h-5 rounded border-2 flex items-center justify-center shrink-0
                       transition-colors duration-150
                       ${isSelected 
-                        ? 'bg-primary border-primary' 
-                        : 'border-gray-300'
+                        ? 'bg-brand border-brand' 
+                        : 'border-edge-rule'
                       }
                     `}>
                       {isSelected && (
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-ink-on-brand" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                         </svg>
                       )}
@@ -270,12 +270,12 @@ export default function CollectionSelectorModal({
                     {getCollectionIcon(collection.icon_type, isSelected)}
                     
                     {/* Name */}
-                    <span className="flex-1 truncate text-cardText">
+                    <span className="flex-1 truncate text-ink-primary">
                       {isSystemCollection ? t(collection.icon_type) : collection.name}
                     </span>
                     
                     {/* Item count */}
-                    <span className="text-xs text-textSecondary">
+                    <span className="text-xs text-ink-secondary">
                       {collection.item_count}
                     </span>
                   </button>
@@ -284,7 +284,7 @@ export default function CollectionSelectorModal({
 
               {/* Separator */}
               {sortedCollections.length > 0 && (
-                <div className="h-px bg-border my-2" />
+                <div className="h-px bg-edge-rule my-2" />
               )}
 
               {/* New collection form */}
@@ -298,7 +298,7 @@ export default function CollectionSelectorModal({
                     value={newCollectionName}
                     onChange={e => setNewCollectionName(e.target.value)}
                     placeholder={t('collection_name_placeholder')}
-                    className="w-full min-w-0 flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary sm:w-auto"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-edge-rule bg-surface-raised px-3 py-2 text-sm text-ink-primary placeholder:text-ink-secondary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
                     autoFocus
                     onKeyDown={e => {
                       if (e.key === 'Enter') handleCreateCollection();
@@ -311,7 +311,7 @@ export default function CollectionSelectorModal({
                   <button
                     onClick={handleCreateCollection}
                     disabled={!newCollectionName.trim() || isCreating}
-                    className="px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
+                    className="px-3 py-2 text-sm font-medium text-ink-on-brand bg-brand rounded-lg hover:bg-brand-hover disabled:opacity-50 transition-colors"
                   >
                     {isCreating ? <LoadingSpinner size="sm" /> : t('create')}
                   </button>
@@ -320,7 +320,7 @@ export default function CollectionSelectorModal({
                       setShowNewForm(false);
                       setNewCollectionName('');
                     }}
-                    className="px-3 py-2 text-sm text-textSecondary hover:text-cardText"
+                    className="px-3 py-2 text-sm text-ink-secondary hover:text-ink-primary"
                   >
                     {t('cancel')}
                   </button>
@@ -328,7 +328,7 @@ export default function CollectionSelectorModal({
               ) : (
                 <button
                   onClick={() => setShowNewForm(true)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-primary hover:bg-primary/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-ink-primary hover:bg-surface-hover transition-colors"
                 >
                   <span className="w-5 h-5 flex items-center justify-center text-lg">+</span>
                   <span>{t('create_new')}</span>

@@ -31,7 +31,7 @@ const SURFACES = [
 */
 const INKS = [
   '--ink-primary', '--ink-secondary', '--ink-on-brand',
-  '--ink-on-media', '--ink-on-auth', '--ink-inverse',
+  '--ink-on-media', '--ink-inverse',
 ] as const;
 const ACCENTS = ['--brand', '--brand-hover', '--brand-muted', '--scrim-media'] as const;
 const EDGES = ['--edge-subtle', '--edge-default', '--edge-strong', '--edge-rule'] as const;

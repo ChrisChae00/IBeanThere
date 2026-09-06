@@ -7,7 +7,6 @@ import ReportIcon from '@/shared/ui/icons/ReportIcon';
 interface ReportButtonProps {
   onClick: () => void;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'icon' | 'text' | 'full';
   label?: string;
   className?: string;
   disabled?: boolean;
@@ -20,46 +19,21 @@ const iconSizes = {
 };
 
 /**
- * Reusable report button component.
- * Uses shared Button component for UI consistency.
- * Can be displayed as icon-only, text, or full button with icon + text.
+ * The report control: an icon on the shared ghost button, labelled for screen
+ * readers and on hover.
+ *
+ * It had `text` and `full` variants as well, neither of which any page ever
+ * asked for — the one call site is the public profile, on the default icon. They
+ * are gone rather than carried into Phase 6, and the `text` one took the last
+ * legacy colour name in this file with it.
  */
 export default function ReportButton({
   onClick,
   size = 'md',
-  variant = 'icon',
   label,
   className = '',
   disabled = false,
 }: ReportButtonProps) {
-  if (variant === 'text') {
-    return (
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        className={`text-ink-secondary hover:text-text transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
-      >
-        {label}
-      </button>
-    );
-  }
-
-  if (variant === 'full') {
-    return (
-      <Button
-        onClick={onClick}
-        disabled={disabled}
-        size={size}
-        variant="ghost"
-        leftIcon={<ReportIcon size={iconSizes[size]} />}
-        className={className}
-      >
-        {label}
-      </Button>
-    );
-  }
-
-  // Default: icon only - use ghost variant for consistency
   return (
     <Button
       onClick={onClick}

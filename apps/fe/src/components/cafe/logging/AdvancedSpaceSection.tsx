@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Input } from '@/components/ui';
+import { Input } from '@/shared/ui';
 
 interface AdvancedSpaceSectionProps {
   wifiQuality: string;
@@ -37,7 +37,7 @@ const renderStarRating = (
   label: string
 ) => (
   <div>
-    <label className="block text-sm font-medium text-surfaceTextSecondary mb-1">
+    <label className="block text-sm font-medium text-ink-secondary mb-1">
       {label}
     </label>
     <div className="flex items-center gap-1">
@@ -52,11 +52,11 @@ const renderStarRating = (
           <svg
             className={`w-6 h-6 transition-colors ${
               value && value >= star
-                ? 'text-starFilled'
-                : 'text-starEmpty'
+                ? 'text-star-filled'
+                : 'text-star-empty'
             }`}
             fill="currentColor"
-            stroke={value && value >= star ? 'currentColor' : 'var(--color-starEmptyOutline)'}
+            stroke={value && value >= star ? 'currentColor' : 'var(--star-empty-edge)'}
             strokeWidth="1.5"
             viewBox="0 0 20 20"
           >
@@ -127,15 +127,15 @@ export default function AdvancedSpaceSection({
   const [environmentExpanded, setEnvironmentExpanded] = useState(true);
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <div className="border border-edge-rule rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-background hover:bg-surface-hover transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between bg-surface-page hover:bg-surface-hover transition-colors"
         aria-expanded={isExpanded}
         aria-label={t('space_work_environment')}
       >
-        <span className="font-medium text-text">{t('space_work_environment')}</span>
+        <span className="font-medium text-ink-primary">{t('space_work_environment')}</span>
         <svg
           className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
@@ -147,13 +147,13 @@ export default function AdvancedSpaceSection({
       </button>
       
       {isExpanded && (
-        <div className="p-4 space-y-6 bg-cardBackground">
+        <div className="p-4 space-y-6 bg-surface-raised">
           {/* Productivity Infrastructure */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={() => setProductivityExpanded(!productivityExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-text uppercase tracking-wide hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-ink-primary uppercase tracking-wide hover:text-ink-primary transition-colors"
               aria-expanded={productivityExpanded}
             >
               <span>{t('productivity_infrastructure')}</span>
@@ -169,7 +169,7 @@ export default function AdvancedSpaceSection({
             {productivityExpanded && (
             <div className="space-y-4">
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-text">
+                <label className="block text-sm font-medium text-ink-primary">
                   {t('wifi_quality')}
                 </label>
                 <div>
@@ -185,11 +185,11 @@ export default function AdvancedSpaceSection({
                         <svg
                           className={`w-6 h-6 transition-colors ${
                             wifiRating && wifiRating >= star
-                              ? 'text-starFilled'
-                              : 'text-starEmpty'
+                              ? 'text-star-filled'
+                              : 'text-star-empty'
                           }`}
                           fill="currentColor"
-                          stroke={wifiRating && wifiRating >= star ? 'currentColor' : 'var(--color-starEmptyOutline)'}
+                          stroke={wifiRating && wifiRating >= star ? 'currentColor' : 'var(--star-empty-edge)'}
                           strokeWidth="1.5"
                           viewBox="0 0 20 20"
                         >
@@ -212,18 +212,18 @@ export default function AdvancedSpaceSection({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
+                <label className="block text-sm font-medium text-ink-secondary mb-2">
                   {t('outlet_info')}
                 </label>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-surfaceTextSecondary mb-1">
+                    <label className="block text-xs text-ink-secondary mb-1">
                       {t('outlet_availability')}
                     </label>
                     <select
                       value={outletAvailability}
                       onChange={(e) => onOutletAvailabilityChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
                       aria-label={t('outlet_availability')}
                     >
                       <option value="">{t('optional')}</option>
@@ -237,13 +237,13 @@ export default function AdvancedSpaceSection({
                   
                   {outletAvailability && outletAvailability !== 'none' && (
                     <div>
-                      <label className="block text-xs text-surfaceTextSecondary mb-1">
+                      <label className="block text-xs text-ink-secondary mb-1">
                         {t('outlet_location')}
                       </label>
                       <select
                         value={outletLocation}
                         onChange={(e) => onOutletLocationChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
+                        className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
                         aria-label={t('outlet_location')}
                       >
                         <option value="">{t('optional')}</option>
@@ -286,14 +286,14 @@ export default function AdvancedSpaceSection({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-border"></div>
+          <div className="border-t border-edge-rule"></div>
 
           {/* Environment Factors */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={() => setEnvironmentExpanded(!environmentExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-text uppercase tracking-wide hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-ink-primary uppercase tracking-wide hover:text-ink-primary transition-colors"
               aria-expanded={environmentExpanded}
             >
               <span>{t('environment_factors')}</span>
@@ -309,13 +309,13 @@ export default function AdvancedSpaceSection({
             {environmentExpanded && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
+                <label className="block text-sm font-medium text-ink-secondary mb-2">
                   {t('noise_level')}
                 </label>
                 <select
                   value={noiseLevel}
                   onChange={(e) => onNoiseLevelChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
                   aria-label={t('noise_level')}
                 >
                   <option value="">{t('optional')}</option>
@@ -340,13 +340,13 @@ export default function AdvancedSpaceSection({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-surfaceTextSecondary mb-2">
+                <label className="block text-sm font-medium text-ink-secondary mb-2">
                   {t('parking_availability')}
                 </label>
                 <select
                   value={parkingType}
                   onChange={(e) => onParkingTypeChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-cardBackground text-cardText focus:outline-hidden focus:ring-2 focus:ring-primary mb-3"
+                  className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand mb-3"
                   aria-label={t('parking_type')}
                 >
                   <option value="">{t('parking_not_specified')}</option>
@@ -365,9 +365,9 @@ export default function AdvancedSpaceSection({
                         id="parking-paid"
                         checked={parkingPaid}
                         onChange={(e) => onParkingPaidChange(e.target.checked)}
-                        className="w-4 h-4 rounded-sm border-border text-primary focus:ring-primary"
+                        className="w-4 h-4 rounded-sm border-edge-rule accent-brand focus:ring-brand"
                       />
-                      <label htmlFor="parking-paid" className="text-sm text-surfaceTextSecondary">
+                      <label htmlFor="parking-paid" className="text-sm text-ink-secondary">
                         {t('parking_paid')}
                       </label>
                     </div>

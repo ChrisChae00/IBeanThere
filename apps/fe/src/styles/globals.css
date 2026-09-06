@@ -60,6 +60,14 @@
   --color-state-danger: var(--state-danger);
   --color-state-pending: var(--state-pending);
 
+  /*
+    The star pair, under the layer-2 names. The legacy `--color-starFilled` /
+    `--color-starEmpty` below say the same thing and are still read by the shared
+    `StarRating`; both sets go when that primitive moves in Phase 6.
+  */
+  --color-star-filled: var(--star-filled);
+  --color-star-empty: var(--star-empty);
+
   --radius-control: var(--radius-control);
   --radius-card: var(--radius-card);
 
@@ -111,7 +119,6 @@
   --color-cardTextSecondary: var(--ink-secondary);
   --color-surfaceText: var(--ink-primary);
   --color-surfaceTextSecondary: var(--ink-secondary);
-  --color-authText: var(--ink-on-auth);
   --color-starFilled: var(--star-filled);
   --color-starEmpty: var(--star-empty);
   --color-starEmptyOutline: var(--star-empty-edge);

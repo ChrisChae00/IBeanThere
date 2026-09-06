@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
-import { Card } from '@/components/ui';
+import { Card } from '@/shared/ui';
 import dynamic from 'next/dynamic';
 import { StarRating } from '@/shared/ui';
 import { Avatar } from '@/shared/ui';
@@ -184,16 +184,16 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     <Card>
       {/* Cafe Name */}
       {!hideCafeName && cafe && (
-        <div className="pb-2 border-b border-border">
+        <div className="pb-2 border-b border-edge-rule">
           {cafePath ? (
             <Link
               href={cafePath}
-              className="text-base font-semibold text-cardText hover:text-secondary transition-colors"
+              className="text-base font-semibold text-ink-primary hover:text-ink-primary transition-colors"
             >
               {cafe.name}
             </Link>
           ) : (
-            <p className="text-base font-semibold text-cardText">
+            <p className="text-base font-semibold text-ink-primary">
               {isLoadingCafe ? 'Loading...' : cafe.name}
             </p>
           )}
@@ -211,10 +211,10 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                   size="sm"
                 />
                 <div>
-                  <p className="text-sm font-medium text-cardText">
+                  <p className="text-sm font-medium text-ink-primary">
                     {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
                   </p>
-                  <p className="text-xs text-cardTextSecondary">
+                  <p className="text-xs text-ink-secondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -226,17 +226,17 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                     src={log.author_avatar_url}
                     alt={log.author_display_name || 'User'}
                     size="sm"
-                    className="cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                    className="cursor-pointer hover:ring-2 hover:ring-brand transition-all"
                   />
                 </Link>
                 <div>
                   <Link 
                     href={`/${locale}/profile/${log.author_username}`}
-                    className="text-sm font-medium text-cardText hover:text-primary transition-colors"
+                    className="text-sm font-medium text-ink-primary hover:text-ink-primary transition-colors"
                   >
                     {log.author_display_name || 'User'}
                   </Link>
-                  <p className="text-xs text-cardTextSecondary">
+                  <p className="text-xs text-ink-secondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -244,7 +244,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             )
           )}
           {hideUserInfo && (
-            <p className="text-xs text-cardTextSecondary">
+            <p className="text-xs text-ink-secondary">
               {formatRelativeDate(log.visited_at)}
             </p>
           )}
@@ -253,7 +253,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onEdit && (
               <button
                 onClick={() => onEdit(log)}
-                className="text-sm text-cardText hover:text-secondary hover:underline transition-colors"
+                className="text-sm text-ink-primary hover:text-ink-primary hover:underline transition-colors"
               >
                 {t('edit')}
               </button>
@@ -261,7 +261,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onDelete && (
               <button
                 onClick={() => onDelete(log.id)}
-                className="text-sm text-error hover:underline"
+                className="text-sm text-state-danger hover:underline"
               >
                 {t('delete')}
               </button>
@@ -273,7 +273,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Rating & Atmosphere Tags */}
       <div className="flex flex-wrap items-center gap-2">
         {log.rating && (
-          <div className="inline-flex items-center gap-2 px-2 py-1 bg-surface rounded-lg">
+          <div className="inline-flex items-center gap-2 px-2 py-1 bg-surface-elevated rounded-lg">
             <StarRating rating={log.rating} size="sm" textColor="surface" />
           </div>
         )}
@@ -293,7 +293,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full border border-border"
+                    className="inline-block px-2 py-1 text-xs font-medium bg-brand/12 text-ink-primary rounded-full border border-edge-rule"
                   >
                     {t(`atmosphere_${tag}`)}
                   </span>
@@ -316,7 +316,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 setLightboxIndex(index);
                 setLightboxOpen(true);
               }}
-              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary"
+              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-brand"
             >
               <img
                 src={url}
@@ -332,7 +332,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {(log.coffee_type || log.price) && (
         <div className="flex items-center gap-3 mb-3">
           {log.coffee_type && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary text-primaryText rounded-lg">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-brand text-ink-on-brand rounded-lg">
               <svg 
                 width="14" 
                 height="14" 
@@ -348,7 +348,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             </span>
           )}
           {log.price !== undefined && log.price !== null && (
-            <span className="text-sm font-medium text-cardText">
+            <span className="text-sm font-medium text-ink-primary">
               {formatPrice(log.price, log.price_currency) ?? log.price}
             </span>
           )}
@@ -358,7 +358,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {/* Dessert */}
       {log.dessert && (
         <div className="mb-3">
-          <span className="text-xs text-cardTextSecondary">
+          <span className="text-xs text-ink-secondary">
             {t('dessert')}: {log.dessert}
           </span>
         </div>
@@ -366,8 +366,8 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Comment */}
       {log.comment && (
-        <div className="mb-4 p-3 bg-surface rounded-lg border border-border">
-          <p className="text-sm text-cardText whitespace-pre-wrap">
+        <div className="mb-4 p-3 bg-surface-elevated rounded-lg border border-edge-rule">
+          <p className="text-sm text-ink-primary whitespace-pre-wrap">
             {log.comment}
           </p>
         </div>
@@ -375,11 +375,11 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Advanced Logging Section */}
       {hasAdvancedData && (
-        <div className="border-t border-border pt-4 mt-4">
+        <div className="border-t border-edge-rule pt-4 mt-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-sm text-cardTextSecondary hover:text-cardText transition-colors"
+            className="w-full flex items-center justify-between text-sm text-ink-secondary hover:text-ink-primary transition-colors"
             aria-expanded={showAdvanced}
           >
             <span>{t('detailed_review')}</span>
@@ -416,9 +416,9 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
                 return (
                   <div className="space-y-2">
-                    <h5 className="font-semibold text-cardText">{t('coffee_taste_advanced')}</h5>
-                    <div className="space-y-1 text-cardTextSecondary pl-2">
-                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-cardText">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
+                    <h5 className="font-semibold text-ink-primary">{t('coffee_taste_advanced')}</h5>
+                    <div className="space-y-1 text-ink-secondary pl-2">
+                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-ink-primary">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
                       {log.bean_origin && log.bean_origin.trim() && <div>{t('bean_origin')}: {log.bean_origin}</div>}
                       {log.processing_method && log.processing_method.trim() && <div>{t('processing_method')}: {log.processing_method}</div>}
                       {log.roast_level && log.roast_level.trim() && <div>{t('roast_level')}: {log.roast_level}</div>}
@@ -474,8 +474,8 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 
                 return (
                   <div className="space-y-2">
-                    <h5 className="font-semibold text-cardText">{t('space_work_environment')}</h5>
-                    <div className="space-y-1 text-cardTextSecondary pl-2">
+                    <h5 className="font-semibold text-ink-primary">{t('space_work_environment')}</h5>
+                    <div className="space-y-1 text-ink-secondary pl-2">
                       {log.wifi_rating !== undefined && log.wifi_rating !== null && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
                       {log.wifi_quality && log.wifi_quality.trim() && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
                       {log.outlet_info && (() => {
