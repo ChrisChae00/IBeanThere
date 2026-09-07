@@ -552,6 +552,16 @@
     are what show up as banding once the bar is over a light page rather than a
     photograph.
   */
+  /*
+    The drawer's scrim. Same slot as the header's, and for the same reason: the
+    brand is a light foreground colour in two of the four themes, so a wash painted
+    with it stops darkening anything. Flat rather than masked - this one covers the
+    whole page instead of feathering out under a bar.
+  */
+  .nav-drawer-scrim {
+    background: color-mix(in srgb, var(--scrim-media) 60%, transparent);
+  }
+
   .nav-scrim {
     /*
       Tinted per theme, but from `--scrim-media` rather than `--brand`. Brand is a
@@ -702,7 +712,14 @@
     cursor: pointer;
   }
 
+  /*
+    `:active` alongside `:hover`, for the same reason every control in this file
+    carries it: a phone has no hover, so the press is the only moment a row can
+    show that the tap landed. Without it the drawer's rows answered a finger with
+    nothing at all.
+  */
   .menu-item:hover,
+  .menu-item:active,
   .menu-item[data-highlighted] {
     background: var(--surface-hover);
     color: var(--ink-primary);
@@ -736,6 +753,7 @@
   }
 
   .menu-item:hover .menu-mark,
+  .menu-item:active .menu-mark,
   .menu-item[data-highlighted] .menu-mark {
     color: var(--ink-primary);
   }

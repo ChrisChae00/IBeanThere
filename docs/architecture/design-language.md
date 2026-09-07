@@ -108,10 +108,13 @@ Rules:
   is the one pin a reader has to find at a glance.
 - **Never encode meaning in colour alone.** Pending vs verified is a dashed vs solid
   border first, a colour second.
-- **A state colour is emphasis, not a text colour.** `--state-success` and
-  `--state-danger` over their own 12% tint measure 2.4-3.5:1 in three of the four
-  themes. Set the label in `--ink-primary` and let the state colour be a dot beside it;
-  the same goes for failure messages.
+- **A state colour is emphasis, not a text colour**, with one row on the record.
+  `--state-success` and `--state-danger` over their own 12% tint measure 2.4-3.5:1 in
+  three of the four themes. Set the label in `--ink-primary` and let the state colour be
+  a dot beside it; the same goes for failure messages. The exception is the drawer's log
+  out row, named in `--state-danger` at rest by decision: it measures 3.25:1 on the
+  raised surface, below the 4.5:1 body threshold, and is kept because a colour that
+  arrives only once the pointer is on the row arrives after the decision to press it.
 
 ## 5. Structure
 
@@ -167,6 +170,27 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   the 44px target with an invisible band, not by growing.
 - **Popovers sit above whatever opened them.** The `--z-*` stack in `tokens.css` is the
   whole ordering; add a band, do not add a bigger number.
+- **A panel stands on `--surface-raised`, because that is what its hover is mixed
+  from.** `--surface-hover` is `--c-raised` darkened; a menu laid on `--surface-page`
+  gets a hover *lighter* than its own ground on the light themes (Morning Coffee's page
+  is a tan, its raised surface a near-white cream) and the row reads as a wash rather
+  than as something being pointed at.
+- **A modal panel is the dialog primitive, not a portal written by hand.** The mobile
+  drawer is a Base UI dialog: focus trap, Escape, focus restore, scroll lock and
+  unmounting when closed all come with it. The hand-rolled version it replaced stayed in
+  the DOM while closed, so every link in it was still reachable by Tab from the page
+  behind.
+- **A popup opened from inside a modal panel is portalled into that panel**, and is
+  handed the element rather than a ref. Portalled to the body it lands outside the focus
+  trap, and the dialog pulls focus straight back and closes it in the frame it opened; a
+  ref is still null on the render that mounts the portal, which renders nothing at all
+  while the trigger goes on reporting itself open.
+- **The mobile drawer carries the bar's own structure, not a second one.** A section that
+  exists in one and not the other is an information architecture the reader has to learn
+  twice: the logs and the beans sit inside the account menu on the desktop bar, so they
+  sit inside the account section here. The same rule removes the drawer's row icons --
+  the bar is text pills with no icon vocabulary, so a glyph per row was invented in one
+  place and nowhere else.
 - **Elevation is one named token or nothing.** `--shadow-panel` for a floating panel,
   `--shadow-marker` for a pin on the map; both are fixed rather than theme-derived,
   because the themes' own shadow colours are light in the dark themes and would paint a
@@ -196,13 +220,17 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   the map) 3:1 — in **all four themes**, measured, not eyeballed. Measure on
   `/[locale]/theme-demo`, which reads the live cascade; the numbers written into docs are
   snapshots, not the source.
-- **Two exceptions are on the record, and neither is an oversight to fix on sight.**
+- **Three exceptions are on the record, and none is an oversight to fix on sight.**
   Matcha Latte's label on its brand is 3.37:1: the pair was read on screen and kept
   (`themes.css` says so beside the slot). `--marker-pending` is 2.21:1 on the map tiles
-  in every theme; the white `--marker-ring` is what draws its edge. Anything else below
-  the threshold is a bug.
+  in every theme; the white `--marker-ring` is what draws its edge. The drawer's log out
+  row is 3.25:1, chosen so the warning is there before the press rather than after it.
+  Anything else below the threshold is a bug.
 - Interactive targets are at least 44×44, even when the visible chrome is smaller -- a
   `before:` band restores the target without inflating the button.
+- **Every hover state has an `:active` twin.** A phone has no hover, so the press is the
+  only moment a control can show that the tap landed; `.menu-item` carried its hover for
+  weeks without one, and the drawer's rows answered a finger with nothing at all.
 - Focus rings are never removed. `focus-visible` styling is part of the component, not
   an afterthought.
 - Every icon-only control has a localised accessible name.

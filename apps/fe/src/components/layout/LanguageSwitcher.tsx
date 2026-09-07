@@ -15,7 +15,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   ko: '한국어',
 };
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ container }: { container?: HTMLElement | null }) {
   const pathname = usePathname();
   const t = useTranslations('navigation');
 
@@ -32,6 +32,7 @@ export default function LanguageSwitcher() {
 
   return (
     <NavSelect
+      container={container}
       label={currentLocale.toUpperCase()}
       ariaLabel={t('language')}
       value={currentLocale}

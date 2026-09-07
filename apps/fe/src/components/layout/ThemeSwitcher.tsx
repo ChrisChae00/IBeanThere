@@ -4,7 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslations } from 'next-intl';
 import NavSelect from './NavSelect';
 
-export default function ThemeSwitcher() {
+export default function ThemeSwitcher({ container }: { container?: HTMLElement | null }) {
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const t = useTranslations('navigation');
 
@@ -15,6 +15,7 @@ export default function ThemeSwitcher() {
   */
   return (
     <NavSelect
+      container={container}
       label={t('theme')}
       ariaLabel={t('theme')}
       value={currentTheme.name}

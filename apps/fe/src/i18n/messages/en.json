@@ -48,7 +48,10 @@
     "admin_dashboard": "Admin Dashboard",
     "learn": "Coffee Roadmap",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "menu": "Menu",
+    "close_menu": "Close menu",
+    "account": "Account"
   },
   "drop_bean": {
     "button": "Drop Bean",

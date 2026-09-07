@@ -48,7 +48,10 @@
     "admin_dashboard": "관리자 대시보드",
     "learn": "커피 로드맵",
     "theme": "테마",
-    "language": "언어"
+    "language": "언어",
+    "menu": "메뉴",
+    "close_menu": "메뉴 닫기",
+    "account": "계정"
   },
   "drop_bean": {
     "button": "커피콩 심기",
