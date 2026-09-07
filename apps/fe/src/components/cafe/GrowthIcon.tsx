@@ -10,17 +10,19 @@ import Image from 'next/image';
   painted on does not change with the theme, and a stage a reader recognises should
   look the same wherever it appears.
 
-  The art is square and full-bleed, and the circles are cut straight out of it at build
-  time (`media-src/bean-growth/` into `public/growth/`) rather than being inset inside a
-  padded square: the soil is painted to the frame's own edge, so any padding leaves a
-  band of sky under it where the ground should be.
+  The files in `public/growth/` are the delivered art itself -- square, full bleed, no
+  crop and no mask, and no second copy under `media-src/` because there is nothing to
+  derive. A circular cut was tried first and is not here: the soil is painted to the
+  frame's own edge, so it either left a band of sky under the ground or clipped the
+  leaves, and the stages are due to be redrawn anyway. Next/image resizes per call
+  site, so the source can stay as large as it arrived.
 */
 const STAGES = [
-  { src: '/growth/seed.webp', name: 'Bean Dropped' },
-  { src: '/growth/sprout.webp', name: 'Sprouting' },
-  { src: '/growth/growing.webp', name: 'Growing' },
-  { src: '/growth/tree.webp', name: 'Sapling' },
-  { src: '/growth/harvest.webp', name: 'Fruiting Tree' },
+  { src: '/growth/bean-growth-seed.png', name: 'Bean Dropped' },
+  { src: '/growth/bean-growth-sprout.png', name: 'Sprouting' },
+  { src: '/growth/bean-growth-growing.png', name: 'Growing' },
+  { src: '/growth/bean-growth-tree.png', name: 'Sapling' },
+  { src: '/growth/bean-growth-harvest.png', name: 'Fruiting Tree' },
 ] as const;
 
 interface GrowthIconProps {
@@ -38,11 +40,11 @@ interface GrowthIconProps {
 export function GrowthIcon({ level, size, animate = false, className = '' }: GrowthIconProps) {
   const box = size ? { width: size, height: size } : undefined;
 
-  // No bean here yet. An empty ring rather than a faded stage: nothing has started.
+  // No bean here yet. An empty frame rather than a faded stage: nothing has started.
   if (level < 1) {
     return (
       <span
-        className={`inline-block rounded-full border border-border bg-surface ${className}`}
+        className={`inline-block border border-border bg-surface ${className}`}
         style={box}
         title="No bean"
       />
@@ -53,7 +55,7 @@ export function GrowthIcon({ level, size, animate = false, className = '' }: Gro
 
   return (
     <span
-      className={`relative inline-block overflow-hidden rounded-full ${animate ? 'animate-bounce' : ''} ${className}`}
+      className={`relative inline-block ${animate ? 'animate-bounce' : ''} ${className}`}
       style={box}
       title={stage.name}
     >

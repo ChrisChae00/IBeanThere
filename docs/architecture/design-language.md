@@ -104,11 +104,14 @@ Rules:
   `--scrim-media` in `--ink-on-media`, or do not exist at all. A row that says the same
   word on every second card carries no information -- delete it rather than style it.
 - **The growth badges are fixed art, not themed drawing.** The five stages are painted
-  illustrations cut to circles at build time (`media-src/bean-growth/` into
-  `public/growth/`); they no longer repaint per theme the way the SVGs they replace did.
-  Same reasoning as the map pin: a stage a reader learns to recognise should look the
-  same everywhere, and the paper it is painted on is not the page's. They also carry
-  more detail than an icon, so nothing draws them below ~36px.
+  illustrations in `public/growth/`, served as delivered -- square, full bleed, no crop
+  and no mask; they no longer repaint per theme the way the SVGs they replace did. Same
+  reasoning as the map pin: a stage a reader learns to recognise should look the same
+  everywhere, and the paper it is painted on is not the page's. Two things follow. They
+  carry more detail than an icon, so nothing draws them below ~36px. And they are not
+  cut to a circle: the soil is painted to the frame's own edge, so a round cut either
+  leaves a band of sky under the ground or clips the leaves -- a stage that wants to be
+  a circle has to be drawn as one.
 - **Domain markers are fixed where their ground is fixed.** `--marker-user` is one
   colour in all four themes: it sits on OpenStreetMap's tiles, which stay light, and it
   is the one pin a reader has to find at a glance.
