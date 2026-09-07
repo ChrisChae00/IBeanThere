@@ -24,13 +24,7 @@ import HeroMedia from './HeroMedia';
 import { GlobeCanvas, type GlobeTheme } from './GlobeCanvas';
 import { Map, BookOpen, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  SeedIcon,
-  SproutIcon,
-  GrowingIcon,
-  TreeIcon,
-  HarvestIcon,
-} from './GrowthJourneyIcons';
+import { GrowthIcon } from '@/components/cafe/GrowthIcon';
 import type { CafeStats } from '@/lib/api/stats';
 import Marquee from './Marquee';
 import WaveDivider from './WaveDivider';
@@ -74,8 +68,6 @@ export type LandingMessages = {
   stages: Stage[];
   personas: { title: string; description: string }[];
 };
-
-const STAGE_ICONS = [SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon];
 
 /*
   The globe, themed for the dark break it sits in.
@@ -398,7 +390,6 @@ function GrowthIndex({ messages }: { messages: LandingMessages }) {
 
       <ol className="mt-16 grid gap-px bg-edge-subtle">
         {messages.stages.map((stage, index) => {
-          const Icon = STAGE_ICONS[index] ?? STAGE_ICONS[0];
           return (
             <li
               key={stage.title}
@@ -427,7 +418,7 @@ function GrowthIndex({ messages }: { messages: LandingMessages }) {
                   className="block shrink-0 origin-center"
                   style={{ transform: 'scale(calc(0.82 + 0.18 * var(--emphasis)))' }}
                 >
-                  <Icon className="h-16 w-16 md:h-24 md:w-24" />
+                  <GrowthIcon level={index + 1} className="h-16 w-16 md:h-24 md:w-24" />
                 </span>
                 <p className="landing-micro" style={{ opacity: EMPHASIS_OPACITY }}>
                   {stage.badge}

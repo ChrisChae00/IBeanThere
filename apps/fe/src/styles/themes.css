@@ -56,7 +56,6 @@
   --c-success: #4CAF50;
   --c-warning: #FFC107;
   --c-danger: #F44336;
-
 }
 
 [data-theme='espresso'] {
@@ -91,7 +90,6 @@
   --c-success: #66BB6A;
   --c-warning: #FFA726;
   --c-danger: #EF5350;
-
 }
 
 /*
@@ -122,7 +120,6 @@
   --c-success: #4CAF50;
   --c-warning: #FFC107;
   --c-danger: #F44336;
-
 }
 
 [data-theme='vanillaLatte'] {
@@ -150,42 +147,5 @@
   --c-success: #4CAF50;
   --c-warning: #FFC107;
   --c-danger: #F44336;
-
 }
 
-/*
-  Growth-journey illustration colours. These are artwork, not UI semantics, so they
-  live in their own namespace and are not part of the surface/ink/accent vocabulary.
-  Only Dark Roast overrides them.
-*/
-:root {
-  --growth-seed-bg: #F5F5F0;
-  --growth-sprout-bg: #F1F8E9;
-  --growth-tree-bg: #E8F5E9;
-  --growth-soil: #bb8f81ff;
-  --growth-bean: #8D6E63;
-  --growth-bean-stroke: #5D4037;
-  --growth-stem: #78BD7B;
-  --growth-leaf: #5CAF60;
-  --growth-leaf-fill: #4CAF50;
-  --growth-trunk: #795548;
-  --growth-canopy: #2E7D32;
-  --growth-canopy-dark: #1B5E20;
-  --growth-fruit: #FF5252;
-}
-
-[data-theme='espresso'] {
-  --growth-seed-bg: #2C2520;
-  --growth-sprout-bg: #252C22;
-  --growth-tree-bg: #1E2C22;
-  --growth-soil: #bb8f81ff;
-  --growth-bean: #A1887F;
-  --growth-bean-stroke: #8D6E63;
-  --growth-stem: #A5D6A7;
-  --growth-leaf: #81C784;
-  --growth-leaf-fill: #66BB6A;
-  --growth-trunk: #8D6E63;
-  --growth-canopy: #43A047;
-  --growth-canopy-dark: #2E7D32;
-  --growth-fruit: #FF8A80;
-}

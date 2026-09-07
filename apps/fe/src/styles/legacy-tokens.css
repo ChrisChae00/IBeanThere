@@ -16,18 +16,4 @@
 
 :root {
   --color-white: #FFFFFF;
-
-  --color-growthSeedBg: var(--growth-seed-bg);
-  --color-growthSproutBg: var(--growth-sprout-bg);
-  --color-growthTreeBg: var(--growth-tree-bg);
-  --color-growthSoil: var(--growth-soil);
-  --color-growthBean: var(--growth-bean);
-  --color-growthBeanStroke: var(--growth-bean-stroke);
-  --color-growthStem: var(--growth-stem);
-  --color-growthLeaf: var(--growth-leaf);
-  --color-growthLeafFill: var(--growth-leaf-fill);
-  --color-growthTrunk: var(--growth-trunk);
-  --color-growthCanopy: var(--growth-canopy);
-  --color-growthCanopyDark: var(--growth-canopy-dark);
-  --color-growthFruit: var(--growth-fruit);
 }

@@ -155,7 +155,7 @@ export default function MyBeansPage(
               <Info className="w-4 h-4 text-textSecondary" />
             </div>
             <div className="flex justify-center mb-1">
-              <GrowthIcon level={maxLevel} size={32} />
+              <GrowthIcon level={maxLevel} size={48} />
             </div>
             <div className="text-sm text-textSecondary">{t('stats.highest')}</div>
           </button>
@@ -313,7 +313,7 @@ function BeanLevelSection({
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <GrowthIcon level={level} size={24} />
+        <GrowthIcon level={level} size={36} />
         <h3 className="text-lg font-semibold text-text">
           {title}
         </h3>
@@ -397,7 +397,7 @@ function LevelInfoModal({ isOpen, onClose, currentLevel, t, tDropBean }: LevelIn
                   : 'bg-surface'
               }`}
             >
-              <GrowthIcon level={level} size={28} />
+              <GrowthIcon level={level} size={40} />
               <div className="flex-1">
                 <div className={`font-medium ${
                   level === currentLevel ? 'text-primary' : 'text-text'

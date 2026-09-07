@@ -1,72 +1,68 @@
 'use client';
 
+import Image from 'next/image';
+
+/*
+  The five growth stages, as painted art rather than drawn icons. What this replaces
+  was five inline SVGs whose every colour came from a `--growth-*` token, so each
+  theme repainted the bean, the soil and the leaves; the illustrations are one fixed
+  set instead, for the same reason the map's own pins are fixed -- the paper they are
+  painted on does not change with the theme, and a stage a reader recognises should
+  look the same wherever it appears.
+
+  The art is square and full-bleed; the circles are cut at build time from
+  `media-src/bean-growth/` into `public/growth/`, inset slightly so the widest leaves
+  stay inside the cut.
+*/
+const STAGES = [
+  { src: '/growth/seed.webp', name: 'Bean Dropped' },
+  { src: '/growth/sprout.webp', name: 'Sprouting' },
+  { src: '/growth/growing.webp', name: 'Growing' },
+  { src: '/growth/tree.webp', name: 'Sapling' },
+  { src: '/growth/harvest.webp', name: 'Fruiting Tree' },
+] as const;
+
 interface GrowthIconProps {
-  level: number;  // 0-5
+  /** 0 for a cafe with no bean in it yet, 1-5 for the stages above. */
+  level: number;
+  /**
+     A pixel box, for the places that draw the badge at one fixed size. Left out, the
+     badge takes its size from `className`, which is what a responsive row needs.
+   */
   size?: number;
   animate?: boolean;
   className?: string;
 }
 
-import { SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon } from '../landing/GrowthJourneyIcons';
+export function GrowthIcon({ level, size, animate = false, className = '' }: GrowthIconProps) {
+  const box = size ? { width: size, height: size } : undefined;
 
-/**
- * GrowthIcon - Visual representation of bean growth level
- * 
- * Levels:
- * 0 - No bean (empty)
- * 1 - Bean Dropped 🫘 (Seed)
- * 2 - Sprouting 🌱 (Sprout)
- * 3 - Growing 🌿 (Growing)
- * 4 - Sapling 🌳 (Tree)
- * 5 - Fruiting Tree 🍒 (Harvest)
- */
-export function GrowthIcon({ 
-  level, 
-  size = 24, 
-  animate = false,
-  className = '' 
-}: GrowthIconProps) {
-  
-  // Empty state
-  if (level === 0) {
+  // No bean here yet. An empty ring rather than a faded stage: nothing has started.
+  if (level < 1) {
     return (
-      <span 
-        className={`inline-flex items-center justify-center rounded-full bg-surface border border-border ${className}`}
-        style={{ width: size, height: size }}
+      <span
+        className={`inline-block rounded-full border border-border bg-surface ${className}`}
+        style={box}
         title="No bean"
       />
     );
   }
 
-  const iconClass = `w-full h-full ${animate ? 'animate-bounce' : ''}`;
+  const stage = STAGES[Math.min(level, STAGES.length) - 1];
 
   return (
-    <div 
-      className={`inline-flex items-center justify-center ${className}`}
-      style={{ width: size, height: size }}
-      title={getLevelName(level)}
-      role="img"
-      aria-label={getLevelName(level)}
+    <span
+      className={`relative inline-block overflow-hidden rounded-full ${animate ? 'animate-bounce' : ''} ${className}`}
+      style={box}
+      title={stage.name}
     >
-      {level === 1 && <SeedIcon className={iconClass} />}
-      {level === 2 && <SproutIcon className={iconClass} />}
-      {level === 3 && <GrowingIcon className={iconClass} />}
-      {level === 4 && <TreeIcon className={iconClass} />}
-      {level >= 5 && <HarvestIcon className={iconClass} />}
-    </div>
+      {/*
+        `sizes` is the largest the badge is ever drawn (the landing index, 96px), so a
+        phone is not handed the 3x file for a 24px row in the beans list.
+      */}
+      <Image src={stage.src} alt={stage.name} fill sizes="96px" className="object-cover" />
+    </span>
   );
-}
-
-function getLevelName(level: number): string {
-  switch (level) {
-    case 0: return 'No bean';
-    case 1: return 'Bean Dropped';
-    case 2: return 'Sprouting';
-    case 3: return 'Growing';
-    case 4: return 'Sapling';
-    case 5: return 'Fruiting Tree';
-    default: return 'Unknown';
-  }
 }
 
 // Export level thresholds for reference
