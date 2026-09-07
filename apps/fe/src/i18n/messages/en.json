@@ -986,7 +986,8 @@
     "my_collections": "My Collections",
     "public_collections": "Public Collections",
     "collections_public_label": "Show on Profile",
-    "collections_public_hint": "Others can see your collections"
+    "collections_public_hint": "Others can see your collections",
+    "view_photo": "View photo"
   },
   "shop": {
     "hero_badge": "Official Store",
@@ -1323,7 +1324,7 @@
     "my_collections": "My Collections",
     "no_collections": "No collections yet",
     "cafes": "{count} cafes",
-    "share": "Share",
+    "share": "Share collection",
     "edit": "Edit",
     "delete": "Delete",
     "delete_confirm": "Delete this collection?",
@@ -1338,7 +1339,10 @@
     "move": "Move",
     "move_failed": "Failed to move",
     "more_options": "More options",
-    "edit_saved": "Change where this is saved"
+    "edit_saved": "Change where this is saved",
+    "remove_from_collection": "Remove from this collection",
+    "remove_everywhere": "Remove this cafe",
+    "remove_everywhere_confirm": "Remove this cafe from every collection it is saved in?"
   },
   "share": {
     "title": "Share",

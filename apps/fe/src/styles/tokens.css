@@ -78,6 +78,16 @@
     marker in each one.
   */
   --marker-user: #D24C28;
+  /*
+    The two built-in collections. Fixed rather than theme-derived, same reasoning as the
+    map pin: a heart is red and a bookmark is blue everywhere a reader has ever seen one,
+    and these two icons are how a saved cafe is picked out of a list at a glance. Both
+    are icons, so the bar is the 3:1 non-text threshold, which they clear on all four
+    grounds. They were eight copies of `#ef4444` / `#3b82f6` before this slot existed.
+  */
+  --collection-favourite: #ef4444;
+  --collection-saved: #3b82f6;
+
   --marker-pending: var(--state-pending);
   /*
     The ring and the count sit on the marker against OpenStreetMap's tiles, which stay
@@ -175,6 +185,18 @@
   */
   --z-map-chrome: 1100;
   --z-map-modal: 1200;
+
+  /*
+    The modal stack, written down for the same reason the nav's is: a collection modal
+    opens a move-to modal, and a row's own menu has to clear both. The rule does not
+    change -- a popup outranks whatever opened it. A menu inside a modal cannot be
+    positioned inside the panel instead: the list it belongs to scrolls, and an
+    absolutely placed menu is clipped by that scroll box and reachable only by scrolling
+    down to it.
+  */
+  --z-modal: 1000;
+  --z-modal-nested: 1002;
+  --z-modal-popover: 1300;
 
   --input-height: 48px;
   --input-radius: var(--radius-control);

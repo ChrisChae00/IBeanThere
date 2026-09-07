@@ -34,6 +34,7 @@ apps/fe/
     ├── hooks/            # Global custom React Hooks
     ├── i18n/             # Localization configs and dictionaries
     ├── lib/              # Utils and client configurations (e.g., Supabase)
+    │   └── api/          # Every call to the backend. See Key Features
     ├── middleware.ts     # Edge middleware for navigation/auth
     ├── shared/           # Common code bridging multiple features
     │   ├── contexts/
@@ -52,6 +53,11 @@ apps/fe/
 - **Built-in i18n capabilities** dynamically routing locales
 - **Robust typed configuration** across React, standard web primitives and data
 - **Tailwind v4**, configured in CSS rather than a JavaScript config file
+- **One door to the backend** (`lib/api/`). `client.ts` holds the base URL, the session
+  token, the network-error wrapper and the `detail → message` error shape; each module
+  beside it is one area of the API. A component that calls `fetch` on
+  `NEXT_PUBLIC_API_URL` with a hand-built `Authorization` header is rebuilding all four,
+  and gets a different answer than its neighbours on every one of them.
 
 ## Styling
 

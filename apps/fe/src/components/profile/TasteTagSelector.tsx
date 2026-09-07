@@ -1,8 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Check } from 'lucide-react';
 import { TasteTag as TasteTagType } from '@/types/api';
-import { TasteTag } from '@/shared/ui';
 
 const ALL_TASTE_TAGS: TasteTagType[] = [
   'acidic',
@@ -43,7 +43,7 @@ export default function TasteTagSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-text">
+        <label className="block text-sm font-medium text-ink-primary">
           {t('taste_tags_label')}
         </label>
         <span className="text-xs text-ink-secondary">
@@ -66,24 +66,13 @@ export default function TasteTagSelector({
               type="button"
               onClick={() => handleTagClick(tag)}
               disabled={isDisabled}
-              className={`
-                inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium
-                transition-all duration-200 border
-                ${isSelected
-                  ? 'bg-primary text-white border-primary'
-                  : isDisabled
-                    ? 'bg-surface text-ink-secondary border-border opacity-50 cursor-not-allowed'
-                    : 'bg-surface text-text border-border hover:border-primary hover:text-primary'
-                }
-              `}
+              className={`control-flat inline-flex items-center gap-1 rounded-(--radius-pill) px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+                isSelected ? 'is-active' : ''
+              }`}
             >
-              <span className="opacity-70">#</span>
+              <span aria-hidden="true" className="opacity-70">#</span>
               {t(`taste_tags.${tag}`)}
-              {isSelected && (
-                <svg className="w-3.5 h-3.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
+              {isSelected && <Check className="ml-0.5 h-3.5 w-3.5" aria-hidden="true" />}
             </button>
           );
         })}

@@ -983,7 +983,8 @@
     "my_collections": "내 컬렉션",
     "public_collections": "공개 컬렉션",
     "collections_public_label": "프로필에 공개",
-    "collections_public_hint": "다른 사용자가 컬렉션을 볼 수 있습니다"
+    "collections_public_hint": "다른 사용자가 컬렉션을 볼 수 있습니다",
+    "view_photo": "사진 보기"
   },
   "shop": {
     "hero_badge": "공식 스토어",
@@ -1320,7 +1321,7 @@
     "my_collections": "내 컬렉션",
     "no_collections": "컬렉션이 없습니다",
     "cafes": "{count}개 카페",
-    "share": "공유",
+    "share": "컬렉션 공유",
     "edit": "수정",
     "delete": "삭제",
     "delete_confirm": "이 컬렉션을 삭제하시겠습니까?",
@@ -1335,7 +1336,10 @@
     "move": "이동하기",
     "move_failed": "이동에 실패했습니다",
     "more_options": "더보기",
-    "edit_saved": "저장 위치 변경"
+    "edit_saved": "저장 위치 변경",
+    "remove_from_collection": "이 컬렉션에서 빼기",
+    "remove_everywhere": "이 카페 지우기",
+    "remove_everywhere_confirm": "이 카페를 저장된 모든 컬렉션에서 뺄까요?"
   },
   "share": {
     "title": "공유하기",

@@ -9,6 +9,8 @@ import { SearchIcon } from '@/components/ui';
 import { Session } from '@supabase/supabase-js';
 import { UserPublicResponse, TrustedUser } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/contexts/ToastContext';
+import { searchUsers as searchUsersApi, setTrust } from '@/lib/api/users';
 
 interface UserSearchSectionProps {
   session: Session | null;
@@ -18,6 +20,8 @@ interface UserSearchSectionProps {
 
 export default function UserSearchSection({ session, trustedUsernames, onTrustUpdate }: UserSearchSectionProps) {
   const t = useTranslations('community');
+  const tErrors = useTranslations('errors');
+  const { showToast } = useToast();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<UserPublicResponse[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -33,15 +37,10 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
 
       setIsSearching(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/search?query=${encodeURIComponent(debouncedQuery)}&limit=5`);
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data);
-        } else {
-          setResults([]);
-        }
+        setResults(await searchUsersApi(debouncedQuery));
       } catch (err) {
         console.error('Search failed:', err);
+        setResults([]);
       } finally {
         setIsSearching(false);
       }
@@ -58,27 +57,12 @@ export default function UserSearchSection({ session, trustedUsernames, onTrustUp
     if (!session?.access_token) return;
 
     try {
-      const isTrusted = trustedUsernames.has(username);
-      const method = isTrusted ? 'DELETE' : 'POST';
-      
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${username}/trust`,
-        {
-          method,
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        onTrustUpdate();
-      } else {
-        const errorData = await response.json();
-        alert(errorData.detail || 'Failed to update trust');
-      }
+      await setTrust(username, !trustedUsernames.has(username));
+      onTrustUpdate();
     } catch (err) {
+      // A toast rather than `alert()`, which blocked the page on an untranslated string.
       console.error('Trust action failed:', err);
+      showToast(tErrors('unknown'), 'error');
     }
   };
 

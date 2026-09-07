@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Menu } from '@base-ui/react/menu';
+import { Coffee, MoreVertical } from 'lucide-react';
+import { Button, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/base/dialog';
 
-import { getCollectionDetail, removeCafeFromCollection } from '@/lib/api/collections';
+import {
+  getCollectionDetail,
+  removeCafeFromAllCollections,
+  removeCafeFromCollection,
+} from '@/lib/api/collections';
 import { getCafePath } from '@/lib/utils/slug';
 import type { Collection, CollectionDetail, CollectionItem } from '@/types/api';
 import CafeMoveToModal from './CafeMoveToModal';
@@ -20,11 +27,30 @@ interface CollectionDetailModalProps {
   onNavigateToCafe?: (path: string) => void;
   isOwnProfile?: boolean;
   onItemCountChange?: (collectionId: string, delta: number) => void;
+  /*
+    A collection made from inside the move-to modal. It has to travel back up to the
+    section that owns the list, or it exists on the server and nowhere on screen until
+    the page is loaded again.
+  */
+  onCollectionCreated?: (collection: Collection) => void;
 }
 
-/**
- * Modal for viewing collection details and managing items.
- */
+/*
+  One collection, and what can be done to the cafes in it.
+
+  What this replaces was a `fixed inset-0` div with `onClick={onClose}` on it. Two things
+  followed from that, and both of them were reported as the feature simply not working.
+  The move-to modal is rendered from here, so although Base UI portals it to the body it
+  is still this component's child in the React tree -- and React bubbles events through
+  the tree, not the DOM. Every click inside the move-to modal therefore reached that
+  backdrop handler and closed the whole stack: picking a collection did nothing, and
+  "create new collection" dismissed everything without creating anything.
+
+  The row menu was the second: an absolutely positioned div inside the list, which is a
+  `max-h` scroll box, so the menu was clipped by it and could only be seen by scrolling
+  the list down to it. It is a Base UI menu now, portalled out and ranked above both
+  modals, so it opens over the panel where the finger already is.
+*/
 export default function CollectionDetailModal({
   collection,
   isOpen,
@@ -35,79 +61,53 @@ export default function CollectionDetailModal({
   onNavigateToCafe,
   isOwnProfile = true,
   onItemCountChange,
+  onCollectionCreated,
 }: CollectionDetailModalProps) {
   const t = useTranslations('collections');
   const params = useParams();
   const locale = params.locale as string;
-  
+
   const [detail, setDetail] = useState<CollectionDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Edit states
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(collection.name);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Share state
   const [shareLoading, setShareLoading] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  
+
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Dropdown & move states
-  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [moveModalItem, setMoveModalItem] = useState<CollectionItem | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  /*
+    Taking a cafe out of every collection it is in cannot be undone from here, so it is
+    asked before it is done. Removing it from this one collection is not: the cafe is
+    still saved wherever else it was, and the move-to modal puts it back in a press.
+  */
+  const [removeAllItem, setRemoveAllItem] = useState<CollectionItem | null>(null);
+  const [isRemovingAll, setIsRemovingAll] = useState(false);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (!isOpen) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = original; };
-  }, [isOpen]);
 
-  // Close dropdown on click-outside or Escape
-  useEffect(() => {
-    if (!activeDropdownId) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setActiveDropdownId(null);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveDropdownId(null);
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [activeDropdownId]);
-
-  // Fetch collection details
-  useEffect(() => {
-    if (!isOpen) return;
-    
     const fetchDetail = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getCollectionDetail(collection.id);
-        setDetail(data);
-      } catch (err) {
+        setDetail(await getCollectionDetail(collection.id));
+      } catch {
         setError(t('load_failed'));
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchDetail();
   }, [isOpen, collection.id, t]);
 
@@ -119,12 +119,12 @@ export default function CollectionDetailModal({
 
   const handleSave = useCallback(async () => {
     if (!onUpdate || isSaving) return;
-    
+
     setIsSaving(true);
     try {
       await onUpdate(collection.id, { name: editName.trim() });
       setIsEditing(false);
-    } catch (err) {
+    } catch {
       setError(t('save_failed'));
     } finally {
       setIsSaving(false);
@@ -133,13 +133,13 @@ export default function CollectionDetailModal({
 
   const handleShare = useCallback(async () => {
     if (!onShare || shareLoading) return;
-    
+
     setShareLoading(true);
     try {
       await onShare(collection.id);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
-    } catch (err) {
+    } catch {
       setError(t('load_failed'));
     } finally {
       setShareLoading(false);
@@ -148,115 +148,124 @@ export default function CollectionDetailModal({
 
   const handleDelete = useCallback(async () => {
     if (!onDelete || isDeleting) return;
-    
+
     setIsDeleting(true);
     try {
       await onDelete(collection.id);
-    } catch (err) {
+    } catch {
       setError(t('load_failed'));
       setIsDeleting(false);
     }
   }, [collection.id, onDelete, isDeleting, t]);
 
-  const handleRemoveCafe = useCallback(async (cafeId: string) => {
+  const handleRemoveEverywhere = useCallback(async () => {
+    if (!removeAllItem || isRemovingAll) return;
+
+    setIsRemovingAll(true);
     try {
-      await removeCafeFromCollection(collection.id, cafeId);
-      setDetail(prev => prev ? {
-        ...prev,
-        items: prev.items.filter(item => item.cafe_id !== cafeId),
-        item_count: prev.item_count - 1,
-      } : null);
-      onItemCountChange?.(collection.id, -1);
-    } catch (err) {
+      const removedFrom = await removeCafeFromAllCollections(removeAllItem.cafe_id);
+      setDetail((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items.filter((item) => item.cafe_id !== removeAllItem.cafe_id),
+              item_count: prev.item_count - 1,
+            }
+          : null,
+      );
+      removedFrom.forEach((id) => onItemCountChange?.(id, -1));
+      setRemoveAllItem(null);
+    } catch {
       setError(t('load_failed'));
+    } finally {
+      setIsRemovingAll(false);
     }
-  }, [collection.id, t, onItemCountChange]);
+  }, [removeAllItem, isRemovingAll, onItemCountChange, t]);
 
-  const getCollectionIcon = (iconType: string) => {
-    if (iconType === 'favourite') {
-      return <HeartIcon filled size={24} color="#ef4444" />;
-    }
-    if (iconType === 'save_later') {
-      return <BookmarkIcon filled size={24} color="#3b82f6" />;
-    }
-    return (
-      <div className="w-6 h-6 rounded-full bg-primary" />
+  const handleRemoveCafe = useCallback(
+    async (cafeId: string) => {
+      try {
+        await removeCafeFromCollection(collection.id, cafeId);
+        setDetail((prev) =>
+          prev
+            ? {
+                ...prev,
+                items: prev.items.filter((item) => item.cafe_id !== cafeId),
+                item_count: prev.item_count - 1,
+              }
+            : null,
+        );
+        onItemCountChange?.(collection.id, -1);
+      } catch {
+        setError(t('load_failed'));
+      }
+    },
+    [collection.id, t, onItemCountChange],
+  );
+
+  const collectionIcon =
+    collection.icon_type === 'favourite' ? (
+      <HeartIcon filled size={24} className="text-collection-favourite" />
+    ) : collection.icon_type === 'save_later' ? (
+      <BookmarkIcon filled size={24} className="text-collection-saved" />
+    ) : (
+      <span className="block h-6 w-6 rounded-(--radius-pill) bg-brand" />
     );
-  };
 
-  const getCollectionName = () => {
-    if (collection.icon_type === 'favourite') return t('favourite');
-    if (collection.icon_type === 'save_later') return t('save_later');
-    return collection.name;
-  };
+  const isSystemCollection =
+    collection.icon_type === 'favourite' || collection.icon_type === 'save_later';
 
-  const isSystemCollection = collection.icon_type === 'favourite' || collection.icon_type === 'save_later';
-
-  if (!isOpen) return null;
+  const collectionName = isSystemCollection ? t(collection.icon_type) : collection.name;
 
   return (
-    <div
-      className="fixed inset-0 z-1001 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-cardBackground rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="z-(--z-modal) rounded-(--radius-card) border-edge-rule bg-surface-raised p-6 sm:max-w-2xl"
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-surface text-cardText hover:bg-surface/80 transition"
-          aria-label="Close"
-        >
-          ✕
-        </button>
+        <div className="flex items-center gap-3 border-b border-edge-rule pb-4">
+          <span className="shrink-0">{collectionIcon}</span>
 
-        <div className="p-6 sm:p-8 min-h-[300px]">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
-          {getCollectionIcon(collection.icon_type)}
-          
           {isEditing && !isSystemCollection ? (
             <input
               type="text"
               value={editName}
-              onChange={e => setEditName(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-lg font-semibold border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
+              onChange={(e) => setEditName(e.target.value)}
+              className="h-(--input-height) flex-1 rounded-(--input-radius) border border-edge-default bg-surface-raised px-3 text-lg font-semibold text-ink-primary outline-none focus-visible:border-brand"
               autoFocus
             />
           ) : (
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-cardText">
-                {getCollectionName()}
-              </h2>
-              <p className="text-sm text-textSecondary">
+            <div className="min-w-0 flex-1">
+              {/* The name is data, so it takes the body face rather than the display serif. */}
+              <DialogTitle className="truncate font-sans text-lg font-semibold text-ink-primary">
+                {collectionName}
+              </DialogTitle>
+              <p className="landing-micro mt-1 text-ink-secondary">
                 {t('cafes', { count: detail?.item_count ?? collection.item_count ?? 0 })}
               </p>
             </div>
           )}
         </div>
-        
-        {/* Content */}
+
         {isLoading ? (
           <div className="flex justify-center py-8">
             <LoadingSpinner size="md" />
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
+          <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-primary">
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger"
+            />
+            {error}
+          </p>
         ) : detail?.items.length === 0 ? (
-          <div className="text-center py-8 text-textSecondary">
-            {t('no_collections')}
-          </div>
+          <p className="py-8 text-center text-sm text-ink-secondary">{t('empty_hint')}</p>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
-            {detail?.items.map(item => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-background group"
-              >
+          <div className="scrollbar-quiet max-h-[400px] space-y-1 overflow-y-auto">
+            {detail?.items.map((item) => (
+              <div key={item.id} className="menu-item group gap-3 py-2">
                 <div
-                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-3"
                   onClick={() => {
                     const path = getCafePath({ id: item.cafe_id, slug: item.cafe_slug }, locale);
                     if (onNavigateToCafe) {
@@ -266,165 +275,192 @@ export default function CollectionDetailModal({
                     }
                   }}
                 >
-                  {/* Cafe Image */}
-                  <div className="shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-background">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-(--radius-control) bg-surface-sunken">
                     {item.cafe_main_image ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.cafe_main_image}
                         alt={item.cafe_name}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xl">
-                        ☕
-                      </div>
+                      <span className="flex h-full w-full items-center justify-center text-ink-secondary">
+                        <Coffee className="h-5 w-5" />
+                      </span>
                     )}
                   </div>
 
-                  {/* Cafe Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-cardText truncate">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-sans text-base font-medium text-ink-primary">
                       {item.cafe_name}
                     </h3>
                     {item.cafe_address && (
-                      <p className="text-sm text-textSecondary truncate">
-                        {item.cafe_address}
-                      </p>
+                      <p className="truncate text-sm text-ink-secondary">{item.cafe_address}</p>
                     )}
                   </div>
                 </div>
-                
-                {/* More options dropdown */}
-                {isOwnProfile && (
-                  <div className="relative" ref={activeDropdownId === item.id ? dropdownRef : undefined}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveDropdownId(prev => prev === item.id ? null : item.id);
-                      }}
-                      className="p-1.5 text-textSecondary opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-surface rounded-sm transition-all"
-                      aria-label={t('more_options')}
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                      </svg>
-                    </button>
 
-                    {activeDropdownId === item.id && (
-                      <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-cardBackground border border-border rounded-lg shadow-lg overflow-hidden">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMoveModalItem(item);
-                            setActiveDropdownId(null);
-                          }}
-                          className="w-full px-3 py-2 text-sm text-left text-cardText hover:bg-background transition-colors"
-                        >
-                          {t('move_to')}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveCafe(item.cafe_id);
-                            setActiveDropdownId(null);
-                          }}
-                          className="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-background transition-colors"
-                        >
-                          {t('delete')}
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                {isOwnProfile && (
+                  <Menu.Root>
+                    <Menu.Trigger
+                      aria-label={t('more_options')}
+                      className="nav-pill flex h-11 w-11 shrink-0 items-center justify-center text-ink-secondary"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </Menu.Trigger>
+
+                    {/*
+                      Portalled to the body, and it has to be. The panel centres itself
+                      with a translate, and a transformed element becomes the containing
+                      block for `fixed` descendants -- a menu portalled into it is placed
+                      against the panel's own box and lands half a screen away from the
+                      row that opened it.
+                    */}
+                    <Menu.Portal>
+                      {/*
+                        Placed against the viewport rather than the row, because the row
+                        sits in that scroll box: an absolutely placed menu would be
+                        offset by the scroll and cut off at its edge.
+                      */}
+                      <Menu.Positioner
+                        side="bottom"
+                        align="end"
+                        sideOffset={4}
+                        positionMethod="fixed"
+                        collisionPadding={8}
+                        className="z-(--z-modal-popover)"
+                      >
+                        <Menu.Popup className="menu-panel min-w-40 motion-slide-up">
+                          <Menu.Item
+                            className="menu-item outline-hidden"
+                            onClick={() => setMoveModalItem(item)}
+                          >
+                            {t('move_to')}
+                          </Menu.Item>
+                          {/*
+                            Two removals, because they are two different sizes of action
+                            and one word was covering both. Taking the cafe out of this
+                            list leaves it saved everywhere else; taking the cafe out
+                            clears it from every collection at once, so that one asks
+                            first.
+                          */}
+                          <Menu.Item
+                            className="menu-item text-state-danger outline-hidden"
+                            onClick={() => handleRemoveCafe(item.cafe_id)}
+                          >
+                            {t('remove_from_collection')}
+                          </Menu.Item>
+                          <Menu.Item
+                            className="menu-item text-state-danger outline-hidden"
+                            onClick={() => setRemoveAllItem(item)}
+                          >
+                            {t('remove_everywhere')}
+                          </Menu.Item>
+                        </Menu.Popup>
+                      </Menu.Positioner>
+                    </Menu.Portal>
+                  </Menu.Root>
                 )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Actions */}
-        {isOwnProfile && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+        {removeAllItem && (
+          <div className="flex flex-wrap items-center gap-3 border-t border-edge-rule pt-4">
+            <p className="flex-1 text-sm text-ink-primary">
+              {t('remove_everywhere_confirm')}
+            </p>
+            {/*
+              A dot in the danger colour beside an ink label, not a red plate.
+              `variant="danger"` paints a 10% tint and sets the label in `--state-danger`
+              on top of it, which is the pairing this system measured at 2.4-3.5:1 and
+              ruled out: the state colour is emphasis, never the text colour.
+            */}
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<span aria-hidden="true" className="block h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger" />}
+              onClick={handleRemoveEverywhere}
+              disabled={isRemovingAll}
+            >
+              {isRemovingAll ? <LoadingSpinner size="sm" /> : t('remove_everywhere')}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setRemoveAllItem(null)}>
+              {t('cancel')}
+            </Button>
+          </div>
+        )}
+
+        {isOwnProfile && !removeAllItem && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-edge-rule pt-4">
             {isEditing ? (
               <>
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving || !editName.trim()}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
-                >
+                <Button size="sm" onClick={handleSave} disabled={isSaving || !editName.trim()}>
                   {isSaving ? <LoadingSpinner size="sm" /> : t('save')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setIsEditing(false);
                     setEditName(collection.name);
                   }}
-                  className="px-4 py-2 text-sm text-textSecondary hover:text-cardText"
                 >
                   {t('cancel')}
-                </button>
+                </Button>
+              </>
+            ) : showDeleteConfirm ? (
+              <>
+                <span className="text-sm text-ink-primary">{t('delete_confirm')}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<span aria-hidden="true" className="block h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger" />}
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? <LoadingSpinner size="sm" /> : t('delete')}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                  {t('cancel')}
+                </Button>
               </>
             ) : (
               <>
-                {/* Share */}
-                <button
-                  onClick={handleShare}
-                  disabled={shareLoading}
-                  className="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 disabled:opacity-50 transition-colors"
-                >
+                <Button variant="outline" size="sm" onClick={handleShare} disabled={shareLoading}>
                   {shareLoading ? (
                     <LoadingSpinner size="sm" />
                   ) : shareCopied ? (
-                    <>✓ {t('share_link_copied')}</>
+                    t('share_link_copied')
                   ) : (
                     t('share')
                   )}
-                </button>
-                
-                {/* Edit (custom collections only) */}
+                </Button>
+
                 {!isSystemCollection && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 text-sm font-medium text-textSecondary hover:text-cardText transition-colors"
-                  >
-                    {t('edit')}
-                  </button>
-                )}
-                
-                {/* Delete (custom collections only) */}
-                {!isSystemCollection && (
-                  showDeleteConfirm ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
-                      >
-                        {isDeleting ? <LoadingSpinner size="sm" /> : t('delete')}
-                      </button>
-                      <button
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="px-3 py-2 text-sm text-textSecondary"
-                      >
-                        {t('cancel')}
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
-                    >
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                      {t('edit')}
+                    </Button>
+                    {/*
+                      Plain, not danger-coloured: `control-flat` sets the label colour of
+                      every non-filled button, so a `text-` utility here loses to it, and
+                      the confirm step is what carries the weight anyway. The row menu's
+                      Remove is the exception on record -- `.menu-item` leaves its colour
+                      to the call site, which is how the log out row takes danger too.
+                    */}
+                    <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)}>
                       {t('delete')}
-                    </button>
-                  )
+                    </Button>
+                  </>
                 )}
               </>
             )}
           </div>
         )}
-        </div>
-      </div>
+      </DialogContent>
 
-      {/* Move to modal */}
       {moveModalItem && (
         <CafeMoveToModal
           isOpen={!!moveModalItem}
@@ -432,18 +468,23 @@ export default function CollectionDetailModal({
           cafeId={moveModalItem.cafe_id}
           cafeName={moveModalItem.cafe_name}
           currentCollectionId={collection.id}
+          onCollectionCreated={onCollectionCreated}
           onMoveComplete={(targetCollectionIds) => {
-            setDetail(prev => prev ? {
-              ...prev,
-              items: prev.items.filter(i => i.cafe_id !== moveModalItem.cafe_id),
-              item_count: prev.item_count - 1,
-            } : null);
+            setDetail((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    items: prev.items.filter((i) => i.cafe_id !== moveModalItem.cafe_id),
+                    item_count: prev.item_count - 1,
+                  }
+                : null,
+            );
             onItemCountChange?.(collection.id, -1);
-            targetCollectionIds.forEach(id => onItemCountChange?.(id, 1));
+            targetCollectionIds.forEach((id) => onItemCountChange?.(id, 1));
             setMoveModalItem(null);
           }}
         />
       )}
-    </div>
+    </Dialog>
   );
 }

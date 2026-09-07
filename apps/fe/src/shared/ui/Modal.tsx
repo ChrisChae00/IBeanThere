@@ -38,7 +38,8 @@ export interface ModalProps {
   align?: ModalAlign;
   children: ReactNode;
   closeButton?: boolean;
-  zIndex?: number;
+  /** A number, or a token reference for a caller that stacks against the named bands. */
+  zIndex?: number | string;
 }
 
 const sizeClasses: Record<ModalSize, string> = {

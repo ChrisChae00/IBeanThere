@@ -184,8 +184,7 @@ export default function SaveButtons({
       >
         <HeartIcon 
           filled={isFavourited} 
-          size={iconSize}
-          color={isFavourited ? '#ef4444' : undefined}
+          size={iconSize} className={isFavourited ? "text-collection-favourite" : undefined}
         />
       </button>
 
@@ -203,8 +202,7 @@ export default function SaveButtons({
       >
         <BookmarkIcon 
           filled={isSaved} 
-          size={iconSize}
-          color={isSaved ? '#3b82f6' : undefined}
+          size={iconSize} className={isSaved ? "text-collection-saved" : undefined}
         />
       </button>
 

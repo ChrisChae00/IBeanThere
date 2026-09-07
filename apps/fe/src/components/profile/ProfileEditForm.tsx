@@ -5,12 +5,18 @@ import { useTranslations } from 'next-intl';
 import { UserResponse, TasteTag } from '@/types/api';
 import { createClient } from '@/shared/lib/supabase/client';
 import { uploadAvatar, validateImageFile } from '@/shared/lib/supabase/storage';
+import { updateCurrentUser } from '@/lib/api/users';
 import { AvatarUpload, Button, Input } from '@/shared/ui';
 import TasteTagSelector from './TasteTagSelector';
 
 interface ProfileEditFormProps {
   profile: UserResponse;
-  onSave: () => void;
+  /*
+    Handed the saved record, not a signal to go and fetch it. The page can put this
+    straight into state: one round trip instead of two, and no window in between where
+    the profile it is rendering is the old one or none at all.
+  */
+  onSave: (saved: UserResponse) => void;
   onCancel: () => void;
 }
 
@@ -20,6 +26,7 @@ export default function ProfileEditForm({
   onCancel,
 }: ProfileEditFormProps) {
   const t = useTranslations('profile');
+  const tErrors = useTranslations('errors');
   
   // Form state
   const [displayName, setDisplayName] = useState(profile.display_name || '');
@@ -57,7 +64,7 @@ export default function ProfileEditForm({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        setError('Please sign in to update your profile');
+        setError(tErrors('not_authenticated'));
         return;
       }
       
@@ -78,32 +85,17 @@ export default function ProfileEditForm({
         }
       }
       
-      // Update profile via API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            display_name: displayName,
-            bio: bio || null,
-            avatar_url: newAvatarUrl,
-            taste_tags: tasteTags,
-          }),
-        }
-      );
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Failed to update profile');
-      }
-      
-      onSave();
+      const saved = await updateCurrentUser({
+        display_name: displayName,
+        bio: bio || null,
+        avatar_url: newAvatarUrl,
+        taste_tags: tasteTags,
+      });
+
+      onSave(saved);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Profile update failed:', err);
+      setError(tErrors('unknown'));
     } finally {
       setIsSaving(false);
     }
@@ -128,7 +120,7 @@ export default function ProfileEditForm({
       <div>
         <label 
           htmlFor="display_name"
-          className="block text-sm font-medium text-text mb-1"
+          className="mb-1 block text-sm font-medium text-ink-primary"
         >
           {t('display_name_label')}
         </label>
@@ -146,7 +138,7 @@ export default function ProfileEditForm({
       <div>
         <label 
           htmlFor="bio"
-          className="block text-sm font-medium text-text mb-1"
+          className="mb-1 block text-sm font-medium text-ink-primary"
         >
           {t('bio_label')}
         </label>
@@ -173,9 +165,15 @@ export default function ProfileEditForm({
       
       {/* Error Message */}
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
+        /*
+          A failure is a sentence in the page's own ink with a danger dot beside it, not
+          a red plate: a state colour over its own tint measures 2.4-3.5:1 in three of
+          the four themes, and `red-50` did not follow the theme at all.
+        */
+        <p className="flex items-center gap-2 text-sm text-ink-primary">
+          <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-(--radius-pill) bg-state-danger" />
+          {error}
+        </p>
       )}
       
       {/* Actions */}
@@ -197,7 +195,7 @@ export default function ProfileEditForm({
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              <span className="h-4 w-4 animate-spin rounded-(--radius-pill) border-2 border-current border-t-transparent" />
               {t('saving')}
             </span>
           ) : (

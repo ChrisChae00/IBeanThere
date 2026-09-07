@@ -3,19 +3,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/shared/lib/supabase/client';
-import { UserPublicResponse, TrustedUser, Collection } from '@/types/api';
-import { Avatar } from '@/shared/ui';
-import { AchievementBadge } from '@/shared/ui';
-import { TasteTag } from '@/shared/ui';
-import { Button } from '@/shared/ui';
-import { HeartIcon, BookmarkIcon } from '@/shared/ui';
-import { UserPlus, Check, ArrowLeft } from 'lucide-react';
+import { UserPublicResponse, Collection } from '@/types/api';
+import { Button, LoadingSpinner, HeartIcon, BookmarkIcon } from '@/shared/ui';
+import { UserPlus, Check, ArrowLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/contexts/ToastContext';
 import { ReportButton, ReportModal, useReportModal } from '@/features/report';
 import { getUserPublicCollections } from '@/lib/api/collections';
+import { getPublicProfile, getTasteMates, setTrust } from '@/lib/api/users';
+import ProfileHeader from './ProfileHeader';
 import CollectionDetailModal from './CollectionDetailModal';
-
 
 interface PublicProfileClientProps {
   username: string;
@@ -26,8 +23,10 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   const tCommunity = useTranslations('community');
   const tReport = useTranslations('report');
   const tCollections = useTranslations('collections');
+  const tErrors = useTranslations('errors');
   const { user: currentUser } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
   const { modalState, openUserReport, closeModal } = useReportModal();
 
   const [profile, setProfile] = useState<UserPublicResponse | null>(null);
@@ -35,21 +34,11 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   const [isTrusted, setIsTrusted] = useState(false);
   const [trustLoading, setTrustLoading] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [collectionsLoading, setCollectionsLoading] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
-
-  const supabase = createClient();
 
   const fetchProfile = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/profile-by-username/${username}`);
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data);
-      } else {
-        // Handle 404 or other errors
-        console.error('Failed to fetch profile');
-      }
+      setProfile(await getPublicProfile(username));
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -61,29 +50,12 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
     if (!currentUser) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Fetch my taste mates to see if this user is among them
-      // Optimization: Could have a specific "is-trusted" endpoint, but reusing list is okay for now
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/taste-mates`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const mates: TrustedUser[] = await response.json();
-        const isFollowing = mates.some(m => m.username === username);
-        setIsTrusted(isFollowing);
-      }
+      const mates = await getTasteMates();
+      setIsTrusted(mates.some((m) => m.username === username));
     } catch (error) {
       console.error('Error checking trust status:', error);
     }
-  }, [currentUser, username, supabase]);
+  }, [currentUser, username]);
 
   useEffect(() => {
     fetchProfile();
@@ -95,19 +67,14 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
     }
   }, [profile, currentUser, checkTrustStatus]);
 
-  // Fetch public collections
   useEffect(() => {
     if (!profile || !profile.collections_public) return;
 
     const fetchCollections = async () => {
-      setCollectionsLoading(true);
       try {
-        const data = await getUserPublicCollections(username);
-        setCollections(data);
+        setCollections(await getUserPublicCollections(username));
       } catch {
         // Silently fail
-      } finally {
-        setCollectionsLoading(false);
       }
     };
 
@@ -122,56 +89,42 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
 
     setTrustLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const method = isTrusted ? 'DELETE' : 'POST';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${username}/trust`,
-        {
-          method,
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
+      await setTrust(username, !isTrusted);
+      setIsTrusted(!isTrusted);
+      setProfile((prev) =>
+        prev ? { ...prev, trust_count: (prev.trust_count || 0) + (isTrusted ? -1 : 1) } : null,
       );
-
-      if (response.ok) {
-        setIsTrusted(!isTrusted);
-        // Update trust count locally (optimistic update)
-        if (profile) {
-            setProfile(prev => prev ? {
-                ...prev,
-                trust_count: (prev.trust_count || 0) + (isTrusted ? -1 : 1)
-            } : null);
-        }
-      } else {
-        const errorData = await response.json();
-        alert(errorData.detail || 'Failed to update trust');
-      }
     } catch (error) {
+      /*
+        A toast, not `alert()`: a browser dialog blocks the page until it is dismissed,
+        and the message it carried was an untranslated English string straight out of
+        the API response.
+      */
       console.error('Trust action failed:', error);
+      showToast(tErrors('unknown'), 'error');
     } finally {
       setTrustLoading(false);
     }
   };
 
   if (loading) {
-     return (
-       <div className="flex justify-center items-center min-h-[400px]">
-         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-       </div>
-     );
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
   if (!profile) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-            <h2 className="text-xl font-bold mb-2">{tCommunity('no_users_found')}</h2>
-            <Button onClick={() => router.back()} variant="outline">
-                {t('go_back')}
-            </Button>
-        </div>
+      <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
+        <h2 className="mb-2 text-xl font-bold text-ink-primary">
+          {tCommunity('no_users_found')}
+        </h2>
+        <Button onClick={() => router.back()} variant="outline">
+          {t('go_back')}
+        </Button>
+      </div>
     );
   }
 
@@ -179,172 +132,111 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
 
   return (
     <div className="space-y-6">
-        {/* Back Button */}
-        <button 
-            onClick={() => router.back()} 
-            className="flex items-center text-sm text-ink-secondary hover:text-primary transition-colors mb-4"
-        >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            {t('back')}
-        </button>
+      <button
+        onClick={() => router.back()}
+        className="mb-4 flex items-center text-sm text-ink-secondary transition-colors hover:text-ink-primary"
+      >
+        <ArrowLeft className="mr-1 h-4 w-4" />
+        {t('back')}
+      </button>
 
-      {/* Profile Header */}
-      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs relative">
-        <div className="flex flex-col md:flex-row items-start gap-6">
-          {/* Avatar */}
-          <div className="shrink-0">
-            <Avatar 
-              src={profile.avatar_url} 
-              alt={profile.display_name} 
-              size="inherit"
-              className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-md"
-            />
-          </div>
-          
-          {/* Profile Info */}
-          <div className="flex-1 space-y-3 w-full">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-2xl md:text-3xl font-bold text-text">
-                        {profile.display_name}
-                    </h1>
-                    
-                    {/* Badges */}
-                    <div className="flex items-center gap-2">
-                        <AchievementBadge 
-                        type="navigator" 
-                        count={profile.founding_stats?.navigator_count || 0} 
-                        size="sm"
-                        />
-                        <AchievementBadge
-                        type="scout"
-                        count={profile.founding_stats?.vanguard_count || 0}
-                        size="sm"
-                        />
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                {!isMe && (
-                    <div className="flex items-center gap-2">
-                        <ReportButton
-                            onClick={() => profile && openUserReport(profile.username, username)}
-                            size="md"
-                            label={tReport('report_user')}
-                        />
-                        <Button
-                            variant={isTrusted ? "outline" : "primary"}
-                            size="md"
-                            onClick={handleTrust}
-                            loading={trustLoading}
-                            leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
-                            className={isTrusted ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100 hover:text-green-700" : ""}
-                        >
-                            {isTrusted ? tCommunity('following') : tCommunity('follow')}
-                        </Button>
-                    </div>
-                )}
+      <ProfileHeader
+        avatarUrl={profile.avatar_url}
+        displayName={profile.display_name}
+        username={profile.username}
+        bio={profile.bio}
+        tasteTags={profile.taste_tags}
+        navigatorCount={profile.founding_stats?.navigator_count || 0}
+        vanguardCount={profile.founding_stats?.vanguard_count || 0}
+        trustCount={profile.trust_count ?? 0}
+        createdAt={profile.created_at}
+        actions={
+          !isMe && (
+            <div className="flex items-center gap-2">
+              <ReportButton
+                onClick={() => openUserReport(profile.username, username)}
+                size="md"
+                label={tReport('report_user')}
+              />
+              {/*
+                Trusting is this page's one primary action, so it takes the fill and
+                gives it up once it is done -- the state is the fill, not a green wash
+                out of the raw Tailwind palette, which did not move with the theme.
+              */}
+              <Button
+                variant={isTrusted ? 'outline' : 'primary'}
+                size="md"
+                onClick={handleTrust}
+                loading={trustLoading}
+                leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
+              >
+                {isTrusted ? tCommunity('following') : tCommunity('follow')}
+              </Button>
             </div>
-            
-            {/* Username */}
-            <p className="text-ink-secondary font-medium">
-              @{profile.username}
-            </p>
-            
-            {/* Bio */}
-            {profile.bio && (
-              <p className="text-ink-secondary max-w-2xl leading-relaxed">
-                {profile.bio}
-              </p>
-            )}
-            
-            {/* Taste Tags */}
-            {profile.taste_tags && profile.taste_tags.length > 0 && (
-              <div className="pt-1">
-                <div className="flex flex-wrap gap-2">
-                  {profile.taste_tags.map((tag) => (
-                    <TasteTag 
-                      key={tag} 
-                      tag={tag as any} 
-                      size="sm"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Trust Count & Member Since */}
-            <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
-              {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-ink-secondary">
-                  <span className="font-semibold text-primary">
-                    {profile.trust_count}
-                  </span>
-                  {' '}{t('trust_count', { count: profile.trust_count || 0 }).replace(String(profile.trust_count || 0), '').trim()}
-                </span>
-              )}
-              
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+          )
+        }
+      />
 
-      {/* Public Collections */}
       {profile.collections_public && collections.length > 0 && (
-        <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border shadow-xs">
-          <h2 className="text-lg font-semibold text-text mb-4">
+        <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4 sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold text-ink-primary">
             {t('public_collections')}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[...collections].sort((a, b) => {
-              if (a.icon_type === 'favourite') return -1;
-              if (b.icon_type === 'favourite') return 1;
-              if (a.icon_type === 'save_later') return -1;
-              if (b.icon_type === 'save_later') return 1;
-              return a.position - b.position;
-            }).map(collection => (
-              <button
-                key={collection.id}
-                onClick={() => setSelectedCollection(collection)}
-                className="flex items-center gap-3 p-3 bg-background rounded-lg hover:bg-cardBackground transition-colors text-left group"
-              >
-                <div className="shrink-0">
-                  {collection.icon_type === 'favourite' ? (
-                    <HeartIcon filled size={20} color="#ef4444" />
-                  ) : collection.icon_type === 'save_later' ? (
-                    <BookmarkIcon filled size={20} color="#3b82f6" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-primary" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium text-text truncate block">
-                    {collection.icon_type === 'favourite' ? tCollections('favourite')
-                      : collection.icon_type === 'save_later' ? tCollections('save_later')
-                      : collection.name}
-                  </span>
-                  <span className="text-sm text-ink-secondary">
-                    {tCollections('cafes', { count: collection.item_count || 0 })}
-                  </span>
-                </div>
-                <svg
-                  className="w-4 h-4 text-ink-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[...collections]
+              .sort((a, b) => {
+                if (a.icon_type === 'favourite') return -1;
+                if (b.icon_type === 'favourite') return 1;
+                if (a.icon_type === 'save_later') return -1;
+                if (b.icon_type === 'save_later') return 1;
+                return a.position - b.position;
+              })
+              .map((collection) => (
+                <button
+                  key={collection.id}
+                  onClick={() => setSelectedCollection(collection)}
+                  className="menu-item group flex items-center gap-3 px-3 py-3 text-left"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            ))}
+                  <span className="shrink-0">
+                    {collection.icon_type === 'favourite' ? (
+                      <HeartIcon filled size={20} className="text-collection-favourite" />
+                    ) : collection.icon_type === 'save_later' ? (
+                      <BookmarkIcon filled size={20} className="text-collection-saved" />
+                    ) : (
+                      <span className="block h-5 w-5 rounded-(--radius-pill) bg-brand" />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-ink-primary">
+                      {collection.icon_type === 'favourite'
+                        ? tCollections('favourite')
+                        : collection.icon_type === 'save_later'
+                          ? tCollections('save_later')
+                          : collection.name}
+                    </span>
+                    <span className="text-sm text-ink-secondary">
+                      {tCollections('cafes', { count: collection.item_count || 0 })}
+                    </span>
+                  </span>
+                  <ChevronRight className="menu-mark h-4 w-4 shrink-0" />
+                </button>
+              ))}
           </div>
         </div>
       )}
 
-      {/* Collection Detail Modal */}
+      {/*
+        The report modal itself, which was imported and never rendered: pressing Report
+        opened the hook's state and nothing on screen.
+      */}
+      <ReportModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        targetType={modalState.targetType}
+        targetId={modalState.targetId}
+        targetUrl={modalState.targetUrl}
+      />
+
       {selectedCollection && (
         <CollectionDetailModal
           collection={selectedCollection}

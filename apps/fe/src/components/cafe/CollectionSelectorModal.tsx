@@ -190,10 +190,10 @@ export default function CollectionSelectorModal({
 
   const getCollectionIcon = (iconType: string, isSelected: boolean) => {
     if (iconType === 'favourite') {
-      return <HeartIcon filled={isSelected} size={20} color={isSelected ? '#ef4444' : undefined} />;
+      return <HeartIcon filled={isSelected} size={20} className={isSelected ? "text-collection-favourite" : undefined} />;
     }
     if (iconType === 'save_later') {
-      return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
+      return <BookmarkIcon filled={isSelected} size={20} className={isSelected ? "text-collection-saved" : undefined} />;
     }
     return (
       <div className={`w-5 h-5 rounded-full bg-brand ${

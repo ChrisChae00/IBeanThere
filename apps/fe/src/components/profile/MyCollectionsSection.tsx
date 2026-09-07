@@ -110,10 +110,10 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   const getCollectionIcon = (iconType: string) => {
     if (iconType === 'favourite') {
-      return <HeartIcon filled size={20} color="#ef4444" />;
+      return <HeartIcon filled size={20} className="text-collection-favourite" />;
     }
     if (iconType === 'save_later') {
-      return <BookmarkIcon filled size={20} color="#3b82f6" />;
+      return <BookmarkIcon filled size={20} className="text-collection-saved" />;
     }
     // Custom collection - primary color circle
     return (
@@ -260,6 +260,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
           onNavigateToCafe={handleNavigateToCafe}
           isOwnProfile={isOwnProfile}
           onItemCountChange={handleItemCountChange}
+          onCollectionCreated={(created) => setCollections(prev => [...prev, created])}
         />
       )}
 

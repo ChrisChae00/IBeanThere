@@ -39,10 +39,10 @@ export default function SharedCollectionPage() {
 
   const getCollectionIcon = (iconType: string) => {
     if (iconType === 'favourite') {
-      return <HeartIcon filled size={28} color="#ef4444" />;
+      return <HeartIcon filled size={28} className="text-collection-favourite" />;
     }
     if (iconType === 'save_later') {
-      return <BookmarkIcon filled size={28} color="#3b82f6" />;
+      return <BookmarkIcon filled size={28} className="text-collection-saved" />;
     }
     return (
       <div className="w-7 h-7 rounded-full bg-primary" />
@@ -145,7 +145,7 @@ export default function SharedCollectionPage() {
               
               {/* Cafe Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-cardText truncate">
+                <h3 className="truncate font-sans text-base font-medium text-ink-primary">
                   {item.cafe_name}
                 </h3>
                 {item.cafe_address && (

@@ -3,14 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/shared/lib/supabase/client';
-import { UserResponse, TasteTag as TasteTagType } from '@/types/api';
-import { Avatar } from '@/shared/ui';
-import { AchievementBadge } from '@/shared/ui';
-import { TasteTag } from '@/shared/ui';
-import { Button } from '@/shared/ui';
-import { EditIcon } from '@/shared/ui';
-import ProfileEditForm from './ProfileEditForm';
+import { UserResponse } from '@/types/api';
+import { Button, EditIcon, LoadingSpinner } from '@/shared/ui';
+import { getCurrentUser } from '@/lib/api/users';
+import ProfileEditModal from './ProfileEditModal';
+import ProfileHeader from './ProfileHeader';
 import MyCollectionsSection from './MyCollectionsSection';
 import { updateCollectionsPublic } from '@/lib/api/collections';
 
@@ -23,23 +20,9 @@ export default function ProfileClient() {
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
-    
+
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) return;
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data);
-      }
+      setProfile(await getCurrentUser());
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -51,16 +34,23 @@ export default function ProfileClient() {
     fetchProfile();
   }, [fetchProfile]);
 
-  const handleSave = async () => {
-    setIsEditing(false);
-    setLoading(true);
-    await fetchProfile();
-  };
+  /*
+    The saved record comes back from the form, so it goes straight into state. Editing
+    used to replace the whole page with the form and then, on save, throw the profile
+    away and fetch it again behind a spinner -- two round trips and a page that blinked
+    for a change the browser had already been told about.
+
+    Merged onto what is already there rather than swapped for it: the update endpoint
+    answers with the fields it writes, and the badges are counted elsewhere. Replacing
+    outright made the navigator badge vanish on save until the next page load.
+  */
+  const handleSave = (saved: UserResponse) =>
+    setProfile((prev) => (prev ? { ...prev, ...saved } : saved));
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -69,33 +59,19 @@ export default function ProfileClient() {
     return null;
   }
 
-  const navigatorCount = profile.founding_stats?.navigator_count || 0;
-  const vanguardCount = profile.founding_stats?.vanguard_count || 0;
-  const tasteTags = profile.taste_tags || [];
-
-  // Edit Mode
-  if (isEditing) {
-    return (
-      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs">
-        <h2 className="text-xl font-bold text-text mb-6">
-          {t('edit_profile')}
-        </h2>
-        <ProfileEditForm
-          profile={profile}
-          onSave={handleSave}
-          onCancel={() => setIsEditing(false)}
-        />
-      </div>
-    );
-  }
-
-  // View Mode
   return (
     <div className="space-y-6">
-      {/* Profile Header - Compact Design */}
-      <div className="bg-surface rounded-xl p-6 border border-border shadow-xs relative">
-        {/* Edit Button - Top Right (Desktop) */}
-        <div className="absolute top-4 right-4 hidden md:block">
+      <ProfileHeader
+        avatarUrl={profile.avatar_url}
+        displayName={profile.display_name}
+        username={profile.username}
+        bio={profile.bio}
+        tasteTags={profile.taste_tags}
+        navigatorCount={profile.founding_stats?.navigator_count || 0}
+        vanguardCount={profile.founding_stats?.vanguard_count || 0}
+        trustCount={profile.trust_count ?? 0}
+        createdAt={profile.created_at}
+        actions={
           <Button
             variant="secondary"
             size="sm"
@@ -104,112 +80,31 @@ export default function ProfileClient() {
           >
             {t('edit_profile')}
           </Button>
-        </div>
+        }
+      />
 
-        <div className="flex flex-col md:flex-row items-start gap-6">
-          {/* Avatar */}
-          <div className="shrink-0">
-            <Avatar 
-              src={profile.avatar_url} 
-              alt={profile.display_name} 
-              size="inherit"
-              className="w-24 h-24 md:w-28 md:h-28 border-4 border-background shadow-md"
-            />
-          </div>
-          
-          {/* Profile Info */}
-          <div className="flex-1 space-y-3 w-full">
-            {/* Name + Badges Row */}
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold text-text">
-                {profile.display_name}
-              </h1>
-              
-              {/* GitHub-style Achievement Badges */}
-              <div className="flex items-center gap-2">
-                <AchievementBadge 
-                  type="navigator" 
-                  count={navigatorCount} 
-                  size="sm"
-                />
-                <AchievementBadge
-                  type="scout"
-                  count={vanguardCount}
-                  size="sm"
-                />
-              </div>
-            </div>
-            
-            {/* Username */}
-            <p className="text-ink-secondary font-medium">
-              @{profile.username}
-            </p>
-            
-            {/* Bio */}
-            {profile.bio && (
-              <p className="text-ink-secondary max-w-2xl leading-relaxed">
-                {profile.bio}
-              </p>
-            )}
-            
-            {/* Taste Tags */}
-            {tasteTags.length > 0 && (
-              <div className="pt-1">
-                <div className="flex flex-wrap gap-2">
-                  {tasteTags.map((tag: TasteTagType) => (
-                    <TasteTag 
-                      key={tag} 
-                      tag={tag} 
-                      size="sm"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Trust Count & Member Since */}
-            <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
-              {(profile.trust_count ?? 0) > 0 && (
-                <span className="text-ink-secondary">
-                  <span className="font-semibold text-primary">
-                    {profile.trust_count}
-                  </span>
-                  {' '}{t('trust_count', { count: profile.trust_count || 0 }).replace(String(profile.trust_count || 0), '').trim()}
-                </span>
-              )}
-              
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                {t('member_since', { date: new Date(profile.created_at).toISOString().split('T')[0] })}
-              </span>
-            </div>
+      {/*
+        The form is the dialog primitive, not a second page. Swapping the page out for
+        it lost the profile behind it, made the browser's back button mean nothing, and
+        managed no focus at all; the modal keeps what is being edited in view and brings
+        Escape, the focus trap and focus restore with it.
+      */}
+      <ProfileEditModal
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        profile={profile}
+        onSave={handleSave}
+      />
 
-            {/* Edit Button - Mobile Only */}
-            <div className="pt-5 md:hidden w-full">
-              <Button
-                variant="secondary"
-                size="md"
-                fullWidth
-                onClick={() => setIsEditing(true)}
-                leftIcon={<EditIcon size={18} />}
-                className="bg-surface border-border shadow-xs active:scale-[0.98]"
-              >
-                {t('edit_profile')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* My Collections */}
       <MyCollectionsSection
         isOwnProfile={true}
         collectionsPublic={profile.collections_public ?? false}
         onToggleCollectionsPublic={async (isPublic) => {
-          setProfile(prev => prev ? { ...prev, collections_public: isPublic } : null);
+          setProfile((prev) => (prev ? { ...prev, collections_public: isPublic } : null));
           try {
             await updateCollectionsPublic(isPublic);
           } catch {
-            setProfile(prev => prev ? { ...prev, collections_public: !isPublic } : null);
+            setProfile((prev) => (prev ? { ...prev, collections_public: !isPublic } : null));
           }
         }}
       />

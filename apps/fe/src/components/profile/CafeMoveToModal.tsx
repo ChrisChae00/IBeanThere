@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Modal, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Check, Plus } from 'lucide-react';
+import { Button, Modal, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
 import {
   getMyCollections,
   addCafeToCollection,
@@ -19,6 +20,13 @@ interface CafeMoveToModalProps {
   cafeName: string;
   currentCollectionId: string;
   onMoveComplete: (targetCollectionIds: string[]) => void;
+  /*
+    A collection made here is made for real, so it has to be handed back to whoever owns
+    the list of them. Without this it lived only in this modal's own state and was gone
+    the moment the modal closed -- the collection existed on the server and the profile
+    did not show it until the page was loaded again.
+  */
+  onCollectionCreated?: (collection: Collection) => void;
 }
 
 export default function CafeMoveToModal({
@@ -28,6 +36,7 @@ export default function CafeMoveToModal({
   cafeName,
   currentCollectionId,
   onMoveComplete,
+  onCollectionCreated,
 }: CafeMoveToModalProps) {
   const t = useTranslations('collections');
 
@@ -119,6 +128,7 @@ export default function CafeMoveToModal({
       });
       setCollections(prev => [...prev, newCollection]);
       setSelectedIds(prev => new Set([...prev, newCollection.id]));
+      onCollectionCreated?.(newCollection);
       setNewCollectionName('');
       setShowNewForm(false);
     } catch {
@@ -126,17 +136,19 @@ export default function CafeMoveToModal({
     } finally {
       setIsCreating(false);
     }
-  }, [newCollectionName, isCreating, t]);
+  }, [newCollectionName, isCreating, onCollectionCreated, t]);
 
   const getCollectionIcon = (iconType: string, isSelected: boolean) => {
     if (iconType === 'favourite') {
-      return <HeartIcon filled={isSelected} size={20} color={isSelected ? '#ef4444' : undefined} />;
+      return <HeartIcon filled={isSelected} size={20} className={isSelected ? "text-collection-favourite" : undefined} />;
     }
     if (iconType === 'save_later') {
-      return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
+      return <BookmarkIcon filled={isSelected} size={20} className={isSelected ? "text-collection-saved" : undefined} />;
     }
     return (
-      <div className={`w-5 h-5 rounded-full bg-primary ${isSelected ? '' : 'opacity-40'}`} />
+      <span
+        className={`block h-5 w-5 rounded-(--radius-pill) bg-brand ${isSelected ? '' : 'opacity-40'}`}
+      />
     );
   };
 
@@ -153,20 +165,23 @@ export default function CafeMoveToModal({
 
   const footer = (
     <div className="flex justify-end">
-      <button
-        onClick={handleMove}
-        disabled={selectedIds.size === 0 || isMoving}
-        className="px-5 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
-      >
+      <Button size="sm" onClick={handleMove} disabled={selectedIds.size === 0 || isMoving}>
         {isMoving ? <LoadingSpinner size="sm" /> : t('move')}
-      </button>
+      </Button>
     </div>
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('move_to')} size="sm" footer={footer} zIndex={1002}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('move_to')}
+      size="sm"
+      footer={footer}
+      zIndex="var(--z-modal-nested)"
+    >
       <div className="min-h-[200px]">
-        <p className="text-sm text-textSecondary mb-4 truncate">
+        <p className="mb-4 truncate text-sm text-ink-secondary">
           {cafeName}
         </p>
 
@@ -175,9 +190,12 @@ export default function CafeMoveToModal({
             <LoadingSpinner size="md" />
           </div>
         ) : error ? (
-          <div className="text-center py-4 text-red-500 text-sm">{error}</div>
+          <p className="flex items-center justify-center gap-2 py-4 text-sm text-ink-primary">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger" />
+            {error}
+          </p>
         ) : (
-          <div className="space-y-1 max-h-[300px] overflow-y-auto">
+          <div className="scrollbar-quiet max-h-[300px] space-y-1 overflow-y-auto">
             {sortedCollections.map(collection => {
               const alreadySaved = savedCollectionIds.has(collection.id);
               const isSelected = selectedIds.has(collection.id) || alreadySaved;
@@ -188,50 +206,32 @@ export default function CafeMoveToModal({
                   key={collection.id}
                   onClick={() => !alreadySaved && handleToggle(collection.id)}
                   disabled={alreadySaved}
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left
-                    transition-colors duration-150
-                    ${isSelected
-                      ? 'bg-primary/10'
-                      : 'hover:bg-background'
-                    }
-                    ${alreadySaved ? 'opacity-50 cursor-not-allowed' : ''}
-                  `}
+                  className={`menu-item py-2.5 ${isSelected ? 'is-active' : ''} ${
+                    alreadySaved ? 'cursor-not-allowed opacity-50' : ''
+                  }`}
                 >
-                  {/* Checkbox */}
-                  <div className={`
-                    w-5 h-5 rounded border-2 flex items-center justify-center shrink-0
-                    transition-colors duration-150
-                    ${isSelected
-                      ? 'bg-primary border-primary'
-                      : 'border-gray-300'
-                    }
-                  `}>
-                    {isSelected && (
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                      </svg>
-                    )}
-                  </div>
-
-                  {/* Icon */}
                   {getCollectionIcon(collection.icon_type, isSelected)}
 
-                  {/* Name */}
-                  <span className="flex-1 truncate text-cardText">
+                  <span className="flex-1 truncate font-sans text-ink-primary">
                     {isSystemCollection ? t(collection.icon_type) : collection.name}
                   </span>
 
-                  {/* Item count */}
-                  <span className="text-xs text-textSecondary">
-                    {collection.item_count}
-                  </span>
+                  <span className="landing-micro text-ink-secondary">{collection.item_count}</span>
+
+                  {/*
+                    A chosen row is `.is-active` and carries a check at its far end -- the
+                    same mark every menu in the app uses for the row you are on. The box
+                    this replaces was drawn with `--radius-control`, which on a 20px square
+                    is a full circle: it read as a radio button in a list that takes more
+                    than one answer.
+                  */}
+                  {isSelected && <Check className="menu-mark" />}
                 </button>
               );
             })}
 
             {sortedCollections.length > 0 && (
-              <div className="h-px bg-border my-2" />
+              <div className="my-2 h-px bg-edge-rule" />
             )}
 
             {/* New collection form */}
@@ -242,7 +242,7 @@ export default function CafeMoveToModal({
                   value={newCollectionName}
                   onChange={e => setNewCollectionName(e.target.value)}
                   placeholder={t('collection_name_placeholder')}
-                  className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
+                  className="h-11 flex-1 rounded-(--input-radius) border border-edge-default bg-surface-raised px-3 text-sm text-ink-primary outline-none focus-visible:border-brand"
                   autoFocus
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleCreateCollection();
@@ -252,29 +252,27 @@ export default function CafeMoveToModal({
                     }
                   }}
                 />
-                <button
+                <Button
+                  size="sm"
                   onClick={handleCreateCollection}
                   disabled={!newCollectionName.trim() || isCreating}
-                  className="px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
                 >
                   {isCreating ? <LoadingSpinner size="sm" /> : t('create')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setShowNewForm(false);
                     setNewCollectionName('');
                   }}
-                  className="px-3 py-2 text-sm text-textSecondary hover:text-cardText"
                 >
                   {t('cancel')}
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
-                onClick={() => setShowNewForm(true)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-primary hover:bg-primary/10 transition-colors"
-              >
-                <span className="w-5 h-5 flex items-center justify-center text-lg">+</span>
+              <button onClick={() => setShowNewForm(true)} className="menu-item py-2.5">
+                <Plus className="menu-mark" />
                 <span>{t('create_new')}</span>
               </button>
             )}

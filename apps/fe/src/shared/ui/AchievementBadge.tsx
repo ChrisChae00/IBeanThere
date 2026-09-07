@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Compass, ShieldCheck } from 'lucide-react';
 import Tooltip from './Tooltip';
 
 export interface AchievementBadgeProps {
@@ -10,59 +11,54 @@ export interface AchievementBadgeProps {
   showTooltip?: boolean;
 }
 
-const badgeConfig = {
-  navigator: {
-    icon: '🧭',
-    color: 'var(--color-primary)',
-    bgColor: 'var(--color-primary)',
-  },
-  scout: {
-    icon: '🛡️',
-    color: 'var(--color-accent)',
-    bgColor: 'var(--color-accent)',
-  },
-};
+/*
+  What someone was first to find, and what they helped verify.
+
+  This was two emoji (🧭 🛡️) in a 15% wash of the brand with a 30% border, written as
+  an inline `style`, and it grew on hover. All four are things the design language names
+  outright: an emoji standing in for an icon, a tint standing in for a state, an inline
+  colour that cannot follow the theme, and depth or movement carrying what the fill
+  should. It is a count beside a name, so it is what every other count in the app is --
+  a micro-label with a lucide mark, unpainted. The number is the claim; a plate around
+  it only competes with the name it sits next to.
+*/
+const marks = {
+  navigator: Compass,
+  scout: ShieldCheck,
+} as const;
 
 const sizeClasses = {
-  sm: 'text-xs px-1.5 py-0.5 gap-0.5',
-  md: 'text-sm px-2 py-1 gap-1',
-};
+  sm: 'gap-1 text-[0.625rem]',
+  md: 'gap-1.5 text-[0.6875rem]',
+} as const;
 
-export default function AchievementBadge({ 
-  type, 
-  count, 
+const markSize = { sm: 13, md: 15 } as const;
+
+export default function AchievementBadge({
+  type,
+  count,
   size = 'sm',
-  showTooltip = true 
+  showTooltip = true,
 }: AchievementBadgeProps) {
   const t = useTranslations('profile');
-  const config = badgeConfig[type];
-  
-  // Don't show badge if count is 0
+  const Mark = marks[type];
+
+  // Nothing earned yet, so there is nothing to say.
   if (count === 0) return null;
-  
-  const tooltipKey = type === 'navigator' ? 'navigator_tooltip' : 'scout_tooltip';
-  const tooltipText = t(tooltipKey, { count });
-  
+
+  const tooltipText = t(type === 'navigator' ? 'navigator_tooltip' : 'scout_tooltip', { count });
+
   const badge = (
-    <span 
-      className={`
-        inline-flex items-center font-semibold rounded-full
-        transition-all duration-200 hover:scale-105 cursor-default
-        ${sizeClasses[size]}
-      `}
-      style={{
-        backgroundColor: `color-mix(in srgb, ${config.bgColor} 15%, transparent)`,
-        color: config.color,
-        border: `1px solid color-mix(in srgb, ${config.color} 30%, transparent)`,
-      }}
+    <span
+      className={`landing-micro inline-flex cursor-default items-center text-ink-secondary ${sizeClasses[size]}`}
     >
-      <span className="leading-none">{config.icon}</span>
-      <span className="font-bold tabular-nums">{count}</span>
+      <Mark size={markSize[size]} aria-hidden="true" />
+      <span className="tabular-nums">{count}</span>
     </span>
   );
-  
+
   if (!showTooltip) return badge;
-  
+
   return (
     <Tooltip content={tooltipText} position="bottom">
       {badge}

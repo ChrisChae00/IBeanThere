@@ -97,8 +97,23 @@ Rules:
 - **State colours come from `--state-*`.** A raw Tailwind palette class
   (`bg-green-500`) is a bug: it does not move with the theme.
 - **Domain colours have their own slots** — `--marker-cafe`, `--marker-user`,
-  `--marker-pending`, `--star-*`. Reading `--brand` for a map pin couples two unrelated
-  decisions.
+  `--marker-pending`, `--star-*`, `--collection-favourite`, `--collection-saved`.
+  Reading `--brand` for a map pin couples two unrelated decisions. The collection pair
+  is fixed rather than theme-derived, for the map pin's reason: a heart is red and a
+  bookmark is blue everywhere a reader has seen one, and those two icons are how a saved
+  cafe is picked out of a list. They are icons, so the bar is 3:1, which they clear on
+  every raised surface (3.24 at the tightest, Morning Coffee's bookmark). Before the
+  slot existed the same two hexes were typed into eight files.
+- **A count beside a name is a micro-label, not a plate.** The navigator and scout
+  badges were two emoji in a 15% brand wash with a 30% border, written as an inline
+  `style` and grown on hover -- four separate things this section bans, in one
+  component. They are now a lucide mark and a number in `--ink-secondary`. The number is
+  the claim; a fill around it only competes with the name it sits next to.
+- **A descriptor draws a rule; only a choice takes a fill.** The taste tags on a profile
+  are labels, so they are a pill with an `--edge-default` rule and no fill. In
+  `TasteTagSelector`, where a tag is actually chosen, the same tag is a `control-flat`
+  with `.is-active` -- the app's one vocabulary for a group of choices. The 10% brand
+  wash both used to share said "selected" in a place where nothing was selectable.
 - **A badge that claims something is painted; a badge that qualifies is not.** Trending
   is `--brand-hover` under `--ink-on-brand`; pending, verified and the rest sit on
   `--scrim-media` in `--ink-on-media`, or do not exist at all. A row that says the same
@@ -139,7 +154,9 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   not a chosen state.
 - Meta rows — counts, statuses, badges — are `.landing-micro`, never emoji.
 - Names of things (a cafe, a person) are set in the body face. The display serif is for
-  the page's own voice, not for data.
+  the page's own voice, not for data. An `h1`-`h3` takes the serif from the base layer,
+  so a name inside a heading tag says `font-sans` explicitly -- and its own `text-` size,
+  or it inherits the heading scale and shouts over the panel's own title.
 
 
 - **A rule before a card.** Grids are `gap-px` over `bg-edge-subtle`, so the gap itself
@@ -179,7 +196,22 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **A link out of the app is a small control** (`CAFE_ACTION_CLASS`, 30px), and it keeps
   the 44px target with an invisible band, not by growing.
 - **Popovers sit above whatever opened them.** The `--z-*` stack in `tokens.css` is the
-  whole ordering; add a band, do not add a bigger number.
+  whole ordering; add a band, do not add a bigger number. The modal band is now written
+  down alongside the nav's, because a collection modal opens a move-to modal and a row's
+  own menu has to clear both.
+- **A menu inside a modal is portalled to the body, not into the panel.** The rule above
+  it -- portal a popup into the modal that opened it -- assumes the panel is not
+  transformed. A centred dialog is: it places itself with a translate, and a transformed
+  element becomes the containing block for `fixed` descendants, so a menu portalled into
+  it is measured against the panel's own box and lands half a screen from its trigger.
+  It also cannot live in the list: that list is a `max-h` scroll box, and an absolutely
+  placed menu is clipped by it and reachable only by scrolling down to find it.
+- **A backdrop with an `onClick` closes things it never rendered.** React bubbles events
+  through its own tree, not the DOM, so a portalled child modal's clicks still reach a
+  `fixed inset-0` handler written by its parent. A collection modal drawn that way ate
+  every press inside the move-to modal it opened: choosing a collection did nothing and
+  "create new collection" dismissed the stack without creating anything. Both were
+  reported as the features not existing. Dismissal belongs to the dialog primitive.
 - **A panel stands on `--surface-raised`, because that is what its hover is mixed
   from.** `--surface-hover` is `--c-raised` darkened; a menu laid on `--surface-page`
   gets a hover *lighter* than its own ground on the light themes (Morning Coffee's page
@@ -201,6 +233,36 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   sit inside the account section here. The same rule removes the drawer's row icons --
   the bar is text pills with no icon vocabulary, so a glyph per row was invented in one
   place and nowhere else.
+- **A photograph opens by growing out of its frame and shrinks back to it.** Tapping a
+  profile picture enlarges it over the page: a dialog, so Escape, the focus trap and
+  focus restore come with it, and the growing and shrinking are the primitive's own
+  starting and ending styles -- an element removed from the tree on close cannot animate
+  on the way out. The popup is the photograph and nothing else, so everything around it
+  is backdrop and closes on a press, and the fallback silhouette does not open at all.
+- **A form that edits what is on screen is a dialog, not a second page.** Swapping the
+  page out for the form lost the record behind it, made the back button mean nothing,
+  and managed no focus. The form hands the saved record back rather than signalling a
+  refetch -- one round trip, and no window where the page shows the old profile or none.
+  Merge it onto what is there: an update endpoint answers with the fields it writes, and
+  replacing outright made the badges vanish until the next load.
+- **State created in a child modal has to reach whoever owns the list.** A collection
+  made inside the move-to modal lived in that modal's own state: it existed on the
+  server and did not appear on the profile until the page was loaded again. The modal
+  hands the created record back up to the section that owns the collections.
+- **One destructive word covering two sizes of action is not one action.** A cafe's row
+  offers removing it from this collection and removing it from every collection it is
+  saved in. The first is undone by the move-to modal in a press, so it happens on the
+  press; the second cannot be undone from here, so it is asked first.
+- **A destructive confirm is an ink label with a danger dot, not a red button.**
+  `Button variant="danger"` paints a 10% tint and sets the label in `--state-danger` on
+  it, which is the pairing measured at 2.4-3.5:1 and ruled out in section 4. A solid
+  danger fill is no better -- white on the themes' own danger reaches 3.3-3.7:1 -- so the
+  state colour goes beside the label, never in it.
+- **A page and its public twin share one component, and differ only in the slot.**
+  The profile header was written once for your own page and once for someone else's,
+  and the two had already drifted -- only the public copy grew an action row. What
+  actually differs between them is what you can *do* there, so that is the prop; the
+  identity block above it is the same panel on both.
 - **Elevation is one named token or nothing.** `--shadow-panel` for a floating panel,
   `--shadow-marker` for a pin on the map; both are fixed rather than theme-derived,
   because the themes' own shadow colours are light in the dark themes and would paint a
@@ -271,8 +333,11 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 | Hardcoded hex, `rgba()`, inline `boxShadow`, arbitrary `rounded-[…]`/`h-[…]` | Tokens |
 | Emoji standing in for an icon (🔥 ⏳ ☕️ 📍) | `lucide-react`, or a `.landing-micro` word |
 | Hand-rolled button classes | `shared/ui/Button` (`variant`, `size` already exist) |
+| A component calling the API with a bare `fetch` on `NEXT_PUBLIC_API_URL` and a hand-built `Authorization` header | A function in `lib/api/*`. The client there carries the base URL, the session token, network-error wrapping and the `detail → message` error shape; a component that rebuilds all four gets a different one each time |
 | A second component that differs from an existing one by two classes | A `size`/`variant` prop on the existing one |
 | Untranslated literals, locale ternaries | `next-intl` keys in `en.json` and `ko.json` |
+| Taking a translated string apart again (`t(...).replace(String(count), '')`, to style the number on its own) | Print the whole string. Cutting a value back out of a sentence assumes English word order and breaks in the other locale |
+| `alert()` / `confirm()` for a failed action | `useToast()`. A browser dialog blocks the page, and the message it carried was usually a raw API string in English |
 
 ## Related
 

@@ -21,13 +21,15 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text mb-2">
+    <main className="container mx-auto max-w-4xl px-4 py-8">
+      {/* The masthead and its rule, the same opening every other page uses. */}
+      <section className="pb-8">
+        <h1 className="landing-display text-[clamp(2rem,5vw,3rem)] text-ink-primary">
           {t('title')}
         </h1>
-      </div>
+        <div className="mt-6 border-t border-edge-rule" />
+      </section>
       <ProfileClient />
-    </div>
+    </main>
   );
 }

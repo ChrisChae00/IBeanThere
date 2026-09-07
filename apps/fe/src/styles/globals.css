@@ -65,6 +65,9 @@
     `--color-starEmpty` below say the same thing and are still read by the shared
     `StarRating`; both sets go when that primitive moves in Phase 6.
   */
+  --color-collection-favourite: var(--collection-favourite);
+  --color-collection-saved: var(--collection-saved);
+
   --color-star-filled: var(--star-filled);
   --color-star-empty: var(--star-empty);
 
