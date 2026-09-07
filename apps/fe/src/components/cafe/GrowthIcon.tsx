@@ -10,9 +10,10 @@ import Image from 'next/image';
   painted on does not change with the theme, and a stage a reader recognises should
   look the same wherever it appears.
 
-  The art is square and full-bleed; the circles are cut at build time from
-  `media-src/bean-growth/` into `public/growth/`, inset slightly so the widest leaves
-  stay inside the cut.
+  The art is square and full-bleed, and the circles are cut straight out of it at build
+  time (`media-src/bean-growth/` into `public/growth/`) rather than being inset inside a
+  padded square: the soil is painted to the frame's own edge, so any padding leaves a
+  band of sky under it where the ground should be.
 */
 const STAGES = [
   { src: '/growth/seed.webp', name: 'Bean Dropped' },
