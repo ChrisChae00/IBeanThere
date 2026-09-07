@@ -111,10 +111,11 @@ Rules:
 - **A state colour is emphasis, not a text colour**, with one row on the record.
   `--state-success` and `--state-danger` over their own 12% tint measure 2.4-3.5:1 in
   three of the four themes. Set the label in `--ink-primary` and let the state colour be
-  a dot beside it; the same goes for failure messages. The exception is the drawer's log
-  out row, named in `--state-danger` at rest by decision: it measures 3.25:1 on the
-  raised surface, below the 4.5:1 body threshold, and is kept because a colour that
-  arrives only once the pointer is on the row arrives after the decision to press it.
+  a dot beside it; the same goes for failure messages. The exception is the log out row,
+  in both the drawer and the profile menu, named in `--state-danger` at rest by
+  decision: it measures 3.25:1 on the raised surface, below the 4.5:1 body threshold,
+  and is kept because a colour that arrives only once the pointer is on the row arrives
+  after the decision to press it.
 
 ## 5. Structure
 
@@ -223,9 +224,9 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **Three exceptions are on the record, and none is an oversight to fix on sight.**
   Matcha Latte's label on its brand is 3.37:1: the pair was read on screen and kept
   (`themes.css` says so beside the slot). `--marker-pending` is 2.21:1 on the map tiles
-  in every theme; the white `--marker-ring` is what draws its edge. The drawer's log out
-  row is 3.25:1, chosen so the warning is there before the press rather than after it.
-  Anything else below the threshold is a bug.
+  in every theme; the white `--marker-ring` is what draws its edge. The log out row is
+  3.25:1, chosen so the warning is there before the press rather than after it. Anything
+  else below the threshold is a bug.
 - Interactive targets are at least 44×44, even when the visible chrome is smaller -- a
   `before:` band restores the target without inflating the button.
 - **Every hover state has an `:active` twin.** A phone has no hover, so the press is the

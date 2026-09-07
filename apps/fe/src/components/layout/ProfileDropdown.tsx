@@ -154,12 +154,13 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
           <div className="my-1 border-t border-edge-subtle" />
 
           {/*
-            Red on hover only, which is what the mobile menu's logout already does:
-            at rest it is one row among several, and the colour arrives at the
-            moment the row is actually about to be pressed.
+            Red at rest, the same as the mobile drawer's: this is the one row here that
+            undoes something, and a colour that only arrives once the pointer is on the
+            row arrives after the decision to press it. The mark takes the colour too,
+            or the row reads as a red label beside a grey icon.
           */}
-          <button onClick={handleSignOut} className={`${ITEM} hover:text-state-danger`}>
-            <LogOut className="menu-mark group-hover:translate-x-1 group-hover:text-state-danger" />
+          <button onClick={handleSignOut} className={`${ITEM} text-state-danger`}>
+            <LogOut className="menu-mark text-state-danger group-hover:translate-x-1" />
             {tAuth('logout')}
           </button>
         </div>
