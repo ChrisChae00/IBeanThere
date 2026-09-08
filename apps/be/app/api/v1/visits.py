@@ -13,8 +13,10 @@ from app.models.visit import (
     TrendingCafeResponse,
     CafeStatsResponse,
     CafeLogPublicResponse,
-    CafeLogsResponse
+    CafeLogsResponse,
+    validate_merged_log,
 )
+from app.services.coffee_logs import LOG_COLUMNS, public_logs, with_bean
 from app.api.deps import get_current_user, require_admin_role
 from app.models.error import ErrorCode, ErrorDetail, create_error_response
 from app.database.supabase import get_supabase_client
@@ -23,6 +25,57 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
+
+
+def _as_tag_list(value) -> list | None:
+    """
+    Atmosphere tags come back as a list, or as a JSON string from older rows.
+
+    Returning `[]` for anything unparseable rather than raising: a malformed tag
+    field is not a reason to fail the whole log listing.
+    """
+    if value is None or isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else []
+        except (ValueError, TypeError):
+            return []
+    return []
+
+
+def _visit_payload(supabase: Client, visit: dict) -> dict:
+    """
+    A stored visit row, ready for `CafeVisitResponse`.
+
+    The insert and update calls already return every column of the row, so the bean
+    is the only thing missing — and only when the log actually points at one. Looking
+    it up conditionally keeps the common case (a log with no bean) at zero extra
+    round trips.
+    """
+    payload = {
+        **visit,
+        "photo_urls": visit.get("photo_urls") or [],
+        "bean": None,
+    }
+
+    bean_id = visit.get("bean_id")
+    if not bean_id:
+        return payload
+
+    try:
+        bean = supabase.table("beans").select(
+            "id, name, roasters(name)"
+        ).eq("id", bean_id).single().execute().data
+        if bean:
+            payload["bean"] = with_bean({"beans": bean})["bean"]
+    except Exception:
+        # A missing bean must not fail the log the reader just saved.
+        logger.warning("Could not load bean %s for visit response", bean_id, exc_info=True)
+
+    return payload
+
 
 # ---------------------------------------------------------------------------
 # In-memory TTL cache for trending cafes
@@ -292,27 +345,17 @@ async def record_cafe_visit(
             "price_currency": visit_data.price_currency,
             "atmosphere_rating": visit_data.atmosphere_rating,
             "atmosphere_tags": visit_data.atmosphere_tags,
-            "parking_info": visit_data.parking_info,
             "acidity_rating": visit_data.acidity_rating,
             "body_rating": visit_data.body_rating,
             "sweetness_rating": visit_data.sweetness_rating,
             "bitterness_rating": visit_data.bitterness_rating,
             "aftertaste_rating": visit_data.aftertaste_rating,
-            "bean_origin": visit_data.bean_origin,
-            "processing_method": visit_data.processing_method,
-            "roast_level": visit_data.roast_level,
-            "extraction_method": visit_data.extraction_method,
-            "extraction_equipment": visit_data.extraction_equipment,
             "aroma_rating": visit_data.aroma_rating,
             "overall_taste_rating": visit_data.overall_taste_rating,
-            "wifi_quality": visit_data.wifi_quality,
-            "wifi_rating": visit_data.wifi_rating,
-            "outlet_info": visit_data.outlet_info,
-            "furniture_comfort": visit_data.furniture_comfort,
-            "noise_level": visit_data.noise_level,
-            "noise_rating": visit_data.noise_rating,
-            "temperature_lighting": visit_data.temperature_lighting,
-            "facilities_info": visit_data.facilities_info
+            "mode": visit_data.mode,
+            "bean_id": visit_data.bean_id,
+            "bean_name_raw": visit_data.bean_name_raw,
+            "want_again": visit_data.want_again,
         }
         
         result = supabase.table("cafe_visits").insert(visit_record).execute()
@@ -372,57 +415,11 @@ async def record_cafe_visit(
             # Log but don't fail the main visit creation
             logger.warning("Auto drop bean failed (non-critical)", exc_info=True)
         
-        # Format response with all fields
-        response_data = {
-            "id": visit.get("id"),
-            "cafe_id": visit.get("cafe_id"),
-            "user_id": visit.get("user_id"),
-            "visited_at": visit.get("visited_at"),
-            "check_in_lat": visit.get("check_in_lat"),
-            "check_in_lng": visit.get("check_in_lng"),
-            "distance_meters": visit.get("distance_meters"),
-            "duration_minutes": visit.get("duration_minutes"),
-            "auto_detected": visit.get("auto_detected", False),
-            "confirmed": visit.get("confirmed", True),
-            "has_review": visit.get("has_review", False),
-            "has_photos": visit.get("has_photos", False),
-            "rating": visit.get("rating"),
-            "comment": visit.get("comment"),
-            "photo_urls": visit.get("photo_urls", []),
-            "is_public": visit.get("is_public", True),
-            "anonymous": visit.get("anonymous", False),
-            "coffee_type": visit.get("coffee_type"),
-            "dessert": visit.get("dessert"),
-            "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
-            "price_currency": visit.get("price_currency"),
-            "atmosphere_rating": visit.get("atmosphere_rating"),
-            "atmosphere_tags": visit.get("atmosphere_tags") if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list) else [],
-            "parking_info": visit.get("parking_info"),
-            "acidity_rating": visit.get("acidity_rating"),
-            "body_rating": visit.get("body_rating"),
-            "sweetness_rating": visit.get("sweetness_rating"),
-            "bitterness_rating": visit.get("bitterness_rating"),
-            "aftertaste_rating": visit.get("aftertaste_rating"),
-            "bean_origin": visit.get("bean_origin"),
-            "processing_method": visit.get("processing_method"),
-            "roast_level": visit.get("roast_level"),
-            "extraction_method": visit.get("extraction_method"),
-            "extraction_equipment": visit.get("extraction_equipment"),
-            "aroma_rating": visit.get("aroma_rating"),
-            "overall_taste_rating": visit.get("overall_taste_rating"),
-            "wifi_quality": visit.get("wifi_quality"),
-            "wifi_rating": visit.get("wifi_rating"),
-            "outlet_info": visit.get("outlet_info"),
-            "furniture_comfort": visit.get("furniture_comfort"),
-            "noise_level": visit.get("noise_level"),
-            "noise_rating": visit.get("noise_rating"),
-            "temperature_lighting": visit.get("temperature_lighting"),
-            "facilities_info": visit.get("facilities_info"),
-            "updated_at": visit.get("updated_at")
-        }
-        
-        return response_data
-        
+        # Hand the stored row to the response model rather than copying it field by
+        # field. The model prunes what it does not declare, so a new column is one
+        # edit here instead of four dicts that drift apart.
+        return CafeVisitResponse(**_visit_payload(supabase, visit))
+
     except HTTPException:
         raise
     except Exception as e:
@@ -448,7 +445,9 @@ async def update_visit(
         supabase = get_supabase_client()
         
         # Verify visit belongs to user
-        visit_check = supabase.table("cafe_visits").select("user_id").eq("id", visit_id).single().execute()
+        visit_check = supabase.table("cafe_visits").select(
+            "user_id, mode, rating"
+        ).eq("id", visit_id).single().execute()
         
         if not visit_check.data:
             raise HTTPException(
@@ -478,114 +477,44 @@ async def update_visit(
                 )
             )
         
-        # Update visit
-        update_payload = {}
-        
-        if update_data.confirmed is not None:
-            update_payload["confirmed"] = update_data.confirmed
-        
-        if update_data.duration_minutes is not None:
-            update_payload["duration_minutes"] = update_data.duration_minutes
-        
-        # Coffee log fields
-        if update_data.rating is not None:
-            update_payload["rating"] = update_data.rating
-            update_payload["has_review"] = True
-        
-        if update_data.comment is not None:
-            update_payload["comment"] = update_data.comment
-        
-        if update_data.photo_urls is not None:
-            update_payload["photo_urls"] = update_data.photo_urls
-            update_payload["has_photos"] = len(update_data.photo_urls) > 0
-        
-        if update_data.is_public is not None:
-            update_payload["is_public"] = update_data.is_public
-        
-        if update_data.anonymous is not None:
-            update_payload["anonymous"] = update_data.anonymous
-        
-        if update_data.coffee_type is not None:
-            update_payload["coffee_type"] = update_data.coffee_type
-        
-        if update_data.dessert is not None:
-            update_payload["dessert"] = update_data.dessert
-        
-        if update_data.price is not None:
-            update_payload["price"] = str(update_data.price)
-        
-        if update_data.price_currency is not None:
-            update_payload["price_currency"] = update_data.price_currency
-            
-        if update_data.atmosphere_rating is not None:
-            update_payload["atmosphere_rating"] = update_data.atmosphere_rating
-        
-        if update_data.atmosphere_tags is not None:
-            update_payload["atmosphere_tags"] = update_data.atmosphere_tags
-            
-        if update_data.parking_info is not None:
-            update_payload["parking_info"] = update_data.parking_info
-            
-        if update_data.sweetness_rating is not None:
-            update_payload["sweetness_rating"] = update_data.sweetness_rating
-            
-        if update_data.bitterness_rating is not None:
-            update_payload["bitterness_rating"] = update_data.bitterness_rating
-            
-        if update_data.aftertaste_rating is not None:
-            update_payload["aftertaste_rating"] = update_data.aftertaste_rating
-            
-        if update_data.acidity_rating is not None:
-            update_payload["acidity_rating"] = update_data.acidity_rating
-            
-        if update_data.body_rating is not None:
-            update_payload["body_rating"] = update_data.body_rating
-        
-        if update_data.bean_origin is not None:
-            update_payload["bean_origin"] = update_data.bean_origin
-        
-        if update_data.processing_method is not None:
-            update_payload["processing_method"] = update_data.processing_method
-        
-        if update_data.roast_level is not None:
-            update_payload["roast_level"] = update_data.roast_level
-        
-        if update_data.extraction_method is not None:
-            update_payload["extraction_method"] = update_data.extraction_method
-        
-        if update_data.extraction_equipment is not None:
-            update_payload["extraction_equipment"] = update_data.extraction_equipment
-        
-        if update_data.aroma_rating is not None:
-            update_payload["aroma_rating"] = update_data.aroma_rating
+        # `exclude_unset` is what makes `bean_id: null` mean "unlink this bean" while
+        # leaving the field out means "keep whatever is there". The chain of
+        # `if field is not None` this replaces could not tell those apart, so a bean
+        # could be attached but never removed.
+        update_payload = update_data.model_dump(exclude_unset=True)
 
-        if update_data.overall_taste_rating is not None:
-            update_payload["overall_taste_rating"] = update_data.overall_taste_rating
+        if "price" in update_payload and update_payload["price"] is not None:
+            update_payload["price"] = str(update_payload["price"])
 
-        if update_data.wifi_quality is not None:
-            update_payload["wifi_quality"] = update_data.wifi_quality
-        
-        if update_data.wifi_rating is not None:
-            update_payload["wifi_rating"] = update_data.wifi_rating
-        
-        if update_data.outlet_info is not None:
-            update_payload["outlet_info"] = update_data.outlet_info
-        
-        if update_data.furniture_comfort is not None:
-            update_payload["furniture_comfort"] = update_data.furniture_comfort
-        
-        if update_data.noise_level is not None:
-            update_payload["noise_level"] = update_data.noise_level
-        
-        if update_data.noise_rating is not None:
-            update_payload["noise_rating"] = update_data.noise_rating
-        
-        if update_data.temperature_lighting is not None:
-            update_payload["temperature_lighting"] = update_data.temperature_lighting
-        
-        if update_data.facilities_info is not None:
-            update_payload["facilities_info"] = update_data.facilities_info
-        
+        # These two are derived, not sent: a log has a review when it has a rating,
+        # and photos when the list is non-empty.
+        if "rating" in update_payload:
+            update_payload["has_review"] = update_payload["rating"] is not None
+        if "photo_urls" in update_payload:
+            update_payload["has_photos"] = bool(update_payload["photo_urls"])
+
+        # Validate the MERGED state, not the patch. A patch that only sets
+        # `mode: "drink"` is valid or not depending entirely on the rating already on
+        # the stored row, which the request body cannot see.
+        stored = visit_check.data
+        try:
+            validate_merged_log(
+                update_payload.get("mode", stored.get("mode", "drink")),
+                update_payload["rating"] if "rating" in update_payload else stored.get("rating"),
+            )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=create_error_response(
+                    error_code=ErrorCode.INVALID_INPUT,
+                    message=str(exc),
+                    details=[ErrorDetail(field="rating", message=str(exc), value=None)],
+                )
+            )
+
+        if not update_payload:
+            update_payload = {"updated_at": datetime.now(timezone.utc).isoformat()}
+
         result = supabase.table("cafe_visits").update(update_payload).eq("id", visit_id).execute()
         
         if not result.data:
@@ -596,56 +525,7 @@ async def update_visit(
         
         visit = result.data[0]
         
-        # Ensure all fields are present
-        response_data = {
-            "id": visit.get("id"),
-            "cafe_id": visit.get("cafe_id"),
-            "user_id": visit.get("user_id"),
-            "visited_at": visit.get("visited_at"),
-            "check_in_lat": visit.get("check_in_lat"),
-            "check_in_lng": visit.get("check_in_lng"),
-            "distance_meters": visit.get("distance_meters"),
-            "duration_minutes": visit.get("duration_minutes"),
-            "auto_detected": visit.get("auto_detected", False),
-            "confirmed": visit.get("confirmed", True),
-            "has_review": visit.get("has_review", False),
-            "has_photos": visit.get("has_photos", False),
-            "rating": visit.get("rating"),
-            "comment": visit.get("comment"),
-            "photo_urls": visit.get("photo_urls", []),
-            "is_public": visit.get("is_public", True),
-            "anonymous": visit.get("anonymous", False),
-            "coffee_type": visit.get("coffee_type"),
-            "dessert": visit.get("dessert"),
-            "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
-            "price_currency": visit.get("price_currency"),
-            "atmosphere_rating": visit.get("atmosphere_rating"),
-            "atmosphere_tags": visit.get("atmosphere_tags") if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list) else [],
-            "parking_info": visit.get("parking_info"),
-            "acidity_rating": visit.get("acidity_rating"),
-            "body_rating": visit.get("body_rating"),
-            "sweetness_rating": visit.get("sweetness_rating"),
-            "bitterness_rating": visit.get("bitterness_rating"),
-            "aftertaste_rating": visit.get("aftertaste_rating"),
-            "bean_origin": visit.get("bean_origin"),
-            "processing_method": visit.get("processing_method"),
-            "roast_level": visit.get("roast_level"),
-            "extraction_method": visit.get("extraction_method"),
-            "extraction_equipment": visit.get("extraction_equipment"),
-            "aroma_rating": visit.get("aroma_rating"),
-            "overall_taste_rating": visit.get("overall_taste_rating"),
-            "wifi_quality": visit.get("wifi_quality"),
-            "wifi_rating": visit.get("wifi_rating"),
-            "outlet_info": visit.get("outlet_info"),
-            "furniture_comfort": visit.get("furniture_comfort"),
-            "noise_level": visit.get("noise_level"),
-            "noise_rating": visit.get("noise_rating"),
-            "temperature_lighting": visit.get("temperature_lighting"),
-            "facilities_info": visit.get("facilities_info"),
-            "updated_at": visit.get("updated_at")
-        }
-        
-        return response_data
+        return CafeVisitResponse(**_visit_payload(supabase, visit))
         
     except HTTPException:
         raise
@@ -1040,12 +920,11 @@ async def get_cafe_logs(
     try:
         offset = (page - 1) * page_size
         
-        # Get public logs with ratings
-        result = supabase.table("cafe_visits").select(
-            "id, cafe_id, visited_at, rating, comment, photo_urls, coffee_type, dessert, price, price_currency, anonymous, updated_at, user_id, atmosphere_rating, atmosphere_tags, parking_info, acidity_rating, body_rating, sweetness_rating, bitterness_rating, aftertaste_rating, bean_origin, processing_method, roast_level, extraction_method, extraction_equipment, aroma_rating, overall_taste_rating, wifi_quality, wifi_rating, outlet_info, furniture_comfort, noise_level, noise_rating, temperature_lighting, facilities_info"
-        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
-            "visited_at", desc=True
-        ).range(offset, offset + page_size - 1).execute()
+        # A rated cup or a recorded purchase -- see `public_logs`. The same filter has
+        # to reach the count below, or the pager promises rows the list cannot show.
+        result = public_logs(
+            supabase.table("cafe_visits").select(LOG_COLUMNS).eq("cafe_id", cafe_id)
+        ).order("visited_at", desc=True).range(offset, offset + page_size - 1).execute()
         
         if not result.data:
             return CafeLogsResponse(
@@ -1057,9 +936,9 @@ async def get_cafe_logs(
             )
         
         # Get total count
-        count_result = supabase.table("cafe_visits").select(
-            "id", count="exact"
-        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").execute()
+        count_result = public_logs(
+            supabase.table("cafe_visits").select("id", count="exact").eq("cafe_id", cafe_id)
+        ).execute()
         
         total_count = count_result.count if count_result.count else 0
         
@@ -1082,49 +961,14 @@ async def get_cafe_logs(
             else:
                 author_display_name = "Anonymous"
             
-            logs.append(CafeLogPublicResponse(
-                id=log["id"],
-                cafe_id=log["cafe_id"],
-                visited_at=datetime.fromisoformat(log["visited_at"].replace("Z", "+00:00")),
-                rating=log.get("rating"),
-                comment=log.get("comment"),
-                photo_urls=log.get("photo_urls", []),
-                coffee_type=log.get("coffee_type"),
-                dessert=log.get("dessert"),
-                price=Decimal(str(log.get("price"))) if log.get("price") is not None else None,
-                price_currency=log.get("price_currency"),
-                atmosphere_rating=log.get("atmosphere_rating"),
-                atmosphere_tags=(
-                    log.get("atmosphere_tags") 
-                    if log.get("atmosphere_tags") is None or isinstance(log.get("atmosphere_tags"), list)
-                    else (json.loads(log.get("atmosphere_tags")) if isinstance(log.get("atmosphere_tags"), str) else [])
-                ),
-                parking_info=log.get("parking_info"),
-                acidity_rating=log.get("acidity_rating"),
-                body_rating=log.get("body_rating"),
-                sweetness_rating=log.get("sweetness_rating"),
-                bitterness_rating=log.get("bitterness_rating"),
-                aftertaste_rating=log.get("aftertaste_rating"),
-                bean_origin=log.get("bean_origin"),
-                processing_method=log.get("processing_method"),
-                roast_level=log.get("roast_level"),
-                extraction_method=log.get("extraction_method"),
-                extraction_equipment=log.get("extraction_equipment"),
-                aroma_rating=log.get("aroma_rating"),
-                overall_taste_rating=log.get("overall_taste_rating"),
-                wifi_quality=log.get("wifi_quality"),
-                wifi_rating=log.get("wifi_rating"),
-                outlet_info=log.get("outlet_info"),
-                furniture_comfort=log.get("furniture_comfort"),
-                noise_level=log.get("noise_level"),
-                noise_rating=log.get("noise_rating"),
-                temperature_lighting=log.get("temperature_lighting"),
-                facilities_info=log.get("facilities_info"),
-                author_display_name=author_display_name,
-                author_username=author_username,
-                author_avatar_url=author_avatar_url,
-                updated_at=datetime.fromisoformat(log["updated_at"].replace("Z", "+00:00")) if log.get("updated_at") else None
-            ))
+            logs.append(CafeLogPublicResponse(**with_bean({
+                **log,
+                "photo_urls": log.get("photo_urls") or [],
+                "atmosphere_tags": _as_tag_list(log.get("atmosphere_tags")),
+                "author_display_name": author_display_name,
+                "author_username": author_username,
+                "author_avatar_url": author_avatar_url,
+            })))
         
         return CafeLogsResponse(
             logs=logs,
@@ -1154,70 +998,24 @@ async def get_my_logs(
     - Ordered by visited_at (most recent first)
     """
     try:
-        result = supabase.table("cafe_visits").select("*").eq(
-            "user_id", current_user.id
-        ).not_.is_("rating", "null").order(
-            "visited_at", desc=True
-        ).execute()
+        # No rating filter here. These are the reader's own logs, and a bag they
+        # bought but have not brewed yet has no rating to filter on -- requiring one
+        # made their own purchases invisible to them.
+        result = supabase.table("cafe_visits").select(
+            "*, beans(id, name, roasters(name))"
+        ).eq("user_id", current_user.id).order("visited_at", desc=True).execute()
         
         if not result.data:
             return []
         
-        # Format response with all fields
-        formatted_logs = []
-        for visit in result.data:
-            formatted_logs.append({
-                "id": visit.get("id"),
-                "cafe_id": visit.get("cafe_id"),
-                "user_id": visit.get("user_id"),
-                "visited_at": visit.get("visited_at"),
-                "check_in_lat": visit.get("check_in_lat"),
-                "check_in_lng": visit.get("check_in_lng"),
-                "distance_meters": visit.get("distance_meters"),
-                "duration_minutes": visit.get("duration_minutes"),
-                "auto_detected": visit.get("auto_detected", False),
-                "confirmed": visit.get("confirmed", True),
-                "has_review": visit.get("has_review", False),
-                "has_photos": visit.get("has_photos", False),
-                "rating": visit.get("rating"),
-                "comment": visit.get("comment"),
-                "photo_urls": visit.get("photo_urls", []),
-                "is_public": visit.get("is_public", True),
-                "anonymous": visit.get("anonymous", False),
-                "coffee_type": visit.get("coffee_type"),
-                "dessert": visit.get("dessert"),
-                "price": Decimal(str(visit.get("price"))) if visit.get("price") is not None else None,
-                "price_currency": visit.get("price_currency"),
-                "atmosphere_rating": visit.get("atmosphere_rating"),
-                "atmosphere_tags": (
-                    visit.get("atmosphere_tags") 
-                    if visit.get("atmosphere_tags") is None or isinstance(visit.get("atmosphere_tags"), list)
-                    else (json.loads(visit.get("atmosphere_tags")) if isinstance(visit.get("atmosphere_tags"), str) else [])
-                ),
-                "parking_info": visit.get("parking_info"),
-                "acidity_rating": visit.get("acidity_rating"),
-                "body_rating": visit.get("body_rating"),
-                "sweetness_rating": visit.get("sweetness_rating"),
-                "bitterness_rating": visit.get("bitterness_rating"),
-                "aftertaste_rating": visit.get("aftertaste_rating"),
-                "bean_origin": visit.get("bean_origin"),
-                "processing_method": visit.get("processing_method"),
-                "roast_level": visit.get("roast_level"),
-                "extraction_method": visit.get("extraction_method"),
-                "extraction_equipment": visit.get("extraction_equipment"),
-                "aroma_rating": visit.get("aroma_rating"),
-                "wifi_quality": visit.get("wifi_quality"),
-                "wifi_rating": visit.get("wifi_rating"),
-                "outlet_info": visit.get("outlet_info"),
-                "furniture_comfort": visit.get("furniture_comfort"),
-                "noise_level": visit.get("noise_level"),
-                "noise_rating": visit.get("noise_rating"),
-                "temperature_lighting": visit.get("temperature_lighting"),
-                "facilities_info": visit.get("facilities_info"),
-                "updated_at": visit.get("updated_at")
-            })
-        
-        return formatted_logs
+        return [
+            CafeVisitResponse(**with_bean({
+                **visit,
+                "photo_urls": visit.get("photo_urls") or [],
+                "atmosphere_tags": _as_tag_list(visit.get("atmosphere_tags")),
+            }))
+            for visit in result.data
+        ]
         
     except Exception as e:
         logger.exception("Error getting my logs")
@@ -1240,7 +1038,9 @@ async def delete_visit(
     """
     try:
         # Check if visit exists and get owner
-        visit_check = supabase.table("cafe_visits").select("user_id").eq("id", visit_id).single().execute()
+        visit_check = supabase.table("cafe_visits").select(
+            "user_id, mode, rating"
+        ).eq("id", visit_id).single().execute()
         
         if not visit_check.data:
             raise HTTPException(

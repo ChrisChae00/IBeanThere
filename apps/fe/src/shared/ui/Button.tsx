@@ -12,7 +12,7 @@ import LoadingSpinner from './LoadingSpinner';
 
   MIGRATION: new code should import { Button } from '@/shared/ui/base/button' directly.
   This wrapper exists only for the existing call sites and is deleted once the last one
-  moves over. See "Phase 2b" in docs/ui-refactoring-roadmap.md.
+  moves over. See "Phase 2b" in docs/archive/plans/ui-refactoring-roadmap.md.
 */
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';

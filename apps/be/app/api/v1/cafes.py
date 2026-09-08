@@ -20,12 +20,18 @@ from app.models.cafe import (
     CafeResponse,
     CafeRegistrationRequest,
     GooglePlacesLookupRequest,
-    GooglePlacesLookupResponse
+    GooglePlacesLookupResponse,
+    TraitSummary,
+    TraitObservationCreate,
+    CafeBeanEntry,
+    CafeBeansResponse,
 )
+from app.services import traits as traits_service
+from app.services.coffee_logs import public_logs
 from app.services.osm_service import OSMService, format_address
 from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
-from app.api.deps import get_current_user, require_admin_role
+from app.api.deps import get_current_user, get_optional_user, require_admin_role
 from app.core.permissions import Permission, require_permission
 from app.core.fraud_detection import check_location_consistency
 from app.core.rate_limit import limiter
@@ -33,7 +39,7 @@ from app.config import settings
 from app.services.google_places_service import GooglePlacesService
 from app.utils.timezone import get_timezone_from_coords
 from supabase import Client
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 import httpx
 from dateutil import parser as date_parser
@@ -458,7 +464,9 @@ async def search_cafes(
                 "updated_at": cafe.get("updated_at"),
                 "main_image": main_image
             })
-        
+
+        _attach_trait_flags(supabase, formatted_cafes)
+
         return CafeSearchResponse(
             cafes=formatted_cafes,
             total_count=len(formatted_cafes)
@@ -522,6 +530,8 @@ async def search_cafes_by_text(
             }
             for cafe in (result.data or [])
         ]
+
+        _attach_trait_flags(supabase, formatted_cafes)
 
         return CafeSearchResponse(cafes=formatted_cafes, total_count=len(formatted_cafes))
 
@@ -717,6 +727,220 @@ async def get_cafe_stats(supabase: Client = Depends(get_supabase_client)):
             detail="An unexpected error occurred. Please try again."
         )
 
+def _attach_trait_flags(supabase, cafes: list) -> None:
+    """
+    Add `trait_flags` to a page of cafe dicts, in place.
+
+    This is what the map and list filter chips read, so it travels with the search
+    results rather than needing a second request per pin.
+    """
+    if not cafes:
+        return
+    flags_by_cafe = traits_service.load_flags(supabase, [c["id"] for c in cafes if c.get("id")])
+    for cafe in cafes:
+        cafe["trait_flags"] = flags_by_cafe.get(cafe.get("id"), {})
+
+
+# ---------------------------------------------------------------------------
+# Coffee traits and beans
+#
+# Both are registered before the `/{cafe_identifier}` catch-all below.
+#
+# Neither is cached, and neither is folded into the cafe detail payload, which is
+# served with `revalidate: 120`. A reader who switches a log to private and then
+# sees the bean still listed for two minutes has been told their privacy setting
+# does not work -- and they would be right to think so.
+# ---------------------------------------------------------------------------
+
+@router.get("/{cafe_id}/traits", response_model=List[TraitSummary])
+async def get_cafe_traits(
+    cafe_id: str,
+    current_user = Depends(get_optional_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    What people report about this cafe's coffee, and -- if signed in -- what you did.
+
+    One query, aggregated in Python. `mine` is derived from the same rows as the
+    counts, so the button state can never disagree with the number beside it.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").select(
+            "trait, value, source, user_id, observed_at, created_at"
+        ).eq("cafe_id", cafe_id).execute()
+
+        viewer_id = current_user.id if current_user else None
+        return [
+            TraitSummary(**summary)
+            for summary in traits_service.summarise(result.data or [], viewer_id)
+        ]
+    except Exception:
+        logger.exception("Error loading cafe traits")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.post("/{cafe_id}/traits/{trait}", response_model=List[TraitSummary])
+async def observe_cafe_trait(
+    cafe_id: str,
+    trait: str,
+    payload: TraitObservationCreate,
+    current_user = Depends(get_current_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Record what you saw. Yes or no, both are observations.
+
+    Insert-only: the history is the point. Saying "no" today does not erase the "yes"
+    from six months ago, it supersedes it -- and the old row is what lets anyone see
+    that the place changed rather than that someone was wrong.
+    """
+    if not traits_service.is_valid_trait(trait):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown trait '{trait}'"
+        )
+
+    try:
+        observed_at = None
+        if payload.observed_at:
+            try:
+                observed_at = date.fromisoformat(payload.observed_at)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="observed_at must be a date in YYYY-MM-DD form"
+                )
+
+        try:
+            traits_service.check_observed_at(observed_at)
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+        supabase.table("cafe_trait_observations").insert({
+            "cafe_id": cafe_id,
+            "trait": trait,
+            "value": payload.value,
+            "source": "user",
+            "user_id": current_user.id,
+            "observed_at": (observed_at or date.today()).isoformat(),
+        }).execute()
+
+        return await get_cafe_traits(cafe_id, current_user, supabase)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error recording trait observation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.delete("/{cafe_id}/traits/{trait}", response_model=List[TraitSummary])
+async def clear_cafe_trait(
+    cafe_id: str,
+    trait: str,
+    current_user = Depends(get_current_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Withdraw your own observations of this trait.
+
+    The `user_id` filter is on the query, not left to row-level security: the backend
+    holds the service key, which bypasses RLS entirely. Without this line, this
+    endpoint would delete everyone's.
+    """
+    if not traits_service.is_valid_trait(trait):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown trait '{trait}'"
+        )
+
+    try:
+        supabase.table("cafe_trait_observations").delete().eq(
+            "cafe_id", cafe_id
+        ).eq("trait", trait).eq("user_id", current_user.id).execute()
+
+        return await get_cafe_traits(cafe_id, current_user, supabase)
+    except Exception:
+        logger.exception("Error clearing trait observation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.get("/{cafe_id}/beans", response_model=CafeBeansResponse)
+async def get_cafe_beans(
+    cafe_id: str,
+    supabase = Depends(get_supabase_client)
+):
+    """
+    The beans people had here and the beans people bought here.
+
+    Derived from public logs, not from a table of its own. That is the whole privacy
+    design: a private or anonymous log contributes nothing a reader can trace back,
+    and switching a log to private removes it here with no retraction step, because
+    there is nothing to retract.
+
+    `last_seen_at` is `visited_at` -- the day it was seen, not the day it was typed up.
+    No author information leaves this endpoint, for anonymous and named logs alike.
+    """
+    try:
+        result = public_logs(
+            supabase.table("cafe_visits").select(
+                "mode, visited_at, bean_id, beans(id, name, origin, roast_level, roasters(name))"
+            ).eq("cafe_id", cafe_id).not_.is_("bean_id", "null")
+        ).order("visited_at", desc=True).limit(200).execute()
+
+        grouped = {"drink": {}, "purchase": {}}
+        for row in result.data or []:
+            bean = row.get("beans")
+            if isinstance(bean, list):
+                bean = bean[0] if bean else None
+            if not bean:
+                continue
+
+            bucket = grouped.get(row.get("mode") or "drink")
+            if bucket is None:
+                continue
+
+            roaster = bean.get("roasters")
+            if isinstance(roaster, list):
+                roaster = roaster[0] if roaster else None
+
+            entry = bucket.get(bean["id"])
+            if entry:
+                entry["count"] += 1
+                continue
+
+            # Rows arrive newest first, so the first one seen for a bean is the
+            # most recent -- no comparison needed.
+            bucket[bean["id"]] = {
+                "bean_id": bean["id"],
+                "name": bean.get("name"),
+                "roaster_name": roaster.get("name") if roaster else None,
+                "origin": bean.get("origin"),
+                "roast_level": bean.get("roast_level"),
+                "last_seen_at": row["visited_at"],
+                "count": 1,
+            }
+
+        return CafeBeansResponse(
+            drink=[CafeBeanEntry(**e) for e in grouped["drink"].values()],
+            purchase=[CafeBeanEntry(**e) for e in grouped["purchase"].values()],
+        )
+    except Exception:
+        logger.exception("Error loading cafe beans")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
 @router.get("/{cafe_identifier}", response_model=CafeResponse)
 async def get_cafe_details(cafe_identifier: str):
     """
@@ -762,12 +986,14 @@ async def get_cafe_details(cafe_identifier: str):
         verified_at_str = cafe.get("verified_at")
         verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
         
-        # Get total count and calculate average rating from all public logs
-        all_logs_result = supabase.table("cafe_visits").select(
-            "id, rating, visited_at, user_id, anonymous, comment, photo_urls, coffee_type"
-        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
-            "visited_at", desc=True
-        ).execute()
+        # Same definition of "public" the log list and its count use -- see
+        # `services/coffee_logs.public_logs`. A purchase with no rating is a log; it
+        # counts here, and `average_rating` below simply skips the missing number.
+        all_logs_result = public_logs(
+            supabase.table("cafe_visits").select(
+                "id, rating, mode, visited_at, user_id, anonymous, comment, photo_urls, coffee_type"
+            ).eq("cafe_id", cafe_id)
+        ).order("visited_at", desc=True).execute()
         
         average_rating = None
         log_count = 0
@@ -811,6 +1037,7 @@ async def get_cafe_details(cafe_identifier: str):
                     "comment": log.get("comment"),
                     "photo_urls": log.get("photo_urls", []),
                     "coffee_type": log.get("coffee_type"),
+                    "mode": log.get("mode", "drink"),
                     "is_public": True,
                     "anonymous": log.get("anonymous", False),
                     "author_display_name": author_display_name,

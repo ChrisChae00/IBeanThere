@@ -1,5 +1,23 @@
 # Cafe Curation Rules
 
+> **Decided but not yet implemented** — see `docs/product/direction.md` (local-only,
+> not tracked in this repo) for the full rationale.
+>
+> - **Rule 1 (no franchises) is being retired.** The new bar is "can this cafe name
+>   its roaster", applied per location. `brand_status` stays, but only as a display
+>   / admin-review hint.
+> - **A three-trait observation model replaces the franchise/venue rules above**
+>   (`sells_beans`, `roasts_on_site`, `filter_coffee`) — dated yes/no observations
+>   with a source, stored in `cafe_trait_observations`.
+> - **`venue_traits` is demoted to a raw OSM hint.** What a reader sees comes from
+>   the observation table instead. OSM's `roastery` tag is not converted into an
+>   observation — being tagged as a roastery-adjacent place does not mean the cafe
+>   roasts on site.
+> - **The seed pipeline is being redone** as an export/review/import cycle.
+>
+> **The rest of this document describes what the code does today.** It will be
+> rewritten once the implementation lands (see the plan's Phase 8).
+
 IBeanThere lists **local, independent cafes that serve coffee**. Two independent rules
 enforce that, both at registration time and against data already stored. Neither rule
 uses a hardcoded list of brand names, so they behave the same in Toronto, Chicago, or
@@ -9,6 +27,8 @@ Both rules read OpenStreetMap data that registration already fetches, so neither
 network round trip to the happy path.
 
 ## Rule 1 — No franchises
+
+> **Slated for removal.** See the block above. What follows is current behaviour.
 
 A brand is a franchise when it has **100 or more locations worldwide**
 (`FRANCHISE_OUTLET_THRESHOLD` in `app/services/franchise_service.py`).
@@ -75,6 +95,9 @@ Migrations `010_add_franchise_classification.sql` and `011_add_venue_category.sq
 | `cafe_brands` | per-brand outlet count cache + `admin_override` |
 
 ### venue_traits
+
+> **Slated for demotion.** What a reader sees will come from `cafe_trait_observations`
+> instead. What follows is current behaviour.
 
 Descriptive traits collected for **future** filtering. Nothing reads them yet.
 

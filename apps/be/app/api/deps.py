@@ -7,6 +7,11 @@ from app.core.permissions import UserRole
 # Security scheme for JWT tokens
 security = HTTPBearer()
 
+# Same scheme, but a missing or bad token is not an error. Used by endpoints that
+# are public but say a little more to someone signed in -- "here is what people
+# report about this cafe" plus "and here is what you reported".
+optional_security = HTTPBearer(auto_error=False)
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     supabase: Client = Depends(get_supabase_client)
@@ -49,6 +54,26 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed"
         )
+
+async def get_optional_user(
+    credentials: HTTPAuthorizationCredentials = Depends(optional_security),
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    The signed-in user, or None.
+
+    Never raises: a public endpoint must keep serving its public answer when the
+    token is absent, expired or malformed. Anything that must not be seen by a
+    stranger belongs behind `get_current_user`, not behind this.
+    """
+    if credentials is None:
+        return None
+    try:
+        auth_user = supabase.auth.get_user(credentials.credentials)
+        return auth_user.user if auth_user and auth_user.user else None
+    except Exception:
+        return None
+
 
 async def verify_review_owner(
     review_id: str,
