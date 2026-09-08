@@ -13,12 +13,15 @@ out/
 .turbo/
 .cache/
 
-# Env files
+# Env files — ignore every shape (.env, .env.local, foo.env, foo.env.bar), then
+# name the one exception. `!.env.example` must be the LAST env rule: a later
+# ignore pattern that also matches .env.example (e.g. *.env.*) re-ignores it,
+# since git resolves overlapping patterns in file order, last match wins.
 .env
 .env.*
-!.env.example
 *.env
 *.env.*
+!.env.example
 
 # Logs
 logs/
@@ -60,20 +63,23 @@ coverage/
 .ipynb_checkpoints/
 Thumbs.db
 
-# Project-specific
-map-feature-implementation.plan.md
-VISITS_AND_TRENDING.md
+# apps/be/scripts/ is a working scratchpad (seed runs, one-off migrations, dedupe
+# passes) and stays out of the repo by default. A script or migration is tracked
+# ONLY when a tracked doc names it as part of a documented, reproducible
+# procedure — otherwise the doc makes a promise nobody outside this machine can
+# run. Add an exception here at the same time you add that reference, not before.
 apps/be/scripts/*
+# named in docs/architecture/google-place-photo-fallback.md
 !apps/be/scripts/backfill_google_place_ids.py
 !apps/be/scripts/migrations/
 apps/be/scripts/migrations/*
+# same doc, same reason
 !apps/be/scripts/migrations/015_google_photo_usage.sql
-/docs/
-!docs/
+
+# docs/ is local-only (handoff notes, engineering log, product/plans drafts) except
+# docs/architecture/, which is the public design-doc set and ships with the repo.
 docs/*
 !docs/architecture/
-docs/architecture/*
-!docs/architecture/google-place-photo-fallback.md
 
 # Temporary/Development files
 *.tmp
