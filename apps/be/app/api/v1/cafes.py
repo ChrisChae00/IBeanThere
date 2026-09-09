@@ -1479,7 +1479,7 @@ async def register_cafe(
                 navigator_id = current_user.id
                 update_data["navigator_id"] = navigator_id
 
-            if unique_user_count >= 3:
+            if unique_user_count >= 3 and not existing_cafe.get("blacklist_history_id"):
                 # Three separate people is still what verifies a cafe. Only the roles
                 # handed out for being second and third are gone.
                 update_data["status"] = "verified"
@@ -2106,6 +2106,8 @@ async def get_pending_cafes(
                 business_hours=cafe.get("business_hours"),
             ))
 
+        for item, row in zip(cafes, sorted_data):
+            item.has_deletion_history = bool(row.get("blacklist_history_id"))
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
 
     except Exception as e:
@@ -2117,8 +2119,9 @@ async def get_pending_cafes(
 
 @router.get("/admin/all", response_model=CafeSearchResponse)
 async def get_all_cafes_admin(
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    q: str = Query("", max_length=100),
     cafe_status: Optional[str] = Query(None, alias="status"),
     brand_status: Optional[str] = Query(None, description="local | franchise | unknown"),
     current_user = Depends(require_admin_role),
@@ -2136,9 +2139,13 @@ async def get_all_cafes_admin(
     """
     try:
         offset = (page - 1) * page_size
+        # Same name/address substring search as the map, stripped of filter syntax.
+        term = "".join(c for c in q.strip() if c.isalnum() or c.isspace() or c in "-'")
 
         # Count query
         count_query = supabase.table("cafes").select("id", count="exact")
+        if term:
+            count_query = count_query.or_(f"name.ilike.%{term}%,address.ilike.%{term}%")
         if cafe_status:
             count_query = count_query.eq("status", cafe_status)
         if brand_status:
@@ -2148,6 +2155,8 @@ async def get_all_cafes_admin(
 
         # Data query with pagination
         data_query = supabase.table("cafes").select("*")
+        if term:
+            data_query = data_query.or_(f"name.ilike.%{term}%,address.ilike.%{term}%")
         if cafe_status:
             data_query = data_query.eq("status", cafe_status)
         if brand_status:
@@ -2228,6 +2237,8 @@ async def get_all_cafes_admin(
                 business_hours=cafe.get("business_hours"),
             ))
 
+        for item, row in zip(cafes, result.data):
+            item.has_deletion_history = bool(row.get("blacklist_history_id"))
         return CafeSearchResponse(cafes=cafes, total_count=total_count)
 
     except Exception as e:
@@ -2351,16 +2362,14 @@ async def admin_delete_cafe(
     """
     try:
         # Check if cafe exists
-        cafe_result = supabase.table("cafes").select("id").eq("id", cafe_id).single().execute()
-        
-        if not cafe_result.data:
+        result = supabase.rpc("delete_cafe_with_history", {"target": cafe_id}).execute()
+        if not result.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cafe not found"
             )
         
-        # Delete cafe (cascade deletes checkins and visits)
-        result = supabase.table("cafes").delete().eq("id", cafe_id).execute()
+        # The RPC stores the minimal identity and deletes in the same transaction.
         _drop_trending_cache()
 
         return {
@@ -2762,7 +2771,7 @@ async def drop_bean(
         
         # 9. Auto-verification: Check if 3 unique users have dropped beans
         triggered_verification = False
-        cafe_status_result = supabase.table("cafes").select("status, navigator_id").eq("id", cafe_id).single().execute()
+        cafe_status_result = supabase.table("cafes").select("status, navigator_id, blacklist_history_id").eq("id", cafe_id).single().execute()
         cafe_status = cafe_status_result.data.get("status") if cafe_status_result.data else "pending"
 
         # App-seeded cafes (e.g. OSM import) have no navigator yet — the
@@ -2772,7 +2781,7 @@ async def drop_bean(
             navigator_id = current_user.id
             supabase.table("cafes").update({"navigator_id": navigator_id}).eq("id", cafe_id).execute()
 
-        if cafe_status == "pending":
+        if cafe_status == "pending" and not (cafe_status_result.data or {}).get("blacklist_history_id"):
             # Count unique users who dropped beans at this cafe
             unique_users_result = supabase.table("cafe_beans").select("user_id").eq("cafe_id", cafe_id).execute()
             unique_user_ids = list(set([bean["user_id"] for bean in unique_users_result.data])) if unique_users_result.data else []

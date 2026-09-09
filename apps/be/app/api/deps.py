@@ -1,8 +1,12 @@
+import logging
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from supabase import Client
 from app.database.supabase import get_supabase_client
 from app.core.permissions import UserRole
+
+logger = logging.getLogger(__name__)
 
 # Security scheme for JWT tokens
 security = HTTPBearer()
@@ -37,6 +41,20 @@ async def get_current_user(
         # Get user role from public.users table
         user_id = auth_user.user.id
         try:
+            blocked = supabase.table("user_blacklist").select("user_id").eq(
+                "user_id", user_id
+            ).eq("status", "blocked").limit(1).execute().data
+        except Exception:
+            # Fail closed: not knowing whether an account is blocked is not permission
+            # to serve it. But say why in the log -- this guard sits in front of every
+            # authenticated endpoint, so when it breaks the whole signed-in app returns
+            # 503 and the response alone cannot tell an outage from an unapplied
+            # migration.
+            logger.exception("user_blacklist lookup failed; refusing the request")
+            raise HTTPException(503, "Account status unavailable")
+        if blocked:
+            raise HTTPException(403, "Account blocked")
+        try:
             user_profile = supabase.table("users").select("role").eq("id", user_id).single().execute()
             role = user_profile.data.get("role", "user") if user_profile.data else "user"
         except Exception:
@@ -69,8 +87,7 @@ async def get_optional_user(
     if credentials is None:
         return None
     try:
-        auth_user = supabase.auth.get_user(credentials.credentials)
-        return auth_user.user if auth_user and auth_user.user else None
+        return await get_current_user(credentials, supabase)
     except Exception:
         return None
 

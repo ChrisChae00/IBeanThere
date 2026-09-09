@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { AlertCircle, Coffee, SlidersHorizontal } from 'lucide-react';
-import PendingCafesList from './PendingCafesList';
+import BlacklistManager from './BlacklistManager';
 import TraitSuggestionsList from './TraitSuggestionsList';
 import AllCafesList from './AllCafesList';
 import { getAdminReportsRepository, ReportsList } from '@/features/admin';
 
-type Tab = 'cafes' | 'traits' | 'reports';
+type Tab = 'cafes' | 'traits' | 'reports' | 'cafe_blacklist' | 'user_blacklist';
 type CafeSubTab = 'pending' | 'all';
 
 export default function AdminDashboardClient() {
@@ -16,6 +16,13 @@ export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<Tab>('cafes');
   const [cafeSubTab, setCafeSubTab] = useState<CafeSubTab>('pending');
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const mapText = useTranslations('map.filters');
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setQuery(search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -34,6 +41,7 @@ export default function AdminDashboardClient() {
     <div>
       {/* Navigation Tabs */}
       <div className="flex items-center gap-4 mb-8 border-b border-border overflow-x-auto">
+        {(['cafe_blacklist', 'user_blacklist'] as const).map(tab => <button key={tab} onClick={() => setActiveTab(tab)} aria-pressed={activeTab === tab} className={`px-4 py-3 whitespace-nowrap border-b-2 ${activeTab === tab ? 'border-primary' : 'border-transparent'}`}>{t(tab)}</button>)}
         <button
           onClick={() => setActiveTab('cafes')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
@@ -109,8 +117,8 @@ export default function AdminDashboardClient() {
             </button>
           </div>
 
-          {cafeSubTab === 'pending' && <PendingCafesList />}
-          {cafeSubTab === 'all' && <AllCafesList />}
+          <input type="search" aria-label={mapText('search_placeholder')} placeholder={mapText('search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} maxLength={100} className="h-11 w-full mb-4 rounded border border-border bg-surface px-3" />
+          <AllCafesList key={`${cafeSubTab}:${query}`} query={query} initialStatus={cafeSubTab === 'pending' ? 'pending' : 'all'} />
         </div>
       )}
 
@@ -124,6 +132,8 @@ export default function AdminDashboardClient() {
       )}
 
       {/* Reports Tab */}
+      {activeTab === 'cafe_blacklist' && <BlacklistManager key="cafes" kind="cafes" />}
+      {activeTab === 'user_blacklist' && <BlacklistManager key="users" kind="users" />}
       {activeTab === 'reports' && (
         <div>
           <div className="mb-6">

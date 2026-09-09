@@ -14,6 +14,7 @@ export interface PendingCafe {
   verification_count: number;
   verified_at: string | null;
   admin_verified: boolean;
+  has_deletion_history?: boolean;
   navigator_id: string | null;
   created_at: string;
   updated_at: string | null;
@@ -99,6 +100,7 @@ export interface AdminUpdateResponse {
 }
 
 export interface AllCafesParams {
+  q?: string;
   page?: number;
   pageSize?: number;
   status?: 'pending' | 'verified' | 'disputed';
@@ -107,6 +109,7 @@ export interface AllCafesParams {
 export async function getAllCafes(params?: AllCafesParams): Promise<PendingCafesResponse> {
   const headers = await getAuthHeaders();
   const searchParams = new URLSearchParams();
+  if (params?.q) searchParams.set('q', params.q);
   if (params?.page) searchParams.set('page', String(params.page));
   if (params?.pageSize) searchParams.set('page_size', String(params.pageSize));
   if (params?.status) searchParams.set('status', params.status);

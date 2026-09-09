@@ -6,8 +6,12 @@
 
 ## Migrations
 
+Admin blacklist support requires migration 022 before backend deployment. See
+[blacklist rollout and checks](../../docs/architecture/blacklists.md) for deletion
+history, seed exclusion, re-registration review, and account restrictions.
+
 Numbered SQL files in `scripts/migrations/`, applied by hand through the Supabase SQL
-editor in dependency order. Latest checked-in migration: `020_trait_note.sql`.
+editor in dependency order. Latest checked-in migration: `022_admin_blacklists.sql`.
 
 The trait workflow requires the base `cafe_trait_observations` table (migration 017),
 then `019_trait_suggestions.sql` (`status` and pending queue index), then

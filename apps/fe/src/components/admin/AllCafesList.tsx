@@ -12,12 +12,12 @@ const PAGE_SIZE = 20;
 
 type StatusFilter = 'all' | 'pending' | 'verified' | 'disputed';
 
-export default function AllCafesList() {
+export default function AllCafesList({ query = '', initialStatus = 'all' }: { query?: string; initialStatus?: StatusFilter }) {
   const t = useTranslations('admin');
   const [cafes, setCafes] = useState<PendingCafe[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function AllCafesList() {
     setIsLoading(true);
     setError(null);
     try {
-      const params: AllCafesParams = { page, pageSize: PAGE_SIZE };
+      const params: AllCafesParams = { page, pageSize: PAGE_SIZE, q: query };
       if (statusFilter !== 'all') params.status = statusFilter;
       const response = await getAllCafes(params);
       setCafes(response.cafes);
@@ -57,7 +57,7 @@ export default function AllCafesList() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, statusFilter]);
+  }, [page, statusFilter, query]);
 
   useEffect(() => {
     fetchCafes();

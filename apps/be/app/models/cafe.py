@@ -135,6 +135,7 @@ class CafeResponse(BaseModel):
     verification_count: int
     verified_at: Optional[datetime] = None
     admin_verified: bool = False
+    has_deletion_history: bool = False  # Only populated by admin list endpoints.
     
     # Founding Crew
     navigator_id: Optional[str] = None
@@ -192,4 +193,3 @@ class GooglePlacesLookupResponse(BaseModel):
     business_hours: Optional[Dict[str, Any]] = None
     google_maps_url: Optional[str] = None
     place_id: Optional[str] = None
-
