@@ -32,6 +32,40 @@ behave the same in Toronto, Chicago, or Seoul.
 Both rules read OpenStreetMap data that registration already fetches, so neither adds a
 network round trip to the happy path.
 
+## Trait suggestions (commit `4f95bfe`)
+
+The three traits are `sells_beans`, `filter_coffee`, and `roasts_on_site`.
+Only approved observations contribute to summaries and map flags; the service also
+filters pending rows so callers cannot accidentally publish them.
+
+| Surface | Stored status | Actual gate |
+|---|---|---|
+| Cafe-page suggestion | `pending` | Signed-in user; admin approval before aggregation |
+| Registration or existing-cafe check-in | `approved` | Registration distance check using submitted coordinates |
+| New log with `sells_beans` present | `approved` | Signed-in user; no purchase-mode or location proof check |
+
+The purchase form sends `sells_beans`, initially checked. Unchecking it submits
+`false`, which is a negative observation, not an opt-out. The backend accepts this
+field on drink creation too; the UI restriction is not a security boundary.
+See SEC-07 in the [security audit](../security-audit-2026-09-09.md).
+
+Paths below have the `/api/v1` prefix:
+
+| Method and path | Contract |
+|---|---|
+| `GET /cafes/{cafe_id}/traits` | Approved summaries, with viewer-specific `mine` |
+| `POST /cafes/{cafe_id}/traits/{trait}` | Returns `{submitted: true, traits: [...]}`; submission does not change the summary |
+| `DELETE /cafes/{cafe_id}/traits/{trait}` | Withdraws the caller's observations, including pending rows |
+| `GET /cafes/traits/suggestions` | Admin only; oldest 100 pending rows with cafe, username and note |
+| `POST /cafes/traits/suggestions/{id}/approve` | Admin only; updates a pending row in place; 404 if absent or already reviewed |
+| `DELETE /cafes/traits/suggestions/{id}` | Admin only; deletes a pending row |
+
+Notes are limited to 200 characters and retained only for positive `sells_beans` or
+`filter_coffee` observations. The summary uses the current observation's note.
+Migrations 019 and 020 add status and note constraints after the base table in 017.
+The queue has no pagination beyond its first 100 rows and these writes have no
+dedicated abuse limit. Approval is moderation, not proof of a visit or purchase.
+
 ## Rule 1 — No franchises (retired)
 
 > **No longer rejects.** Registration runs this classification and stores the verdict
@@ -95,7 +129,7 @@ Migrations `010_add_franchise_classification.sql` and `011_add_venue_category.sq
 | Column | Meaning |
 |---|---|
 | `cafes.brand_key` | normalized brand this cafe belongs to |
-| `cafes.brand_status` | `local` \| `unknown` (franchises are deleted, never stored) |
+| `cafes.brand_status` | Brand classification, including `franchise`; a review/display hint, not a registration rejection |
 | `cafes.serves_coffee` | `false` hides a venue an admin judged not to serve coffee |
 | `cafes.category_source` | `osm` \| `self_declared` \| `admin` \| `unverified` |
 | `cafes.venue_traits` | `TEXT[]`, GIN indexed — see below |
@@ -234,7 +268,7 @@ caches exist for that reason. Prefer one batched sweep over per-row lookups.
 
 - The threshold catches chains by OSM presence, not legal structure. Country Style (79
   OSM locations) is a franchise that passes; a 100-location specialty roaster would be
-  rejected. `FRANCHISE_OUTLET_THRESHOLD` is one constant.
+  classified as a franchise. This no longer rejects registration. `FRANCHISE_OUTLET_THRESHOLD` is one constant.
 - Venues absent from OSM cannot be classified at all. Seven bubble tea rows had to be
   removed by hand during the initial purge for this reason.
 - `roastery` coverage in OSM is thin. Trustworthy roastery filtering needs a

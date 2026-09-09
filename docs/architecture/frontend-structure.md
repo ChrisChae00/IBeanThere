@@ -1,5 +1,24 @@
 # Frontend Repository Structure
 
+## Coffee workflow changes (`4f95bfe`)
+
+- `CafeTraits.tsx` submits suggestions through `suggestTraitObservation`; pending
+  submissions leave approved summaries unchanged. Trait reads use `no-store`.
+- `admin/TraitSuggestionsList.tsx` displays the pending queue, including notes, and
+  calls admin approve/reject endpoints. Backend authorization enforces access.
+- `CoffeeLogForm.tsx` asks purchase users whether the cafe sells beans (checked by
+  default). Unchecking submits a negative observation. “Want again” starts unset;
+  selecting the chosen answer again clears the local selection.
+- `app/actions/cafe.ts` calls `revalidateTag` for `cafe-${cafeId}` after log creation
+  and My Logs edits/deletes. Detail fetches retain their 120-second revalidation.
+  This is not complete privacy revocation: slug/ID tag mismatch and other cached
+  feeds remain audit concerns (SEC-10 in the [security audit](../security-audit-2026-09-09.md)).
+- `shared/ui/FlipText.tsx` supplies the landing link hover animation. CSS handles
+  reduced motion; duplicate letter faces are hidden from accessibility and selection.
+
+The production build passed before this commit, with Supabase Edge Runtime warnings.
+That check does not establish browser accessibility or resolution of audit findings.
+
 ```
 apps/fe/
 ├── .env.local            # Environment variables

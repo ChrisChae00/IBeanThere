@@ -41,13 +41,17 @@ apps/be/
 - **API versioning** (v1 currently active)
 - **Supabase Integration** for authentication and database management (if applicable to the core infrastructure)
 - **Environment-based** dependency and secret management
-- **Algorithmic cafe curation** rejecting franchises and non-coffee venues at registration — see [Cafe Curation Rules](./cafe-curation.md)
+- **Cafe curation** classifies brands without rejecting franchises and rejects non-coffee venues — see [Cafe Curation Rules](./cafe-curation.md)
+- **Trait suggestions** use `services/traits.py` for approved-only aggregation and note cleanup, with admin review endpoints in `api/v1/cafes.py`.
+- **Coffee logs and badges** use `services/coffee_logs.py` for public log projections and `services/badges.py` for shared badge awards. Log creation handles an absent `cafe_beans` row with `limit(1)` before inserting the first drop.
 
 ## Database Migrations
 
 Numbered SQL files in `apps/be/scripts/migrations/`, applied by hand through the Supabase
-SQL editor. Latest: `015_google_photo_usage.sql`.
+SQL editor. Latest checked-in file: `020_trait_note.sql`. Trait suggestions require
+the base table from 017, followed by 019 and 020. The full bootstrap is not tracked;
+see [backend migration notes](../../apps/be/README.md#migrations).
 
-The latest migration and its endpoint support an optional, disabled-by-default Google
+Migration 015 and its endpoint support an optional, disabled-by-default Google
 photo fallback for explore cards. See [Google Place Photo card fallback](./google-place-photo-fallback.md)
 for the data flow, billing guard, backfill, and activation gates.
