@@ -108,6 +108,7 @@ export default function CafeInfoSection({
           <p className="text-cardText">{cafe.address}</p>
           <div className="pt-1">
             <CafeMapActions
+              cafeId={cafe.id}
               name={cafe.name}
               address={cafe.address}
               latitude={cafe.latitude}

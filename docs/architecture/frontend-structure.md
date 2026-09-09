@@ -1,5 +1,16 @@
 # Frontend Repository Structure
 
+## Analytics
+
+Three events and a pageview, mounted once from `ClientProviders` as `AnalyticsWatcher`.
+`posthog-js` is imported at runtime rather than bundled, no URL leaves the browser with
+an identifier in it, and nothing is stored on the reader's device. Absent
+`NEXT_PUBLIC_POSTHOG_KEY` it is entirely inert, which is the local default. The CSP in
+`next.config.js` has to name the host or every event is dropped silently.
+
+Full contract, including what each event carries and why the identity is bootstrapped
+rather than `identify()`d: `docs/architecture/analytics.md`.
+
 ## Coffee workflow changes (`4f95bfe`)
 
 - `CafeTraits.tsx` submits suggestions through `suggestTraitObservation`; pending

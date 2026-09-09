@@ -1256,8 +1256,13 @@
         "link_label": "Google Privacy Policy"
       },
       "contact": {
-        "title": "15. Contact Us",
+        "title": "16. Contact Us",
         "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: ibeanthere.app@gmail.com"
+      },
+      "analytics": {
+        "title": "15. Analytics",
+        "content": "We use PostHog to count how the Services are used: page views, and three product events (a cafe page opened, a map or directions link taken, a coffee log saved). These carry a cafe identifier and, when you are signed in, your account identifier. They do not carry your name, email address, or the text of anything you write. Our configuration stores nothing on your device for this purpose, so no cookie or similar identifier is set and there is no analytics banner to accept or decline. As a result, if you are not signed in, we cannot recognise you across visits.",
+        "link_label": "PostHog Privacy Policy"
       }
     }
   },

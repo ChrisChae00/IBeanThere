@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getCafeDetail } from '@/lib/api/cafes';
 import { createLog } from '@/lib/api/logs';
 import { revalidateCafe } from '@/app/actions/cafe';
+import { capture } from '@/lib/analytics';
 import { LogFormData, CafeDetailResponse } from '@/types/api';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import { LoadingSpinner } from '@/shared/ui';
@@ -55,6 +56,10 @@ export default function WriteLogPage() {
     try {
       const locale = params.locale as string;
       await createLog(cafe!.id, data);
+      /* After the write, not on submit: a log that failed validation is not a log.
+         `mode` is the whole point of the pivot -- a cup drunk and a bag bought are
+         different acts, and counting them together would hide which one people do. */
+      capture('coffee_log_saved', { cafe_id: cafe!.id, mode: data.mode });
       // The page being returned to reports a log count that no longer holds.
       await revalidateCafe(cafe!.id);
       const cafePath = cafe!.slug || cafe!.id;

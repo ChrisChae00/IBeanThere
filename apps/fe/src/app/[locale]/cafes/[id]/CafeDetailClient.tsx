@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -20,6 +20,7 @@ import SaveButtons from '@/components/cafe/SaveButtons';
 import CollectionSelectorModal from '@/components/cafe/CollectionSelectorModal';
 import { useAuth } from '@/hooks/useAuth';
 import { ReportModal, useReportModal } from '@/features/report';
+import { capture } from '@/lib/analytics';
 
 const ImageGalleryModal = dynamic(() => import('@/shared/ui/ImageGalleryModal'), { ssr: false });
 
@@ -48,6 +49,13 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   /* Closing the picker is the moment the save buttons can be wrong, so it is the
      moment they re-read what is actually saved. */
   const [saveSync, setSaveSync] = useState(0);
+
+  /* Keyed on the cafe rather than the mount: the router keeps this component alive
+     across a slug change, and the uuid is what joins this to `cafe_action_taken` --
+     the URL may carry either a slug or an id for the same place. */
+  useEffect(() => {
+    capture('cafe_detail_opened', { cafe_id: cafe.id });
+  }, [cafe.id]);
 
   const foundingCrew = cafe.founding_crew;
 

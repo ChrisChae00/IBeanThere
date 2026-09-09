@@ -10,6 +10,10 @@ interface NavigationButtonProps {
   longitude: number;
   size?: 'sm' | 'md';
   className?: string;
+  /* Fired with the app the reader chose, before handing off. Reporting the *choice*
+     rather than the button keeps a reader who opened the menu and thought better of it
+     out of the count. */
+  onSelect?: () => void;
 }
 
 export default function NavigationButton({
@@ -17,6 +21,7 @@ export default function NavigationButton({
   longitude,
   size = 'md',
   className = '',
+  onSelect,
 }: NavigationButtonProps) {
   const t = useTranslations('cafe.navigation');
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +54,7 @@ export default function NavigationButton({
   }, [isOpen]);
 
   const handleAppClick = (appId: NavigationApp) => {
+    onSelect?.();
     openNavigation(latitude, longitude, appId);
     setIsOpen(false);
   };

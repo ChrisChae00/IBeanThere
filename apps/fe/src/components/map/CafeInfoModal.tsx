@@ -122,6 +122,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
         )}
 
         <CafeMapActions
+          cafeId={cafe.id}
           name={cafe.name}
           address={cafe.address}
           latitude={cafe.latitude}

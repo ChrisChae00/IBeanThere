@@ -2,6 +2,13 @@ import { getTranslations } from 'next-intl/server';
 
 export const revalidate = 86400;
 
+/* Sections that name a third party owe the reader that party's own policy. Second one
+   of these, so it stops being an `if` on a literal section name. */
+const POLICY_LINKS: Record<string, string> = {
+  google_maps: 'https://policies.google.com/privacy',
+  analytics: 'https://posthog.com/privacy',
+};
+
 export default async function PrivacyPage({
   params
 }: {
@@ -26,6 +33,7 @@ export default async function PrivacyPage({
     'rights',
     'changes',
     'google_maps',
+    'analytics',
     'contact'
   ];
 
@@ -39,7 +47,7 @@ export default async function PrivacyPage({
         <div className="bg-background p-4 rounded-sm border border-border mb-8 text-sm text-ink-secondary">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
-            {tLegal('last_updated', { date: '2026-08-31' })}
+            {tLegal('last_updated', { date: '2026-09-09' })}
           </p>
         </div>
 
@@ -74,14 +82,14 @@ export default async function PrivacyPage({
             <div key={section}>
               <h2 className="text-xl font-semibold mb-3">{t(`${section}.title`)}</h2>
               <p className="whitespace-pre-wrap">{t(`${section}.content`)}</p>
-              {section === 'google_maps' ? (
+              {POLICY_LINKS[section] ? (
                 <a
-                  href="https://policies.google.com/privacy"
+                  href={POLICY_LINKS[section]}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 inline-block underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                  {t('google_maps.link_label')}
+                  {t(`${section}.link_label`)}
                 </a>
               ) : null}
             </div>
