@@ -13,6 +13,8 @@ import FoundingCrewAvatars from '@/components/cafe/FoundingCrewAvatars';
 import CafePhotoHero from '@/components/cafe/CafePhotoHero';
 import CafeActionsMenu from '@/components/cafe/CafeActionsMenu';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
+import CafeTraits from '@/components/cafe/CafeTraits';
+import CafeBeansRecent from '@/components/cafe/CafeBeansRecent';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
 import SaveButtons from '@/components/cafe/SaveButtons';
 import CollectionSelectorModal from '@/components/cafe/CollectionSelectorModal';
@@ -183,6 +185,16 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* The coffee, before the logs. Someone opening this page wants to know what
+          they can drink and what they can carry home; the log feed is who said so. */}
+      <section className="mb-8 rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+        <div className="space-y-6 p-6">
+          <CafeTraits cafeId={cafe.id} />
+          <div className="h-px bg-brand" />
+          <CafeBeansRecent cafeId={cafe.id} />
         </div>
       </section>
 

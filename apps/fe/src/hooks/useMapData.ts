@@ -99,7 +99,8 @@ export function useMapData() {
             role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2'
           }))
         } : undefined,
-        main_image: cafe.main_image
+        main_image: cafe.main_image,
+        trait_flags: cafe.trait_flags
       }));
 
       addCafes(cafes, { lat: params.lat, lng: params.lng }, params.radius);

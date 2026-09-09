@@ -42,6 +42,7 @@ export interface CafeSearchResponse {
       }>;
     };
     main_image?: string;
+    trait_flags?: Record<string, boolean>;
   }>;
   total_count: number;
   cache_hit?: boolean;
@@ -155,6 +156,8 @@ export interface CoffeeLog {
   cafe_id: string;
   user_id: string;
   visited_at: string;
+  /* 'drink' | 'purchase'. A purchase has no rating; see LogFormData. */
+  mode: 'drink' | 'purchase';
   rating?: number;
   comment?: string;
   photo_urls?: string[];
@@ -166,27 +169,17 @@ export interface CoffeeLog {
   price_currency?: string;
   atmosphere_rating?: number;
   atmosphere_tags?: string[];
-  parking_info?: string;
   acidity_rating?: number;
   body_rating?: number;
   sweetness_rating?: number;
   bitterness_rating?: number;
   aftertaste_rating?: number;
-  bean_origin?: string;
-  processing_method?: string;
-  roast_level?: string;
-  extraction_method?: string;
-  extraction_equipment?: string;
   aroma_rating?: number;
   overall_taste_rating?: number;
-  wifi_quality?: string;
-  wifi_rating?: number;
-  outlet_info?: string;
-  furniture_comfort?: string;
-  noise_level?: string;
-  noise_rating?: number;
-  temperature_lighting?: string;
-  facilities_info?: string;
+  bean_id?: string;
+  bean_name_raw?: string;
+  want_again?: boolean;
+  bean?: BeanRef;
   author_display_name?: string;
   author_username?: string;
   author_avatar_url?: string;
@@ -244,6 +237,13 @@ export interface CafeLogsResponse {
 }
 
 export interface LogFormData {
+  /*
+    The unit of a log is an experience, and there are two of them: a cup drunk here,
+    or a bag bought here. A drink needs a rating; a purchase does not -- scoring a
+    coffee you have not brewed yet means inventing a number or not recording the
+    purchase at all, and the purchase is the thing worth knowing.
+  */
+  mode: 'drink' | 'purchase';
   rating?: number;
   comment?: string;
   photo_urls?: string[];
@@ -255,27 +255,68 @@ export interface LogFormData {
   price_currency?: string;
   atmosphere_rating?: number;
   atmosphere_tags?: string[];
-  parking_info?: string;
   acidity_rating?: number;
   body_rating?: number;
   sweetness_rating?: number;
   bitterness_rating?: number;
   aftertaste_rating?: number;
-  bean_origin?: string;
-  processing_method?: string;
-  roast_level?: string;
-  extraction_method?: string;
-  extraction_equipment?: string;
   aroma_rating?: number;
   overall_taste_rating?: number;
-  wifi_quality?: string;
-  wifi_rating?: number;
-  outlet_info?: string;
-  furniture_comfort?: string;
-  noise_level?: string;
-  noise_rating?: number;
-  temperature_lighting?: string;
-  facilities_info?: string;
+  /* Explicit null unlinks the bean; leaving the key out keeps whatever is stored. */
+  bean_id?: string | null;
+  bean_name_raw?: string;
+  want_again?: boolean;
+}
+
+export interface Roaster {
+  id: string;
+  name: string;
+  city?: string;
+  website?: string;
+}
+
+export interface Bean {
+  id: string;
+  name: string;
+  roaster_id: string;
+  roaster_name?: string;
+  origin?: string;
+  process?: string;
+  roast_level?: string;
+}
+
+/* What a log carries about its bean. No author, no created_by -- see the backend note. */
+export interface BeanRef {
+  id: string;
+  name: string;
+  roaster_name?: string;
+}
+
+export interface TraitSummary {
+  trait: string;
+  yes: number;
+  no: number;
+  latest_value?: boolean;
+  last_observed_at?: string;
+  seed_value?: boolean;
+  seed_observed_at?: string;
+  mine?: boolean;
+}
+
+export interface CafeBeanEntry {
+  bean_id: string;
+  name: string;
+  roaster_name?: string;
+  origin?: string;
+  roast_level?: string;
+  last_seen_at: string;
+  count: number;
+}
+
+/* Two lists, never merged: poured here is not the same claim as sold here. */
+export interface CafeBeansResponse {
+  drink: CafeBeanEntry[];
+  purchase: CafeBeanEntry[];
 }
 
 export interface FoundingStats {

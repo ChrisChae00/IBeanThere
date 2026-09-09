@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CheckIcon, RefreshIcon, SearchIcon, UserLocationIcon } from '@/shared/ui';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/base/tooltip';
-import { CafeMapData } from '@/types/map';
+import { CafeMapData, CafeTraitId } from '@/types/map';
 import { searchCafesByText } from '@/lib/api/cafes';
 
 /*
@@ -16,9 +16,18 @@ import { searchCafesByText } from '@/lib/api/cafes';
   Filters narrow together (local AND verified, not local OR verified): each one the
   reader turns on is a condition they are adding. None on means every pin.
 */
-export type MapFilterId = 'local' | 'verified' | 'trending';
+export type MapFilterId = CafeTraitId | 'local' | 'verified' | 'trending';
 
-export const MAP_FILTER_IDS: MapFilterId[] = ['local', 'verified', 'trending'];
+/* Coffee first: the three traits are why someone opens the map, and 'local' and
+   'verified' say something about the entry rather than about the coffee. */
+export const MAP_FILTER_IDS: MapFilterId[] = [
+  'sells_beans',
+  'roasts_on_site',
+  'filter_coffee',
+  'local',
+  'verified',
+  'trending',
+];
 
 function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (

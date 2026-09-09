@@ -1,22 +1,21 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Input, IntensitySlider } from '@/shared/ui';
+import { IntensitySlider } from '@/shared/ui';
+
+/*
+  How it tasted, on seven sliders.
+
+  Everything else this section used to hold is gone: bean origin, process and roast
+  level are properties of a bean, not of one cup, so they belong to the catalogue
+  row the log points at -- typed free-hand into every log they were seven spellings
+  of the same coffee. Extraction method and equipment described the barista's work,
+  which is not what this app asks anyone to remember.
+*/
 
 interface AdvancedCoffeeSectionProps {
   overallTasteRating: number | undefined;
   onOverallTasteRatingChange: (value: number | undefined) => void;
-  beanOrigin: string;
-  onBeanOriginChange: (value: string) => void;
-  processingMethod: string;
-  onProcessingMethodChange: (value: string) => void;
-  roastLevel: string;
-  onRoastLevelChange: (value: string) => void;
-  extractionMethod: string;
-  onExtractionMethodChange: (value: string) => void;
-  extractionEquipment: string;
-  onExtractionEquipmentChange: (value: string) => void;
   aromaRating: number | undefined;
   onAromaRatingChange: (value: number | undefined) => void;
   acidityRating: number | undefined;
@@ -31,34 +30,9 @@ interface AdvancedCoffeeSectionProps {
   onAftertasteRatingChange: (value: number | undefined) => void;
 }
 
-const PROCESSING_METHODS = [
-  { value: 'washed', labelKey: 'processing_method_washed' },
-  { value: 'natural', labelKey: 'processing_method_natural' },
-  { value: 'honey', labelKey: 'processing_method_honey' },
-  { value: 'other', labelKey: 'processing_method_other' }
-];
-
-const ROAST_LEVELS = [
-  { value: 'light', labelKey: 'roast_level_light' },
-  { value: 'medium', labelKey: 'roast_level_medium' },
-  { value: 'medium_dark', labelKey: 'roast_level_medium_dark' },
-  { value: 'dark', labelKey: 'roast_level_dark' }
-];
-
-
 export default function AdvancedCoffeeSection({
   overallTasteRating,
   onOverallTasteRatingChange,
-  beanOrigin,
-  onBeanOriginChange,
-  processingMethod,
-  onProcessingMethodChange,
-  roastLevel,
-  onRoastLevelChange,
-  extractionMethod,
-  onExtractionMethodChange,
-  extractionEquipment,
-  onExtractionEquipmentChange,
   aromaRating,
   onAromaRatingChange,
   acidityRating,
@@ -70,243 +44,42 @@ export default function AdvancedCoffeeSection({
   bodyRating,
   onBodyRatingChange,
   aftertasteRating,
-  onAftertasteRatingChange
+  onAftertasteRatingChange,
 }: AdvancedCoffeeSectionProps) {
   const t = useTranslations('cafe.log');
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [beanInfoExpanded, setBeanInfoExpanded] = useState(true);
-  const [extractionInfoExpanded, setExtractionInfoExpanded] = useState(true);
-  const [tastingNotesExpanded, setTastingNotesExpanded] = useState(true);
+
+  const sliders = [
+    { label: t('aroma'), value: aromaRating, onChange: onAromaRatingChange },
+    { label: t('acidity'), value: acidityRating, onChange: onAcidityRatingChange },
+    { label: t('sweetness'), value: sweetnessRating, onChange: onSweetnessRatingChange },
+    { label: t('bitterness'), value: bitternessRating, onChange: onBitternessRatingChange },
+    { label: t('body'), value: bodyRating, onChange: onBodyRatingChange },
+    { label: t('aftertaste'), value: aftertasteRating, onChange: onAftertasteRatingChange },
+  ];
 
   return (
-    <div className="border border-edge-rule rounded-lg overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-surface-page hover:bg-surface-hover transition-colors"
-        aria-expanded={isExpanded}
-        aria-label={t('coffee_taste_advanced')}
-      >
-        <span className="font-medium text-ink-primary">{t('coffee_taste_advanced')}</span>
-        <svg
-          className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      
-      {isExpanded && (
-        <div className="p-4 space-y-6 bg-surface-raised">
-          {/* Overall Taste Rating */}
-          <IntensitySlider
-            value={overallTasteRating}
-            onChange={onOverallTasteRatingChange}
-            label={t('overall_taste')}
-            min={0}
-            max={10}
-            step={1}
-          />
-
-          {/* Divider */}
-          <div className="border-t border-edge-rule"></div>
-
-          {/* Bean Information */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => setBeanInfoExpanded(!beanInfoExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-ink-primary uppercase tracking-wide hover:text-ink-primary transition-colors"
-              aria-expanded={beanInfoExpanded}
-            >
-              <span>Bean Information</span>
-              <svg
-                className={`w-3 h-3 transition-transform ${beanInfoExpanded ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {beanInfoExpanded && (
-            <div className="space-y-4">
-              <div>
-                <Input
-                  label={t('bean_origin')}
-                  value={beanOrigin}
-                  onChange={(e) => onBeanOriginChange(e.target.value)}
-                  placeholder={t('bean_origin_placeholder')}
-                  aria-label={t('bean_origin')}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-ink-secondary mb-2">
-                  {t('processing_method')}
-                </label>
-                <select
-                  value={processingMethod}
-                  onChange={(e) => onProcessingMethodChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
-                  aria-label={t('processing_method')}
-                >
-                  <option value="">{t('optional')}</option>
-                  {PROCESSING_METHODS.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {t(method.labelKey)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-ink-secondary mb-2">
-                  {t('roast_level')}
-                </label>
-                <select
-                  value={roastLevel}
-                  onChange={(e) => onRoastLevelChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-edge-rule rounded-lg bg-surface-raised text-ink-primary focus:outline-hidden focus:ring-2 focus:ring-brand"
-                  aria-label={t('roast_level')}
-                >
-                  <option value="">{t('optional')}</option>
-                  {ROAST_LEVELS.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {t(level.labelKey)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-edge-rule"></div>
-
-          {/* Extraction Information */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => setExtractionInfoExpanded(!extractionInfoExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-ink-primary uppercase tracking-wide hover:text-ink-primary transition-colors"
-              aria-expanded={extractionInfoExpanded}
-            >
-              <span>Extraction Information</span>
-              <svg
-                className={`w-3 h-3 transition-transform ${extractionInfoExpanded ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {extractionInfoExpanded && (
-            <div className="space-y-4">
-              <div>
-                <Input
-                  label={t('extraction_method')}
-                  value={extractionMethod}
-                  onChange={(e) => onExtractionMethodChange(e.target.value)}
-                  placeholder={t('extraction_method_placeholder')}
-                  aria-label={t('extraction_method')}
-                />
-              </div>
-              
-              <div>
-                <Input
-                  label={t('extraction_equipment')}
-                  value={extractionEquipment}
-                  onChange={(e) => onExtractionEquipmentChange(e.target.value)}
-                  placeholder={t('extraction_equipment_placeholder')}
-                  aria-label={t('extraction_equipment')}
-                />
-              </div>
-            </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-edge-rule"></div>
-
-          {/* Tasting Notes */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => setTastingNotesExpanded(!tastingNotesExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-ink-primary uppercase tracking-wide hover:text-ink-primary transition-colors"
-              aria-expanded={tastingNotesExpanded}
-            >
-              <span>Tasting Notes</span>
-              <svg
-                className={`w-3 h-3 transition-transform ${tastingNotesExpanded ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {tastingNotesExpanded && (
-            <div className="space-y-4">
-              <IntensitySlider
-                value={aromaRating}
-                onChange={onAromaRatingChange}
-                label={t('aroma')}
-                min={0}
-                max={10}
-                step={1}
-              />
-              <IntensitySlider
-                value={acidityRating}
-                onChange={onAcidityRatingChange}
-                label={t('acidity')}
-                min={0}
-                max={10}
-                step={1}
-              />
-              <IntensitySlider
-                value={sweetnessRating}
-                onChange={onSweetnessRatingChange}
-                label={t('sweetness')}
-                min={0}
-                max={10}
-                step={1}
-              />
-              <IntensitySlider
-                value={bitternessRating}
-                onChange={onBitternessRatingChange}
-                label={t('bitterness')}
-                min={0}
-                max={10}
-                step={1}
-              />
-              <IntensitySlider
-                value={bodyRating}
-                onChange={onBodyRatingChange}
-                label={t('body')}
-                min={0}
-                max={10}
-                step={1}
-              />
-              <IntensitySlider
-                value={aftertasteRating}
-                onChange={onAftertasteRatingChange}
-                label={t('aftertaste')}
-                min={0}
-                max={10}
-                step={1}
-              />
-            </div>
-            )}
-          </div>
-        </div>
-      )}
+    <div className="space-y-4">
+      <p className="text-sm font-medium text-ink-secondary">{t('tasting_notes')}</p>
+      <IntensitySlider
+        value={overallTasteRating}
+        onChange={onOverallTasteRatingChange}
+        label={t('overall_taste')}
+        min={0}
+        max={10}
+        step={1}
+      />
+      <div className="border-t border-edge-rule" />
+      {sliders.map((slider) => (
+        <IntensitySlider
+          key={slider.label}
+          value={slider.value}
+          onChange={slider.onChange}
+          label={slider.label}
+          min={0}
+          max={10}
+          step={1}
+        />
+      ))}
     </div>
   );
 }
-

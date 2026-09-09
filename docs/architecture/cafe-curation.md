@@ -1,34 +1,42 @@
 # Cafe Curation Rules
 
-> **Decided but not yet implemented** — see `docs/product/direction.md` (local-only,
-> not tracked in this repo) for the full rationale.
+> **Partly implemented — read this before the sections below.** See
+> `docs/product/direction.md` (local-only, not tracked in this repo) for the rationale.
 >
-> - **Rule 1 (no franchises) is being retired.** The new bar is "can this cafe name
->   its roaster", applied per location. `brand_status` stays, but only as a display
->   / admin-review hint.
-> - **A three-trait observation model replaces the franchise/venue rules above**
->   (`sells_beans`, `roasts_on_site`, `filter_coffee`) — dated yes/no observations
->   with a source, stored in `cafe_trait_observations`.
-> - **`venue_traits` is demoted to a raw OSM hint.** What a reader sees comes from
->   the observation table instead. OSM's `roastery` tag is not converted into an
->   observation — being tagged as a roastery-adjacent place does not mean the cafe
->   roasts on site.
-> - **The seed pipeline is being redone** as an export/review/import cycle.
+> **Done:**
 >
-> **The rest of this document describes what the code does today.** It will be
-> rewritten once the implementation lands (see the plan's Phase 8).
+> - **Rule 1 (no franchises) is retired.** Registration still classifies the brand and
+>   still stores `brand_status`, but no longer rejects on it. The bar is now "can this
+>   cafe name its roaster", applied per location, and `brand_status` is a display /
+>   admin-review hint only. Rule 2 (coffee only) is unchanged and still rejects.
+> - **A three-trait observation model is live** (`sells_beans`, `roasts_on_site`,
+>   `filter_coffee`): dated yes/no observations with a source, in
+>   `cafe_trait_observations`. It is what the map filters and the cafe page read.
+>
+> **Still to do:**
+>
+> - **`venue_traits` demotion.** It is now a raw OSM hint that nothing user-facing
+>   reads, but the column and its collection are untouched. OSM's `roastery` tag is
+>   deliberately not converted into an observation — being tagged roastery-adjacent
+>   does not mean the cafe roasts on site.
+> - **The seed pipeline redo**, as an export/review/import cycle.
+>
+> Sections below still describe the code as it stands; the ones this block contradicts
+> are flagged inline. The document is rewritten once the rest lands (the plan's Phase 8).
 
-IBeanThere lists **local, independent cafes that serve coffee**. Two independent rules
-enforce that, both at registration time and against data already stored. Neither rule
-uses a hardcoded list of brand names, so they behave the same in Toronto, Chicago, or
-Seoul.
+IBeanThere lists **cafes that serve coffee**. One rule enforces that at registration
+time and against data already stored; a second, described below, used to reject
+franchises and no longer does. Neither uses a hardcoded list of brand names, so they
+behave the same in Toronto, Chicago, or Seoul.
 
 Both rules read OpenStreetMap data that registration already fetches, so neither adds a
 network round trip to the happy path.
 
-## Rule 1 — No franchises
+## Rule 1 — No franchises (retired)
 
-> **Slated for removal.** See the block above. What follows is current behaviour.
+> **No longer rejects.** Registration runs this classification and stores the verdict
+> in `brand_status`; nothing turns a cafe away on it. What follows describes how the
+> verdict is still computed.
 
 A brand is a franchise when it has **100 or more locations worldwide**
 (`FRANCHISE_OUTLET_THRESHOLD` in `app/services/franchise_service.py`).
@@ -96,8 +104,9 @@ Migrations `010_add_franchise_classification.sql` and `011_add_venue_category.sq
 
 ### venue_traits
 
-> **Slated for demotion.** What a reader sees will come from `cafe_trait_observations`
-> instead. What follows is current behaviour.
+> **Demoted.** What a reader sees comes from `cafe_trait_observations` instead. These
+> stay as a raw OSM hint that no user-facing query reads. What follows is how they are
+> still collected.
 
 Descriptive traits collected for **future** filtering. Nothing reads them yet.
 

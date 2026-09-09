@@ -1212,8 +1212,8 @@ async def register_cafe(
         
         # A silent map service is not a verdict about the place. Reading None as
         # "does not exist" told people standing inside a real cafe that their cafe was
-        # not on the map, and the franchise and coffee-only checks below both read this
-        # same payload — so an outage has to stop the registration, not pass it.
+        # not on the map, and the brand classification and coffee-only check below both
+        # read this same payload — so an outage has to stop the registration, not pass it.
         if osm_data is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -1230,22 +1230,16 @@ async def register_cafe(
         if not request.address:
             request.address = osm_data.get('display_name', '')
 
-        # 3. Franchise check - ibeanthere only lists local, independent cafes
+        # 3. Brand classification. A franchise is no longer turned away: whether a place
+        # is worth listing is decided by the coffee it can name, not by how many outlets
+        # its brand has, and one franchise location can roast on site while the one down
+        # the road pours from a bag nobody can name. The verdict is stored and shown, not
+        # enforced.
         verdict = await franchise_service.classify(
             request.name,
             osm_data.get('extratags'),
             supabase
         )
-
-        if verdict.status == franchise_service.FRANCHISE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"{verdict.display_name} is a franchise "
-                    f"({verdict.outlet_count}+ locations worldwide). "
-                    "ibeanthere is for local, independent cafes only."
-                )
-            )
 
         # 4. Coffee-only rule - bubble tea, tea houses and juice bars are out
         extratags = osm_data.get('extratags')
@@ -1988,7 +1982,7 @@ async def get_all_cafes_admin(
     page: int = 1,
     page_size: int = 20,
     cafe_status: Optional[str] = Query(None, alias="status"),
-    brand_status: Optional[str] = Query(None, description="local | unknown"),
+    brand_status: Optional[str] = Query(None, description="local | franchise | unknown"),
     current_user = Depends(require_admin_role),
     supabase: Client = Depends(get_supabase_client)
 ):
@@ -1999,7 +1993,7 @@ async def get_all_cafes_admin(
         page: Page number (default 1)
         page_size: Number of items per page (default 20)
         cafe_status: Optional status filter (pending/verified/disputed)
-        brand_status: Optional franchise-classification filter (local/unknown).
+        brand_status: Optional brand-classification filter (local/franchise/unknown).
             'unknown' is the review queue for cafes we could not classify.
     """
     try:

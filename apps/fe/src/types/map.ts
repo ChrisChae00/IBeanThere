@@ -6,6 +6,8 @@ export interface BusinessHours {
   };
 }
 
+export type CafeTraitId = 'sells_beans' | 'roasts_on_site' | 'filter_coffee';
+
 export interface CafeMapData {
   id: string;
   name: string;
@@ -35,6 +37,8 @@ export interface CafeMapData {
     }>;
   };
   main_image?: string;
+  /* Derived server-side from coffee-trait observations; absent until the API says. */
+  trait_flags?: Partial<Record<CafeTraitId, boolean>>;
 }
 
 export type CafeMarkerState = 'pending-1' | 'pending-2' | 'verified';

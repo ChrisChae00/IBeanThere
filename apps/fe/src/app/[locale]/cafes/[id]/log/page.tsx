@@ -15,7 +15,6 @@ export default function WriteLogPage() {
   const t = useTranslations('cafe.log');
   const router = useRouter();
   const params = useParams();
-  const locale = params.locale as string;
   const { user, isLoading: authLoading } = useAuth();
   const cafeId = params.id as string;
 
@@ -92,7 +91,7 @@ export default function WriteLogPage() {
       <div className="bg-surface rounded-lg border border-border p-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-surfaceText mb-2">
-            {locale === 'ko' ? `${cafe.name} ${t('write_log_for')}` : `${t('write_log_for')} ${cafe.name}`}
+            {t('write_log_for_cafe', { name: cafe.name })}
           </h1>
           <p className="text-sm text-surfaceTextSecondary">
             {t('write_log_description')}

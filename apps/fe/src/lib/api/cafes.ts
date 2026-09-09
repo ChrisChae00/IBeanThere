@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto, TraitSummary, CafeBeansResponse } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
@@ -270,4 +270,56 @@ export async function searchCafesByText(query: string, limit = 20): Promise<Cafe
     console.error('Error searching cafes by text:', error);
     return [];
   }
+}
+
+/*
+  Coffee traits and the beans seen at a cafe.
+
+  Both are derived from what people have written, and both change the moment
+  somebody writes something -- so `no-store`. A cached "sells beans" is a promise
+  the shop stopped keeping last month.
+*/
+export async function getCafeTraits(cafeId: string): Promise<TraitSummary[]> {
+  /* Signed out is a normal way to read this page, so the token is optional here --
+     the backend uses it only to fill in `mine`, and refuses nothing without it. */
+  const headers = await getAuthHeaders(false);
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits`, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
+  return handleResponse<TraitSummary[]>(response);
+}
+
+export async function setTraitObservation(
+  cafeId: string,
+  trait: string,
+  value: boolean,
+  observedAt?: string
+): Promise<TraitSummary[]> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits/${trait}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ value, observed_at: observedAt }),
+  });
+  return handleResponse<TraitSummary[]>(response);
+}
+
+export async function clearTraitObservation(cafeId: string, trait: string): Promise<TraitSummary[]> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits/${trait}`, {
+    method: 'DELETE',
+    headers,
+  });
+  return handleResponse<TraitSummary[]>(response);
+}
+
+export async function getCafeBeans(cafeId: string): Promise<CafeBeansResponse> {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/beans`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
+  return handleResponse<CafeBeansResponse>(response);
 }

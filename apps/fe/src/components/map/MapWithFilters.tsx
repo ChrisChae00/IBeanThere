@@ -515,6 +515,12 @@ export default function MapWithFilters({ locale, mapTitle, mapSubtitle }: MapWit
         return !!coords && calculateDistance(coords.latitude, coords.longitude, cafe.latitude, cafe.longitude) <= LOCAL_RADIUS;
       case 'verified':
         return cafe.status === 'verified';
+      case 'sells_beans':
+      case 'roasts_on_site':
+      case 'filter_coffee':
+        // No observation is not a denial, but it is not a promise either, so an
+        // unflagged cafe stays out of a filter that claims the trait.
+        return cafe.trait_flags?.[filter] === true;
       case 'trending':
         // Before the list arrives nothing is known to be trending, so nothing passes --
         // showing every pin would say "these are all trending", which is worse than a
