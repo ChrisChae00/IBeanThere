@@ -5,6 +5,7 @@ from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
 from app.models.collection import CollectionResponse
 from app.api.deps import get_supabase_client, get_current_user
+from app.services import badges as badges_service
 from app.core.permissions import require_permission, Permission
 
 logger = logging.getLogger(__name__)
@@ -40,20 +41,7 @@ async def get_user_profiles(display_name: str = Path(..., max_length=30), supaba
             if user_id_result.data:
                 user_id = user_id_result.data["id"]
                 
-                # Count Navigator roles (cafes where user is navigator_id)
-                nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
-                navigator_count = nav_count.count if nav_count.count is not None else 0
-
-                # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
-                van_result = supabase.table("cafes").select("vanguard_ids").filter(
-                    "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
-                ).execute()
-                vanguard_count = len(van_result.data) if van_result.data else 0
-
-                user["founding_stats"] = {
-                    "navigator_count": navigator_count,
-                    "vanguard_count": vanguard_count
-                }
+                user["founding_stats"] = badges_service.founding_stats(supabase, user_id)
 
             response_users.append(UserPublicResponse(**user))
             
@@ -107,20 +95,7 @@ async def get_user_profile_by_username(username: str = Path(..., max_length=20),
         if user_full.data:
             user_id = user_full.data["id"]
 
-            # Count Navigator roles (cafes where user is navigator_id)
-            nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
-            navigator_count = nav_count.count if nav_count.count is not None else 0
-
-            # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
-            van_result = supabase.table("cafes").select("vanguard_ids").filter(
-                "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
-            ).execute()
-            vanguard_count = len(van_result.data) if van_result.data else 0
-
-            user_data["founding_stats"] = {
-                "navigator_count": navigator_count,
-                "vanguard_count": vanguard_count
-            }
+            user_data["founding_stats"] = badges_service.founding_stats(supabase, user_id)
             
         return UserPublicResponse(**user_data)
     except HTTPException:
@@ -363,16 +338,7 @@ async def get_my_profile(
         # Use username as default if display_name is not provided
         display_name = user_data.get('display_name') or username
         
-        # Get founding stats
-        # Count Navigator roles (cafes where user is navigator_id)
-        nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", current_user.id).execute()
-        navigator_count = nav_count.count if nav_count.count is not None else 0
-
-        # Count Vanguard roles (cafes where user appears in vanguard_ids JSON array)
-        van_result = supabase.table("cafes").select("vanguard_ids").filter(
-            "vanguard_ids", "cs", f'[{{"user_id": "{current_user.id}"}}]'
-        ).execute()
-        vanguard_count = len(van_result.data) if van_result.data else 0
+        stats = badges_service.founding_stats(supabase, current_user.id)
         
         return UserResponse(
             id=user_data['id'],
@@ -382,10 +348,7 @@ async def get_my_profile(
             bio=user_data.get('bio'),
             avatar_url=user_data.get('avatar_url'),
             role=user_data.get('role', 'user'),  # Get role from public.users table
-            founding_stats={
-                "navigator_count": navigator_count,
-                "vanguard_count": vanguard_count
-            },
+            founding_stats=stats,
             taste_tags=await _get_user_taste_tags(supabase, current_user.id),
             trust_count=await _get_user_trust_count(supabase, current_user.id),
             is_trusted_by_me=False,  # Can't trust yourself
@@ -896,18 +859,7 @@ async def get_trusting_users(
             if user_id_result.data:
                 user_id = user_id_result.data["id"]
                 
-                nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
-                navigator_count = nav_count.count if nav_count.count is not None else 0
-
-                van_result = supabase.table("cafes").select("vanguard_ids").filter(
-                    "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
-                ).execute()
-                vanguard_count = len(van_result.data) if van_result.data else 0
-                
-                user["founding_stats"] = {
-                    "navigator_count": navigator_count,
-                    "vanguard_count": vanguard_count
-                }
+                user["founding_stats"] = badges_service.founding_stats(supabase, user_id)
                 user["taste_tags"] = await _get_user_taste_tags(supabase, user_id)
                 user["trust_count"] = await _get_user_trust_count(supabase, user_id)
             

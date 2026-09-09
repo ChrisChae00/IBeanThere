@@ -15,11 +15,6 @@ export interface PendingCafe {
   verified_at: string | null;
   admin_verified: boolean;
   navigator_id: string | null;
-  vanguard_ids: Array<{
-    user_id: string;
-    role: string;
-    verified_at: string;
-  }>;
   created_at: string;
   updated_at: string | null;
   business_hours?: BusinessHours;

@@ -27,7 +27,6 @@ export interface CafeSearchResponse {
     verified_at?: string;
     admin_verified?: boolean;
     navigator_id?: string;
-    vanguard_ids?: string[];
     created_at: string;
     updated_at?: string;
     founding_crew?: {
@@ -35,11 +34,6 @@ export interface CafeSearchResponse {
         user_id: string;
         username?: string;
       };
-      vanguard?: Array<{
-        user_id: string;
-        username?: string;
-        role: 'vanguard_2nd' | 'vanguard_3rd';
-      }>;
     };
     main_image?: string;
     trait_flags?: Record<string, boolean>;
@@ -206,7 +200,6 @@ export interface CafeDetailResponse {
   verified_at?: string;
   admin_verified?: boolean;
   navigator_id?: string;
-  vanguard_ids?: string[];
   created_at: string;
   updated_at?: string;
   founding_crew?: {
@@ -214,11 +207,6 @@ export interface CafeDetailResponse {
       user_id: string;
       username?: string;
     };
-    vanguard?: Array<{
-      user_id: string;
-      username?: string;
-      role: 'vanguard_2nd' | 'vanguard_3rd';
-    }>;
   };
   average_rating?: number;
   log_count: number;
@@ -321,7 +309,7 @@ export interface CafeBeansResponse {
 
 export interface FoundingStats {
   navigator_count: number;
-  vanguard_count: number;
+  regular_count: number;
 }
 
 export type TasteTag = 

@@ -52,9 +52,15 @@ class User(UserBase):
         from_attributes = True
 
 class FoundingStats(BaseModel):
-    """Statistics about user's founding contributions."""
+    """
+    What a profile says about what somebody has built here.
+
+    `vanguard_count` is gone: it counted being second or third through a door,
+    which ranked people in a race they never entered. `regular_count` replaced it --
+    how many cafes you came back to, which is a thing you chose.
+    """
     navigator_count: int = 0
-    vanguard_count: int = 0
+    regular_count: int = 0
 
 class UserResponse(BaseModel):
     """User model for API responses (authenticated user)."""

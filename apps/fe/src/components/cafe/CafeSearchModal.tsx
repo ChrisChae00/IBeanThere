@@ -93,13 +93,7 @@ export default function CafeSearchModal({ onClose }: CafeSearchModalProps) {
         businessHours: cafe.business_hours,
         status: cafe.status || 'pending',
         verification_count: cafe.verification_count || 1,
-        foundingCrew: cafe.founding_crew ? {
-          navigator: cafe.founding_crew.navigator,
-          scouts: (cafe.founding_crew.vanguard || []).map(v => ({
-            ...v,
-            role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2'
-          }))
-        } : undefined
+        foundingCrew: cafe.founding_crew
       }));
 
       setCafes(mappedCafes);

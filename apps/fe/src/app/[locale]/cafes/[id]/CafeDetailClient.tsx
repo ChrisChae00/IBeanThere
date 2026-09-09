@@ -49,12 +49,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
      moment they re-read what is actually saved. */
   const [saveSync, setSaveSync] = useState(0);
 
-  /* The API calls them `vanguard`; everything drawn from them calls them scouts. */
   const foundingCrew = cafe.founding_crew;
-  const scouts = (foundingCrew?.vanguard || []).map((v) => ({
-    ...v,
-    role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2',
-  }));
 
   const galleryImages: GalleryImage[] = (cafe.images || [])
     .filter((url) => url && typeof url === 'string' && url.trim().length > 0)
@@ -111,12 +106,8 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
             />
           }
           overlay={
-            foundingCrew && (foundingCrew.navigator || scouts.length > 0) ? (
-              <FoundingCrewAvatars
-                variant="stack"
-                navigator={foundingCrew.navigator}
-                scouts={scouts}
-              />
+            foundingCrew?.navigator ? (
+              <FoundingCrewAvatars variant="stack" navigator={foundingCrew.navigator} />
             ) : null
           }
         />

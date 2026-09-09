@@ -29,6 +29,7 @@ from app.models.cafe import (
 from app.services import traits as traits_service
 from app.services.coffee_logs import public_logs
 from app.services.osm_service import OSMService, format_address
+from app.services import badges as badges_service
 from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
 from app.api.deps import get_current_user, get_optional_user, require_admin_role
@@ -459,8 +460,7 @@ async def search_cafes(
                 "verified_at": cafe.get("verified_at"),
                 "admin_verified": cafe.get("admin_verified", False),
                 "navigator_id": cafe.get("navigator_id"),
-                "vanguard_ids": cafe.get("vanguard_ids", []),
-                "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
+                    "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
                 "updated_at": cafe.get("updated_at"),
                 "main_image": main_image
             })
@@ -523,8 +523,7 @@ async def search_cafes_by_text(
                 "verified_at": cafe.get("verified_at"),
                 "admin_verified": cafe.get("admin_verified", False),
                 "navigator_id": cafe.get("navigator_id"),
-                "vanguard_ids": cafe.get("vanguard_ids", []),
-                "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
+                    "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
                 "updated_at": cafe.get("updated_at"),
                 "main_image": cafe.get("main_image"),
             }
@@ -611,7 +610,6 @@ async def get_pending_cafes_public(
                     verified_at=verified_at,
                     admin_verified=cafe.get("admin_verified", False),
                     navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                    vanguard_ids=cafe.get("vanguard_ids", []),
                     created_at=created_at,
                     updated_at=updated_at
                 )
@@ -1103,7 +1101,6 @@ async def get_cafe_details(cafe_identifier: str):
             "verified_at": verified_at,
             "admin_verified": cafe.get("admin_verified", False),
             "navigator_id": cafe.get("navigator_id"),
-            "vanguard_ids": cafe.get("vanguard_ids", []),
             "created_at": created_at,
             "updated_at": updated_at,
             "average_rating": float(average_rating) if average_rating else None,
@@ -1126,21 +1123,10 @@ async def get_cafe_details(cafe_identifier: str):
             except Exception:
                 pass
                 
-        # 2. Vanguards
-        if cafe.get("vanguard_ids"):
-            vanguards = []
-            for vanguard in cafe["vanguard_ids"]:
-                try:
-                    van_user = supabase.table("users").select("user_id:id, username, display_name, avatar_url").eq("id", vanguard["user_id"]).single().execute()
-                    if van_user.data:
-                        vanguard_data = van_user.data
-                        vanguard_data["role"] = vanguard.get("role")
-                        vanguards.append(vanguard_data)
-                except Exception:
-                    continue
-            if vanguards:
-                founding_crew["vanguard"] = vanguards
-                
+        # There is no second half. Vanguard ranked the second and third person through
+        # a door against the first, which is a race nobody entered -- what a cafe's page
+        # says about people is now who put it on the map, and nothing about the order
+        # everyone else arrived in.
         if founding_crew:
             response["founding_crew"] = founding_crew
         
@@ -1340,25 +1326,10 @@ async def register_cafe(
                 update_data["navigator_id"] = navigator_id
 
             if unique_user_count >= 3:
-                # Get founding order to assign vanguard roles
-                drops_result = supabase.table("cafe_beans").select(
-                    "user_id, first_dropped_at"
-                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
-
-                founding_drops = drops_result.data if drops_result.data else []
-
-                vanguard_ids = []
-                for idx, drop in enumerate(founding_drops):
-                    if drop["user_id"] != navigator_id:
-                        vanguard_ids.append({
-                            "user_id": drop["user_id"],
-                            "role": f"vanguard_{idx + 1}",
-                            "verified_at": now_iso
-                        })
-
+                # Three separate people is still what verifies a cafe. Only the roles
+                # handed out for being second and third are gone.
                 update_data["status"] = "verified"
                 update_data["verified_at"] = now_iso
-                update_data["vanguard_ids"] = vanguard_ids
                 triggered_verification = True
                 logger.info("Cafe %s auto-verified by 3 unique bean droppers (register flow)", cafe_id)
 
@@ -1454,7 +1425,6 @@ async def register_cafe(
                 "status": "pending",
                 "verification_count": 1,
                 "navigator_id": current_user.id,
-                "vanguard_ids": [],
                 "source_type": request.source_type,
                 "source_url": source_url,
                 "normalized_name": normalized_name,
@@ -1960,7 +1930,6 @@ async def get_pending_cafes(
                 verified_at=verified_at,
                 admin_verified=cafe.get("admin_verified", False),
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                vanguard_ids=cafe.get("vanguard_ids", []),
                 created_at=created_at,
                 updated_at=updated_at,
                 main_image=main_image,
@@ -2083,7 +2052,6 @@ async def get_all_cafes_admin(
                 verified_at=verified_at,
                 admin_verified=cafe.get("admin_verified", False),
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                vanguard_ids=cafe.get("vanguard_ids", []),
                 created_at=created_at,
                 updated_at=updated_at,
                 main_image=main_image,
@@ -2166,7 +2134,6 @@ async def admin_verify_cafe(
                 verified_at=updated_cafe.get("verified_at"),
                 admin_verified=updated_cafe.get("admin_verified", False),
                 navigator_id=str(updated_cafe.get("navigator_id")) if updated_cafe.get("navigator_id") else None,
-                vanguard_ids=updated_cafe.get("vanguard_ids", []),
                 created_at=updated_cafe.get("created_at"),
                 updated_at=updated_cafe.get("updated_at")
             )
@@ -2575,7 +2542,7 @@ async def drop_bean(
         
         # 9. Auto-verification: Check if 3 unique users have dropped beans
         triggered_verification = False
-        cafe_status_result = supabase.table("cafes").select("status, navigator_id, vanguard_ids").eq("id", cafe_id).single().execute()
+        cafe_status_result = supabase.table("cafes").select("status, navigator_id").eq("id", cafe_id).single().execute()
         cafe_status = cafe_status_result.data.get("status") if cafe_status_result.data else "pending"
 
         # App-seeded cafes (e.g. OSM import) have no navigator yet — the
@@ -2592,29 +2559,10 @@ async def drop_bean(
             unique_user_count = len(unique_user_ids)
             
             if unique_user_count >= 3:
-                # Get the order of bean drops to determine founding crew
-                drops_result = supabase.table("cafe_beans").select(
-                    "user_id, first_dropped_at"
-                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
-
-                founding_drops = drops_result.data if drops_result.data else []
-
-                # Build vanguard_ids (2nd and 3rd droppers)
-                vanguard_ids = []
-                for idx, drop in enumerate(founding_drops):
-                    if drop["user_id"] != navigator_id:
-                        role = f"vanguard_{idx + 1}"
-                        vanguard_ids.append({
-                            "user_id": drop["user_id"],
-                            "role": role,
-                            "verified_at": datetime.now(timezone.utc).isoformat()
-                        })
-
                 # Update cafe to verified, sync verification_count
                 supabase.table("cafes").update({
                     "status": "verified",
                     "verified_at": datetime.now(timezone.utc).isoformat(),
-                    "vanguard_ids": vanguard_ids,
                     "verification_count": unique_user_count
                 }).eq("id", cafe_id).execute()
 
@@ -2626,6 +2574,8 @@ async def drop_bean(
                     "verification_count": unique_user_count
                 }).eq("id", cafe_id).execute()
         
+        badges_service.award_badges_quietly(supabase, current_user.id)
+
         return {
             "message": "Bean dropped successfully!",
             "cafe_id": cafe_id,

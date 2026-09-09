@@ -68,7 +68,7 @@ export default function ProfileClient() {
         bio={profile.bio}
         tasteTags={profile.taste_tags}
         navigatorCount={profile.founding_stats?.navigator_count || 0}
-        vanguardCount={profile.founding_stats?.vanguard_count || 0}
+        regularCount={profile.founding_stats?.regular_count || 0}
         trustCount={profile.trust_count ?? 0}
         createdAt={profile.created_at}
         actions={

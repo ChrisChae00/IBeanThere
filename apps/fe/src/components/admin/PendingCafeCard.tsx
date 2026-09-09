@@ -153,11 +153,6 @@ export default function PendingCafeCard({
             <p className="text-xs text-textSecondary">
               {t('navigator')}: {cafe.navigator_id.slice(0, 8)}...
             </p>
-            {cafe.vanguard_ids && cafe.vanguard_ids.length > 0 && (
-              <p className="text-xs text-textSecondary">
-                {t('vanguards')}: {cafe.vanguard_ids.length}
-              </p>
-            )}
           </div>
         )}
 

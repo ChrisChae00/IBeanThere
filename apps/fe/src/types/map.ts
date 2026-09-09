@@ -30,11 +30,6 @@ export interface CafeMapData {
       user_id: string;
       username?: string;
     };
-    scouts?: Array<{
-      user_id: string;
-      username?: string;
-      role: 'scout_1' | 'scout_2';
-    }>;
   };
   main_image?: string;
   /* Derived server-side from coffee-trait observations; absent until the API says. */

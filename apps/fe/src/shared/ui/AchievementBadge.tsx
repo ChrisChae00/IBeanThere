@@ -1,18 +1,22 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Compass, ShieldCheck } from 'lucide-react';
+import { Compass, Repeat } from 'lucide-react';
 import Tooltip from './Tooltip';
 
 export interface AchievementBadgeProps {
-  type: 'navigator' | 'scout';
+  type: 'navigator' | 'regular';
   count: number;
   size?: 'sm' | 'md';
   showTooltip?: boolean;
 }
 
 /*
-  What someone was first to find, and what they helped verify.
+  What someone was first to find, and what they came back to.
+
+  `scout` used to be the second one -- the count of cafes where you were the second
+  or third person through the door. That ranked people in a race nobody entered, so
+  it is gone; `regular` counts the cafes you chose to return to instead.
 
   This was two emoji (🧭 🛡️) in a 15% wash of the brand with a 30% border, written as
   an inline `style`, and it grew on hover. All four are things the design language names
@@ -24,7 +28,7 @@ export interface AchievementBadgeProps {
 */
 const marks = {
   navigator: Compass,
-  scout: ShieldCheck,
+  regular: Repeat,
 } as const;
 
 const sizeClasses = {
@@ -46,7 +50,7 @@ export default function AchievementBadge({
   // Nothing earned yet, so there is nothing to say.
   if (count === 0) return null;
 
-  const tooltipText = t(type === 'navigator' ? 'navigator_tooltip' : 'scout_tooltip', { count });
+  const tooltipText = t(type === 'navigator' ? 'navigator_tooltip' : 'regular_tooltip', { count });
 
   const badge = (
     <span

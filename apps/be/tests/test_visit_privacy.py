@@ -67,6 +67,10 @@ class FakeQuery:
         self.filters.append(("or", expr, None))
         return self
 
+    def gte(self, field, value):
+        self.filters.append(("gte", field, value))
+        return self
+
     def in_(self, field, values):
         self.filters.append(("in", field, tuple(values)))
         return self

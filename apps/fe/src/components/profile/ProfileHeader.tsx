@@ -25,7 +25,7 @@ interface ProfileHeaderProps {
   /** Nullable, not just optional: the API sends `null` for a profile with no tags. */
   tasteTags?: TasteTagType[] | null;
   navigatorCount: number;
-  vanguardCount: number;
+  regularCount: number;
   trustCount: number;
   createdAt: string;
   /** The page's own controls: edit on your profile, trust and report on someone else's. */
@@ -39,7 +39,7 @@ export default function ProfileHeader({
   bio,
   tasteTags,
   navigatorCount,
-  vanguardCount,
+  regularCount,
   trustCount,
   createdAt,
   actions,
@@ -71,7 +71,7 @@ export default function ProfileHeader({
 
               <div className="flex items-center gap-2">
                 <AchievementBadge type="navigator" count={navigatorCount} size="sm" />
-                <AchievementBadge type="scout" count={vanguardCount} size="sm" />
+                <AchievementBadge type="regular" count={regularCount} size="sm" />
               </div>
             </div>
 
