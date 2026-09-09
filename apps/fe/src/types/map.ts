@@ -1,9 +1,24 @@
+import { isTemporarilyClosed } from '@/lib/utils/businessHours';
+
+export interface DayHours {
+  open: string;
+  close: string;
+  closed: boolean;
+}
+
+/*
+  The days a shop keeps, and one thing that is not a day.
+
+  "Temporarily closed" is a state of the whole shop, not of a Tuesday, but it is stored
+  in this same blob under `temporarily_closed` -- the API passes `business_hours` through
+  untouched, so saying it here costs no column and no migration. The index signature
+  stays day-shaped on purpose: every reader indexes by day name, and widening it to
+  `DayHours | boolean` would make each of them narrow a value that is always a day.
+  `lib/utils/businessHours.ts` owns the one cast that reads the flag -- go through
+  `isTemporarilyClosed` and `dayHourEntries` rather than touching the key directly.
+*/
 export interface BusinessHours {
-  [key: string]: {
-    open: string;
-    close: string;
-    closed: boolean;
-  };
+  [day: string]: DayHours;
 }
 
 export type CafeTraitId = 'sells_beans' | 'roasts_on_site' | 'filter_coffee';
@@ -36,9 +51,16 @@ export interface CafeMapData {
   trait_flags?: Partial<Record<CafeTraitId, boolean>>;
 }
 
-export type CafeMarkerState = 'pending-1' | 'pending-2' | 'verified';
+export type CafeMarkerState = 'pending-1' | 'pending-2' | 'verified' | 'temporarily-closed';
 
+/*
+  Closed for now outranks verified: a reader scanning the map is deciding where to walk,
+  and a shop that is shut is the wrong answer however well confirmed it is.
+*/
 export function getMarkerState(cafe: CafeMapData): CafeMarkerState {
+  if (isTemporarilyClosed(cafe.businessHours)) {
+    return 'temporarily-closed';
+  }
   if (cafe.status === 'verified') {
     return 'verified';
   }

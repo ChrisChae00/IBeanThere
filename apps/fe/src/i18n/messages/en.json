@@ -465,6 +465,20 @@
     "reset_link_expired": "Reset link has expired. Please request a new one"
   },
   "admin": {
+    "cafe_blacklist": "Cafe deletion history",
+    "user_blacklist": "User blacklist",
+    "cafe_blacklist_hint": "Deleted cafes are excluded from seeds. User re-registrations wait for admin review. Removing an entry allows future seeding again.",
+    "user_blacklist_hint": "Watch records a concern without restricting access. Block denies authenticated API and protected database access. Public browsing remains available. Admin accounts cannot be listed.",
+    "deletion_history": "Previously blacklisted — review for reopening before approval",
+    "user_id": "User ID (UUID)",
+    "reason": "Reason",
+    "watch": "Watch",
+    "blocked": "Blocked",
+    "blacklist_empty": "No entries on this page",
+    "blacklist_error": "Could not save this change. Check the user ID and permissions, then retry.",
+    "confirm_user_decision": "Save this moderation decision? Block restricts this account immediately.",
+    "confirm_blacklist_remove": "Remove this entry? This lifts its seed exclusion or account restriction.",
+    "remove_blacklist": "Remove from list",
     "dashboard_title": "Admin Dashboard",
     "dashboard_subtitle": "Manage pending cafes and verify community submissions",
     "pending_cafes_title": "Pending Cafes",
@@ -562,21 +576,7 @@
     "approve": "Approve",
     "reject": "Reject",
     "suggests_yes": "says yes",
-    "suggests_no": "says no",
-    "cafe_blacklist": "Cafe deletion history",
-    "user_blacklist": "User blacklist",
-    "cafe_blacklist_hint": "Deleted cafes are excluded from seeds. User re-registrations wait for admin review. Removing an entry allows future seeding again.",
-    "user_blacklist_hint": "Watch records a concern without restricting access. Block denies authenticated API and protected database access. Public browsing remains available. Admin accounts cannot be listed.",
-    "deletion_history": "Previously blacklisted — review for reopening before approval",
-    "user_id": "User ID (UUID)",
-    "reason": "Reason",
-    "watch": "Watch",
-    "blocked": "Blocked",
-    "blacklist_empty": "No entries on this page",
-    "blacklist_error": "Could not save this change. Check the user ID and permissions, then retry.",
-    "confirm_user_decision": "Save this moderation decision? Block restricts this account immediately.",
-    "confirm_blacklist_remove": "Remove this entry? This lifts its seed exclusion or account restriction.",
-    "remove_blacklist": "Remove from list"
+    "suggests_no": "says no"
   },
   "settings": {
     "title": "Settings",
@@ -708,6 +708,8 @@
       "opening_hours_label": "Opening Hours (Optional)",
       "opening_hours_toggle": "Add Opening Hours",
       "opening_hours_hint": "Set business hours for each day of the week",
+      "temporarily_closed": "Temporarily closed",
+      "temporarily_closed_hint": "Shown instead of the timetable, for a shop that is shut for now but not gone",
       "day_monday": "Monday",
       "day_tuesday": "Tuesday",
       "day_wednesday": "Wednesday",
@@ -768,6 +770,7 @@
       "opens_at": "Opens at {time}",
       "closes_at": "Closes at {time}",
       "no_hours_available": "Opening hours not available",
+      "temporarily_closed": "Temporarily closed",
       "google_maps": "Google Maps",
       "close": "Close",
       "status_pending": "Pending Verification",
@@ -1255,14 +1258,14 @@
         "content": "When a Google photo is displayed, we send the cafe's Place ID to Google. Your browser may connect directly to a Google image host, which can disclose your IP address and browser information to Google.",
         "link_label": "Google Privacy Policy"
       },
-      "contact": {
-        "title": "16. Contact Us",
-        "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: ibeanthere.app@gmail.com"
-      },
       "analytics": {
         "title": "15. Analytics",
         "content": "We use PostHog to count how the Services are used: page views, and three product events (a cafe page opened, a map or directions link taken, a coffee log saved). These carry a cafe identifier and, when you are signed in, your account identifier. They do not carry your name, email address, or the text of anything you write. Our configuration stores nothing on your device for this purpose, so no cookie or similar identifier is set and there is no analytics banner to accept or decline. As a result, if you are not signed in, we cannot recognise you across visits.",
         "link_label": "PostHog Privacy Policy"
+      },
+      "contact": {
+        "title": "16. Contact Us",
+        "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: ibeanthere.app@gmail.com"
       }
     }
   },

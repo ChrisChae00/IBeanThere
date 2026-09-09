@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CafeMapData } from '@/types/map';
 import { CafeDetailResponse } from '@/types/api';
-import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
+import { isOpenNow, getCurrentDayInTimezone, hasDayHours, isTemporarilyClosed } from '@/lib/utils/businessHours';
 import FoundingCrewAvatars from './FoundingCrewAvatars';
 import CafeMapActions from './CafeMapActions';
 
@@ -54,6 +54,7 @@ export default function CafeInfoSection({
   };
 
   const todayHours = getTodayHours();
+  const temporarilyClosed = isTemporarilyClosed(businessHours);
   const phoneNumber = 'phoneNumber' in cafe ? cafe.phoneNumber : 
     ('phone' in cafe ? cafe.phone : undefined);
   const website = cafe.website;
@@ -147,8 +148,22 @@ export default function CafeInfoSection({
         </div>
       )}
 
+      {/*
+        Shut for now, and that is the whole answer: the timetable is left out rather
+        than shown greyed, because a reader who is deciding whether to walk over does
+        not need Tuesday's hours to know the door is locked today.
+      */}
+      {temporarilyClosed && (
+        <div className="space-y-1">
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+          <span className="inline-block rounded-full bg-error/10 px-2 py-1 text-xs text-error">
+            {t('temporarily_closed')}
+          </span>
+        </div>
+      )}
+
       {/* Opening Hours */}
-      {businessHours && Object.keys(businessHours).length > 0 && (
+      {!temporarilyClosed && hasDayHours(businessHours) && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
@@ -233,7 +248,7 @@ export default function CafeInfoSection({
         </div>
       )}
 
-      {!businessHours && (
+      {!temporarilyClosed && !hasDayHours(businessHours) && (
         <div className="space-y-1">
           <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
           <p className="text-sm text-cardText">{t('no_hours_available')}</p>

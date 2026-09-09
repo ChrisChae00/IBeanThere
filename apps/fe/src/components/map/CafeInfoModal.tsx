@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CafeMapData } from '@/types/map';
-import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
+import { isOpenNow, getCurrentDayInTimezone, hasDayHours, isTemporarilyClosed } from '@/lib/utils/businessHours';
 
 import CafeCardImage from '../cafe/CafeCardImage';
 import CafeMapActions from '../cafe/CafeMapActions';
@@ -60,6 +60,7 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
   };
 
   const todayHours = getTodayHours();
+  const temporarilyClosed = isTemporarilyClosed(cafe.businessHours);
 
   /* One scroll region, not two: a scrolling body inside a fixed frame put the first line
      of the address under the photograph the moment anything took focus. */
@@ -155,8 +156,16 @@ export default function CafeInfoModal({ cafe, onClose }: CafeInfoModalProps) {
           </div>
         )}
 
-        {/* Opening Hours */}
-        {cafe.businessHours && Object.keys(cafe.businessHours).length > 0 ? (
+        {/* Shut for now: the badge is the answer, and the timetable is beside the point. */}
+        {temporarilyClosed ? (
+          <div className="space-y-2">
+            <h3 className="landing-micro text-ink-secondary">{t('opening_hours')}</h3>
+            <span className="landing-micro flex w-fit items-center gap-1.5 rounded-(--radius-pill) bg-state-danger/12 px-3 py-1.5 text-ink-primary">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger" />
+              {t('temporarily_closed')}
+            </span>
+          </div>
+        ) : hasDayHours(cafe.businessHours) ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="landing-micro text-ink-secondary">{t('opening_hours')}</h3>

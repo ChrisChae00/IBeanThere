@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Card, Badge, Button } from '@/components/ui';
 import { BusinessHours } from '@/types/map';
 import OpeningHoursInput from '@/components/cafe/OpeningHoursInput';
+import { isTemporarilyClosed, setTemporarilyClosed } from '@/lib/utils/businessHours';
 import PhotoUploadWithMain from '@/shared/ui/PhotoUploadWithMain';
 import { useAuth } from '@/hooks/useAuth';
 import { lookupGoogleMapsUrl } from '@/lib/api/cafes';
@@ -100,7 +101,18 @@ export default function PendingCafeCard({
         address: found.address || previous.address,
         phone: found.phone || previous.phone,
         website: found.website || previous.website,
-        business_hours: (found.business_hours as BusinessHours) || previous.business_hours,
+        /*
+          Google supplies a timetable, never the closed-for-now mark, and the mark lives
+          in the same object -- so taking Google's hours wholesale would quietly reopen a
+          shop an admin had shut. Their own statement about the shop survives the lookup;
+          if Google is right that it is trading again, the tick box is right there.
+        */
+        business_hours: found.business_hours
+          ? setTemporarilyClosed(
+              found.business_hours as BusinessHours,
+              isTemporarilyClosed(previous.business_hours)
+            )
+          : previous.business_hours,
         latitude: found.latitude ?? previous.latitude,
         longitude: found.longitude ?? previous.longitude,
         google_place_id: found.place_id || previous.google_place_id,
@@ -165,6 +177,7 @@ export default function PendingCafeCard({
             <h3 className="text-xl font-semibold text-text mb-2">
               {cafe.name}
             </h3>
+            {cafe.has_deletion_history && <p className="text-warning mb-2">{t('deletion_history')}</p>}
             {cafe.address && (
               <p className="text-textSecondary text-sm mb-2">
                 {cafe.address}

@@ -24,19 +24,39 @@ const PIN_SHADOW = 'filter: drop-shadow(0 2px 4px var(--c-shadow));';
 */
 export function createCustomMarkerIcon(state: CafeMarkerState, selected = false): L.DivIcon {
   const verified = state === 'verified';
-  const size = selected ? 44 : 32;
+  /*
+    A shop shut for now reads as a smaller, faded pin with a slash across it. Faded
+    alone would be the same mistake the pending pin avoids -- a difference in colour
+    only -- so the mark carries it, and the pin still answers to a tap at full size.
+  */
+  const closed = state === 'temporarily-closed';
+  const size = selected ? 44 : closed ? 26 : 32;
 
   const iconHtml = `
     <div style="
+      position: relative;
       width: ${size}px;
       height: ${size}px;
-      background-color: ${verified ? 'var(--marker-cafe)' : 'var(--marker-pending)'};
-      border: ${selected ? 3 : 2}px ${verified ? 'solid' : 'dashed'} ${verified ? 'var(--marker-ring)' : 'var(--marker-cafe)'};
+      background-color: ${verified || closed ? 'var(--marker-cafe)' : 'var(--marker-pending)'};
+      border: ${selected ? 3 : 2}px ${verified || closed ? 'solid' : 'dashed'} ${verified || closed ? 'var(--marker-ring)' : 'var(--marker-cafe)'};
       border-radius: 50%;
+      ${closed ? 'opacity: 0.55;' : ''}
       ${MARKER_SHADOW}
       ${selected ? 'outline: 3px solid var(--marker-user); outline-offset: 2px;' : ''}
       transition: width 120ms ease-out, height 120ms ease-out;
-    "></div>
+    ">${
+      closed
+        ? `<span style="
+             position: absolute;
+             top: 50%;
+             left: -10%;
+             width: 120%;
+             height: 2px;
+             background-color: var(--marker-ring);
+             transform: translateY(-50%) rotate(-45deg);
+           "></span>`
+        : ''
+    }</div>
   `;
 
   return L.divIcon({

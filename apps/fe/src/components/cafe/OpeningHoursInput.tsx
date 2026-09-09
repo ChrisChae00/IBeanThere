@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/contexts/ToastContext';
 import { BusinessHours } from '@/types/map';
+import { hasDayHours, isTemporarilyClosed, setTemporarilyClosed } from '@/lib/utils/businessHours';
 
 interface OpeningHoursInputProps {
   value: BusinessHours | undefined;
@@ -56,30 +57,56 @@ function DaySelect({
 export default function OpeningHoursInput({ value, onChange }: OpeningHoursInputProps) {
   const t = useTranslations('cafe.register');
   const { showToast } = useToast();
-  const [showHours, setShowHours] = useState(!!value && Object.keys(value).length > 0);
+  const [showHours, setShowHours] = useState(hasDayHours(value));
   const [rangeStart, setRangeStart] = useState<typeof DAYS[number]>('monday');
   const [rangeEnd, setRangeEnd] = useState<typeof DAYS[number]>('friday');
 
   // Sync showHours when value is set externally (e.g. Google Maps auto-fill)
   useEffect(() => {
-    if (value && Object.keys(value).length > 0) {
+    if (hasDayHours(value)) {
       setShowHours(true);
     }
   }, [value]);
 
+  const tempClosed = isTemporarilyClosed(value);
+
   const handleToggle = () => {
     if (showHours) {
-      onChange(undefined);
+      // Dropping the timetable is not the same as reopening: keep the closed-for-now
+      // mark, which is about the shop rather than about its hours.
+      onChange(setTemporarilyClosed(undefined, tempClosed));
       setShowHours(false);
     } else {
       const defaultHours: BusinessHours = {};
       DAYS.forEach((day) => {
         defaultHours[day] = { open: '09:00', close: '18:00', closed: false };
       });
-      onChange(defaultHours);
+      onChange(setTemporarilyClosed(defaultHours, tempClosed));
       setShowHours(true);
     }
   };
+
+  const handleTempClosedChange = (closed: boolean) => {
+    onChange(setTemporarilyClosed(value, closed));
+  };
+
+  /*
+    Offered above the timetable and outside the `showHours` branch, because it applies
+    to a shop whose hours nobody has recorded just as much as to one whose hours are
+    known -- and because a reader who sees "temporarily closed" does not then need the
+    hours to work out that the door is locked.
+  */
+  const temporarilyClosedToggle = (
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={tempClosed}
+        onChange={(e) => handleTempClosedChange(e.target.checked)}
+        className="h-4 w-4 rounded-sm border-edge-rule accent-[var(--brand)]"
+      />
+      <span className="text-sm text-ink-primary">{t('temporarily_closed')}</span>
+    </label>
+  );
 
   const handleDayChange = (day: string, field: 'open' | 'close' | 'closed', newValue: string | boolean) => {
     if (!value) return;
@@ -144,10 +171,11 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
 
   if (!showHours) {
     return (
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-ink-primary">
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-ink-primary">
           {t('opening_hours_label')}
         </label>
+        {temporarilyClosedToggle}
         <button
           type="button"
           onClick={handleToggle}
@@ -174,9 +202,13 @@ export default function OpeningHoursInput({ value, onChange }: OpeningHoursInput
         </button>
       </div>
       
-      <p className="text-xs text-ink-secondary">
-        {t('opening_hours_hint')}
-      </p>
+      {temporarilyClosedToggle}
+
+      {tempClosed ? (
+        <p className="text-xs text-ink-secondary">{t('temporarily_closed_hint')}</p>
+      ) : (
+        <p className="text-xs text-ink-secondary">{t('opening_hours_hint')}</p>
+      )}
 
       {/*
         On a phone this is three stacked rows -- copy Monday everywhere, pick a range,

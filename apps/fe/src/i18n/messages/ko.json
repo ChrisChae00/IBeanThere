@@ -463,6 +463,20 @@
     "reset_link_expired": "재설정 링크가 만료되었습니다. 새 링크를 요청해주세요"
   },
   "admin": {
+    "cafe_blacklist": "카페 삭제 이력",
+    "user_blacklist": "사용자 블랙리스트",
+    "cafe_blacklist_hint": "삭제된 카페는 시드에서 제외됩니다. 사용자가 재등록하면 관리자 검토를 기다립니다. 이력을 해제하면 시드에 다시 포함될 수 있습니다.",
+    "user_blacklist_hint": "관찰은 의심 이력만 기록합니다. 차단은 인증 API와 보호된 DB 접근을 제한하며 공개 페이지 열람은 가능합니다. 관리자 계정은 등록할 수 없습니다.",
+    "deletion_history": "블랙리스트 전적 있음 — 재개업 여부를 확인한 뒤 승인하세요",
+    "user_id": "사용자 ID (UUID)",
+    "reason": "사유",
+    "watch": "관찰",
+    "blocked": "차단",
+    "blacklist_empty": "이 페이지에 등록된 이력이 없습니다",
+    "blacklist_error": "저장하지 못했습니다. 사용자 ID와 권한을 확인한 뒤 다시 시도하세요.",
+    "confirm_user_decision": "이 관리 결정을 저장할까요? 차단하면 계정 접근이 즉시 제한됩니다.",
+    "confirm_blacklist_remove": "목록에서 해제할까요? 시드 제외 또는 사용자 접근 제한이 해제됩니다.",
+    "remove_blacklist": "목록에서 해제",
     "dashboard_title": "관리자 대시보드",
     "dashboard_subtitle": "대기 중인 카페를 관리하고 커뮤니티 제출물을 검증하세요",
     "pending_cafes_title": "대기 중인 카페",
@@ -560,21 +574,7 @@
     "approve": "승인",
     "reject": "거절",
     "suggests_yes": "맞다고 함",
-    "suggests_no": "아니라고 함",
-    "cafe_blacklist": "카페 삭제 이력",
-    "user_blacklist": "사용자 블랙리스트",
-    "cafe_blacklist_hint": "삭제된 카페는 시드에서 제외됩니다. 사용자가 재등록하면 관리자 검토를 기다립니다. 이력을 해제하면 시드에 다시 포함될 수 있습니다.",
-    "user_blacklist_hint": "관찰은 의심 이력만 기록합니다. 차단은 인증 API와 보호된 DB 접근을 제한하며 공개 페이지 열람은 가능합니다. 관리자 계정은 등록할 수 없습니다.",
-    "deletion_history": "블랙리스트 전적 있음 — 재개업 여부를 확인한 뒤 승인하세요",
-    "user_id": "사용자 ID (UUID)",
-    "reason": "사유",
-    "watch": "관찰",
-    "blocked": "차단",
-    "blacklist_empty": "이 페이지에 등록된 이력이 없습니다",
-    "blacklist_error": "저장하지 못했습니다. 사용자 ID와 권한을 확인한 뒤 다시 시도하세요.",
-    "confirm_user_decision": "이 관리 결정을 저장할까요? 차단하면 계정 접근이 즉시 제한됩니다.",
-    "confirm_blacklist_remove": "목록에서 해제할까요? 시드 제외 또는 사용자 접근 제한이 해제됩니다.",
-    "remove_blacklist": "목록에서 해제"
+    "suggests_no": "아니라고 함"
   },
   "settings": {
     "title": "설정",
@@ -706,6 +706,8 @@
       "opening_hours_label": "영업시간 (선택)",
       "opening_hours_toggle": "영업시간 추가",
       "opening_hours_hint": "요일별 영업시간을 설정하세요",
+      "temporarily_closed": "임시 휴업",
+      "temporarily_closed_hint": "폐업은 아니지만 지금은 문을 닫은 가게에 표시됩니다. 영업시간표 대신 노출됩니다",
       "day_monday": "월요일",
       "day_tuesday": "화요일",
       "day_wednesday": "수요일",
@@ -766,6 +768,7 @@
       "opens_at": "{time}에 오픈",
       "closes_at": "{time}에 마감",
       "no_hours_available": "영업시간 정보 없음",
+      "temporarily_closed": "임시 휴업",
       "google_maps": "Google Maps",
       "close": "닫기",
       "status_pending": "검증 대기 중",
@@ -1252,14 +1255,14 @@
         "content": "Google 사진을 표시할 때 카페의 Place ID가 Google에 전달됩니다. 브라우저가 Google 이미지 호스트에 직접 연결하면서 IP 주소와 브라우저 정보가 Google에 전달될 수 있습니다.",
         "link_label": "Google 개인정보처리방침"
       },
-      "contact": {
-        "title": "16. 문의하기",
-        "content": "본 개인정보처리방침과 관련된 질문, 의견 또는 우려 사항, 그리고 서비스 이용 중 수집된 개인정보에 대한 수정 또는 액세스 요청은 다음으로 보내주십시오: 이메일: ibeanthere.app@gmail.com"
-      },
       "analytics": {
         "title": "15. 분석",
         "content": "서비스 이용 현황을 집계하기 위해 PostHog를 사용합니다. 수집 대상은 페이지 조회와 제품 이벤트 3개(카페 페이지 열람, 지도·길찾기 링크 이용, 커피 기록 저장)입니다. 각 이벤트에는 카페 식별자와, 로그인한 경우 계정 식별자가 포함됩니다. 이름·이메일 주소나 작성한 글의 내용은 포함되지 않습니다. 이 목적으로 기기에 아무것도 저장하지 않는 설정이라 쿠키나 유사 식별자가 생성되지 않으며, 동의를 받거나 거부할 분석 배너도 없습니다. 그 결과 로그인하지 않은 이용자는 방문 간에 식별되지 않습니다.",
         "link_label": "PostHog 개인정보처리방침"
+      },
+      "contact": {
+        "title": "16. 문의하기",
+        "content": "본 개인정보처리방침과 관련된 질문, 의견 또는 우려 사항, 그리고 서비스 이용 중 수집된 개인정보에 대한 수정 또는 액세스 요청은 다음으로 보내주십시오: 이메일: ibeanthere.app@gmail.com"
       }
     }
   },

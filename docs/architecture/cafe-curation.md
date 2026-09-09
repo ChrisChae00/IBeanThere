@@ -198,6 +198,38 @@ Both verdicts are reversible without touching code, via `PATCH /cafes/admin/{caf
 `GET /cafes/admin/all?brand_status=unknown` is the review queue for rows the algorithm
 could not classify.
 
+## Temporarily closed
+
+A shop that is shut for now but not gone — a renovation, a family emergency, a seasonal
+break. Deleting it would take its logs, beans and badges with it, and leaving it as-is
+sends people to a locked door.
+
+An admin ticks it in the cafe edit form, beside the opening hours. It is stored as
+`temporarily_closed: true` **inside the `business_hours` JSON**, not in a column of its
+own: `business_hours` is already an opaque blob the API passes straight through, so the
+whole feature cost no migration and no backend change.
+
+The consequences of that choice, all in `apps/fe/src/lib/utils/businessHours.ts`, which
+is the only module that names the key:
+
+- `isOpenNow` returns false whatever the timetable says.
+- The cafe page and the map card drop the timetable and show the state instead — a
+  reader deciding whether to walk over does not need Tuesday's hours to know the door is
+  locked. The map pin is smaller, faded and struck through; per the marker rules it stays
+  distinguishable without colour.
+- `dayHourEntries`/`hasDayHours` exist because `Object.keys(business_hours).length > 0`
+  was the test for "are there hours to show", and the flag alone would have answered yes
+  and rendered an empty panel.
+- Clearing it deletes the key rather than storing `false`. Absence already means "open as
+  usual", and a stored `false` reads like a decision somebody made.
+
+**The flag shares a blob with the days, so anything that replaces `business_hours`
+wholesale drops it.** The admin's Google Maps lookup does exactly that, and now carries
+the flag across the merge — the admin's statement about the shop outranks Google's
+timetable, and if Google is right that it is trading again the tick box is right there.
+Any future path that overwrites `business_hours` has to do the same, which is the price
+of not having given this a column. `scripts/check-business-hours.ts` pins the behaviour.
+
 ## Cafe identity
 
 Two rows are the same cafe when they share an id we borrowed from someone else, or
@@ -309,3 +341,6 @@ caches exist for that reason. Prefer one batched sweep over per-row lookups.
   removed by hand during the initial purge for this reason.
 - `roastery` coverage in OSM is thin. Trustworthy roastery filtering needs a
   human-entered path, not just map tags.
+- Temporarily closed rides inside `business_hours`, so it is only as durable as that
+  blob. Every wholesale write of it has to preserve the flag by hand; a column would
+  have made that structural. Worth revisiting if a second such write path appears.
