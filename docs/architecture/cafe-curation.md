@@ -42,12 +42,41 @@ filters pending rows so callers cannot accidentally publish them.
 |---|---|---|
 | Cafe-page suggestion | `pending` | Signed-in user; admin approval before aggregation |
 | Registration or existing-cafe check-in | `approved` | Registration distance check using submitted coordinates |
-| New log with `sells_beans` present | `approved` | Signed-in user; no purchase-mode or location proof check |
+| Purchase log with a check-in inside the 50m gate | `approved` | `mode == "purchase"` plus a server-computed distance |
+| Any other log with `sells_beans` present | `pending` | Signed-in user; admin approval before aggregation |
+| Reviewed seed row | `pending` | Researched from the shop's own pages; admin approval before aggregation |
 
 The purchase form sends `sells_beans`, initially checked. Unchecking it submits
 `false`, which is a negative observation, not an opt-out. The backend accepts this
-field on drink creation too; the UI restriction is not a security boundary.
-See SEC-07 in the [security audit](../security-audit-2026-09-09.md).
+field on drink creation too, and the UI restriction is not a security boundary — so the
+log path decides the status from evidence rather than from the field being present. The
+distance it reads is the one the endpoint computes from the cafe's stored coordinates,
+never the `distance_meters` in the request body. Everything the form sends today lacks
+coordinates, so in practice a log's answer is a suggestion and reaches the admin queue.
+This closes SEC-07 in the [security audit](../security-audit-2026-09-09.md).
+
+### Seeded claims are suggestions with their working attached
+
+A seeded row used to be `approved` on the grounds that a person had reviewed the import
+spreadsheet before it reached the database. That is no longer where the review happens:
+the answers are now researched from each shop's own pages and confirmed afterwards in
+the admin queue, so migration 021 drops the constraint that forbade a pending seed row
+and adds `evidence`.
+
+`evidence` is admin-only and never leaves the review endpoint. It holds the URL and the
+sentence that produced the answer, and unlike `note` it is kept on a "no" as well — the
+reason for "roasts on site: no" is exactly what an approver wants to read. `note` stays
+public and answers the reader's next question ("which beans?"). Merging the two would
+either publish working notes or throw away the only thing that makes an unattended
+claim checkable.
+
+Two rules the research follows, both learned by getting them wrong first:
+
+- **Directory sites are not evidence.** Aggregators print the same paragraph under every
+  listing, so unrelated cafes come back claiming the same thing in the same words.
+- **A blank answer is a real answer.** Unknown is not "no", and the map filter treats it
+  as "not this one" rather than publishing a negative. Nothing is inferred from a cafe's
+  name.
 
 Paths below have the `/api/v1` prefix:
 
@@ -56,15 +85,22 @@ Paths below have the `/api/v1` prefix:
 | `GET /cafes/{cafe_id}/traits` | Approved summaries, with viewer-specific `mine` |
 | `POST /cafes/{cafe_id}/traits/{trait}` | Returns `{submitted: true, traits: [...]}`; submission does not change the summary |
 | `DELETE /cafes/{cafe_id}/traits/{trait}` | Withdraws the caller's observations, including pending rows |
-| `GET /cafes/traits/suggestions` | Admin only; oldest 100 pending rows with cafe, username and note |
+| `GET /cafes/traits/suggestions` | Admin only; oldest 300 pending rows with the cafe's address, website and coordinates, plus username, note, source and evidence |
 | `POST /cafes/traits/suggestions/{id}/approve` | Admin only; updates a pending row in place; 404 if absent or already reviewed |
 | `DELETE /cafes/traits/suggestions/{id}` | Admin only; deletes a pending row |
 
 Notes are limited to 200 characters and retained only for positive `sells_beans` or
 `filter_coffee` observations. The summary uses the current observation's note.
-Migrations 019 and 020 add status and note constraints after the base table in 017.
-The queue has no pagination beyond its first 100 rows and these writes have no
-dedicated abuse limit. Approval is moderation, not proof of a visit or purchase.
+Migrations 019 and 020 add status and note constraints after the base table in 017; 021
+allows a pending seed row and adds `evidence` (500 characters). The queue has no
+pagination beyond its first 300 rows and these writes have no dedicated abuse limit.
+Approval is moderation, not proof of a visit or purchase.
+
+The admin queue groups claims by cafe rather than listing them flat: a seeded cafe
+arrives with up to three at once and they are one decision, not three. Each group
+carries the shop's website and a Google Maps link built from its name and address —
+never from bare coordinates, which resolve to an unnamed pin and tell a reviewer
+nothing.
 
 ## Rule 1 — No franchises (retired)
 

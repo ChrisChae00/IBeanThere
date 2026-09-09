@@ -423,11 +423,20 @@ async def record_cafe_visit(
             logger.warning("Auto drop bean failed (non-critical)", exc_info=True)
 
         # Somebody who just bought a bag here is evidence the cafe sells them -- but
-        # only because the form asked and they said yes. Approved, like registration:
-        # they were there.
+        # only if they were here. A log can be written from anywhere, days later, in any
+        # mode, so the answer alone proves nothing: without it, one `mode: "drink"`
+        # request carrying `sells_beans: false` flipped a map filter for everyone.
+        #
+        # `distance_meters` is the one computed above from the cafe's own coordinates,
+        # never the number the client sent, and it exists only when a check-in passed
+        # the 50m gate. That plus the purchase form asking the question is the same
+        # standing-in-the-shop evidence registration has; anything less waits for review
+        # like a claim typed on the cafe page.
         if visit_data.sells_beans is not None:
+            stood_in_the_shop = visit_data.mode == "purchase" and distance_meters is not None
             traits_service.record_observations_quietly(
-                supabase, cafe_id, {"sells_beans": visit_data.sells_beans}, current_user.id
+                supabase, cafe_id, {"sells_beans": visit_data.sells_beans}, current_user.id,
+                status=traits_service.APPROVED if stood_in_the_shop else traits_service.PENDING,
             )
 
         # After the drop, not before: the drop is what a `regular_*` badge counts.
@@ -843,82 +852,17 @@ async def update_trending_scores(
         )
 
 
-@router.post("/admin/backfill-cafe-images")
-async def backfill_cafe_images(
-    current_user=Depends(require_admin_role),
-    batch_size: int = Query(default=100, ge=1, le=500, description="Number of cafes to process per batch")
-):
-    """
-    Backfill main_image for cafes that don't have one yet.
-
-    - Scans cafes where main_image is NULL
-    - Picks the most recent public visit photo for each cafe
-    - Updates cafes.main_image so the trending endpoint no longer needs runtime lookups
-    - Admin only
-    """
-    try:
-        supabase = get_supabase_client()
-
-        # 1. Get cafes without main_image
-        cafes_result = supabase.table("cafes").select("id").is_(
-            "main_image", "null"
-        ).limit(batch_size).execute()
-
-        if not cafes_result.data:
-            return {"message": "No cafes need image backfill", "updated": 0, "scanned": 0}
-
-        cafe_ids = [c["id"] for c in cafes_result.data]
-
-        # 2. Batch fetch the most recent photo per cafe
-        logs_result = supabase.table("cafe_visits").select(
-            "cafe_id, photo_urls"
-        ).in_(
-            "cafe_id", cafe_ids
-        ).eq(
-            "is_public", True
-        ).not_.is_(
-            "photo_urls", "null"
-        ).order(
-            "visited_at", desc=True
-        ).execute()
-
-        # Deduplicate: keep only the first (most recent) photo per cafe
-        cafe_images = {}
-        if logs_result.data:
-            for log in logs_result.data:
-                cid = log.get("cafe_id")
-                urls = log.get("photo_urls", [])
-                if cid not in cafe_images and urls:
-                    cafe_images[cid] = urls[0]
-
-        # 3. Update each cafe's main_image
-        updated = 0
-        for cafe_id, image_url in cafe_images.items():
-            try:
-                supabase.table("cafes").update(
-                    {"main_image": image_url}
-                ).eq("id", cafe_id).execute()
-                updated += 1
-            except Exception:
-                logger.warning("Failed to update main_image for cafe %s", cafe_id, exc_info=True)
-
-        # 4. Invalidate trending cache so next request picks up new images
-        _trending_cache.clear()
-
-        return {
-            "message": "Cafe image backfill completed",
-            "scanned": len(cafe_ids),
-            "updated": updated,
-            "skipped_no_photo": len(cafe_ids) - updated
-        }
-
-    except Exception as e:
-        logger.exception("Error backfilling cafe images")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again."
-        )
-
+# `POST /admin/backfill-cafe-images` was here. It copied the newest public log photo
+# into `cafes.main_image` so the trending list would not have to look one up at read
+# time -- and stored no link back to the log it came from. When the author made that
+# log private, or deleted it, the copy stayed on the cafe and kept being served: a
+# photo withdrawn from the app that the app still showed (SEC-10).
+#
+# Deleted rather than given a provenance column, because the read-time lookup it was
+# avoiding already exists in `cafes.py` (both the trending list and the cafe detail
+# fall back to log photos) and that one re-reads `is_public` on every request, so a
+# withdrawal takes effect at once. `cafes.main_image` is now only ever written by an
+# act that means it: registration, an admin edit, or a reviewed seed row.
 
 @router.get("/cafes/{cafe_id}/logs", response_model=CafeLogsResponse)
 async def get_cafe_logs(

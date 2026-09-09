@@ -132,6 +132,9 @@ export interface GooglePlacesLookupData {
   website?: string;
   business_hours?: BusinessHoursData;
   google_maps_url?: string;
+  /* Google's own id for the place. The photo fallback cannot ask for anything
+     without it, and a seeded cafe has none until an admin pastes a Maps URL. */
+  place_id?: string;
 }
 
 export interface GooglePlacesLookupResult {
@@ -303,6 +306,13 @@ export interface TraitSuggestion {
   cafe_id: string;
   cafe_name?: string;
   cafe_slug?: string;
+  /* Enough of the cafe to check the claim without leaving the queue. */
+  cafe_address?: string;
+  cafe_website?: string;
+  cafe_status?: string;
+  cafe_source_type?: string;
+  cafe_latitude?: number;
+  cafe_longitude?: number;
   trait: string;
   value: boolean;
   observed_at?: string;
@@ -310,6 +320,10 @@ export interface TraitSuggestion {
   username?: string;
   /* The free text an admin is being asked to publish. */
   note?: string;
+  /* 'user' -- somebody pressed a button. 'seed' -- researched during the import. */
+  source?: string;
+  /* Why a seeded claim was made: the URL and the sentence behind it. Admin-only. */
+  evidence?: string;
 }
 
 export interface CafeBeanEntry {

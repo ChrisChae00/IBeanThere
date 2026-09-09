@@ -34,6 +34,14 @@ The fallback is therefore deliberately narrow:
 The initial planning inventory found 302 image-less cafes. Treat that as a historical
 estimate: recount production rows before running a backfill.
 
+The pivot's reviewed KW seed changes what this feature is for. That seed deliberately
+inserts cafes with no stored photo — a reviewer who has not been there yet cannot supply
+one, and the priority below already covers it — so the explore cards of newly seeded
+cafes rest on rung 3. Until the activation gate above is met they show rung 4, the
+coffee-logo placeholder. Note also that a seeded row has no `google_place_id`, so the
+Place ID backfill is a prerequisite for those cards specifically, not only a cost
+optimization.
+
 ## Image priority and request flow
 
 The priority is fixed:

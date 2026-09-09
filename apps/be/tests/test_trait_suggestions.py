@@ -5,12 +5,14 @@ The same sentence -- "this place sells beans" -- carries different evidence depe
 on where it was said:
 
 - Registering a cafe means passing a 100m check while standing in it.
-- Logging a bean purchase means having just bought the bag.
-- Pressing a button on a cafe page means neither; the reader may never have been there.
+- Logging a bean purchase from inside the cafe means the same check, plus having just
+  bought the bag.
+- Logging one from home, or pressing a button on a cafe page, means neither; the person
+  may never have been there.
 
-So the first two write approved rows and count at once, and the third waits. These
-tests pin that split, and pin the thing that makes the split worth having: a pending
-row must never reach a count, a flag, or a map filter.
+So a claim counts at once only when the server measured where it was made, and every
+other claim waits. These tests pin that split, and pin the thing that makes the split
+worth having: a pending row must never reach a count, a flag, or a map filter.
 """
 
 import sys
@@ -23,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from app.services import traits
 
-from test_visit_privacy import FakeSupabase
+from test_visit_privacy import FakeSupabase, _row, make_client
 
 CAFE = "cafe-1"
 SOMEONE = "user-1"
@@ -117,6 +119,78 @@ class WritePathTests(unittest.TestCase):
         traits.record_observations_quietly(
             Exploding({}), CAFE, {"sells_beans": True}, SOMEONE
         )  # must not raise
+
+
+class LogPathEvidenceTests(unittest.TestCase):
+    """
+    What a coffee log's `sells_beans` answer is worth.
+
+    A log can be written from anywhere, in either mode, days after the fact -- the form
+    is not a check-in. So the answer counts at once only when the request also carried a
+    location the server measured against the cafe. Anything else is a claim like any
+    other and waits for review.
+
+    The bug this pins: `mode: "drink"`, no coordinates, `sells_beans: false` used to
+    write an approved observation, which is the newest user observation, which is the
+    state -- one request from any account dropped a cafe out of the map's bean filter.
+    """
+
+    CAFE_ROW = {"id": CAFE, "latitude": "37.6190", "longitude": "127.0590"}
+
+    # A shop-front metre or two away: inside the 50m gate the endpoint enforces.
+    INSIDE = {"check_in_lat": 37.61901, "check_in_lng": 127.05901}
+
+    def _post(self, body):
+        client, supabase = make_client(self, {
+            "cafes": [self.CAFE_ROW],
+            "cafe_visits": [_row()],
+            "cafe_beans": [],
+            "cafe_trait_observations": [],
+        })
+        response = client.post(f"/api/v1/cafes/{CAFE}/visit", json={"cafe_id": CAFE, **body})
+        written = [
+            q.payload for q in supabase.queries_on("cafe_trait_observations") if q.op == "insert"
+        ]
+        return response, written
+
+    def test_a_drink_log_cannot_approve_a_trait(self):
+        response, written = self._post(
+            {"mode": "drink", "rating": 4, "is_public": False, "sells_beans": False}
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual([w["status"] for w in written], [traits.PENDING])
+
+    def test_a_purchase_log_with_no_location_waits(self):
+        """Saying "I bought a bag here" is not evidence of having been here."""
+        _, written = self._post({"mode": "purchase", "sells_beans": True})
+        self.assertEqual([w["status"] for w in written], [traits.PENDING])
+
+    def test_a_client_claimed_distance_is_not_evidence(self):
+        """`distance_meters` in the body is whatever the caller typed."""
+        _, written = self._post(
+            {"mode": "purchase", "sells_beans": True, "distance_meters": 3}
+        )
+        self.assertEqual([w["status"] for w in written], [traits.PENDING])
+
+    def test_a_purchase_checked_in_at_the_cafe_counts_at_once(self):
+        response, written = self._post(
+            {"mode": "purchase", "sells_beans": True, **self.INSIDE}
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual([w["status"] for w in written], [traits.APPROVED])
+
+    def test_a_check_in_too_far_away_takes_the_whole_log_down(self):
+        """Not a trait question: the endpoint already refuses the visit outright."""
+        response, written = self._post(
+            {"mode": "purchase", "sells_beans": True,
+             "check_in_lat": 37.5665, "check_in_lng": 126.9780}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(written, [])
+
+    def test_no_answer_writes_no_observation(self):
+        _, written = self._post({"mode": "drink", "rating": 4})
+        self.assertEqual(written, [])
 
 
 class MapFlagQueryTests(unittest.TestCase):

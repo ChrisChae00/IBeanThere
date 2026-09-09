@@ -4,15 +4,38 @@
 
 - `CafeTraits.tsx` submits suggestions through `suggestTraitObservation`; pending
   submissions leave approved summaries unchanged. Trait reads use `no-store`.
-- `admin/TraitSuggestionsList.tsx` displays the pending queue, including notes, and
-  calls admin approve/reject endpoints. Backend authorization enforces access.
+- `admin/TraitSuggestionsList.tsx` displays the pending queue grouped by cafe, with each
+  claim's note and admin-only evidence, and calls admin approve/reject endpoints.
+  Backend authorization enforces access. Per-cafe actions approve every claim at once or
+  delete the cafe; the website and Maps links let a reviewer check a claim without
+  leaving the queue.
+- **Admin cafe edits fill from Google.** The edit modal takes a Google Maps URL and
+  applies the same lookup the registration form uses, filling name, address, phone,
+  website, hours, coordinates and `place_id`. Nothing is written until Save. The backend
+  refuses a coordinate move beyond 100m: past that the URL describes a different shop,
+  and accepting it would carry this cafe's logs and badges somewhere nobody earned them.
+- **Admin modals were unusable and are fixed.** The backdrop used `bg-opacity-50`, which
+  Tailwind v4 removed, so `bg-black` painted the page solid black; and the only way out
+  was one button. They now use `bg-black/50`, close on Escape and on a backdrop click,
+  and lock background scrolling while open.
+- **Admin actions drop the cached lists.** Verifying, editing or deleting a cafe
+  revalidates the cafe tags and `trending-cafes`, and the backend clears its memoised
+  trending lists. Without both, a deleted cafe kept appearing on discover for up to four
+  hours after the row was gone.
 - `CoffeeLogForm.tsx` asks purchase users whether the cafe sells beans (checked by
-  default). Unchecking submits a negative observation. “Want again” starts unset;
-  selecting the chosen answer again clears the local selection.
-- `app/actions/cafe.ts` calls `revalidateTag` for `cafe-${cafeId}` after log creation
-  and My Logs edits/deletes. Detail fetches retain their 120-second revalidation.
-  This is not complete privacy revocation: slug/ID tag mismatch and other cached
-  feeds remain audit concerns (SEC-10 in the [security audit](../security-audit-2026-09-09.md)).
+  default). Unchecking submits a negative observation, and the form says the answer is
+  reviewed before it reaches the cafe page — it is stored `pending` unless the log also
+  carried a check-in the backend measured. “Want again” starts unset; selecting the
+  chosen answer again clears the local selection.
+- `app/actions/cafe.ts` revalidates after log creation and My Logs edits/deletes. It
+  drops both `cafe-${cafeId}` and the broad `cafe` tag: a detail page is cached under
+  whichever identifier its URL carried, usually a slug, while every caller here holds a
+  UUID, so the narrow tag alone left slug-cached pages stale for two minutes. The action
+  now also requires a session and a well-formed identifier — a Server Action is a public
+  endpoint, and an anonymous caller could otherwise clear the cache in a loop.
+  Detail fetches retain their 120-second revalidation. Remaining gap: a visibility change
+  made outside this frontend invalidates nothing, since the backend has no way to reach
+  Next's cache (SEC-10 in the [security audit](../security-audit-2026-09-09.md)).
 - `shared/ui/FlipText.tsx` supplies the landing link hover animation. CSS handles
   reduced motion; duplicate letter faces are hidden from accessibility and selection.
 

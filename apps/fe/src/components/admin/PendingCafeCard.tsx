@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PendingCafe } from '@/lib/api/admin';
 import { useTranslations } from 'next-intl';
 import { Card, Badge, Button } from '@/components/ui';
@@ -8,6 +8,7 @@ import { BusinessHours } from '@/types/map';
 import OpeningHoursInput from '@/components/cafe/OpeningHoursInput';
 import PhotoUploadWithMain from '@/shared/ui/PhotoUploadWithMain';
 import { useAuth } from '@/hooks/useAuth';
+import { lookupGoogleMapsUrl } from '@/lib/api/cafes';
 
 interface PendingCafeCardProps {
   cafe: PendingCafe;
@@ -28,6 +29,11 @@ export interface EditCafeData {
   business_hours?: BusinessHours;
   main_image?: string;
   images?: string[];
+  /* Only set when a Google Maps lookup filled the form. */
+  latitude?: number;
+  longitude?: number;
+  google_place_id?: string;
+  source_url?: string;
 }
 
 export default function PendingCafeCard({
@@ -50,6 +56,9 @@ export default function PendingCafeCard({
     description: cafe.description || '',
     business_hours: cafe.business_hours,
   });
+  const [mapsUrl, setMapsUrl] = useState('');
+  const [lookupState, setLookupState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [lookupMessage, setLookupMessage] = useState('');
   const [editPhotos, setEditPhotos] = useState<string[]>(cafe.images || []);
   const [editMainIndex, setEditMainIndex] = useState<number>(() => {
     if (cafe.main_image && cafe.images) {
@@ -58,6 +67,52 @@ export default function PendingCafeCard({
     }
     return 0;
   });
+
+  /*
+    Pull the shop's real details off its Google Maps page.
+
+    A seeded cafe carries an OpenStreetMap node's idea of the place: often no phone, no
+    hours, an address with no street number, and a name last edited by a stranger years
+    ago. The same lookup the registration form uses answers all of that from one pasted
+    URL. It also brings back `place_id`, which is what the card photo fallback needs
+    before it can ask Google for anything.
+
+    Nothing is saved here -- the fields are filled in and the admin still presses Save,
+    so a wrong URL is undone by closing the modal.
+  */
+  const applyGoogleUrl = async () => {
+    const url = mapsUrl.trim();
+    if (!url) return;
+
+    setLookupState('loading');
+    setLookupMessage('');
+    try {
+      const result = await lookupGoogleMapsUrl(url);
+      if (!result.success || !result.data) {
+        setLookupState('error');
+        setLookupMessage(t('google_lookup_failed'));
+        return;
+      }
+      const found = result.data;
+      setEditData((previous) => ({
+        ...previous,
+        name: found.name || previous.name,
+        address: found.address || previous.address,
+        phone: found.phone || previous.phone,
+        website: found.website || previous.website,
+        business_hours: (found.business_hours as BusinessHours) || previous.business_hours,
+        latitude: found.latitude ?? previous.latitude,
+        longitude: found.longitude ?? previous.longitude,
+        google_place_id: found.place_id || previous.google_place_id,
+        source_url: found.google_maps_url || url,
+      }));
+      setLookupState('done');
+      setLookupMessage(t('google_lookup_applied'));
+    } catch {
+      setLookupState('error');
+      setLookupMessage(t('google_lookup_failed'));
+    }
+  };
 
   const handleEditSubmit = () => {
     const mainImage = editPhotos.length > 0 ? editPhotos[editMainIndex] || editPhotos[0] : undefined;
@@ -69,7 +124,27 @@ export default function PendingCafeCard({
     setShowEditModal(false);
   };
 
+  // A modal with no way out but one button is a trap: Escape is the first thing
+  // anybody presses, and on a phone the backdrop is the only thing in reach.
+  useEffect(() => {
+    if (!showEditModal) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowEditModal(false);
+    };
+    document.addEventListener('keydown', onKey);
+    // The page behind must not scroll under the dialog.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showEditModal]);
+
   const handleOpenEditModal = () => {
+    setMapsUrl('');
+    setLookupState('idle');
+    setLookupMessage('');
     // Reset image state from latest cafe data when opening
     setEditPhotos(cafe.images || []);
     setEditMainIndex(() => {
@@ -189,13 +264,54 @@ export default function PendingCafeCard({
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-surface rounded-lg p-6 max-w-lg w-full border border-border max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div
+            className="bg-surface rounded-lg p-6 max-w-lg w-full border border-border max-h-[90vh] overflow-y-auto"
+            onClick={(event) => event.stopPropagation()}
+          >
             <h3 className="text-lg font-semibold mb-4 text-text">
               {t('edit_cafe_title')}
             </h3>
 
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">
+                  {t('google_lookup_label')}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={mapsUrl}
+                    onChange={(e) => setMapsUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyGoogleUrl();
+                      }
+                    }}
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="flex-1 min-w-0 px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={applyGoogleUrl}
+                    loading={lookupState === 'loading'}
+                    disabled={!mapsUrl.trim()}
+                  >
+                    {t('google_lookup_fetch')}
+                  </Button>
+                </div>
+                <p className={`mt-1 text-xs ${lookupState === 'error' ? 'text-error' : 'text-textSecondary'}`}>
+                  {lookupMessage || t('google_lookup_hint')}
+                </p>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-text mb-1">
                   {t('cafe_name')}

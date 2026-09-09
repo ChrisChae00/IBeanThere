@@ -331,7 +331,8 @@ export async function getCafeBeans(cafeId: string): Promise<CafeBeansResponse> {
 }
 
 
-/* The admin queue. Only cafe-page suggestions reach it -- see TraitSuggestionsList. */
+/* The admin queue: cafe-page suggestions and researched seed claims -- see
+   TraitSuggestionsList. */
 export async function getTraitSuggestions(): Promise<TraitSuggestion[]> {
   const headers = await getAuthHeaders();
   const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/traits/suggestions`, {

@@ -19,12 +19,14 @@ of a filter. Revisit it when there are enough observations for that to matter.
 Nothing is stored precomputed. The state is derived on every read, so deleting an
 observation takes effect immediately with no cache to invalidate.
 
-**Evidence decides whether a claim waits.** Registering a cafe means passing a 100m
-check while standing in it; logging a purchase means having just bought the bag. Those
-write `approved` rows and count at once. A claim made from the cafe page carries no
-such evidence -- the reader may never have been there -- so it is written `pending`
-and counts for nothing until a person approves it. `summarise` enforces that here
-rather than trusting each caller's query to remember the filter.
+**Evidence decides whether a claim waits, and evidence means a location the server
+checked.** Registering a cafe means passing a 100m check while standing in it, so it
+writes `approved` rows that count at once. Everything else is somebody typing -- a
+claim from the cafe page, or a purchase log filed from the sofa at home -- and is
+written `pending`, counting for nothing until a person approves it. Saying "I bought a
+bag here" is not evidence of buying a bag here; only the coordinates are.
+`summarise` enforces the filter here rather than trusting each caller's query to
+remember the clause.
 """
 import logging
 from datetime import date
@@ -42,6 +44,10 @@ TRAITS = ("sells_beans", "filter_coffee", "roasts_on_site")
 NOTE_TRAITS = ("sells_beans", "filter_coffee")
 
 NOTE_MAX_LENGTH = 200
+
+# The reviewer's working, not the reader's answer. Longer than a note because it holds a
+# URL and a sentence; capped because migration 021 caps it.
+EVIDENCE_MAX_LENGTH = 500
 
 APPROVED = "approved"
 PENDING = "pending"
@@ -66,6 +72,20 @@ def clean_note(trait: str, value: bool, note: Optional[str]) -> Optional[str]:
     if not note or trait not in NOTE_TRAITS or value is not True:
         return None
     cleaned = " ".join(note.split())[:NOTE_MAX_LENGTH].strip()
+    return cleaned or None
+
+
+def clean_evidence(evidence: Optional[str]) -> Optional[str]:
+    """
+    The admin-only reason a claim was made, or None.
+
+    Unlike a note, this is kept on a "no" as much as on a "yes": the reason for
+    "roasts on site: no" is exactly what an approver wants to read. Never returned by
+    any reader-facing endpoint.
+    """
+    if not evidence:
+        return None
+    cleaned = " ".join(evidence.split())[:EVIDENCE_MAX_LENGTH].strip()
     return cleaned or None
 
 
@@ -213,9 +233,10 @@ def record_observation(
     """
     Write one user observation.
 
-    `status` is the caller's to decide and never the client's: it is set from which
-    surface the claim came through, not from anything in the request body. Registering
-    a cafe and logging a purchase pass `APPROVED`; the cafe page passes `PENDING`.
+    `status` is the caller's to decide and never the client's: it is set from what that
+    surface actually verified, not from anything in the request body. Registration, and
+    a purchase log carrying a check-in the endpoint measured, pass `APPROVED`; the cafe
+    page and every other log pass `PENDING`.
     """
     supabase.table("cafe_trait_observations").insert({
         "cafe_id": cafe_id,
@@ -234,6 +255,7 @@ def record_observations_quietly(
     cafe_id: str,
     values: Dict[str, bool],
     user_id: str,
+    status: str = APPROVED,
 ) -> None:
     """
     Record what somebody reported while doing something else, and never fail them for it.
@@ -241,12 +263,17 @@ def record_observations_quietly(
     Used by cafe registration and by saving a bean purchase. Both have already
     succeeded by the time this runs; a trait that will not insert must not take the
     cafe or the log down with it.
+
+    `status` is the caller's, for the same reason as in `record_observation`: it says
+    what evidence that surface actually checked. It is a parameter and not a constant
+    because the log form asks the same question registration does without standing
+    anybody inside the cafe to answer it.
     """
     for trait, value in (values or {}).items():
         if not is_valid_trait(trait) or value is None:
             continue
         try:
-            record_observation(supabase, cafe_id, trait, bool(value), user_id)
+            record_observation(supabase, cafe_id, trait, bool(value), user_id, status=status)
         except Exception:  # pragma: no cover - network shape
             logger.warning(
                 "Trait observation failed (%s on cafe %s)", trait, cafe_id, exc_info=True

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getPendingCafes, verifyCafe, deleteCafe, updateCafe, PendingCafe, CafeUpdateData } from '@/lib/api/admin';
+import { revalidateCafe } from '@/app/actions/cafe';
 import { getErrorCode } from '@/lib/api/client';
 import { ErrorAlert } from '@/shared/ui';
 import PendingCafeCard, { EditCafeData } from './PendingCafeCard';
@@ -67,6 +68,8 @@ export default function PendingCafesList() {
     setActionError(null);
     try {
       await updateCafe(cafeId, data as CafeUpdateData);
+      // An edit changes the name, address and photo the discover cards show.
+      await revalidateCafe(cafeId);
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error updating cafe:', err);
@@ -86,6 +89,7 @@ export default function PendingCafesList() {
 
     try {
       await verifyCafe(selectedCafeId);
+      await revalidateCafe(selectedCafeId);
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error verifying cafe:', err);
@@ -106,6 +110,9 @@ export default function PendingCafesList() {
 
     try {
       await deleteCafe(selectedCafeId);
+      // Nothing else drops the cached discover list, so without this the cafe keeps
+      // appearing on the map for up to four hours after it stops existing.
+      await revalidateCafe(selectedCafeId);
       await fetchPendingCafes();
     } catch (err) {
       console.error('Error deleting cafe:', err);
@@ -179,7 +186,7 @@ export default function PendingCafesList() {
       </div>
 
       {showVerifyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
             <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_verify_title')}
@@ -209,7 +216,7 @@ export default function PendingCafesList() {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
             <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_delete_title')}

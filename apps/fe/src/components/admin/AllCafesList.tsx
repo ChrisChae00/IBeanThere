@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { getAllCafes, verifyCafe, deleteCafe, updateCafe, PendingCafe, CafeUpdateData, AllCafesParams } from '@/lib/api/admin';
+import { revalidateCafe } from '@/app/actions/cafe';
 import { getErrorCode } from '@/lib/api/client';
 import { ErrorAlert } from '@/shared/ui';
 import PendingCafeCard, { EditCafeData } from './PendingCafeCard';
@@ -82,6 +83,8 @@ export default function AllCafesList() {
     setActionError(null);
     try {
       await updateCafe(cafeId, data as CafeUpdateData);
+      // An edit changes the name, address and photo the discover cards show.
+      await revalidateCafe(cafeId);
       await fetchCafes();
     } catch (err) {
       console.error('Error updating cafe:', err);
@@ -99,6 +102,7 @@ export default function AllCafesList() {
     setShowVerifyModal(false);
     try {
       await verifyCafe(selectedCafeId);
+      await revalidateCafe(selectedCafeId);
       await fetchCafes();
     } catch (err) {
       console.error('Error verifying cafe:', err);
@@ -117,6 +121,7 @@ export default function AllCafesList() {
     setShowDeleteModal(false);
     try {
       await deleteCafe(selectedCafeId);
+      await revalidateCafe(selectedCafeId);
       await fetchCafes();
     } catch (err) {
       console.error('Error deleting cafe:', err);
@@ -230,7 +235,7 @@ export default function AllCafesList() {
       )}
 
       {showVerifyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
             <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_verify_title')}
@@ -257,7 +262,7 @@ export default function AllCafesList() {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4 border border-border">
             <h3 className="text-lg font-semibold mb-4 text-text">
               {t('confirm_delete_title')}

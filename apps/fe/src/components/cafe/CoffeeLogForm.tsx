@@ -301,15 +301,21 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
            purchases go unrecorded. */
         <>
           <BeanPicker value={bean} onChange={setBean} />
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              checked={sellsBeans}
-              onChange={(event) => setSellsBeans(event.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
-            />
-            <span className="text-sm text-ink-primary">{t('sells_beans_here')}</span>
-          </label>
+          <div>
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={sellsBeans}
+                onChange={(event) => setSellsBeans(event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+              />
+              <span className="text-sm text-ink-primary">{t('sells_beans_here')}</span>
+            </label>
+            {/* A log is written from anywhere, so this answer waits for review like a
+                suggestion made on the cafe page. Saying so here stops the reader
+                looking for a change that is not going to appear. */}
+            <p className="mt-1 pl-7 text-xs text-ink-secondary">{t('sells_beans_review')}</p>
+          </div>
         </>
       )}
 

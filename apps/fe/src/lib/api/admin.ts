@@ -85,6 +85,12 @@ export interface CafeUpdateData {
   business_hours?: BusinessHours;
   main_image?: string;
   images?: string[];
+  /* What a Google Maps lookup corrected. The backend refuses a move of more than
+     100m -- past that the URL is a different shop, not a better address for this one. */
+  latitude?: number;
+  longitude?: number;
+  google_place_id?: string;
+  source_url?: string;
 }
 
 export interface AdminUpdateResponse {

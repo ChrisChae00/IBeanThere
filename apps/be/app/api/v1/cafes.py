@@ -894,13 +894,19 @@ async def list_trait_suggestions(
     """
     Everything waiting for review, oldest first.
 
+    Two kinds of claim land here now. One is a reader pressing a button on a cafe page.
+    The other is a seeded row: a cafe imported from the review CSV, whose answers were
+    researched rather than witnessed, so they wait here with their `evidence` instead of
+    counting on arrival. Both are the same shape -- an unwitnessed claim -- which is why
+    they share a queue rather than getting a second one.
+
     Registered above the `/{cafe_identifier}` catch-all, like `/trending`: a literal
     path segment that comes after a wildcard route is never reached.
     """
     try:
         result = supabase.table("cafe_trait_observations").select(
-            "id, cafe_id, trait, value, observed_at, created_at, user_id, note"
-        ).eq("status", traits_service.PENDING).order("created_at", desc=False).limit(100).execute()
+            "id, cafe_id, trait, value, observed_at, created_at, user_id, note, source, evidence"
+        ).eq("status", traits_service.PENDING).order("created_at", desc=False).limit(300).execute()
 
         rows = result.data or []
         if not rows:
@@ -910,7 +916,13 @@ async def list_trait_suggestions(
         cafe_ids = list({r["cafe_id"] for r in rows})
         user_ids = list({r["user_id"] for r in rows if r.get("user_id")})
 
-        cafes = supabase.table("cafes").select("id, name, slug").in_("id", cafe_ids).execute()
+        # Enough to check the claim without leaving the page: the seed review answers
+        # "does this place sell beans" from a website, and an approver needs the same
+        # website. `status` and `source_type` say whether the cafe itself is still
+        # waiting, which is a different decision from the trait and has its own buttons.
+        cafes = supabase.table("cafes").select(
+            "id, name, slug, address, website, status, source_type, latitude, longitude"
+        ).in_("id", cafe_ids).execute()
         cafe_by_id = {c["id"]: c for c in (cafes.data or [])}
 
         users_by_id = {}
@@ -925,6 +937,12 @@ async def list_trait_suggestions(
                     "cafe_id": row["cafe_id"],
                     "cafe_name": cafe_by_id.get(row["cafe_id"], {}).get("name"),
                     "cafe_slug": cafe_by_id.get(row["cafe_id"], {}).get("slug"),
+                    "cafe_address": cafe_by_id.get(row["cafe_id"], {}).get("address"),
+                    "cafe_website": cafe_by_id.get(row["cafe_id"], {}).get("website"),
+                    "cafe_status": cafe_by_id.get(row["cafe_id"], {}).get("status"),
+                    "cafe_source_type": cafe_by_id.get(row["cafe_id"], {}).get("source_type"),
+                    "cafe_latitude": cafe_by_id.get(row["cafe_id"], {}).get("latitude"),
+                    "cafe_longitude": cafe_by_id.get(row["cafe_id"], {}).get("longitude"),
                     "trait": row["trait"],
                     "value": row["value"],
                     "observed_at": row.get("observed_at"),
@@ -932,6 +950,12 @@ async def list_trait_suggestions(
                     # Free text an admin is being asked to publish: it is the reason
                     # this queue exists, so it has to be visible before approving.
                     "note": row.get("note"),
+                    # Where the claim came from, and what it was based on. A seeded row
+                    # has no author to vouch for it, so the working -- which website,
+                    # which sentence -- is the only thing an approver can check.
+                    # Never leaves this endpoint; the cafe page shows `note` alone.
+                    "source": row.get("source"),
+                    "evidence": row.get("evidence"),
                     # An admin deciding whether to trust a claim needs to know who made
                     # it. This endpoint is admin-only; nothing here reaches a reader.
                     "username": users_by_id.get(row.get("user_id"), {}).get("username"),
@@ -2261,7 +2285,8 @@ async def admin_verify_cafe(
             )
         
         updated_cafe = result.data[0]
-        
+        _drop_trending_cache()
+
         return {
             "message": "Cafe verified by admin",
             "cafe": CafeResponse(
@@ -2293,6 +2318,21 @@ async def admin_verify_cafe(
             detail="An unexpected error occurred. Please try again."
         )
 
+
+def _drop_trending_cache() -> None:
+    """
+    Forget the memoised trending lists after an admin changes what exists.
+
+    The discover cards are served from `visits._trending_cache`, keyed by viewport, and
+    a deleted cafe stays in every key that already held it until the TTL runs out. So
+    an admin deletes a cafe, reloads discover, and it is still there. Imported inside
+    the function because `visits` imports from this module.
+    """
+    from app.api.v1 import visits
+
+    visits._trending_cache.clear()
+
+
 @router.delete("/admin/{cafe_id}")
 async def admin_delete_cafe(
     cafe_id: str,
@@ -2321,7 +2361,8 @@ async def admin_delete_cafe(
         
         # Delete cafe (cascade deletes checkins and visits)
         result = supabase.table("cafes").delete().eq("id", cafe_id).execute()
-        
+        _drop_trending_cache()
+
         return {
             "message": "Cafe deleted successfully",
             "cafe_id": cafe_id
@@ -2352,6 +2393,14 @@ class AdminCafeUpdateRequest(BaseModel):
     images: Optional[List[str]] = None     # Gallery image URLs
     brand_override: Optional[bool] = None  # True = force franchise, False = force local
     serves_coffee: Optional[bool] = None   # False hides a venue that does not serve coffee
+    # What a Google Maps lookup returned for this cafe. A seeded row carries an OSM
+    # node's idea of where a shop is and what it is called; Google usually has the
+    # better answer, and the place id is what the photo fallback needs to show anything
+    # at all. Corrections, not a re-registration -- see the drift check below.
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    google_place_id: Optional[str] = None
+    source_url: Optional[str] = None
 
 @router.patch("/admin/{cafe_id}")
 async def admin_update_cafe(
@@ -2400,6 +2449,31 @@ async def admin_update_cafe(
         if request.serves_coffee is not None:
             update_data["serves_coffee"] = request.serves_coffee
             update_data["category_source"] = "admin"
+        if request.google_place_id is not None:
+            update_data["google_place_id"] = request.google_place_id
+        if request.source_url is not None:
+            update_data["source_url"] = request.source_url
+
+        # Moving a cafe is a correction, never a relocation. The same 100m the
+        # registration flow allows a Google result to drift from the submitted point:
+        # past that, the URL describes a different shop, and accepting it would carry
+        # this cafe's logs, beans and badges somewhere nobody earned them.
+        if request.latitude is not None and request.longitude is not None:
+            drift = calculate_earth_distance(
+                float(cafe_result.data["latitude"]), float(cafe_result.data["longitude"]),
+                float(request.latitude), float(request.longitude),
+            )
+            if drift > GOOGLE_PLACE_MAX_DRIFT_METERS:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"That location is {drift:.0f}m from this cafe, past the "
+                        f"{GOOGLE_PLACE_MAX_DRIFT_METERS}m correction limit. If it is a "
+                        "different place, register it rather than moving this one."
+                    ),
+                )
+            update_data["latitude"] = request.latitude
+            update_data["longitude"] = request.longitude
 
         has_image_update = request.images is not None
 
@@ -2513,6 +2587,7 @@ async def admin_update_cafe(
 
         # Re-fetch the updated cafe
         updated_cafe = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        _drop_trending_cache()
 
         return {
             "message": "Cafe updated successfully",
