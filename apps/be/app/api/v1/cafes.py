@@ -764,8 +764,8 @@ async def get_cafe_traits(
     """
     try:
         result = supabase.table("cafe_trait_observations").select(
-            "trait, value, source, user_id, observed_at, created_at"
-        ).eq("cafe_id", cafe_id).execute()
+            traits_service.OBSERVATION_COLUMNS
+        ).eq("cafe_id", cafe_id).eq("status", traits_service.APPROVED).execute()
 
         viewer_id = current_user.id if current_user else None
         return [
@@ -780,7 +780,7 @@ async def get_cafe_traits(
         )
 
 
-@router.post("/{cafe_id}/traits/{trait}", response_model=List[TraitSummary])
+@router.post("/{cafe_id}/traits/{trait}")
 async def observe_cafe_trait(
     cafe_id: str,
     trait: str,
@@ -789,7 +789,13 @@ async def observe_cafe_trait(
     supabase = Depends(get_supabase_client)
 ):
     """
-    Record what you saw. Yes or no, both are observations.
+    Suggest a change to what this cafe's page says. Yes or no, both are observations.
+
+    This is the one surface with no evidence behind the claim: the person pressing the
+    button may never have set foot in the place. So it is written `pending` and counts
+    for nothing until an admin approves it. The two surfaces that do carry evidence --
+    registering a cafe from inside it, logging a bean purchase -- write approved rows
+    directly and are not routed through here.
 
     Insert-only: the history is the point. Saying "no" today does not erase the "yes"
     from six months ago, it supersedes it -- and the old row is what lets anyone see
@@ -817,16 +823,25 @@ async def observe_cafe_trait(
         except ValueError as exc:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-        supabase.table("cafe_trait_observations").insert({
-            "cafe_id": cafe_id,
-            "trait": trait,
-            "value": payload.value,
-            "source": "user",
-            "user_id": current_user.id,
-            "observed_at": (observed_at or date.today()).isoformat(),
-        }).execute()
+        # `status` is set from which endpoint this is, never from the request body.
+        traits_service.record_observation(
+            supabase,
+            cafe_id=cafe_id,
+            trait=trait,
+            value=payload.value,
+            user_id=current_user.id,
+            observed_at=observed_at,
+            status=traits_service.PENDING,
+            note=payload.note,
+        )
 
-        return await get_cafe_traits(cafe_id, current_user, supabase)
+        # The summary comes back unchanged -- a suggestion does not move the numbers.
+        # Returning it anyway keeps the caller on one shape, and the `submitted` flag
+        # is what the page uses to say "thanks, someone will look at this".
+        return {
+            "submitted": True,
+            "traits": await get_cafe_traits(cafe_id, current_user, supabase),
+        }
     except HTTPException:
         raise
     except Exception:
@@ -845,7 +860,7 @@ async def clear_cafe_trait(
     supabase = Depends(get_supabase_client)
 ):
     """
-    Withdraw your own observations of this trait.
+    Withdraw your own observations of this trait, approved or still waiting.
 
     The `user_id` filter is on the query, not left to row-level security: the backend
     holds the service key, which bypasses RLS entirely. Without this line, this
@@ -865,6 +880,121 @@ async def clear_cafe_trait(
         return await get_cafe_traits(cafe_id, current_user, supabase)
     except Exception:
         logger.exception("Error clearing trait observation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.get("/traits/suggestions")
+async def list_trait_suggestions(
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Everything waiting for review, oldest first.
+
+    Registered above the `/{cafe_identifier}` catch-all, like `/trending`: a literal
+    path segment that comes after a wildcard route is never reached.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").select(
+            "id, cafe_id, trait, value, observed_at, created_at, user_id, note"
+        ).eq("status", traits_service.PENDING).order("created_at", desc=False).limit(100).execute()
+
+        rows = result.data or []
+        if not rows:
+            return {"suggestions": []}
+
+        # Two lookups for the page rather than two per row.
+        cafe_ids = list({r["cafe_id"] for r in rows})
+        user_ids = list({r["user_id"] for r in rows if r.get("user_id")})
+
+        cafes = supabase.table("cafes").select("id, name, slug").in_("id", cafe_ids).execute()
+        cafe_by_id = {c["id"]: c for c in (cafes.data or [])}
+
+        users_by_id = {}
+        if user_ids:
+            users = supabase.table("users").select("id, username").in_("id", user_ids).execute()
+            users_by_id = {u["id"]: u for u in (users.data or [])}
+
+        return {
+            "suggestions": [
+                {
+                    "id": row["id"],
+                    "cafe_id": row["cafe_id"],
+                    "cafe_name": cafe_by_id.get(row["cafe_id"], {}).get("name"),
+                    "cafe_slug": cafe_by_id.get(row["cafe_id"], {}).get("slug"),
+                    "trait": row["trait"],
+                    "value": row["value"],
+                    "observed_at": row.get("observed_at"),
+                    "created_at": row.get("created_at"),
+                    # Free text an admin is being asked to publish: it is the reason
+                    # this queue exists, so it has to be visible before approving.
+                    "note": row.get("note"),
+                    # An admin deciding whether to trust a claim needs to know who made
+                    # it. This endpoint is admin-only; nothing here reaches a reader.
+                    "username": users_by_id.get(row.get("user_id"), {}).get("username"),
+                }
+                for row in rows
+            ]
+        }
+    except Exception:
+        logger.exception("Error listing trait suggestions")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.post("/traits/suggestions/{suggestion_id}/approve")
+async def approve_trait_suggestion(
+    suggestion_id: str,
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Accept a suggestion: the row it already is becomes the record.
+
+    An UPDATE rather than a copy into another table, so the observer and the day they
+    say they saw it survive approval. Those two fields are what make it an observation
+    rather than a vote, and every copy is a chance to lose them.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").update({
+            "status": traits_service.APPROVED
+        }).eq("id", suggestion_id).eq("status", traits_service.PENDING).execute()
+
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Suggestion not found or already reviewed"
+            )
+        return {"approved": True, "id": suggestion_id}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error approving trait suggestion")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.delete("/traits/suggestions/{suggestion_id}")
+async def reject_trait_suggestion(
+    suggestion_id: str,
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """Turn a suggestion down. It never counted, so there is nothing to undo."""
+    try:
+        supabase.table("cafe_trait_observations").delete().eq(
+            "id", suggestion_id
+        ).eq("status", traits_service.PENDING).execute()
+        return {"rejected": True, "id": suggestion_id}
+    except Exception:
+        logger.exception("Error rejecting trait suggestion")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
@@ -1338,6 +1468,13 @@ async def register_cafe(
             # Fetch updated cafe
             result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
 
+            # A check-in at an existing cafe is the same evidence as registering one:
+            # the 100m gate above was passed either way.
+            traits_service.record_observations_quietly(
+                supabase, cafe_id, request.traits, current_user.id
+            )
+            badges_service.award_badges_quietly(supabase, current_user.id)
+
             return {
                 "message": "Check-in recorded",
                 "cafe": result.data,
@@ -1510,6 +1647,14 @@ async def register_cafe(
                 except Exception:
                     logger.warning("Error saving registration photos to cafe_visits", exc_info=True)
             
+            # What the registrant could see from inside. Approved on arrival: nobody
+            # else in the app has better evidence than the person who just stood there
+            # and passed the distance check.
+            traits_service.record_observations_quietly(
+                supabase, cafe_id, request.traits, current_user.id
+            )
+            badges_service.award_badges_quietly(supabase, current_user.id)
+
             return {
                 "message": "Cafe registered successfully",
                 "cafe": new_cafe,

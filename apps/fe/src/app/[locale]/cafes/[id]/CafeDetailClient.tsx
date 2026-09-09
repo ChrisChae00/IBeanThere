@@ -157,23 +157,28 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
           )}
 
           {hasStats && (
-            <div className="mt-6 grid grid-cols-3 gap-4 border-t border-brand pt-6">
-              <div>
-                <p className="landing-micro text-ink-secondary">{t('average_rating')}</p>
-                <p className="mt-1 text-2xl font-bold text-ink-primary">
-                  {cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-'}
-                </p>
-              </div>
-              <div>
-                <p className="landing-micro text-ink-secondary">{t('total_logs')}</p>
-                <p className="mt-1 text-2xl font-bold text-ink-primary">{cafe.log_count}</p>
-              </div>
-              <div>
-                <p className="landing-micro text-ink-secondary">{t('beans_dropped')}</p>
-                <p className="mt-1 text-2xl font-bold text-ink-primary">
-                  {cafe.total_beans_dropped || 0}
-                </p>
-              </div>
+            /*
+              Subgrid, so the three numbers share one row no matter how many lines
+              each label takes. On a phone "AVERAGE RATING" and "BEANS DROPPED" wrap
+              to two lines and "TOTAL LOGS" does not, which left the numbers sitting
+              at three different heights -- and numbers meant to be read across have
+              to sit on one line. A min-height on the label would fix today's three
+              strings and break on the first translation that needs a third line.
+            */
+            <div className="mt-6 grid grid-cols-3 grid-rows-[auto_auto] gap-x-4 border-t border-brand pt-6">
+              {[
+                {
+                  label: t('average_rating'),
+                  value: cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-',
+                },
+                { label: t('total_logs'), value: cafe.log_count },
+                { label: t('beans_dropped'), value: cafe.total_beans_dropped || 0 },
+              ].map((stat) => (
+                <div key={stat.label} className="row-span-2 grid grid-rows-subgrid">
+                  <p className="landing-micro text-ink-secondary">{stat.label}</p>
+                  <p className="mt-1 text-2xl font-bold text-ink-primary">{stat.value}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -183,8 +188,11 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
           they can drink and what they can carry home; the log feed is who said so. */}
       <section className="mb-8 rounded-(--radius-card) border border-edge-rule bg-surface-raised">
         <div className="space-y-6 p-6">
+          {/* "The Coffee" titles the whole card, and its brand rule sits under that
+              title. What separates the traits from the bean lists is a hairline: they
+              are two parts of one section, not two sections. */}
           <CafeTraits cafeId={cafe.id} />
-          <div className="h-px bg-brand" />
+          <div className="h-px bg-edge-rule" />
           <CafeBeansRecent cafeId={cafe.id} />
         </div>
       </section>

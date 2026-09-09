@@ -23,12 +23,18 @@ class TraitSummary(BaseModel):
     seed_value: Optional[bool] = None
     seed_observed_at: Optional[str] = None
     mine: Optional[bool] = None
+    # Which beans, which filter method. Only ever set on the observation that is
+    # currently the state, and only on the two traits that take one.
+    note: Optional[str] = None
 
 
 class TraitObservationCreate(BaseModel):
     """`value` is the claim; `observed_at` defaults to today on the server."""
     value: bool
     observed_at: Optional[str] = None
+    # Free text, so it is length-capped here, again in the service, and once more by a
+    # CHECK on the column. The backend bypasses RLS, so the database is the last gate.
+    note: Optional[str] = Field(None, max_length=200)
 
 
 class CafeBeanEntry(BaseModel):
@@ -79,6 +85,10 @@ class CafeRegistrationRequest(BaseModel):
 
     # Registrant's confirmation, used only when the map has no cuisine tag
     serves_coffee: bool = False
+    # What the person standing in the cafe can see about its coffee. Written as
+    # approved observations: they passed a 100m check to get here, which is the
+    # strongest evidence any surface in the app collects.
+    traits: Optional[Dict[str, bool]] = None
     
     # Source tracking
     source_type: Optional[str] = None  # 'google_url' | 'map_click' | 'manual'

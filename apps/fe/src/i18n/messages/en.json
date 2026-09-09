@@ -544,7 +544,14 @@
       "previous": "Previous",
       "next": "Next",
       "page": "Page {page}"
-    }
+    },
+    "trait_suggestions": "Coffee trait suggestions",
+    "trait_suggestions_empty": "Nothing waiting.",
+    "trait_suggestions_hint": "Sent from cafe pages. Registrations and purchase logs apply without review.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "suggests_yes": "says yes",
+    "suggests_no": "says no"
   },
   "settings": {
     "title": "Settings",
@@ -712,7 +719,12 @@
       "apply_to_range": "Apply to range",
       "hours_applied_all": "Applied to every day",
       "hours_applied_range": "Applied {from} to {to}",
-      "address_search_success": "Pin moved to that address"
+      "address_search_success": "Pin moved to that address",
+      "coffee_traits": "The coffee here",
+      "coffee_traits_hint": "Only what you can see right now. Leave blank if you're not sure.",
+      "trait_sells_beans": "Sells beans to take home",
+      "trait_roasts_on_site": "Roasts on site",
+      "trait_filter_coffee": "Serves filter coffee"
     },
     "modal": {
       "title": "Cafe Information",
@@ -881,26 +893,34 @@
       "want_again": "Would you again?",
       "want_again_no": "No",
       "want_again_no_label": "Would not again",
-      "want_again_unset": "Not sure",
       "want_again_yes": "Yes",
       "want_again_yes_label": "Would again",
       "write_log": "Write Log",
       "write_log_description": "Share your coffee experience at this cafe",
       "write_log_for_cafe": "Write a log for {name}",
-      "yesterday": "Yesterday"
+      "yesterday": "Yesterday",
+      "sells_beans_here": "You can buy beans at this cafe"
     },
     "traits": {
-      "title": "The coffee here",
+      "title": "Coffee & Beans",
       "sells_beans": "Sells beans",
       "roasts_on_site": "Roasts on site",
       "filter_coffee": "Filter coffee",
       "yes": "Yes",
       "no": "No",
-      "status_yes": "Last seen {date} · {count} people",
+      "status_yes": "Last seen {date} · {count, plural, one {# person} other {# people}}",
       "status_no": "Last reported gone {date}",
       "status_seed": "From our own check, {date}",
-      "status_unknown": "Nobody has said yet",
-      "save_failed": "Could not save that. Try again."
+      "status_unknown": "Not answered yet — tell us if you know",
+      "save_failed": "Could not save that. Try again.",
+      "suggest": "Suggest a change",
+      "suggest_title": "Suggest a change",
+      "suggest_description": "Someone reviews this before it appears on the page.",
+      "suggest_submit": "Send",
+      "suggestion_sent": "Sent. Someone will look at it.",
+      "cancel": "Cancel",
+      "sells_beans_note_placeholder": "Which beans? (optional)",
+      "filter_coffee_note_placeholder": "Which method or origin? (optional)"
     },
     "beans": {
       "drink_title": "Recently drunk here",

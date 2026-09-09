@@ -542,7 +542,14 @@
       "previous": "이전",
       "next": "다음",
       "page": "{page}페이지"
-    }
+    },
+    "trait_suggestions": "커피 특성 수정 제안",
+    "trait_suggestions_empty": "대기 중인 제안이 없습니다.",
+    "trait_suggestions_hint": "카페 페이지에서 온 제안입니다. 등록과 구매 로그는 검토 없이 반영됩니다.",
+    "approve": "승인",
+    "reject": "거절",
+    "suggests_yes": "맞다고 함",
+    "suggests_no": "아니라고 함"
   },
   "settings": {
     "title": "설정",
@@ -710,7 +717,12 @@
       "apply_to_range": "선택 구간에 적용",
       "hours_applied_all": "모든 요일에 적용했습니다",
       "hours_applied_range": "{from}부터 {to}까지 적용했습니다",
-      "address_search_success": "핀을 그 주소로 옮겼습니다"
+      "address_search_success": "핀을 그 주소로 옮겼습니다",
+      "coffee_traits": "여기 커피",
+      "coffee_traits_hint": "지금 눈으로 보이는 것만. 확실하지 않으면 비워두세요.",
+      "trait_sells_beans": "원두를 팔아요",
+      "trait_roasts_on_site": "직접 로스팅해요",
+      "trait_filter_coffee": "필터 커피가 있어요"
     },
     "modal": {
       "title": "카페 정보",
@@ -878,16 +890,16 @@
       "want_again": "또 하시겠어요?",
       "want_again_no": "아니요",
       "want_again_no_label": "또 하진 않을래요",
-      "want_again_unset": "모르겠어요",
       "want_again_yes": "네",
       "want_again_yes_label": "또 할래요",
       "write_log": "로그 작성",
       "write_log_description": "이 카페에서의 커피 경험을 공유하세요",
       "write_log_for_cafe": "{name} 기록 쓰기",
-      "yesterday": "어제"
+      "yesterday": "어제",
+      "sells_beans_here": "이 카페에서 원두를 살 수 있어요"
     },
     "traits": {
-      "title": "여기 커피",
+      "title": "커피와 원두",
       "sells_beans": "원두 판매",
       "roasts_on_site": "직접 로스팅",
       "filter_coffee": "필터 커피",
@@ -896,8 +908,16 @@
       "status_yes": "{date} 확인 · {count}명",
       "status_no": "{date}에 아니라고 확인됨",
       "status_seed": "IBeanThere 확인 {date}",
-      "status_unknown": "아직 아무도 확인하지 않음",
-      "save_failed": "저장하지 못했습니다. 다시 시도해 주세요."
+      "status_unknown": "아직 답이 없습니다 — 아신다면 알려주세요",
+      "save_failed": "저장하지 못했습니다. 다시 시도해 주세요.",
+      "suggest": "수정 제안",
+      "suggest_title": "수정 제안",
+      "suggest_description": "검토를 거쳐 페이지에 반영됩니다.",
+      "suggest_submit": "보내기",
+      "suggestion_sent": "보냈습니다. 검토 후 반영됩니다.",
+      "cancel": "취소",
+      "sells_beans_note_placeholder": "어떤 원두인가요? (선택)",
+      "filter_coffee_note_placeholder": "어떤 방식·원산지인가요? (선택)"
     },
     "beans": {
       "drink_title": "최근 마신 원두",

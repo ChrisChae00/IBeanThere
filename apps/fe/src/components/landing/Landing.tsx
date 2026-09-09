@@ -25,6 +25,7 @@ import { GlobeCanvas, type GlobeTheme } from './GlobeCanvas';
 import { Map, BookOpen, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { GrowthIcon } from '@/components/cafe/GrowthIcon';
+import { FlipText } from '@/shared/ui';
 import type { CafeStats } from '@/lib/api/stats';
 import Marquee from './Marquee';
 import WaveDivider from './WaveDivider';
@@ -261,11 +262,18 @@ function LandingHero({
               >
                 {primaryLabel}
               </a>
+              {/*
+                The rule under this link is the link's own edge, so it holds still
+                while the letters turn -- an underline that moved with them would
+                read as the control sliding. `hover:opacity-70` is gone: the turn is
+                the hover state now, and dimming a thing that is already moving says
+                the same thing twice.
+              */}
               <a
                 href={`/${locale}/discover/explore-map`}
-                className="landing-micro inline-flex min-h-[52px] items-center border-b border-ink-on-media pb-1 text-ink-on-media transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current"
+                className="flip-host landing-micro inline-flex min-h-[52px] items-center border-b border-ink-on-media pb-1 text-ink-on-media focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current"
               >
-                {messages.heroCtaSecondary}
+                <FlipText>{messages.heroCtaSecondary}</FlipText>
               </a>
             </div>
           </Reveal>

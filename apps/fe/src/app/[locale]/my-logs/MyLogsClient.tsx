@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getMyLogs, deleteLog, updateLog } from '@/lib/api/logs';
+import { revalidateCafe } from '@/app/actions/cafe';
 import { CoffeeLog, LogFormData } from '@/types/api';
 import CoffeeLogCard from '@/components/cafe/CoffeeLogCard';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
@@ -44,8 +45,12 @@ export default function MyLogsClient() {
     if (!confirm(t('confirm_delete'))) return;
 
     try {
+      // Read the cafe before the row goes: its page counts this log and lists
+      // this bean, and both just changed.
+      const cafeId = logs.find(log => log.id === logId)?.cafe_id;
       await deleteLog(logId);
       setLogs(prev => prev.filter(log => log.id !== logId));
+      if (cafeId) await revalidateCafe(cafeId);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error_deleting_log'));
     }
@@ -63,6 +68,7 @@ export default function MyLogsClient() {
 
     try {
       await updateLog(editingLog.id, data);
+      await revalidateCafe(editingLog.cafe_id);
       await fetchLogs();
       setEditingLog(null);
     } catch (err) {

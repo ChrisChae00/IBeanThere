@@ -33,11 +33,10 @@ interface GrowthIconProps {
      badge takes its size from `className`, which is what a responsive row needs.
    */
   size?: number;
-  animate?: boolean;
   className?: string;
 }
 
-export function GrowthIcon({ level, size, animate = false, className = '' }: GrowthIconProps) {
+export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
   const box = size ? { width: size, height: size } : undefined;
 
   // No bean here yet. An empty frame rather than a faded stage: nothing has started.
@@ -55,7 +54,7 @@ export function GrowthIcon({ level, size, animate = false, className = '' }: Gro
 
   return (
     <span
-      className={`relative inline-block ${animate ? 'animate-bounce' : ''} ${className}`}
+      className={`relative inline-block ${className}`}
       style={box}
       title={stage.name}
     >

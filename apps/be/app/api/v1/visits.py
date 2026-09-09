@@ -16,6 +16,8 @@ from app.models.visit import (
     CafeLogsResponse,
     validate_merged_log,
 )
+from app.services import badges as badges_service
+from app.services import traits as traits_service
 from app.services.coffee_logs import LOG_COLUMNS, public_logs, with_bean
 from app.api.deps import get_current_user, require_admin_role
 from app.models.error import ErrorCode, ErrorDetail, create_error_response
@@ -374,16 +376,21 @@ async def record_cafe_visit(
             
             today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
             
-            # Check if already dropped today
-            existing_bean = supabase.table("cafe_beans").select("*").eq(
+            # Not `.single()`: PostgREST raises PGRST116 when a row does not exist yet,
+            # which is exactly the case this branch is here to handle. The `except`
+            # below swallowed it, so nobody's FIRST log at a cafe ever dropped a bean --
+            # and the form promises one. It also meant `cafe_beans.growth_level` never
+            # started counting, which is what the `regular_*` badges read.
+            existing_result = supabase.table("cafe_beans").select("*").eq(
                 "cafe_id", cafe_id
             ).eq(
                 "user_id", current_user.id
-            ).single().execute()
-            
-            if existing_bean.data:
+            ).limit(1).execute()
+            existing_bean = existing_result.data[0] if existing_result.data else None
+
+            if existing_bean:
                 # Check if already dropped today
-                last_dropped = existing_bean.data.get("last_dropped_at")
+                last_dropped = existing_bean.get("last_dropped_at")
                 already_today = False
                 
                 if last_dropped:
@@ -393,14 +400,14 @@ async def record_cafe_visit(
                 
                 if not already_today:
                     # Update existing bean
-                    new_count = existing_bean.data.get("drop_count", 0) + 1
+                    new_count = existing_bean.get("drop_count", 0) + 1
                     from app.api.v1.cafes import calculate_growth_level
                     new_level = calculate_growth_level(new_count)
                     supabase.table("cafe_beans").update({
                         "drop_count": new_count,
                         "growth_level": new_level,
                         "last_dropped_at": datetime.now(timezone.utc).isoformat()
-                    }).eq("id", existing_bean.data["id"]).execute()
+                    }).eq("id", existing_bean["id"]).execute()
             else:
                 # Create new bean entry
                 supabase.table("cafe_beans").insert({
@@ -414,7 +421,18 @@ async def record_cafe_visit(
         except Exception:
             # Log but don't fail the main visit creation
             logger.warning("Auto drop bean failed (non-critical)", exc_info=True)
-        
+
+        # Somebody who just bought a bag here is evidence the cafe sells them -- but
+        # only because the form asked and they said yes. Approved, like registration:
+        # they were there.
+        if visit_data.sells_beans is not None:
+            traits_service.record_observations_quietly(
+                supabase, cafe_id, {"sells_beans": visit_data.sells_beans}, current_user.id
+            )
+
+        # After the drop, not before: the drop is what a `regular_*` badge counts.
+        badges_service.award_badges_quietly(supabase, current_user.id)
+
         # Hand the stored row to the response model rather than copying it field by
         # field. The model prunes what it does not declare, so a new column is one
         # edit here instead of four dicts that drift apart.

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { getCafeDetail } from '@/lib/api/cafes';
 import { createLog } from '@/lib/api/logs';
+import { revalidateCafe } from '@/app/actions/cafe';
 import { LogFormData, CafeDetailResponse } from '@/types/api';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import { LoadingSpinner } from '@/shared/ui';
@@ -54,6 +55,8 @@ export default function WriteLogPage() {
     try {
       const locale = params.locale as string;
       await createLog(cafe!.id, data);
+      // The page being returned to reports a log count that no longer holds.
+      await revalidateCafe(cafe!.id);
       const cafePath = cafe!.slug || cafe!.id;
       router.push(`/${locale}/cafes/${cafePath}`);
     } catch (err) {

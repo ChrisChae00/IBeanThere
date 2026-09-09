@@ -36,6 +36,7 @@ export default function RegisterCafeForm({
 }: RegisterCafeFormProps) {
   const t = useTranslations('cafe.register');
   const tErrors = useTranslations('errors');
+  const tTraits = useTranslations('cafe.traits');
   const { showToast } = useToast();
   const { user } = useAuth();
   
@@ -68,6 +69,8 @@ export default function RegisterCafeForm({
   const [photos, setPhotos] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [servesCoffee, setServesCoffee] = useState(false);
+  /* undefined means "did not look", which is not the same claim as "no". */
+  const [traits, setTraits] = useState<Record<string, boolean | undefined>>({});
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   /* Google filled the identity fields; they are its answer until the user drops it. */
@@ -380,6 +383,9 @@ export default function RegisterCafeForm({
         business_hours: businessHours,
         user_location: userLocation,
         serves_coffee: servesCoffee,
+        traits: Object.fromEntries(
+          Object.entries(traits).filter(([, value]) => value !== undefined)
+        ) as Record<string, boolean>,
         source_type: formData.source_url ? 'google_url' : locationMode === 'current' ? 'manual' : locationMode === 'map' ? 'map_click' : 'postcode',
         images: photos.length > 0 ? photos : undefined,
         main_image_index: photos.length > 0 ? mainImageIndex : undefined
@@ -657,6 +663,48 @@ export default function RegisterCafeForm({
           userId={user?.id || ''}
           maxPhotos={MAX_PHOTOS}
         />
+
+        {/*
+          What the registrant can see from where they are standing. They passed the
+          100m check to get here, which is the strongest evidence any surface in the
+          app collects -- so these apply without review, unlike the same three
+          questions asked from a cafe page by someone who may never have visited.
+
+          Three states, and "not sure" is the default. A checkbox would have made
+          "unchecked" mean both "no" and "I did not look", and the map filter reads
+          these.
+        */}
+        <fieldset className="space-y-3 border-t border-edge-rule pt-4">
+          <legend className="text-sm font-medium text-ink-primary">{t('coffee_traits')}</legend>
+          <p className="landing-micro text-ink-secondary">{t('coffee_traits_hint')}</p>
+          {(['sells_beans', 'filter_coffee', 'roasts_on_site'] as const).map((trait) => (
+            <div key={trait} className="flex items-center justify-between gap-3">
+              <span className="min-w-0 text-sm text-ink-primary">{t(`trait_${trait}`)}</span>
+              <span className="inline-flex shrink-0 -space-x-px">
+                {[true, false].map((value, index) => (
+                  <button
+                    key={String(value)}
+                    type="button"
+                    aria-pressed={traits[trait] === value}
+                    onClick={() =>
+                      setTraits((current) => ({
+                        ...current,
+                        [trait]: current[trait] === value ? undefined : value,
+                      }))
+                    }
+                    /* `w-16` on both: "Yes" and "No" are different lengths, and a
+                       pair that changes size between them reads as two controls. */
+                    className={`control-flat min-h-11 w-16 text-sm ${
+                      index === 0 ? 'rounded-l-(--radius-pill)' : 'rounded-r-(--radius-pill)'
+                    } ${traits[trait] === value ? 'is-active' : ''}`}
+                  >
+                    {value ? tTraits('yes') : tTraits('no')}
+                  </button>
+                ))}
+              </span>
+            </div>
+          ))}
+        </fieldset>
 
         {/* Coffee confirmation — the app only lists cafes that serve coffee */}
         <label className="flex cursor-pointer items-start gap-3">

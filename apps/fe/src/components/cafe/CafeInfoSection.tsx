@@ -170,12 +170,20 @@ export default function CafeInfoSection({
               onClick={() => setShowAllHours(!showAllHours)}
               className="w-full p-3 bg-surface rounded-lg border border-border hover:bg-primary hover:text-primaryText transition-colors"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
+              {/*
+                One line at 375px. A range broken across two lines reads as two
+                times, and "6:00 AM - 10:00" over "PM" is briefly a different shop.
+                So the range never wraps; the day label is what gives if the row
+                runs out of room, because it is the half the reader can infer.
+                `text-sm` also matches the week list this row expands into -- the
+                collapsed row was a size larger than the same data underneath it.
+              */}
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="min-w-0 truncate font-medium">
                   {t('today')} ({getDayName(today)})
                 </span>
-                <div className="flex items-center gap-2">
-                  <span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="whitespace-nowrap">
                     {todayHours.closed
                       ? t('closed')
                       : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
@@ -211,7 +219,7 @@ export default function CafeInfoSection({
                     >
                       {getDayName(day)}
                     </span>
-                    <span className="text-cardText">
+                    <span className="whitespace-nowrap text-cardText">
                       {hours.closed
                         ? t('closed')
                         : `${formatTime(hours.open)} - ${formatTime(hours.close)}`}

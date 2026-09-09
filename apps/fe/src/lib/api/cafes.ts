@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto, TraitSummary, CafeBeansResponse } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto, TraitSummary, TraitSuggestion, CafeBeansResponse } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
@@ -291,19 +291,25 @@ export async function getCafeTraits(cafeId: string): Promise<TraitSummary[]> {
   return handleResponse<TraitSummary[]>(response);
 }
 
-export async function setTraitObservation(
+/*
+  A claim made from the cafe page is a suggestion, not a change. The server decides
+  that, not this call -- there is no status in the body to forge. The summary comes
+  back unmoved, which is the honest answer: nothing counts until someone reviews it.
+*/
+export async function suggestTraitObservation(
   cafeId: string,
   trait: string,
   value: boolean,
+  note?: string,
   observedAt?: string
-): Promise<TraitSummary[]> {
+): Promise<{ submitted: boolean; traits: TraitSummary[] }> {
   const headers = await getAuthHeaders();
   const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits/${trait}`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ value, observed_at: observedAt }),
+    body: JSON.stringify({ value, note, observed_at: observedAt }),
   });
-  return handleResponse<TraitSummary[]>(response);
+  return handleResponse<{ submitted: boolean; traits: TraitSummary[] }>(response);
 }
 
 export async function clearTraitObservation(cafeId: string, trait: string): Promise<TraitSummary[]> {
@@ -322,4 +328,35 @@ export async function getCafeBeans(cafeId: string): Promise<CafeBeansResponse> {
     cache: 'no-store',
   });
   return handleResponse<CafeBeansResponse>(response);
+}
+
+
+/* The admin queue. Only cafe-page suggestions reach it -- see TraitSuggestionsList. */
+export async function getTraitSuggestions(): Promise<TraitSuggestion[]> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/traits/suggestions`, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
+  const data = await handleResponse<{ suggestions: TraitSuggestion[] }>(response);
+  return data.suggestions;
+}
+
+export async function approveTraitSuggestion(suggestionId: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/v1/cafes/traits/suggestions/${suggestionId}/approve`,
+    { method: 'POST', headers }
+  );
+  await handleResponse(response);
+}
+
+export async function rejectTraitSuggestion(suggestionId: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/v1/cafes/traits/suggestions/${suggestionId}`,
+    { method: 'DELETE', headers }
+  );
+  await handleResponse(response);
 }

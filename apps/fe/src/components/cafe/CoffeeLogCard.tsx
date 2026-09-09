@@ -235,9 +235,17 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Rating & Atmosphere Tags */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="landing-micro rounded-(--radius-pill) border border-edge-rule px-2 py-1 text-ink-secondary">
-          {t(log.mode === 'purchase' ? 'mode_purchase' : 'mode_drink')}
-        </span>
+        {/*
+          Only a purchase says so. Drinking is what almost every log is, and a chip
+          on all of them labels the ordinary -- it reads as noise and pushes the
+          rating and the tags along. A drink log already looks like one: it has
+          stars and a coffee type. What needs saying is the exception.
+        */}
+        {log.mode === 'purchase' && (
+          <span className="landing-micro rounded-(--radius-pill) border border-edge-rule px-2 py-1 text-ink-secondary">
+            {t('mode_purchase')}
+          </span>
+        )}
         {/* No stars at all on a log with no rating: an empty five would read as
             "rated zero", and a purchase is not a bad cup. */}
         {log.rating ? (

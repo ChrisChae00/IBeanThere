@@ -86,6 +86,8 @@ export interface CafeRegistrationRequest {
   };
   source_type?: 'google_url' | 'map_click' | 'manual' | 'postcode';
   serves_coffee?: boolean;
+  /* Written as approved observations: the registrant passed a 100m check. */
+  traits?: Record<string, boolean>;
   images?: string[];
   main_image_index?: number;
 }
@@ -254,6 +256,8 @@ export interface LogFormData {
   bean_id?: string | null;
   bean_name_raw?: string;
   want_again?: boolean;
+  /* Not stored on the log. Recorded as a coffee-trait observation for the cafe. */
+  sells_beans?: boolean;
 }
 
 export interface Roaster {
@@ -289,6 +293,23 @@ export interface TraitSummary {
   seed_value?: boolean;
   seed_observed_at?: string;
   mine?: boolean;
+  /* Which beans, which filter method. Only on the observation that is the state. */
+  note?: string;
+}
+
+/* Admin-only. `username` never leaves this shape -- readers see no author anywhere. */
+export interface TraitSuggestion {
+  id: string;
+  cafe_id: string;
+  cafe_name?: string;
+  cafe_slug?: string;
+  trait: string;
+  value: boolean;
+  observed_at?: string;
+  created_at?: string;
+  username?: string;
+  /* The free text an admin is being asked to publish. */
+  note?: string;
 }
 
 export interface CafeBeanEntry {

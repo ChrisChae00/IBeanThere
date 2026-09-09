@@ -18,15 +18,55 @@ of a filter. Revisit it when there are enough observations for that to matter.
 
 Nothing is stored precomputed. The state is derived on every read, so deleting an
 observation takes effect immediately with no cache to invalidate.
+
+**Evidence decides whether a claim waits.** Registering a cafe means passing a 100m
+check while standing in it; logging a purchase means having just bought the bag. Those
+write `approved` rows and count at once. A claim made from the cafe page carries no
+such evidence -- the reader may never have been there -- so it is written `pending`
+and counts for nothing until a person approves it. `summarise` enforces that here
+rather than trusting each caller's query to remember the filter.
 """
+import logging
 from datetime import date
 from typing import Any, Dict, Iterable, List, Optional
 
-TRAITS = ("sells_beans", "roasts_on_site", "filter_coffee")
+logger = logging.getLogger(__name__)
+
+# Order is the reading order on the page. The two that take a note come first, because
+# "yes, and here is which" is a fuller answer than a bare yes, and a reader scanning for
+# somewhere to buy coffee wants those two before they want the roasting question.
+TRAITS = ("sells_beans", "filter_coffee", "roasts_on_site")
+
+# Only these two have a follow-up question worth asking. "Roasts on site" is answered by
+# yes or no; an empty box under it would just invite filling.
+NOTE_TRAITS = ("sells_beans", "filter_coffee")
+
+NOTE_MAX_LENGTH = 200
+
+APPROVED = "approved"
+PENDING = "pending"
+
+# Every column the aggregation reads. One list, so a caller cannot select a subset that
+# silently drops `status` and starts counting suggestions.
+OBSERVATION_COLUMNS = "trait, value, source, user_id, observed_at, created_at, status, note"
 
 
 def is_valid_trait(trait: str) -> bool:
     return trait in TRAITS
+
+
+def clean_note(trait: str, value: bool, note: Optional[str]) -> Optional[str]:
+    """
+    The note as it may be stored, or None.
+
+    A note only means anything attached to a yes on one of the two traits that take
+    one: "no, and here is which beans" is not a sentence. Anything else is dropped
+    rather than refused -- the claim is still worth recording without it.
+    """
+    if not note or trait not in NOTE_TRAITS or value is not True:
+        return None
+    cleaned = " ".join(note.split())[:NOTE_MAX_LENGTH].strip()
+    return cleaned or None
 
 
 def check_observed_at(observed_at: Optional[date]) -> Optional[date]:
@@ -67,7 +107,10 @@ def summarise(
 
     No `user_id` appears in the output.
     """
-    rows = list(rows)
+    # Filtered here, not left to the caller's `.eq()`. A pending row is a request to
+    # change the record, not a change to it, and one endpoint forgetting the clause
+    # would publish unreviewed claims as counts.
+    rows = [r for r in rows if r.get("status", APPROVED) == APPROVED]
     by_trait: Dict[str, List[Dict[str, Any]]] = {t: [] for t in TRAITS}
     for row in rows:
         trait = row.get("trait")
@@ -107,6 +150,10 @@ def summarise(
             "seed_value": newest_seed.get("value") if newest_seed else None,
             "seed_observed_at": newest_seed.get("observed_at") if newest_seed else None,
             "mine": mine.get("value") if mine else None,
+            # The note belongs to the observation that is currently the state, not to
+            # whichever row happens to have one. A note left on a claim that has since
+            # been superseded describes a cafe that has moved on.
+            "note": state.get("note") if state else None,
         })
 
     return summaries
@@ -141,8 +188,8 @@ def load_flags(supabase, cafe_ids: List[str]) -> Dict[str, Dict[str, bool]]:
 
     try:
         result = supabase.table("cafe_trait_observations").select(
-            "cafe_id, trait, value, source, user_id, observed_at, created_at"
-        ).in_("cafe_id", cafe_ids).execute()
+            f"cafe_id, {OBSERVATION_COLUMNS}"
+        ).in_("cafe_id", cafe_ids).eq("status", APPROVED).execute()
     except Exception:  # pragma: no cover - network shape
         return {}
 
@@ -151,3 +198,56 @@ def load_flags(supabase, cafe_ids: List[str]) -> Dict[str, Dict[str, bool]]:
         by_cafe.setdefault(row["cafe_id"], []).append(row)
 
     return {cafe_id: flags(rows) for cafe_id, rows in by_cafe.items()}
+
+
+def record_observation(
+    supabase,
+    cafe_id: str,
+    trait: str,
+    value: bool,
+    user_id: str,
+    observed_at: Optional[date] = None,
+    status: str = APPROVED,
+    note: Optional[str] = None,
+) -> None:
+    """
+    Write one user observation.
+
+    `status` is the caller's to decide and never the client's: it is set from which
+    surface the claim came through, not from anything in the request body. Registering
+    a cafe and logging a purchase pass `APPROVED`; the cafe page passes `PENDING`.
+    """
+    supabase.table("cafe_trait_observations").insert({
+        "cafe_id": cafe_id,
+        "trait": trait,
+        "value": value,
+        "source": "user",
+        "user_id": user_id,
+        "observed_at": (observed_at or date.today()).isoformat(),
+        "status": status,
+        "note": clean_note(trait, value, note),
+    }).execute()
+
+
+def record_observations_quietly(
+    supabase,
+    cafe_id: str,
+    values: Dict[str, bool],
+    user_id: str,
+) -> None:
+    """
+    Record what somebody reported while doing something else, and never fail them for it.
+
+    Used by cafe registration and by saving a bean purchase. Both have already
+    succeeded by the time this runs; a trait that will not insert must not take the
+    cafe or the log down with it.
+    """
+    for trait, value in (values or {}).items():
+        if not is_valid_trait(trait) or value is None:
+            continue
+        try:
+            record_observation(supabase, cafe_id, trait, bool(value), user_id)
+        except Exception:  # pragma: no cover - network shape
+            logger.warning(
+                "Trait observation failed (%s on cafe %s)", trait, cafe_id, exc_info=True
+            )

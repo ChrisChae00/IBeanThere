@@ -85,6 +85,11 @@ class CafeVisitCreate(CoffeeLogFields):
     mode: str = Field("drink", description="drink | purchase")
     is_public: bool = True
     anonymous: bool = False
+    # Buying a bag here is evidence the cafe sells them, but it is not recorded by
+    # inference: a private purchase log must not move a public count on its own, or a
+    # cafe with one visitor leaks that visitor's private log through the number. The
+    # form asks, and this carries the answer. Not a column on cafe_visits.
+    sells_beans: Optional[bool] = None
 
     @model_validator(mode="after")
     def _check_mode(self):

@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, Coffee } from 'lucide-react';
+import { AlertCircle, Coffee, SlidersHorizontal } from 'lucide-react';
 import PendingCafesList from './PendingCafesList';
+import TraitSuggestionsList from './TraitSuggestionsList';
 import AllCafesList from './AllCafesList';
 import { getAdminReportsRepository, ReportsList } from '@/features/admin';
 
-type Tab = 'cafes' | 'reports';
+type Tab = 'cafes' | 'traits' | 'reports';
 type CafeSubTab = 'pending' | 'all';
 
 export default function AdminDashboardClient() {
@@ -43,6 +44,18 @@ export default function AdminDashboardClient() {
         >
           <Coffee size={18} />
           {t('cafes_tab')}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('traits')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'traits'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-ink-secondary hover:text-text'
+          }`}
+        >
+          <SlidersHorizontal size={18} />
+          {t('trait_suggestions')}
         </button>
 
         <button
@@ -98,6 +111,15 @@ export default function AdminDashboardClient() {
 
           {cafeSubTab === 'pending' && <PendingCafesList />}
           {cafeSubTab === 'all' && <AllCafesList />}
+        </div>
+      )}
+
+      {activeTab === 'traits' && (
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-text mb-2">{t('trait_suggestions')}</h2>
+          </div>
+          <TraitSuggestionsList />
         </div>
       )}
 

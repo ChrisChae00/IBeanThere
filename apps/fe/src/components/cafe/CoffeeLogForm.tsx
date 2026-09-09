@@ -99,6 +99,10 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
   const [coffeeType, setCoffeeType] = useState(initialData?.coffee_type || '');
   const [wantAgain, setWantAgain] = useState<boolean | undefined>(initialData?.want_again ?? undefined);
   const [visibility, setVisibility] = useState<Visibility>(visibilityOf(initialData));
+  /* Buying a bag here is evidence the cafe sells them -- but it is recorded
+     because the person said so, not because the app inferred it from a log
+     they may have kept private. */
+  const [sellsBeans, setSellsBeans] = useState(true);
 
   const [bean, setBean] = useState<BeanSelection>(() =>
     initialData?.bean
@@ -155,6 +159,8 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         coffee_type: coffeeType || undefined,
         want_again: wantAgain,
+        // Only from the purchase path, and only as an answer that was given.
+        sells_beans: mode === 'purchase' ? sellsBeans : undefined,
         is_public: visibility !== 'private',
         anonymous: visibility === 'anonymous',
         /* Explicit null so clearing the picker actually unlinks: leaving the key
@@ -293,19 +299,35 @@ export default function CoffeeLogForm({ initialData, onSubmit, onCancel, isLoadi
         /* Purchase puts the bean on the first screen. Which bag was bought is the
            whole content of the log -- burying it under "add details" is what made
            purchases go unrecorded. */
-        <BeanPicker value={bean} onChange={setBean} />
+        <>
+          <BeanPicker value={bean} onChange={setBean} />
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={sellsBeans}
+              onChange={(event) => setSellsBeans(event.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+            />
+            <span className="text-sm text-ink-primary">{t('sells_beans_here')}</span>
+          </label>
+        </>
       )}
 
+      {/*
+        Two answers, and neither is chosen until somebody chooses it. A third
+        "not sure" option looked tidy and was preselected, which meant every log
+        shipped an answer nobody gave. Pressing the chosen one takes it back --
+        the same gesture that withdraws a trait observation on the cafe page.
+      */}
       <div>
         <label className="mb-2 block text-sm font-medium text-ink-secondary">{t('want_again')}</label>
         <Segmented
-          value={wantAgain === undefined ? 'unset' : wantAgain ? 'yes' : 'no'}
+          value={wantAgain === undefined ? '' : wantAgain ? 'yes' : 'no'}
           label={t('want_again')}
-          onChange={(next) => setWantAgain(next === 'unset' ? undefined : next === 'yes')}
+          onChange={(next) => setWantAgain((current) => (current === (next === 'yes') ? undefined : next === 'yes'))}
           options={[
             { id: 'yes', label: t('want_again_yes') },
             { id: 'no', label: t('want_again_no') },
-            { id: 'unset', label: t('want_again_unset') },
           ]}
         />
       </div>
