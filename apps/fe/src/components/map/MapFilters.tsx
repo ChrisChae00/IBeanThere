@@ -32,7 +32,7 @@ export const MAP_FILTER_IDS: MapFilterId[] = [
 function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`w-72 max-w-[calc(100vw-3rem)] rounded-(--radius-card) border border-edge-rule bg-surface-raised p-2 shadow-(--shadow-panel) ${className}`}
+      className={`w-72 max-w-[calc(100vw-3rem)] rounded-(--radius-card) border border-edge-rule bg-surface-raised p-1.5 shadow-(--shadow-panel) ${className}`}
     >
       {children}
     </div>

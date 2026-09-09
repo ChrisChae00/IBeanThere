@@ -694,7 +694,11 @@
     here for it.
   */
   .menu-panel {
-    padding: 0.25rem;
+    /* 6px, not 4: the rows inside are `--radius-control` and sit flush against this
+       padding, so the panel's own `--radius-card` has to leave exactly that much room
+       for the two curves to stay concentric -- 16 - 6 = 10. See "Nested radii" in
+       docs/architecture/design-language.md. */
+    padding: 0.375rem;
     border: 1px solid var(--edge-default);
     border-radius: var(--radius-card);
     background: var(--surface-raised);

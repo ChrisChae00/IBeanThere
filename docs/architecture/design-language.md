@@ -164,6 +164,16 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **No panel inside a panel.** One elevation step per region.
 - **Three radii exist**: `--radius-control` (10px), `--radius-card` (16px),
   `--radius-pill`. A literal `rounded-xl` in new code is a mistake.
+- **Nested radii are concentric: inner = outer − padding.** When a rounded child sits
+  flush against a rounded parent's padding, two curves that do not share a centre read
+  as a wobble in the gap even when nobody can say why. With only three radii to spend,
+  that fixes the padding rather than the radius: a `--radius-card` panel holding
+  `--radius-control` rows takes **6px** of padding (16 − 6 = 10), not 4 or 8. Adding a
+  fourth radius to rescue a padding value is the wrong trade.
+  The rule only applies to a child that actually touches the padding — a `w-full` row, a
+  full-bleed image. A control floating in the middle of a card owes it nothing.
+  `.menu-panel` and the map's filter panel are the two places this comes up; both were
+  off by 2px until 2026-09-09.
 - **Controls that act on one region live in one group at its edge, not on top of it.**
   The map's four verbs are a single button group above the frame (`-space-x-px`, pill
   ends, a tooltip each). A control laid over the thing it changes covers the change.
