@@ -303,11 +303,45 @@ limited to image-less cafes and does not change verification status.
 
 ## Maintenance scripts
 
-`apps/be/scripts/` is ignored by default. Operational files explicitly unignored for
-this feature are tracked; older maintenance scripts remain local unless already in Git.
+`apps/be/scripts/` is ignored by default. A script becomes tracked only when a document
+in this directory names it — that is the whole rule, and it is why the list below is the
+inventory rather than a sample. Older maintenance scripts stay local unless already in
+Git.
+
+**Seeding the map** (tracked, added with the reviewed-seed work):
+
+- `seed_kw_reviewed.py` — the CSV round trip. `export` writes the candidate rows out for
+  a person to judge; `import` reads the judged file back, dry-run first, `--apply` to
+  write. What it writes is a *claim*, marked `pending`, not a verdict — see "Trait
+  suggestions" above.
+- `seed_real_cafes.py`, `seed_with_google_places.py` — the two older entry points, kept
+  because they are the ones that enrich from Google.
+- `osm_fields.py` — the shared field extraction the three of them lean on.
+- All three check `services/blacklists.py` before inserting, so a shop an admin deleted
+  is not quietly re-added by the next import. A lookup failure aborts the run rather
+  than inserting blind; rerun after checking why. See `blacklists.md`.
+- `purge_photoless_seed_cafes.sql` (local) — the block-by-block purge that preceded the
+  reviewed seed. Block 1 lists, block 1.5 backs up to `cafes_purged_backup`, block 2
+  deletes. Never run block 2 without 1.5.
+
+**The fixed order for a purge-and-reseed.** Each step assumes the one before it:
+
+1. `purge_photoless_seed_cafes.sql` block 1 — list what would go.
+2. Block 1.5 — `cafes_purged_backup`. This is the only way back.
+3. Block 2 — delete.
+4. `seed_kw_reviewed.py export --out kw_review.csv`.
+5. A person judges the CSV.
+6. `seed_kw_reviewed.py import kw_review.csv`, dry run, then `--apply`.
+7. `migrations/018_regular_badges_backfill.sql` — **after** the purge, so a cafe that is
+   about to be deleted does not hand out badges on its way out.
+8. Deploy.
+
+**Classification and identity:**
 
 - `purge_franchise_cafes.py` — sweeps OSM by region, matches rows to nodes by proximity
-  and name, applies both rules, and records traits on survivors. Dry run by default;
+  and name, applies both rules, and records traits on survivors. **Rule 1 is retired**
+  (see above), so its franchise half now only classifies; it no longer decides what
+  exists. Dry run by default;
   `--apply` hard-deletes, cascading to that cafe's reviews, check-ins, bean drops and
   collection entries. Region sweeps and outlet counts are cached to disk between runs.
 - `dedupe_cafes.py` — clusters duplicate cafes with the shared rules above and deletes
