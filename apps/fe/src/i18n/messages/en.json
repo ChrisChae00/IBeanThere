@@ -986,14 +986,14 @@
     "heic_browser_not_supported": "HEIC photos can't be uploaded on this browser. Please use Safari, or convert the photo to JPEG first.",
     "profile_updated": "Profile updated successfully",
     "taste_tags": {
-      "bean_hunter": "Leaves With a Bag",
-      "origin_chaser": "Reads the Origin First",
-      "filter_first": "Filter Before Espresso",
-      "roaster_pilgrim": "Goes Where It Is Roasted",
-      "light_roast": "Light Roast Loyalist",
-      "quiet_corner": "Hunts the Quiet Corner",
-      "work_friendly": "Stays for the Afternoon",
-      "sweet_tooth": "Something Beside the Cup"
+      "bean_hunter": "Bean Buyer",
+      "origin_chaser": "Origin Chaser",
+      "filter_first": "Filter First",
+      "roaster_pilgrim": "Roastery Goer",
+      "light_roast": "Light Roast",
+      "quiet_corner": "Quiet Corner",
+      "work_friendly": "Work Friendly",
+      "sweet_tooth": "Sweet Tooth"
     },
     "my_collections": "My Collections",
     "public_collections": "Public Collections",

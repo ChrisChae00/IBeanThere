@@ -983,14 +983,14 @@
     "heic_browser_not_supported": "이 브라우저에서는 HEIC 사진을 업로드할 수 없어요. Safari를 사용하거나, 사진을 JPEG으로 변환 후 업로드해 주세요.",
     "profile_updated": "프로필이 업데이트되었습니다",
     "taste_tags": {
-      "bean_hunter": "원두까지 사 오는 사람",
-      "origin_chaser": "산지부터 보는 사람",
-      "filter_first": "에스프레소보다 필터",
-      "roaster_pilgrim": "로스팅하는 곳으로 가는 사람",
-      "light_roast": "라이트 로스팅만 찾는 사람",
-      "quiet_corner": "조용한 구석자리 사냥꾼",
-      "work_friendly": "오후 내내 앉아 있는 사람",
-      "sweet_tooth": "커피 옆에 뭔가 있어야 하는 사람"
+      "bean_hunter": "원두 구매파",
+      "origin_chaser": "산지 중시",
+      "filter_first": "필터 우선",
+      "roaster_pilgrim": "로스터리파",
+      "light_roast": "라이트 로스팅",
+      "quiet_corner": "조용한 자리",
+      "work_friendly": "작업 친화",
+      "sweet_tooth": "디저트 러버"
     },
     "my_collections": "내 컬렉션",
     "public_collections": "공개 컬렉션",
