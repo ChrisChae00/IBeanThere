@@ -358,6 +358,7 @@ export type TasteTag =
   | 'filter_first'
   | 'roaster_pilgrim'
   | 'light_roast'
+  | 'dark_roast'
   | 'quiet_corner'
   | 'work_friendly'
   | 'sweet_tooth';
