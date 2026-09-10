@@ -347,15 +347,20 @@ export interface FoundingStats {
   regular_count: number;
 }
 
-export type TasteTag = 
-  | 'acidic' 
-  | 'full_body' 
-  | 'light_roast' 
-  | 'dessert_lover'
+/*
+  How somebody reads a cafe, not what they think of a cup. The list used to be flavour
+  notes (`acidic`, `full_body`), which described the coffee rather than the person and
+  said nothing a reader could recognise themselves in.
+*/
+export type TasteTag =
+  | 'bean_hunter'
+  | 'origin_chaser'
+  | 'filter_first'
+  | 'roaster_pilgrim'
+  | 'light_roast'
+  | 'quiet_corner'
   | 'work_friendly'
-  | 'cozy'
-  | 'roastery'
-  | 'specialty';
+  | 'sweet_tooth';
 
 export interface UserResponse {
   id: string;
@@ -368,6 +373,7 @@ export interface UserResponse {
   founding_stats?: FoundingStats;
   taste_tags?: TasteTag[];
   trust_count?: number;
+  following_count?: number;
   is_trusted_by_me?: boolean;
   collections_public?: boolean;
   created_at: string;
@@ -381,7 +387,10 @@ export interface UserPublicResponse {
   bio?: string;
   founding_stats?: FoundingStats;
   taste_tags?: TasteTag[];
+  /* Both directions of the same relation. `trust_count` is followers; either number
+     shown without the other reads as a score rather than as a pair. */
   trust_count?: number;
+  following_count?: number;
   collections_public?: boolean;
   created_at: string;
 }

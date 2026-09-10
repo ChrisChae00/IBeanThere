@@ -2,16 +2,19 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
-# Available taste tags
+# How somebody reads a cafe. Enforced here and nowhere else -- `user_taste_tags.tag` has
+# no CHECK constraint -- so a value dropped from this list stays in the table until it is
+# remapped. Renaming one therefore needs a data pass: migration 023 is the one for this
+# list, and like most of `scripts/migrations` it is local rather than in the repository.
 TASTE_TAGS = [
-    "acidic",
-    "full_body", 
+    "bean_hunter",
+    "origin_chaser",
+    "filter_first",
+    "roaster_pilgrim",
     "light_roast",
-    "dessert_lover",
+    "quiet_corner",
     "work_friendly",
-    "cozy",
-    "roastery",
-    "specialty"
+    "sweet_tooth",
 ]
 
 class UserBase(BaseModel):
@@ -74,6 +77,7 @@ class UserResponse(BaseModel):
     founding_stats: Optional[FoundingStats] = None
     taste_tags: Optional[List[str]] = None
     trust_count: int = 0
+    following_count: int = 0
     is_trusted_by_me: bool = False
     collections_public: bool = False
     created_at: datetime
@@ -87,7 +91,11 @@ class UserPublicResponse(BaseModel):
     bio: Optional[str] = None
     founding_stats: Optional[FoundingStats] = None
     taste_tags: Optional[List[str]] = None
+    # Both directions of the same table. `trust_count` is how many people trust this
+    # person; `following_count` is how many they trust. The pair is only meaningful
+    # together -- one number alone reads as a score.
     trust_count: int = 0
+    following_count: int = 0
     collections_public: bool = False
     created_at: datetime
 

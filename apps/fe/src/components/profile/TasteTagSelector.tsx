@@ -5,14 +5,14 @@ import { Check } from 'lucide-react';
 import { TasteTag as TasteTagType } from '@/types/api';
 
 const ALL_TASTE_TAGS: TasteTagType[] = [
-  'acidic',
-  'full_body',
+  'bean_hunter',
+  'origin_chaser',
+  'filter_first',
+  'roaster_pilgrim',
   'light_roast',
-  'dessert_lover',
+  'quiet_corner',
   'work_friendly',
-  'cozy',
-  'roastery',
-  'specialty',
+  'sweet_tooth',
 ];
 
 export interface TasteTagSelectorProps {

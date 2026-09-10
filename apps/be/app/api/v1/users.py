@@ -69,34 +69,27 @@ async def get_user_profile_by_username(username: str = Path(..., max_length=20),
         UserPublicResponse: The user profile.
     """
     try:
-        user = supabase.table("users").select("""username, display_name, avatar_url, bio, collections_public, created_at""").eq("username", username).single().execute()
+        # One query, `id` included. This used to select without `id`, then run a second
+        # query to get it back, guided by a run of comments arguing with itself about
+        # whether the select could be edited. Worse, it never filled `taste_tags` or
+        # `trust_count`, so every profile but your own showed no tags and no followers.
+        user = supabase.table("users").select(
+            "id, username, display_name, avatar_url, bio, collections_public, created_at"
+        ).eq("username", username).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        user_data = user.data
-        user_id = user_data.get("id") # Although we queried by username, we need ID for stats. 
-        # Wait, the query above only selects specific fields. We need to select ID too.
-        
-        # Re-query to get ID if not present (or just include ID in the select above)
-        # Let's modify the select in the original code block instead of re-querying if possible.
-        # But here I can only replace the block.
-        
-        # Actually, let's fix the select query in the previous lines to include ID.
-        # But I can't change lines outside this block easily without a larger chunk.
-        # I'll just fetch ID here if it's missing, or better, I'll update the select query in a separate chunk if needed.
-        # Looking at line 55: select("""username, display_name, avatar_url, bio, created_at""")
-        # It does NOT include ID. I need to include ID to query checkins.
-        
-        # Let's do a separate query for ID since I can't easily change the select here without overlapping.
-        # Or I can just use the ID from the user table since 'username' is unique.
-        user_full = supabase.table("users").select("id").eq("username", username).single().execute()
-        if user_full.data:
-            user_id = user_full.data["id"]
 
-            user_data["founding_stats"] = badges_service.founding_stats(supabase, user_id)
-            
+        user_data = dict(user.data)
+        user_id = user_data.pop("id")
+
+        user_data["founding_stats"] = badges_service.founding_stats(supabase, user_id)
+        user_data["taste_tags"] = await _get_user_taste_tags(supabase, user_id)
+        user_data["trust_count"] = await _get_user_trust_count(supabase, user_id)
+        user_data["following_count"] = await _get_user_following_count(supabase, user_id)
+
         return UserPublicResponse(**user_data)
     except HTTPException:
         raise
@@ -163,6 +156,74 @@ async def get_user_public_collections(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while fetching user collections"
         ) from e
+
+
+# Both directions of `user_trust`, for anybody's profile rather than only your own.
+# `/me/trusting` already answered "who do I trust"; a profile page has to answer the
+# same question about the person being read, and the reverse one besides.
+async def _trust_list(supabase: Client, username: str, direction: str) -> List[UserPublicResponse]:
+    """`direction` is the column holding *this* user; the other column names the people listed."""
+    mine, theirs = ("trustee_id", "truster_id") if direction == "followers" else ("truster_id", "trustee_id")
+
+    user = supabase.table("users").select("id").eq("username", username).single().execute()
+    if not user or not user.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    rows = supabase.table("user_trust").select(theirs).eq(mine, user.data["id"]).execute().data or []
+    ids = [row[theirs] for row in rows]
+    if not ids:
+        return []
+
+    people = supabase.table("users").select(
+        "id, username, display_name, avatar_url, bio, collections_public, created_at"
+    ).in_("id", ids).execute().data or []
+
+    listed = []
+    for person in people:
+        data = dict(person)
+        person_id = data.pop("id")
+        # Their own follower count, so the list reads like a list of people rather than
+        # a list of names. Not their following count: nobody is choosing between two
+        # numbers here.
+        data["trust_count"] = await _get_user_trust_count(supabase, person_id)
+        listed.append(UserPublicResponse(**data))
+    return listed
+
+
+@router.get("/{username}/followers", response_model=List[UserPublicResponse])
+async def get_user_followers(
+    username: str = Path(..., max_length=20),
+    supabase: Client = Depends(get_supabase_client),
+):
+    """The people who trust this user. Public, like the profile it hangs off."""
+    try:
+        return await _trust_list(supabase, username, "followers")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error listing followers")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.get("/{username}/following", response_model=List[UserPublicResponse])
+async def get_user_following(
+    username: str = Path(..., max_length=20),
+    supabase: Client = Depends(get_supabase_client),
+):
+    """The people this user trusts."""
+    try:
+        return await _trust_list(supabase, username, "following")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error listing following")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
 
 
 @router.get("/check-username/{username}")
@@ -351,6 +412,7 @@ async def get_my_profile(
             founding_stats=stats,
             taste_tags=await _get_user_taste_tags(supabase, current_user.id),
             trust_count=await _get_user_trust_count(supabase, current_user.id),
+            following_count=await _get_user_following_count(supabase, current_user.id),
             is_trusted_by_me=False,  # Can't trust yourself
             collections_public=user_data.get('collections_public', False),
             created_at=user_data['created_at'],
@@ -640,6 +702,7 @@ async def update_my_profile(
             bio=profile_data.get("bio"),
             taste_tags=taste_tags,
             trust_count=trust_count,
+            following_count=await _get_user_following_count(supabase, current_user.id),
             is_trusted_by_me=False,  # Can't trust yourself
             collections_public=profile_data.get("collections_public", False),
             created_at=profile_data["created_at"],
@@ -671,6 +734,15 @@ async def _get_user_trust_count(supabase: Client, user_id: str) -> int:
     """Get the count of users who trust this user."""
     try:
         result = supabase.table("user_trust").select("id", count="exact").eq("trustee_id", user_id).execute()
+        return result.count if result.count is not None else 0
+    except Exception:
+        return 0
+
+
+async def _get_user_following_count(supabase: Client, user_id: str) -> int:
+    """How many people this user trusts. The other direction of `_get_user_trust_count`."""
+    try:
+        result = supabase.table("user_trust").select("id", count="exact").eq("truster_id", user_id).execute()
         return result.count if result.count is not None else 0
     except Exception:
         return 0

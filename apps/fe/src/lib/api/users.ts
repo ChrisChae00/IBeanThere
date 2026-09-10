@@ -54,6 +54,20 @@ export async function getPublicProfile(username: string): Promise<UserPublicResp
   return handleResponse<UserPublicResponse>(response);
 }
 
+/** Who trusts this person, and who this person trusts. Public, like the profile. */
+export type TrustDirection = 'followers' | 'following';
+
+export async function getTrustList(
+  username: string,
+  direction: TrustDirection,
+): Promise<UserPublicResponse[]> {
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/v1/users/${encodeURIComponent(username)}/${direction}`,
+  );
+
+  return handleResponse<UserPublicResponse[]>(response);
+}
+
 /**
  * The people whose taste the signed-in user trusts.
  *

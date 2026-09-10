@@ -1,9 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog } from '@base-ui/react/dialog';
 import { Avatar, AchievementBadge, TasteTag } from '@/shared/ui';
+import TrustListModal from './TrustListModal';
 import type { TasteTag as TasteTagType } from '@/types/api';
 
 /*
@@ -26,8 +27,10 @@ interface ProfileHeaderProps {
   tasteTags?: TasteTagType[] | null;
   navigatorCount: number;
   regularCount: number;
+  /** Followers -- how many people trust this person. */
   trustCount: number;
-  createdAt: string;
+  /** How many this person trusts. */
+  followingCount: number;
   /** The page's own controls: edit on your profile, trust and report on someone else's. */
   actions?: ReactNode;
 }
@@ -41,11 +44,12 @@ export default function ProfileHeader({
   navigatorCount,
   regularCount,
   trustCount,
-  createdAt,
+  followingCount,
   actions,
 }: ProfileHeaderProps) {
   const t = useTranslations('profile');
   const tags = tasteTags ?? [];
+  const [openList, setOpenList] = useState<'followers' | 'following' | null>(null);
 
   return (
     <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-6">
@@ -91,19 +95,34 @@ export default function ProfileHeader({
           )}
 
           {/*
-            The meta row, as micro-labels rather than as a tinted pill and a hand-built
-            sentence. The trust count used to be rendered by asking next-intl for
-            "{count} people trust" and then cutting the number back out of the result
-            with `.replace()`, so the number could be styled on its own -- which reads
-            the translation as though it were English word order and breaks the moment a
-            locale puts the count anywhere else. The whole string is printed now.
+            Two counts, both openable, the way every other profile on the internet does
+            it -- the number is only interesting because you can ask who it is. The
+            sign-up date used to sit here instead: it is true, unchangeable, and
+            answers nothing a reader came to this page with.
+
+            The count is printed inside the translated string rather than styled apart
+            from it. An earlier version asked next-intl for the whole sentence and then
+            cut the number back out with `.replace()`, which assumes English word order
+            and breaks the moment a locale puts the figure anywhere else.
           */}
-          <div className="landing-micro flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 text-ink-secondary">
-            {trustCount > 0 && <span>{t('trust_count', { count: trustCount })}</span>}
-            <span>
-              {t('member_since', { date: new Date(createdAt).toISOString().split('T')[0] })}
-            </span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+            <TrustCount
+              label={t('followers', { count: trustCount })}
+              onClick={() => setOpenList('followers')}
+              disabled={trustCount === 0}
+            />
+            <TrustCount
+              label={t('following', { count: followingCount })}
+              onClick={() => setOpenList('following')}
+              disabled={followingCount === 0}
+            />
           </div>
+
+          <TrustListModal
+            username={username}
+            direction={openList}
+            onClose={() => setOpenList(null)}
+          />
         </div>
       </div>
     </div>
@@ -163,5 +182,34 @@ function ZoomableAvatar({ src, alt }: { src?: string; alt: string }) {
         </Dialog.Close>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+/*
+  A count nobody can open is a statistic; one you can open is a door. So the zero case
+  is still printed -- "0 followers" is an answer -- but it does not pretend to be a
+  button.
+*/
+function TrustCount({
+  label,
+  onClick,
+  disabled,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  if (disabled) {
+    return <span className="landing-micro text-ink-secondary">{label}</span>;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="landing-micro text-ink-secondary underline-offset-4 hover:text-ink-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+    >
+      {label}
+    </button>
   );
 }

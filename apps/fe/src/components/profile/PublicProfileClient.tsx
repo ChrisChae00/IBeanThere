@@ -148,7 +148,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         navigatorCount={profile.founding_stats?.navigator_count || 0}
         regularCount={profile.founding_stats?.regular_count || 0}
         trustCount={profile.trust_count ?? 0}
-        createdAt={profile.created_at}
+        followingCount={profile.following_count ?? 0}
         actions={
           !isMe && (
             <div className="flex items-center gap-2">
