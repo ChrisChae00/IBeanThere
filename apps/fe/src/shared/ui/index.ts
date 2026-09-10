@@ -15,6 +15,7 @@ export { default as GoogleIcon } from './GoogleIcon';
 export { default as ErrorAlert } from './ErrorAlert';
 export { default as StarRating } from './StarRating';
 export { default as FlipText } from './FlipText';
+export { default as PixelImage } from './PixelImage';
 export { default as ToggleButton } from './ToggleButton';
 export { default as PlusIcon } from './PlusIcon';
 export { default as WriteIcon } from './WriteIcon';

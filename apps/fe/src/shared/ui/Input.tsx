@@ -4,6 +4,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes
 } from 'react';
+import { cn } from '@/lib/cn';
 
 type InputElementProps = InputHTMLAttributes<HTMLInputElement> &
   TextareaHTMLAttributes<HTMLTextAreaElement>;
@@ -54,19 +55,19 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       hasLeftIcon ? 'pl-12' : 'pl-4',
       needsRightPadding ? 'pr-12' : 'pr-4'
     ].join(' ');
-    const fieldClasses = [
+    /* Merged, not joined: a caller's `rounded-*` or `pl-*` has to beat the base
+       rather than land beside it and leave the stylesheet order to decide. */
+    const fieldClasses = cn(
       baseFieldClasses,
       'min-h-[48px] py-3',
       paddingWithIcon,
-      fullWidth ? 'w-full' : '',
+      fullWidth && 'w-full',
       error
         ? 'border-error focus:ring-2 focus:ring-error/30'
         : 'border-border focus:ring-2 focus:ring-primary/30',
-      multiline ? 'resize-none leading-relaxed' : '',
+      multiline && 'resize-none leading-relaxed',
       className
-    ]
-      .filter(Boolean)
-      .join(' ');
+    );
 
     return (
       <label

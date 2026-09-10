@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { AuthLayout } from '@/components/auth';
 import { CompleteProfileForm } from '@/components/auth';
-import { User, Coffee, Shield } from 'lucide-react';
 
 export default function CompleteProfilePage(
   props: {
@@ -18,26 +17,10 @@ export default function CompleteProfilePage(
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') || '/';
 
-  const features = [
-    {
-      icon: <User size={16} className="text-background" />,
-      text: t('feature_profile')
-    },
-    {
-      icon: <Coffee size={16} className="text-background" />,
-      text: t('feature_experience')
-    },
-    {
-      icon: <Shield size={16} className="text-background" />,
-      text: t('feature_security')
-    }
-  ];
-
   return (
     <AuthLayout
       title={t('complete_profile_title')}
       subtitle={t('complete_profile_subtitle')}
-      features={features}
     >
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-(--color-text-primary) mb-2">

@@ -926,8 +926,66 @@
   .landing-words-view .landing-word { animation-play-state: paused; }
   .landing-words-view.is-in .landing-word { animation-play-state: running; }
 
+  /*
+    Blur fade, for the auth forms: each block arrives out of focus and settles, one after
+    another. `.blur-fade` is a single block (the heading); `.blur-fade-children` staggers
+    its direct children one step behind it.
+
+    Positional, so a block that mounts later (an error above the form) takes the first
+    slot and the rest keep their delay without restarting: only the delay changes, never
+    the animation. The to-state is implicit, so nothing is left blurred or transformed
+    once it lands -- a leftover `filter` would put the fields in their own layer.
+  */
+  @keyframes blurFade {
+    from { opacity: 0; filter: blur(6px); transform: translateY(6px); }
+  }
+
+  .blur-fade,
+  .blur-fade-children > * {
+    animation: blurFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .blur-fade-children > * { animation-delay: 80ms; }
+  .blur-fade-children > :nth-child(2) { animation-delay: 160ms; }
+  .blur-fade-children > :nth-child(3) { animation-delay: 240ms; }
+  .blur-fade-children > :nth-child(4) { animation-delay: 320ms; }
+  .blur-fade-children > :nth-child(5) { animation-delay: 400ms; }
+  .blur-fade-children > :nth-child(6) { animation-delay: 480ms; }
+  .blur-fade-children > :nth-child(n + 7) { animation-delay: 560ms; }
+
+  /*
+    `PixelImage`: the photograph arrives as a grid of tiles fading in out of order, in
+    grey, and takes its colour once they have all landed. Pure CSS so the tiles are
+    server-rendered at their from-state and wait there for the photograph to load. Each
+    tile's delay is inline; the colour waits for the last tile.
+  */
+  @keyframes pixelIn {
+    from { opacity: 0; }
+  }
+
+  @keyframes pixelColor {
+    from { filter: grayscale(1); }
+  }
+
+  .pixel-tile {
+    animation: pixelIn 1s ease-out both;
+  }
+
+  .pixel-color {
+    animation: pixelColor 1s cubic-bezier(0.4, 0, 0.2, 1) 1.3s both;
+  }
+
+  /* Held at the from-state until the photograph is in; see `PixelImage`. */
+  .pixel-color:not([data-loaded]),
+  .pixel-color:not([data-loaded]) .pixel-tile {
+    animation-play-state: paused;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .landing-rise,
+    .blur-fade,
+    .blur-fade-children > *,
+    .pixel-tile,
+    .pixel-color,
     .landing-word { animation: none; }
     .landing-words-view .landing-word { animation-play-state: running; }
   }

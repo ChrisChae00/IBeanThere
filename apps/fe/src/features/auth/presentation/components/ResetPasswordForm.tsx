@@ -255,7 +255,6 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
             placeholder={t('new_password_placeholder')}
             icon={<LockIcon size={20} className="text-cardTextSecondary" />}
             required
-            className="bg-background/50 backdrop-blur-xs"
             endAdornment={
               <button
                 type="button"
@@ -294,7 +293,6 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
           placeholder={t('confirm_new_password_placeholder')}
           icon={<LockIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-background/50 backdrop-blur-xs"
           endAdornment={
             <button
               type="button"

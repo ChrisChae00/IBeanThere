@@ -1,100 +1,67 @@
-"use client";
-
-import { ReactNode, useEffect } from 'react';
-import { Logo, CoffeeBean } from '@/components/ui';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter, usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
+import { PixelImage } from '@/shared/ui';
 
 interface AuthLayoutProps {
   children: ReactNode;
   title: string;
   subtitle: string;
-  features: Array<{
-    icon: ReactNode;
-    text: string;
-  }>;
 }
 
-export function AuthLayout({ 
-  children, 
-  title, 
-  subtitle, 
-  features 
-}: AuthLayoutProps) {
-  const { needsProfileSetup, isLoading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+/*
+  Photograph on the left, form on the right, split in half. The photograph is the
+  landing hero's portrait still, so arriving here from the landing keeps the same room,
+  and it sits inset as a card rather than bleeding to the edge: it is a picture beside
+  the form, not the page's ground.
 
-  useEffect(() => {
-    // Logic moved to AuthWatcher
-  }, []);
+  Below `lg` the photograph is not rendered at all and the form is the whole page: a
+  half-width panel on a phone is a strip of wall above the fields. The photograph's
+  tiles stay lazy for the same reason -- a lazy image inside `display: none` is never
+  fetched.
 
+  The height is the viewport less the fixed header (`h-16`, which `main` pads for), so
+  the photograph ends at the fold instead of running 64px under it.
+
+  The title here is set as a paragraph, not a heading. It disappears on a phone, so
+  the page's `h1` belongs to the form column, which is the one thing every width shows.
+*/
+export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row font-sans">
-      {/* Left Side - Branding & Visual (33%) */}
-      <div className="w-full md:w-1/3 md:flex-none bg-secondary relative overflow-hidden p-8 lg:p-12 flex flex-col justify-between min-h-[300px] md:min-h-screen transition-colors duration-300">
-        
-        {/* Background Coffee Beans - Decorative */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[8%] left-[10%] opacity-10">
-            <CoffeeBean size="lg" className="text-primaryText transform rotate-25 scale-[4]" />
-          </div>
-          <div className="absolute bottom-[20%] right-[15%] opacity-15">
-            <CoffeeBean size="lg" className="text-primaryText transform rotate-[-15deg] scale-[5]" />
-          </div>
-          <div className="absolute top-[40%] right-[10%] opacity-5">
-             <CoffeeBean size="lg" className="text-primaryText transform rotate-120 scale-[2]" />
+    <div className="grid min-h-[calc(100svh-4rem)] lg:grid-cols-2">
+      <div className="hidden p-4 lg:block">
+        <div className="relative h-full overflow-hidden rounded-card bg-scrim-media">
+          <PixelImage src="/pics/hero-tall.webp" sizes="50vw" />
+          <div className="absolute inset-0 bg-linear-to-t from-scrim-media/85 via-scrim-media/25 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 p-10 xl:p-14">
+            <p className="landing-display max-w-lg text-5xl text-ink-on-media break-keep xl:text-6xl">
+              {title}
+            </p>
+            <p className="mt-6 max-w-md border-t border-ink-on-media/20 pt-6 text-lg leading-relaxed text-balance text-ink-on-media/85 break-keep">
+              {subtitle}
+            </p>
           </div>
         </div>
-
-        {/* Top: Logo */}
-        <div className="relative z-10">
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="p-2 bg-primaryText/10 rounded-xl backdrop-blur-xs">
-               <Logo size="md" className="text-primaryText" />
-            </div>
-            <span className="text-2xl font-bold text-primaryText tracking-tight font-logo">ibeanthere</span>
-          </div>
-        </div>
-
-        {/* Middle: Hero Content */}
-        <div className="relative z-10 my-auto">
-          <h1 className="text-2xl lg:text-4xl font-bold text-primaryText mb-6 leading-[1.1] tracking-tight whitespace-pre-line drop-shadow-xs">
-            {title}
-          </h1>
-          <p className="text-lg text-primaryText mb-10 max-w-md leading-relaxed font-light whitespace-pre-line">
-            {subtitle}
-          </p>
-
-          {/* Features List */}
-          <div className="flex flex-col space-y-3 mt-8 md:mt-0">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-4 group">
-                <div className="w-10 h-10 bg-primaryText/10 rounded-full flex items-center justify-center group-hover:bg-primaryText/20 transition-all duration-300 backdrop-blur-xs">
-                  <div className="text-primaryText">
-                    {feature.icon}
-                  </div>
-                </div>
-                <span className="text-primaryText font-medium text-lg tracking-wide">{feature.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom space (Copyright removed per user request) */}
-        <div></div>
       </div>
 
-      {/* Right Side - Auth Form (66%) */}
-      <div className="w-full md:w-2/3 md:flex-none bg-surface flex items-center justify-center p-6 lg:p-16 relative">
-         {/* Decorative subtle gradient for the form area */}
-         <div className="absolute top-0 right-0 w-full h-2 bg-linear-to-r from-transparent to-primary/10"></div>
-         
-        {/* Form Container - Widened to 85% */}
-        <div className="w-full md:w-[85%] max-w-4xl bg-cardBackground/50 p-8 lg:p-12 rounded-4xl shadow-none lg:shadow-xl backdrop-blur-md border border-border">
-          {children}
-        </div>
+      <div className="flex items-center justify-center bg-surface-page px-6 py-12 md:py-16">
+        <div className="w-full max-w-105">{children}</div>
       </div>
+    </div>
+  );
+}
+
+/*
+  The form column's own heading, shared by every auth screen and every state of one
+  (a form, its "email sent", its "done"). It is the page's `h1` for the reason above,
+  and it blurs in first so the form's own stagger follows it.
+*/
+export function AuthHeading({ title, subtitle }: { title: string; subtitle?: ReactNode }) {
+  return (
+    <div className="blur-fade mb-8 text-center">
+      <h1 className="text-3xl text-ink-primary md:text-4xl">{title}</h1>
+      {subtitle && (
+        <p className="mt-2 text-sm text-balance text-ink-secondary break-keep">{subtitle}</p>
+      )}
     </div>
   );
 }

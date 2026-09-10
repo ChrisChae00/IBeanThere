@@ -202,7 +202,6 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
           placeholder={t('email_placeholder')}
           icon={<MailIcon size={20} className="text-cardTextSecondary" />}
           required
-          className="bg-background/50 backdrop-blur-xs"
         />
       </div>
 
