@@ -4,18 +4,31 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { CircleCheck } from 'lucide-react';
 import { createClient } from '@/shared/lib/supabase/client';
 import { validatePassword, passwordsMatch, calculatePasswordStrength } from '@/features/auth/domain';
+import { cn } from '@/lib/cn';
+import { AuthHeading } from './AuthLayout';
 import {
-  LockIcon,
+  ArrowLeftIcon,
   EyeIcon,
   EyeOffIcon,
-  CheckCircleIcon,
   ErrorAlert,
   Button,
   Input,
   LoadingSpinner
 } from '@/components/ui';
+
+/* Pill fields, matching the sign-in and sign-up forms. */
+const FIELD = 'rounded-full pl-5';
+
+/* The bar carries the colour; the word beside it stays in ink (design-language §4). */
+function strengthLevel(strength: number) {
+  if (strength < 25) return { key: 'strength_weak', bar: 'bg-state-danger' } as const;
+  if (strength < 50) return { key: 'strength_fair', bar: 'bg-state-warning' } as const;
+  if (strength < 75) return { key: 'strength_good', bar: 'bg-state-warning' } as const;
+  return { key: 'strength_strong', bar: 'bg-state-success' } as const;
+}
 
 interface ResetPasswordFormProps {
   locale: string;
@@ -108,20 +121,6 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
     setPasswordStrength(calculatePasswordStrength(password));
   }, [password]);
 
-  const getStrengthColor = () => {
-    if (passwordStrength < 25) return 'var(--color-error)';
-    if (passwordStrength < 50) return 'var(--color-warning)';
-    if (passwordStrength < 75) return 'var(--color-warning)';
-    return 'var(--color-success)';
-  };
-
-  const getStrengthLabel = () => {
-    if (passwordStrength < 25) return 'Weak';
-    if (passwordStrength < 50) return 'Fair';
-    if (passwordStrength < 75) return 'Good';
-    return 'Strong';
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -168,160 +167,142 @@ export function ResetPasswordForm({ locale }: ResetPasswordFormProps) {
     }
   };
 
-  // Loading state while checking session
+  const backToSignIn = (
+    <p className="text-center">
+      <Link
+        href={`/${locale}/signin`}
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm text-ink-secondary hover:text-ink-primary"
+      >
+        <ArrowLeftIcon size={16} />
+        {t('back_to_login')}
+      </Link>
+    </p>
+  );
+
   if (isCheckingSession) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+      <div className="flex flex-col items-center justify-center gap-4 py-12">
         <LoadingSpinner />
-        <p className="text-cardTextSecondary">
-          Verifying your reset link...
-        </p>
+        <p className="text-sm text-ink-secondary">{t('verifying_reset_link')}</p>
       </div>
     );
   }
 
-  // No valid session - show error
   if (!hasValidSession && error) {
     return (
-      <div className="space-y-6 text-center">
+      <div className="blur-fade-children space-y-5">
+        <AuthHeading title={t('reset_password_title')} />
         <ErrorAlert message={error} />
-        <Link href={`/${locale}/forgot-password`}>
-          <Button variant="primary" fullWidth>
-            Request New Reset Link
-          </Button>
-        </Link>
-        <Link href={`/${locale}/signin`}>
-          <Button variant="ghost" fullWidth>
-            {t('back_to_login')}
-          </Button>
-        </Link>
+        <Button fullWidth onClick={() => router.push(`/${locale}/forgot-password`)}>
+          {t('request_new_link')}
+        </Button>
+        {backToSignIn}
       </div>
     );
   }
 
-  // Success state
   if (isSuccess) {
     return (
-      <div className="space-y-6 motion-fade-in text-center">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-success) 20%, var(--color-cardBackground))' }}>
-            <CheckCircleIcon size={32} style={{ color: 'var(--color-success)' }} />
+      <div className="blur-fade-children space-y-5">
+        <CircleCheck aria-hidden className="mx-auto size-10 text-ink-primary" strokeWidth={1.5} />
+        <AuthHeading title={t('password_updated')} subtitle={t('password_updated_subtitle')} />
+        <p className="text-center text-sm text-ink-secondary">{t('redirecting_to_login')}</p>
+        {backToSignIn}
+      </div>
+    );
+  }
+
+  const strength = strengthLevel(passwordStrength);
+  const matches = passwordsMatch(password, confirmPassword);
+
+  return (
+    <>
+      <AuthHeading title={t('reset_password_title')} subtitle={t('reset_password_subtitle')} />
+
+      <form onSubmit={handleSubmit} className="blur-fade-children space-y-5" noValidate>
+        <ErrorAlert message={error} />
+
+        <div className="space-y-5">
+          <div>
+            <Input
+              label={t('new_password')}
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('new_password_placeholder')}
+              required
+              className={FIELD}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? t('hide_password') : t('show_password')}
+                  className="rounded-full p-1 text-ink-secondary hover:text-ink-primary"
+                >
+                  {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                </button>
+              }
+            />
+
+            {password.length > 0 && (
+              <div className="mt-2 px-5">
+                <div className="h-1 overflow-hidden rounded-full bg-edge-rule">
+                  <div
+                    className={cn('h-full transition-all duration-300', strength.bar)}
+                    style={{ width: `${passwordStrength}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-ink-secondary">
+                  {t('password_strength', { level: t(strength.key) })}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <Input
+              label={t('confirm_new_password')}
+              type={showConfirmPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={t('confirm_new_password_placeholder')}
+              required
+              className={FIELD}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? t('hide_password') : t('show_password')}
+                  className="rounded-full p-1 text-ink-secondary hover:text-ink-primary"
+                >
+                  {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                </button>
+              }
+            />
+
+            {confirmPassword.length > 0 && (
+              <p className="mt-2 flex items-center gap-2 px-5 text-xs text-ink-secondary">
+                <span
+                  aria-hidden
+                  className={cn('size-1.5 rounded-full', matches ? 'bg-state-success' : 'bg-state-danger')}
+                />
+                {matches ? t('passwords_match') : tErrors('passwords_not_match')}
+              </p>
+            )}
           </div>
         </div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-cardText mb-2">
-            {t('password_updated')}
-          </h2>
-          <p className="text-cardTextSecondary">
-            {t('password_updated_subtitle')}
-          </p>
-        </div>
-
-        <p className="text-sm text-cardTextSecondary">
-          Redirecting to login...
-        </p>
-
-        <Link href={`/${locale}/signin`}>
-          <Button fullWidth variant="primary">
-            {t('back_to_login')}
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Form state
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-cardText mb-2">
-          {t('reset_password_title')}
-        </h2>
-        <p className="text-cardTextSecondary">
-          {t('reset_password_subtitle')}
-        </p>
-      </div>
-
-      <ErrorAlert message={error} />
-
-      <div className="space-y-5">
-        <div>
-          <Input
-            label={t('new_password')}
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('new_password_placeholder')}
-            icon={<LockIcon size={20} className="text-cardTextSecondary" />}
-            required
-            endAdornment={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
-              >
-                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-              </button>
-            }
-          />
-          
-          {/* Password strength indicator */}
-          {password.length > 0 && (
-            <div className="mt-2">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-cardTextSecondary">Password strength</span>
-                <span className="font-medium" style={{ color: getStrengthColor() }}>
-                  {getStrengthLabel()}
-                </span>
-              </div>
-              <div className="h-1.5 bg-surface rounded-full overflow-hidden">
-                <div 
-                  className="h-full transition-all duration-300"
-                  style={{ width: `${passwordStrength}%`, backgroundColor: getStrengthColor() }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <Input
-          label={t('confirm_new_password')}
-          type={showConfirmPassword ? 'text' : 'password'}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder={t('confirm_new_password_placeholder')}
-          icon={<LockIcon size={20} className="text-cardTextSecondary" />}
-          required
-          endAdornment={
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-cardTextSecondary hover:text-cardText transition p-1 hover:bg-surface/50 rounded-full"
-            >
-              {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-            </button>
-          }
-        />
-
-        {/* Password match indicator */}
-        {confirmPassword.length > 0 && (
-          <p className="text-xs" style={{ color: passwordsMatch(password, confirmPassword) ? 'var(--color-success)' : 'var(--color-error)' }}>
-            {passwordsMatch(password, confirmPassword) ? '✓ Passwords match' : '✕ Passwords do not match'}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        fullWidth
-        size="lg"
-        loading={isLoading}
-        disabled={!password || !confirmPassword || !passwordsMatch(password, confirmPassword)}
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-primary text-primaryText hover:bg-accent hover:text-text"
-      >
-        {t('update_password')}
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          fullWidth
+          loading={isLoading}
+          disabled={!password || !confirmPassword || !matches}
+        >
+          {t('update_password')}
+        </Button>
+      </form>
+    </>
   );
 }

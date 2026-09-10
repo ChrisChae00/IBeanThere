@@ -304,7 +304,7 @@
     "confirm_new_password": "새 비밀번호 확인",
     "confirm_new_password_placeholder": "새 비밀번호 다시 입력",
     "update_password": "비밀번호 변경",
-    "password_updated": "비밀번호가 변경되었습니다!",
+    "password_updated": "비밀번호가 변경되었습니다.",
     "password_updated_subtitle": "새 비밀번호로 로그인할 수 있습니다",
     "didnt_receive_email": "이메일이 도착하지 않았나요?",
     "resend_email": "다시 보내기",
@@ -315,7 +315,16 @@
     "continue_with_google": "Google로 계속하기",
     "show_password": "비밀번호 보기",
     "hide_password": "비밀번호 숨기기",
-    "or": "또는"
+    "or": "또는",
+    "verifying_reset_link": "재설정 링크를 확인하고 있어요.",
+    "request_new_link": "새 링크 받기",
+    "password_strength": "강도: {level}",
+    "strength_weak": "약함",
+    "strength_fair": "보통",
+    "strength_good": "좋음",
+    "strength_strong": "강함",
+    "passwords_match": "비밀번호가 일치합니다",
+    "redirecting_to_login": "로그인 화면으로 이동합니다."
   },
   "map": {
     "loading": "지도 로딩 중...",

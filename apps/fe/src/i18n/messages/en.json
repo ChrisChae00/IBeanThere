@@ -306,7 +306,7 @@
     "confirm_new_password": "Confirm New Password",
     "confirm_new_password_placeholder": "Confirm your new password",
     "update_password": "Update Password",
-    "password_updated": "Password Updated!",
+    "password_updated": "Password updated.",
     "password_updated_subtitle": "You can now sign in with your new password",
     "didnt_receive_email": "Didn't receive the email?",
     "resend_email": "Resend",
@@ -317,7 +317,16 @@
     "continue_with_google": "Continue with Google",
     "show_password": "Show password",
     "hide_password": "Hide password",
-    "or": "or"
+    "or": "or",
+    "verifying_reset_link": "Checking your reset link.",
+    "request_new_link": "Request a new link",
+    "password_strength": "Strength: {level}",
+    "strength_weak": "weak",
+    "strength_fair": "fair",
+    "strength_good": "good",
+    "strength_strong": "strong",
+    "passwords_match": "Passwords match",
+    "redirecting_to_login": "Taking you to sign in."
   },
   "map": {
     "loading": "Loading map...",
