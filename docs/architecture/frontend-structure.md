@@ -71,15 +71,15 @@ apps/fe/
     │   ├── admin/
     │   ├── auth/
     │   ├── cafe/
-    │   ├── community/
+    │   ├── common/
     │   ├── landing/
     │   ├── layout/
+    │   ├── learn/
     │   ├── map/
     │   ├── profile/
     │   ├── providers/
     │   ├── settings/
     │   ├── shared/
-    │   ├── shop/
     │   ├── ui/           # Legacy; see the note under Styling
     │   └── visits/
     ├── contexts/         # Global React context providers
@@ -97,6 +97,33 @@ apps/fe/
     ├── styles/           # See Styling below
     └── types/            # App-wide TypeScript definitions
 ```
+
+## Profile and social (`0ecb396`, `882f917`)
+
+- **Trust is followers and following.** `user_trust` has one row per "A trusts B";
+  the profile header shows both directions as counts, and either one opens
+  `TrustListModal` — fetched on open, not with the profile, because the list is
+  unbounded and the page only ever asks about one person.
+- **The server says whether you follow this person.** `is_trusted_by_me` rides on the
+  public-profile response, which now takes optional auth. The page used to download its
+  own entire following list and search it for one name, and answered "you follow
+  nobody" for the whole time a newline in a PostgREST `select` was silently dropping the
+  embed and returning `[]`. A multi-line `select` string is that bug waiting to happen —
+  keep them on one line.
+- **Unfollowing asks first.** The button that undoes it is the same button that did it,
+  one click away, and the feed of logs it empties does not refill on its own. A `Modal`,
+  not `confirm()`: the browser dialog cannot be translated and cannot name the person.
+- **Reporting lives in the overflow.** `shared/ui/ActionsMenu` (was
+  `components/cafe/CafeActionsMenu`, never cafe-specific) — a rare, irreversible-feeling
+  action does not get a control in the row beside the one people came for.
+- **Cafe hunter types, not flavour notes.** The eight `taste_tags` describe how someone
+  reads a cafe (`bean_hunter`, `quiet_corner`, `work_friendly`), not what an espresso
+  tastes like. Ids are enforced only in `app/models/user.py`; `user_taste_tags.tag` has
+  no CHECK, so renaming one needs a data pass (migration 023, local).
+- **`/shop` and `/community` are gone** (`c9fe635`). Neither was reachable from the app,
+  both were in the sitemap, and the shop still sold gear for working in cafes — the
+  framing the log was rewritten to drop. The badge gallery went with `/community`; a
+  profile badge row is the open replacement.
 
 ## Key Features
 
