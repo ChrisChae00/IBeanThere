@@ -13,6 +13,8 @@ import { WriteIcon } from '@/components/ui';
 
 type FilterType = 'all' | 'public' | 'private';
 
+const FILTERS: FilterType[] = ['all', 'public', 'private'];
+
 export default function MyLogsClient() {
   const t = useTranslations('cafe.log');
   const [logs, setLogs] = useState<CoffeeLog[]>([]);
@@ -84,104 +86,134 @@ export default function MyLogsClient() {
     return true;
   });
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center py-12">
-          <LoadingSpinner />
-        </div>
-      </div>
-    );
-  }
+  const filterKey = (f: FilterType) =>
+    f === 'public' ? 'filter_public' : f === 'private' ? 'filter_private' : f;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-text mb-2">
-            {t('my_logs')}
-          </h1>
-          <p className="text-textSecondary">
-            {t('my_logs_description')}
-          </p>
-        </div>
+    <main className="min-h-screen bg-surface-page">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        {/*
+          A masthead and a rule under it, the same opening every page in the app uses.
+          The count sits in the eyebrow rather than in a stat card: this is a record
+          somebody keeps, and how many entries it holds is a fact about the page, not
+          a figure worth a panel of its own.
+        */}
+        <header className="border-b border-edge-rule pb-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="landing-micro text-ink-secondary">
+                {t('log_count', { count: logs.length })}
+              </p>
+              <h1 className="mt-2 text-[clamp(2rem,5vw,3rem)] text-ink-primary">
+                {t('my_logs')}
+              </h1>
+              <p className="mt-3 text-ink-secondary">{t('my_logs_description')}</p>
+            </div>
 
-        {/* Write Log Button */}
-        <button
-          onClick={() => setShowSearchModal(true)}
-          className="px-4 py-2 bg-primary text-primaryText rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
-        >
-          <WriteIcon size={18} className="text-primaryText" />
-          {t('write_log')}
-        </button>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-border">
-        {(['all', 'public', 'private'] as FilterType[]).map((filterType) => {
-          const translationKey = filterType === 'public' ? 'filter_public' :
-            filterType === 'private' ? 'filter_private' : filterType;
-          return (
+            {/* The page's one filled control. */}
             <button
-              key={filterType}
-              onClick={() => setFilter(filterType)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                filter === filterType
-                  ? 'border-primary text-text'
-                  : 'border-transparent text-textSecondary hover:text-secondary'
-              }`}
+              onClick={() => setShowSearchModal(true)}
+              className="btn-shade flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
             >
-              {t(translationKey)}
+              <WriteIcon size={18} />
+              {t('write_log')}
             </button>
-          );
-        })}
-      </div>
+          </div>
+        </header>
 
-      {error && (
-        <div className="mb-6">
-          <ErrorAlert message={error} />
-        </div>
-      )}
-
-      {/* Logs List */}
-      {filteredLogs.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-textSecondary">
-            {t('no_logs_found')}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredLogs.map((log) => (
-            editingLog?.id === log.id ? (
-              <div key={log.id} className="p-6 bg-cardBackground rounded-lg border border-border">
-                <h2 className="text-xl font-bold text-text mb-4">
-                  {t('edit_log')}
-                </h2>
-                <CoffeeLogForm
-                  initialData={editingLog}
-                  onSubmit={handleUpdate}
-                  onCancel={() => setEditingLog(null)}
-                  isLoading={isSubmitting}
-                />
-              </div>
-            ) : (
-              <CoffeeLogCard
-                key={log.id}
-                log={log}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                hideUserInfo={true}
-              />
-            )
+        {/*
+          Pills, not underlined tabs: every other grouped control in the app is a pill
+          whose fill carries the selection, and an underline row here read as a second
+          navigation bar under the header's.
+        */}
+        <div className="flex flex-wrap gap-2 pt-6">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
+              className="control-flat landing-micro min-h-11 rounded-(--radius-pill) border border-edge-rule px-5"
+            >
+              {t(filterKey(f))}
+            </button>
           ))}
         </div>
-      )}
 
-      {/* Cafe Search Modal */}
-      {showSearchModal && (
-        <CafeSearchModal onClose={() => setShowSearchModal(false)} />
-      )}
-    </div>
+        {error && (
+          <div className="pt-6">
+            <ErrorAlert message={error} />
+          </div>
+        )}
+
+        <div className="pt-6">
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : filteredLogs.length === 0 ? (
+            /*
+              An empty list offers the next action. Which sentence depends on why it is
+              empty -- "you have written none" and "none are private" are different
+              facts, and telling somebody to write their first log when they have
+              thirty of them is the app not reading its own screen.
+            */
+            <div className="space-y-5 rounded-(--radius-card) border border-edge-rule bg-surface-raised py-16 text-center">
+              <div className="text-2xl text-ink-primary">
+                {logs.length === 0 ? t('no_logs_yet_title') : t('no_logs_in_filter')}
+              </div>
+              {logs.length === 0 ? (
+                <>
+                  <p className="mx-auto max-w-md px-6 text-ink-secondary">
+                    {t('no_logs_yet_hint')}
+                  </p>
+                  <button
+                    onClick={() => setShowSearchModal(true)}
+                    className="btn-shade inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
+                  >
+                    {t('write_log')}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setFilter('all')}
+                  className="control-flat landing-micro min-h-11 rounded-(--radius-pill) border border-edge-rule px-5"
+                >
+                  {t('filter_all_show')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredLogs.map((log) =>
+                editingLog?.id === log.id ? (
+                  <div
+                    key={log.id}
+                    className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-6"
+                  >
+                    <h2 className="mb-4 text-xl text-ink-primary">{t('edit_log')}</h2>
+                    <CoffeeLogForm
+                      initialData={editingLog}
+                      onSubmit={handleUpdate}
+                      onCancel={() => setEditingLog(null)}
+                      isLoading={isSubmitting}
+                    />
+                  </div>
+                ) : (
+                  <CoffeeLogCard
+                    key={log.id}
+                    log={log}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    hideUserInfo={true}
+                  />
+                )
+              )}
+            </div>
+          )}
+        </div>
+
+        {showSearchModal && <CafeSearchModal onClose={() => setShowSearchModal(false)} />}
+      </div>
+    </main>
   );
 }

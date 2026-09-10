@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { GrowthIcon, getGrowthLevel, GROWTH_THRESHOLDS } from '@/components/cafe/GrowthIcon';
 import { Sprout, Trees, MapPin, ChevronRight, Info, Flame } from 'lucide-react';
 import Modal from '@/shared/ui/Modal';
+import { LoadingSpinner } from '@/shared/ui';
 
 
 interface BeanData {
@@ -84,7 +85,7 @@ export default function MyBeansPage(
   const beans = beansData?.beans || [];
   const streak = streakData || null;
   const isLoading = authLoading || (user ? beansLoading : false);
-  const error = beansError ? 'Failed to load your beans' : null;
+  const error = beansError ? t('error') : null;
 
   // Calculate stats
   const totalCafes = beans.length;
@@ -101,19 +102,17 @@ export default function MyBeansPage(
 
   if (!user && !authLoading) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center py-16">
-            <Trees className="w-16 h-16 mx-auto mb-4 text-primary" />
-            <h1 className="text-2xl font-bold text-text mb-4">
-              {t('login_required_title')}
-            </h1>
-            <p className="text-textSecondary mb-6">
+      <main className="min-h-screen bg-surface-page">
+        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+          <div className="space-y-5 py-16 text-center">
+            <Trees size={40} className="mx-auto text-ink-secondary" strokeWidth={1.5} />
+            <h1 className="text-2xl text-ink-primary">{t('login_required_title')}</h1>
+            <p className="mx-auto max-w-md text-ink-secondary">
               {t('login_required_description')}
             </p>
             <Link
               href={`/${locale}/signin`}
-              className="inline-flex items-center gap-2 bg-primary text-primaryText px-6 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
+              className="btn-shade inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
             >
               {t('sign_in')}
             </Link>
@@ -124,74 +123,83 @@ export default function MyBeansPage(
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <main className="min-h-screen bg-surface-page">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text mb-2 flex items-center gap-3">
-            <Trees className="w-8 h-8 text-primary" />
-            {t('title')}
-          </h1>
-          <p className="text-textSecondary">
-            {t('subtitle')}
-          </p>
-        </div>
+        <header className="border-b border-edge-rule pb-6">
+          <h1 className="text-[clamp(2rem,5vw,3rem)] text-ink-primary">{t('title')}</h1>
+          <p className="mt-3 text-ink-secondary">{t('subtitle')}</p>
+        </header>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-surface border border-border rounded-xl p-4 text-center">
-            <div className="text-3xl font-bold text-primary">{totalCafes}</div>
-            <div className="text-sm text-textSecondary">{t('stats.cafes')}</div>
+        {/*
+          Three counts, divided by the same hairline the page is divided by. They were
+          three bordered cards in a gapped row, which made the summary read as heavier
+          than the list it summarises -- and stacked a panel inside the page for numbers
+          that are one line each.
+        */}
+        <div className="mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-(--radius-card) border border-edge-rule bg-edge-rule">
+          <div className="bg-surface-page p-5 text-center">
+            <div className="text-3xl text-ink-primary">{totalCafes}</div>
+            <div className="landing-micro mt-1 text-ink-secondary">{t('stats.cafes')}</div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 text-center">
-            <div className="text-3xl font-bold text-accent">{totalDrops}</div>
-            <div className="text-sm text-textSecondary">{t('stats.drops')}</div>
+          <div className="bg-surface-page p-5 text-center">
+            <div className="text-3xl text-ink-primary">{totalDrops}</div>
+            <div className="landing-micro mt-1 text-ink-secondary">{t('stats.drops')}</div>
           </div>
+          {/* The only one that does anything, so it is the only one that says so. */}
           <button
             onClick={() => setShowLevelModal(true)}
-            className="bg-surface border border-border rounded-xl p-4 text-center hover:border-primary hover:bg-surface/80 transition-all cursor-pointer group relative"
+            className="group relative bg-surface-page p-5 text-center hover:bg-surface-hover"
           >
-            <div className="absolute top-2 right-2 opacity-50 group-hover:opacity-100 transition-opacity">
-              <Info className="w-4 h-4 text-textSecondary" />
+            <Info
+              size={14}
+              className="absolute right-2 top-2 text-ink-secondary opacity-60 group-hover:opacity-100"
+              aria-hidden
+            />
+            <div className="flex justify-center">
+              <GrowthIcon level={maxLevel} size={40} />
             </div>
-            <div className="flex justify-center mb-1">
-              <GrowthIcon level={maxLevel} size={48} />
-            </div>
-            <div className="text-sm text-textSecondary">{t('stats.highest')}</div>
+            <div className="landing-micro mt-1 text-ink-secondary">{t('stats.highest')}</div>
           </button>
         </div>
 
-        {/* Streak Badge */}
+        {/*
+          A streak, stated. It was a raw orange-to-red gradient out of the Tailwind
+          palette, which is fixed ink that does not move with the four themes and read
+          as the loudest thing on a page whose subject is a quiet record. Live or
+          lapsed is now the flame's colour and the word beside it.
+        */}
         {streak && streak.current_streak > 0 && (
-          <div className={`mb-8 p-4 rounded-xl border ${
-            streak.streak_active 
-              ? 'bg-linear-to-r from-orange-500/10 to-red-500/10 border-orange-400/30' 
-              : 'bg-surface border-border'
-          }`}>
-            <div className="flex items-center justify-between">
+          <div className="mt-8 rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${streak.streak_active ? 'bg-orange-500/20' : 'bg-border'}`}>
-                  <Flame className={`w-6 h-6 ${streak.streak_active ? 'text-orange-500' : 'text-textSecondary'}`} />
-                </div>
+                <Flame
+                  size={20}
+                  strokeWidth={1.5}
+                  className={streak.streak_active ? 'text-state-warning' : 'text-ink-secondary'}
+                  aria-hidden
+                />
                 <div>
-                  <div className="font-semibold text-text">
-                    {t('streak.current')}: {streak.current_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.current_streak })}
+                  <div className="text-ink-primary">
+                    {t('streak.current')}:{' '}
+                    {streak.current_streak === 1
+                      ? t('streak.day')
+                      : t('streak.days', { count: streak.current_streak })}
                   </div>
-                  <div className="text-sm text-textSecondary">
-                    {t('streak.best')}: {streak.max_streak === 1 ? t('streak.day') : t('streak.days', { count: streak.max_streak })}
+                  <div className="landing-micro mt-1 text-ink-secondary">
+                    {t('streak.best')}:{' '}
+                    {streak.max_streak === 1
+                      ? t('streak.day')
+                      : t('streak.days', { count: streak.max_streak })}
                   </div>
                 </div>
               </div>
               {streak.streak_active && (
-                <span className="text-sm font-medium text-orange-500">
-                  {t('streak.active')}
-                </span>
+                <span className="landing-micro text-ink-primary">{t('streak.active')}</span>
               )}
             </div>
-            {!streak.streak_active && streak.current_streak > 0 && (
-              <p className="mt-2 text-sm text-textSecondary">
-                {t('streak.info')}
-              </p>
+            {!streak.streak_active && (
+              <p className="mt-3 text-sm text-ink-secondary">{t('streak.info')}</p>
             )}
           </div>
         )}
@@ -199,32 +207,37 @@ export default function MyBeansPage(
 
         {/* Loading State */}
         {isLoading && (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-textSecondary">{t('loading')}</p>
+          <div className="flex justify-center py-16">
+            <LoadingSpinner size="lg" />
           </div>
         )}
 
-        {/* Error State */}
+        {/*
+          An error says what failed and offers a way on; it does not dress itself as an
+          empty shelf. The red here is the theme's danger slot, not `red-50` out of the
+          Tailwind palette, which stayed a pale pink on the three dark themes.
+        */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
+          <div className="mt-8 space-y-4 rounded-(--radius-card) border border-state-danger/40 bg-state-danger/8 p-6 text-center">
+            <p className="text-ink-primary">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="control-flat landing-micro min-h-11 rounded-(--radius-pill) border border-edge-rule px-5"
+            >
+              {t('retry')}
+            </button>
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && beans.length === 0 && (
-          <div className="text-center py-12 bg-surface border border-border rounded-xl">
-            <Sprout className="w-16 h-16 mx-auto mb-4 text-textSecondary" />
-            <h2 className="text-xl font-semibold text-text mb-2">
-              {t('empty.title')}
-            </h2>
-            <p className="text-textSecondary mb-6">
-              {t('empty.description')}
-            </p>
+          <div className="mt-8 space-y-5 rounded-(--radius-card) border border-edge-rule bg-surface-raised py-16 text-center">
+            <Sprout size={40} className="mx-auto text-ink-secondary" strokeWidth={1.5} />
+            <div className="text-2xl text-ink-primary">{t('empty.title')}</div>
+            <p className="mx-auto max-w-md px-6 text-ink-secondary">{t('empty.description')}</p>
             <Link
               href={`/${locale}/discover/dropbean`}
-              className="inline-flex items-center gap-2 bg-primary text-primaryText px-6 py-3 rounded-lg font-medium hover:bg-secondary transition-colors"
+              className="btn-shade inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
             >
               {t('empty.cta')}
             </Link>
@@ -233,7 +246,7 @@ export default function MyBeansPage(
 
         {/* Beans List */}
         {!isLoading && beans.length > 0 && (
-          <div className="space-y-6">
+          <div className="mt-8 space-y-8">
             {/* Fruiting Trees (Level 5) */}
             {beansByLevel[5] && (
               <BeanLevelSection
@@ -310,47 +323,48 @@ function BeanLevelSection({
   locale: string;
   title: string;
 }) {
+  const t = useTranslations('my_beans');
+
+  /*
+    One rule per level and a row per cafe. Each cafe was its own bordered card, so a
+    reader with fifteen beans got fifteen boxes and no sense of the grouping the level
+    headings were drawing -- and the row count is the thing being read here, not each
+    individual entry.
+  */
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <GrowthIcon level={level} size={36} />
-        <h3 className="text-lg font-semibold text-text">
-          {title}
-        </h3>
-        <span className="text-sm text-textSecondary">
-          ({beans.length})
-        </span>
+    <section>
+      <div className="flex items-center gap-3 border-b border-edge-rule pb-3">
+        <GrowthIcon level={level} size={32} />
+        <h2 className="text-lg text-ink-primary">{title}</h2>
+        <span className="landing-micro text-ink-secondary">{beans.length}</span>
       </div>
-      <div className="space-y-2">
+      <ul>
         {beans.map((bean) => (
-          <Link
-            key={bean.id}
-            href={`/${locale}/cafes/${bean.cafe_slug || bean.cafe_id}`}
-            className="flex items-center justify-between p-4 bg-surface border border-border rounded-xl hover:border-primary transition-colors"
-          >
-            <div>
-              <div className="font-medium text-text">
-                {bean.cafe_name}
+          <li key={bean.id}>
+            <Link
+              href={`/${locale}/cafes/${bean.cafe_slug || bean.cafe_id}`}
+              className="flex items-center justify-between gap-4 border-b border-edge-rule px-1 py-4 hover:bg-surface-hover"
+            >
+              <div className="min-w-0">
+                <div className="truncate text-ink-primary">{bean.cafe_name}</div>
+                {bean.cafe_address && (
+                  <div className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
+                    <MapPin size={12} aria-hidden className="shrink-0" />
+                    <span className="truncate">{bean.cafe_address}</span>
+                  </div>
+                )}
               </div>
-              {bean.cafe_address && (
-                <div className="text-sm text-textSecondary flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {bean.cafe_address}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm font-medium text-text">
-                  {bean.drop_count} drops
-                </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="landing-micro text-ink-secondary">
+                  {t('drops_count', { count: bean.drop_count })}
+                </span>
+                <ChevronRight size={16} className="text-ink-secondary" aria-hidden />
               </div>
-              <ChevronRight className="w-5 h-5 text-textSecondary" />
-            </div>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }
 
@@ -383,41 +397,34 @@ function LevelInfoModal({ isOpen, onClose, currentLevel, t, tDropBean }: LevelIn
       size="sm"
     >
       <div className="space-y-4">
-        <p className="text-sm text-textSecondary">
-          {t('level_info.how_to_level')}
-        </p>
-        
-        <div className="space-y-2">
+        <p className="text-sm text-ink-secondary">{t('level_info.how_to_level')}</p>
+
+        {/*
+          The reader's own level is marked by the one pill on the list, not by tinting
+          its whole row: a 10% brand wash behind a row is a lit background rather than
+          a chosen state, and it read as "disabled" on the darker themes.
+        */}
+        <ul>
           {LEVEL_DATA.map(({ level, threshold }) => (
-            <div
+            <li
               key={level}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                level === currentLevel
-                  ? 'bg-primary/10 border border-primary/30'
-                  : 'bg-surface'
-              }`}
+              className="flex items-center gap-3 border-b border-edge-rule py-3 last:border-0"
             >
-              <GrowthIcon level={level} size={40} />
-              <div className="flex-1">
-                <div className={`font-medium ${
-                  level === currentLevel ? 'text-primary' : 'text-text'
-                }`}>
-                  {tDropBean(`levels.${level}`)}
-                </div>
-              </div>
-              <div className={`text-sm ${
-                level === currentLevel ? 'text-primary' : 'text-textSecondary'
-              }`}>
-                {t('level_info.drops_required', { count: threshold })}
+              <GrowthIcon level={level} size={36} />
+              <div className="min-w-0 flex-1 text-ink-primary">
+                {tDropBean(`levels.${level}`)}
               </div>
               {level === currentLevel && (
-                <span className="text-xs bg-primary text-primaryText px-2 py-0.5 rounded-full">
+                <span className="landing-micro rounded-(--radius-pill) bg-brand px-2.5 py-1 text-ink-on-brand">
                   {t('level_info.current_highest')}
                 </span>
               )}
-            </div>
+              <div className="landing-micro shrink-0 text-ink-secondary">
+                {t('level_info.drops_required', { count: threshold })}
+              </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </Modal>
   );

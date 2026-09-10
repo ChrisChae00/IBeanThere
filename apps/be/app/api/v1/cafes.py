@@ -1025,6 +1025,68 @@ async def reject_trait_suggestion(
         )
 
 
+# `/user/beans` sits above `/{cafe_id}/beans`, and the order is the whole point:
+# FastAPI matches in registration order, so with the parameterised route first a
+# request for `/cafes/user/beans` is served as "the cafe whose id is `user`" and dies
+# as a 500 that explains nothing. The My Beans page never loaded a single bean because
+# of it. Same hazard the `/{cafe_identifier}` catch-all is commented for -- a literal
+# segment must be registered before the pattern that would swallow it.
+@router.get("/user/beans")
+async def get_user_beans(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0)
+):
+    """
+    Get all beans for current user (for My Beans page / heatmap).
+    Includes cafe info and growth status.
+    """
+    try:
+        # Get user's beans with cafe info
+        beans_result = supabase.table("cafe_beans").select(
+            "*, cafes(id, name, slug, address, latitude, longitude)"
+        ).eq(
+            "user_id", current_user.id
+        ).order(
+            "last_dropped_at", desc=True
+        ).range(offset, offset + limit - 1).execute()
+        
+        beans = []
+        for bean in (beans_result.data or []):
+            cafe = bean.get("cafes", {})
+            growth_level = bean.get("growth_level", 1)
+            
+            beans.append({
+                "id": bean.get("id"),
+                "cafe_id": bean.get("cafe_id"),
+                "cafe_name": cafe.get("name"),
+                "cafe_slug": cafe.get("slug"),
+                "cafe_address": cafe.get("address"),
+                "latitude": cafe.get("latitude"),
+                "longitude": cafe.get("longitude"),
+                "drop_count": bean.get("drop_count"),
+                "growth_level": growth_level,
+                "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
+                "first_dropped_at": bean.get("first_dropped_at"),
+                "last_dropped_at": bean.get("last_dropped_at")
+            })
+        
+        return {
+            "beans": beans,
+            "total_count": len(beans),
+            "offset": offset,
+            "limit": limit
+        }
+        
+    except Exception as e:
+        logger.exception("Error getting user beans")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
 @router.get("/{cafe_id}/beans", response_model=CafeBeansResponse)
 async def get_cafe_beans(
     cafe_id: str,
@@ -2983,62 +3045,6 @@ async def get_my_bean(
         
     except Exception as e:
         logger.exception("Error getting bean status")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again."
-        )
-
-
-@router.get("/user/beans")
-async def get_user_beans(
-    current_user = Depends(get_current_user),
-    supabase: Client = Depends(get_supabase_client),
-    limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0)
-):
-    """
-    Get all beans for current user (for My Beans page / heatmap).
-    Includes cafe info and growth status.
-    """
-    try:
-        # Get user's beans with cafe info
-        beans_result = supabase.table("cafe_beans").select(
-            "*, cafes(id, name, slug, address, latitude, longitude)"
-        ).eq(
-            "user_id", current_user.id
-        ).order(
-            "last_dropped_at", desc=True
-        ).range(offset, offset + limit - 1).execute()
-        
-        beans = []
-        for bean in (beans_result.data or []):
-            cafe = bean.get("cafes", {})
-            growth_level = bean.get("growth_level", 1)
-            
-            beans.append({
-                "id": bean.get("id"),
-                "cafe_id": bean.get("cafe_id"),
-                "cafe_name": cafe.get("name"),
-                "cafe_slug": cafe.get("slug"),
-                "cafe_address": cafe.get("address"),
-                "latitude": cafe.get("latitude"),
-                "longitude": cafe.get("longitude"),
-                "drop_count": bean.get("drop_count"),
-                "growth_level": growth_level,
-                "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
-                "first_dropped_at": bean.get("first_dropped_at"),
-                "last_dropped_at": bean.get("last_dropped_at")
-            })
-        
-        return {
-            "beans": beans,
-            "total_count": len(beans),
-            "offset": offset,
-            "limit": limit
-        }
-        
-    except Exception as e:
-        logger.exception("Error getting user beans")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
