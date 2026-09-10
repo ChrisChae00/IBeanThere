@@ -332,38 +332,47 @@ function BeanLevelSection({
     individual entry.
   */
   return (
-    <section>
-      <div className="flex items-center gap-3 border-b border-edge-rule pb-3">
-        <GrowthIcon level={level} size={32} />
-        <h2 className="text-lg text-ink-primary">{title}</h2>
-        <span className="landing-micro text-ink-secondary">{beans.length}</span>
+    <section className="rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+      <div className="p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <GrowthIcon level={level} size={32} />
+          <h2 className="text-xl font-bold text-ink-primary">{title}</h2>
+          <span className="landing-micro text-ink-secondary">{beans.length}</span>
+        </div>
+        {/*
+          Ruled in the ink, not the hairline -- the same line that closes a section
+          header on the cafe page. Every divider here used to be the same 18% hairline,
+          so a level heading landed with no more weight than the gap between two cafes
+          under it, and five levels read as one long undifferentiated list.
+        */}
+        <div className="mb-2 h-px bg-brand" />
+        <ul>
+          {beans.map((bean) => (
+            <li key={bean.id}>
+              <Link
+                href={`/${locale}/cafes/${bean.cafe_slug || bean.cafe_id}`}
+                className="-mx-2 flex items-center justify-between gap-4 rounded-(--radius-control) border-b border-edge-rule px-2 py-4 last:border-0 hover:bg-surface-hover"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-ink-primary">{bean.cafe_name}</div>
+                  {bean.cafe_address && (
+                    <div className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
+                      <MapPin size={12} aria-hidden className="shrink-0" />
+                      <span className="truncate">{bean.cafe_address}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="landing-micro text-ink-secondary">
+                    {t('drops_count', { count: bean.drop_count })}
+                  </span>
+                  <ChevronRight size={16} className="text-ink-secondary" aria-hidden />
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul>
-        {beans.map((bean) => (
-          <li key={bean.id}>
-            <Link
-              href={`/${locale}/cafes/${bean.cafe_slug || bean.cafe_id}`}
-              className="flex items-center justify-between gap-4 border-b border-edge-rule px-1 py-4 hover:bg-surface-hover"
-            >
-              <div className="min-w-0">
-                <div className="truncate text-ink-primary">{bean.cafe_name}</div>
-                {bean.cafe_address && (
-                  <div className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
-                    <MapPin size={12} aria-hidden className="shrink-0" />
-                    <span className="truncate">{bean.cafe_address}</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="landing-micro text-ink-secondary">
-                  {t('drops_count', { count: bean.drop_count })}
-                </span>
-                <ChevronRight size={16} className="text-ink-secondary" aria-hidden />
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

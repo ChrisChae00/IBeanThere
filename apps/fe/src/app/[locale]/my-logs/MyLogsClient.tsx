@@ -110,10 +110,15 @@ export default function MyLogsClient() {
               <p className="mt-3 text-ink-secondary">{t('my_logs_description')}</p>
             </div>
 
-            {/* The page's one filled control. */}
+            {/*
+              The same outlined control the cafe page puts beside "Coffee Logs", at
+              page scale rather than section scale. Writing a log is the same act from
+              either place, so it should not be a quiet line there and a filled slab
+              here; the filled control on this page is the one the empty state offers.
+            */}
             <button
               onClick={() => setShowSearchModal(true)}
-              className="btn-shade flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand"
+              className="btn-line inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-control) px-5 text-sm font-medium text-ink-primary"
             >
               <WriteIcon size={18} />
               {t('write_log')}
