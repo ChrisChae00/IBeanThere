@@ -237,11 +237,11 @@ async def get_community_feed(
         offset = (page - 1) * page_size
         
         # Get public visits from trusted users
-        visits = supabase.table("cafe_visits").select("""
-            id, cafe_id, user_id, visited_at, rating, comment, photo_urls, coffee_type,
-            users!inner(username, display_name, avatar_url),
-            cafes!inner(name)
-        """).in_("user_id", trustee_ids).eq("is_public", True).order("visited_at", desc=True).range(offset, offset + page_size - 1).execute()
+        # One line for the same reason as above: a newline in `select` loses the embeds.
+        visits = supabase.table("cafe_visits").select(
+            "id, cafe_id, user_id, visited_at, rating, comment, photo_urls, coffee_type,"
+            "users!inner(username, display_name, avatar_url),cafes!inner(name)"
+        ).in_("user_id", trustee_ids).eq("is_public", True).order("visited_at", desc=True).range(offset, offset + page_size - 1).execute()
         
         # Get total count
         count_result = supabase.table("cafe_visits").select("id", count="exact").in_("user_id", trustee_ids).eq("is_public", True).execute()
@@ -310,10 +310,13 @@ async def get_taste_mates(
         user_id = current_user.id
         
         # Get trust relationships with user details
-        trusts = supabase.table("user_trust").select("""
-            trustee_id, created_at,
-            users!user_trust_trustee_id_fkey(id, username, display_name, avatar_url)
-        """).eq("truster_id", user_id).order("created_at", desc=True).execute()
+        # One line, no newlines. PostgREST cannot parse a `select` containing them and
+        # falls back to every column *silently* -- the embed simply is not there, the
+        # `if user_data` below skips every row, and the endpoint answers `[]` with a 200.
+        # "Who do I follow" was empty everywhere it was asked because of this.
+        trusts = supabase.table("user_trust").select(
+            "trustee_id, created_at, users!user_trust_trustee_id_fkey(id, username, display_name, avatar_url)"
+        ).eq("truster_id", user_id).order("created_at", desc=True).execute()
         
         if not trusts.data:
             return []

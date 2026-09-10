@@ -46,9 +46,16 @@ export async function searchUsers(query: string, limit = 5): Promise<UserPublicR
   return handleResponse<UserPublicResponse[]>(response);
 }
 
+/*
+  Public, and better with a token. The endpoint takes optional auth so a signed-out
+  reader still gets the profile; a signed-in one additionally gets `is_trusted_by_me`,
+  which is how the page knows whether to offer Follow or Following. Sent unauthenticated
+  it answers `false` for everyone, which reads as "you follow nobody".
+*/
 export async function getPublicProfile(username: string): Promise<UserPublicResponse> {
   const response = await apiFetch(
     `${API_BASE_URL}/api/v1/users/profile-by-username/${encodeURIComponent(username)}`,
+    { headers: await getAuthHeaders() },
   );
 
   return handleResponse<UserPublicResponse>(response);

@@ -63,7 +63,7 @@ export default function TrustListModal({
     <Modal
       isOpen={direction !== null}
       onClose={onClose}
-      title={direction === 'following' ? t('following_title') : t('followers_title')}
+      title={direction === 'following' ? t('following') : t('followers')}
       size="sm"
     >
       {isLoading ? (
@@ -92,7 +92,7 @@ export default function TrustListModal({
                 </span>
                 {(person.trust_count ?? 0) > 0 && (
                   <span className="landing-micro shrink-0 text-ink-secondary">
-                    {t('followers', { count: person.trust_count ?? 0 })}
+                    {t('followers_count', { count: person.trust_count ?? 0 })}
                   </span>
                 )}
               </Link>

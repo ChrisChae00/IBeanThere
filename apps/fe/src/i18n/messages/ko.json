@@ -999,13 +999,18 @@
     "collections_public_hint": "다른 사용자가 컬렉션을 볼 수 있습니다",
     "view_photo": "사진 보기",
     "follow": "팔로우",
-    "following": "팔로잉 {count}",
+    "following": "팔로잉",
     "no_users_found": "검색 결과가 없습니다",
-    "followers": "팔로워 {count}",
+    "followers": "팔로워",
     "followers_title": "팔로워",
     "following_title": "팔로잉",
     "trust_list_empty": "아직 아무도 없습니다",
-    "trust_list_error": "목록을 불러오지 못했습니다"
+    "trust_list_error": "목록을 불러오지 못했습니다",
+    "unfollow_title": "{name} 님을 팔로우 취소할까요?",
+    "unfollow_body": "이 사람의 기록이 피드에서 사라집니다. 언제든 다시 팔로우할 수 있습니다.",
+    "unfollow_confirm": "팔로우 취소",
+    "followers_count": "팔로워 {count}",
+    "following_count": "팔로잉 {count}"
   },
   "legal": {
     "disclaimer_translation": "이 번역은 편의를 위해 제공됩니다. 영문 원상과 차이가 있을 경우 영문 버전이 우선합니다.",

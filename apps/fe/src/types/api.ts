@@ -392,6 +392,8 @@ export interface UserPublicResponse {
      shown without the other reads as a score rather than as a pair. */
   trust_count?: number;
   following_count?: number;
+  /** Whether the reader of this response follows this person. */
+  is_trusted_by_me?: boolean;
   collections_public?: boolean;
   created_at: string;
 }

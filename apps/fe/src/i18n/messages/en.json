@@ -1002,13 +1002,18 @@
     "collections_public_hint": "Others can see your collections",
     "view_photo": "View photo",
     "follow": "Follow",
-    "following": "{count} following",
+    "following": "Following",
     "no_users_found": "No users found",
-    "followers": "{count, plural, one {# follower} other {# followers}}",
+    "followers": "Followers",
     "followers_title": "Followers",
     "following_title": "Following",
     "trust_list_empty": "Nobody here yet",
-    "trust_list_error": "That list could not be loaded"
+    "trust_list_error": "That list could not be loaded",
+    "unfollow_title": "Unfollow {name}?",
+    "unfollow_body": "Their logs will stop appearing in your feed. You can follow them again at any time.",
+    "unfollow_confirm": "Unfollow",
+    "followers_count": "{count, plural, one {# follower} other {# followers}}",
+    "following_count": "{count} following"
   },
   "legal": {
     "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",

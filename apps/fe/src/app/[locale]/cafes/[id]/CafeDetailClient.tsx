@@ -11,7 +11,7 @@ import { GalleryImage } from '@/types/gallery';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
 import FoundingCrewAvatars from '@/components/cafe/FoundingCrewAvatars';
 import CafePhotoHero from '@/components/cafe/CafePhotoHero';
-import CafeActionsMenu from '@/components/cafe/CafeActionsMenu';
+import { ActionsMenu } from '@/shared/ui';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
 import CafeTraits from '@/components/cafe/CafeTraits';
 import CafeBeansRecent from '@/components/cafe/CafeBeansRecent';
@@ -101,7 +101,7 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
             away from the actions the reader came for.
           */
           cornerAction={
-            <CafeActionsMenu
+            <ActionsMenu
               label={t('more_actions')}
               onMedia
               items={[

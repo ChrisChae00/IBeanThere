@@ -97,6 +97,9 @@ class UserPublicResponse(BaseModel):
     # together -- one number alone reads as a score.
     trust_count: int = 0
     following_count: int = 0
+    # Whether the reader of this response follows this person. Absent for a signed-out
+    # reader, and false is the right answer for them.
+    is_trusted_by_me: bool = False
     collections_public: bool = False
     created_at: datetime
 

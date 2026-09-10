@@ -4,9 +4,13 @@ import { Menu } from '@base-ui/react/menu';
 import { MoreVertical } from 'lucide-react';
 
 /*
-  The overflow. Reporting a cafe is rare, irreversible-feeling, and belongs to
-  nobody's main task, so it does not get a control in the row beside "Drop Bean" —
-  a row where every button looks equally likely to be the thing you came for.
+  The overflow. Reporting is rare, irreversible-feeling, and belongs to nobody's main
+  task, so it does not get a control in the row beside "Drop Bean" or "Follow" — a row
+  where every button looks equally likely to be the thing you came for.
+
+  It lives in `shared/ui` because the cafe page is no longer the only page with a quiet
+  end to its action row; it was `CafeActionsMenu` under `components/cafe` and was never
+  cafe-specific.
 
   Same panel vocabulary as the header switchers (`menu-panel` / `menu-item`), so
   a menu opened here looks like a menu opened anywhere else in the app. It takes a
@@ -14,7 +18,7 @@ import { MoreVertical } from 'lucide-react';
   suggest a correction — and a menu that has to be rebuilt to hold a second item is
   a button wearing a menu's clothes.
 */
-export default function CafeActionsMenu({
+export default function ActionsMenu({
   label,
   items,
   onMedia = false,

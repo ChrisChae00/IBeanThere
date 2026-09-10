@@ -107,12 +107,12 @@ export default function ProfileHeader({
           */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
             <TrustCount
-              label={t('followers', { count: trustCount })}
+              label={t('followers_count', { count: trustCount })}
               onClick={() => setOpenList('followers')}
               disabled={trustCount === 0}
             />
             <TrustCount
-              label={t('following', { count: followingCount })}
+              label={t('following_count', { count: followingCount })}
               onClick={() => setOpenList('following')}
               disabled={followingCount === 0}
             />

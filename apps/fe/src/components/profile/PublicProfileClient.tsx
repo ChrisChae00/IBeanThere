@@ -4,13 +4,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPublicResponse, Collection } from '@/types/api';
-import { Button, LoadingSpinner, HeartIcon, BookmarkIcon } from '@/shared/ui';
+import { ActionsMenu, Button, LoadingSpinner, HeartIcon, BookmarkIcon } from '@/shared/ui';
+import Modal from '@/shared/ui/Modal';
 import { UserPlus, Check, ArrowLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
-import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+import { ReportModal, useReportModal } from '@/features/report';
 import { getUserPublicCollections } from '@/lib/api/collections';
-import { getPublicProfile, getTasteMates, setTrust } from '@/lib/api/users';
+import { getPublicProfile, setTrust } from '@/lib/api/users';
 import ProfileHeader from './ProfileHeader';
 import CollectionDetailModal from './CollectionDetailModal';
 
@@ -32,12 +33,18 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   const [loading, setLoading] = useState(true);
   const [isTrusted, setIsTrusted] = useState(false);
   const [trustLoading, setTrustLoading] = useState(false);
+  const [confirmUnfollow, setConfirmUnfollow] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
 
   const fetchProfile = useCallback(async () => {
     try {
-      setProfile(await getPublicProfile(username));
+      const loaded = await getPublicProfile(username);
+      setProfile(loaded);
+      /* The server says whether you follow this person; the page used to download your
+         entire following list and search it, which answered `[]` for everyone the whole
+         time a broken query was silently returning nothing. */
+      setIsTrusted(loaded.is_trusted_by_me ?? false);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -45,26 +52,9 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
     }
   }, [username]);
 
-  const checkTrustStatus = useCallback(async () => {
-    if (!currentUser) return;
-
-    try {
-      const mates = await getTasteMates();
-      setIsTrusted(mates.some((m) => m.username === username));
-    } catch (error) {
-      console.error('Error checking trust status:', error);
-    }
-  }, [currentUser, username]);
-
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
-
-  useEffect(() => {
-    if (profile && currentUser) {
-      checkTrustStatus();
-    }
-  }, [profile, currentUser, checkTrustStatus]);
 
   useEffect(() => {
     if (!profile || !profile.collections_public) return;
@@ -152,25 +142,38 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         actions={
           !isMe && (
             <div className="flex items-center gap-2">
-              <ReportButton
-                onClick={() => openUserReport(profile.username, username)}
-                size="md"
-                label={tReport('report_user')}
-              />
               {/*
-                Trusting is this page's one primary action, so it takes the fill and
-                gives it up once it is done -- the state is the fill, not a green wash
-                out of the raw Tailwind palette, which did not move with the theme.
+                Following is this page's one primary action, so it takes the fill and
+                gives it up once it is done -- the state is the fill, not a second
+                colour. Undoing it asks first: unfollowing is one click away from a
+                button whose whole job is to be clicked, and the row of logs it removes
+                does not come back on its own.
               */}
               <Button
                 variant={isTrusted ? 'outline' : 'primary'}
                 size="md"
-                onClick={handleTrust}
+                onClick={() => (isTrusted ? setConfirmUnfollow(true) : handleTrust())}
                 loading={trustLoading}
                 leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
               >
                 {isTrusted ? t('following') : t('follow')}
               </Button>
+
+              {/*
+                Reporting moved into the overflow for the reason the cafe page moved it
+                there: it is rare, it feels irreversible, and standing in the row beside
+                the action a reader came for it looked equally likely to be that action.
+              */}
+              <ActionsMenu
+                label={tReport('report_user')}
+                items={[
+                  {
+                    key: 'report',
+                    label: tReport('report_user'),
+                    onClick: () => openUserReport(profile.username, username),
+                  },
+                ]}
+              />
             </div>
           )
         }
@@ -228,6 +231,35 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         The report modal itself, which was imported and never rendered: pressing Report
         opened the hook's state and nothing on screen.
       */}
+      {/*
+        A dialog, not `confirm()`: the browser's own blocks the page, cannot be
+        translated, and cannot say whose name is about to be dropped.
+      */}
+      <Modal
+        isOpen={confirmUnfollow}
+        onClose={() => setConfirmUnfollow(false)}
+        title={t('unfollow_title', { name: profile.display_name })}
+        size="sm"
+      >
+        <p className="text-ink-secondary">{t('unfollow_body')}</p>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" size="md" onClick={() => setConfirmUnfollow(false)}>
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            loading={trustLoading}
+            onClick={async () => {
+              await handleTrust();
+              setConfirmUnfollow(false);
+            }}
+          >
+            {t('unfollow_confirm')}
+          </Button>
+        </div>
+      </Modal>
+
       <ReportModal
         isOpen={modalState.isOpen}
         onClose={closeModal}

@@ -4,7 +4,7 @@ import logging
 from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
 from app.models.collection import CollectionResponse
-from app.api.deps import get_supabase_client, get_current_user
+from app.api.deps import get_supabase_client, get_current_user, get_optional_user
 from app.services import badges as badges_service
 from app.core.permissions import require_permission, Permission
 
@@ -55,7 +55,11 @@ async def get_user_profiles(display_name: str = Path(..., max_length=30), supaba
         ) from e
 
 @router.get("/profile-by-username/{username}", response_model=UserPublicResponse)
-async def get_user_profile_by_username(username: str = Path(..., max_length=20), supabase: Client = Depends(get_supabase_client)):
+async def get_user_profile_by_username(
+    username: str = Path(..., max_length=20),
+    supabase: Client = Depends(get_supabase_client),
+    viewer = Depends(get_optional_user),
+):
     """
     Public endpoint to get user profile by username. (No authentication required)
     - Username is unique, so returns single user
@@ -89,6 +93,13 @@ async def get_user_profile_by_username(username: str = Path(..., max_length=20),
         user_data["taste_tags"] = await _get_user_taste_tags(supabase, user_id)
         user_data["trust_count"] = await _get_user_trust_count(supabase, user_id)
         user_data["following_count"] = await _get_user_following_count(supabase, user_id)
+        # Answered here rather than by the client downloading its own following list and
+        # searching it: that list is unbounded, and the page only ever asks about one
+        # person. Optional auth, so a signed-out reader still gets the profile.
+        user_data["is_trusted_by_me"] = bool(
+            viewer and viewer.id != user_id
+            and await _is_user_trusted_by(supabase, viewer.id, user_id)
+        )
 
         return UserPublicResponse(**user_data)
     except HTTPException:
