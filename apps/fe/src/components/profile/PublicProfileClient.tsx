@@ -20,7 +20,6 @@ interface PublicProfileClientProps {
 
 export default function PublicProfileClient({ username }: PublicProfileClientProps) {
   const t = useTranslations('profile');
-  const tCommunity = useTranslations('community');
   const tReport = useTranslations('report');
   const tCollections = useTranslations('collections');
   const tErrors = useTranslations('errors');
@@ -119,7 +118,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
         <h2 className="mb-2 text-xl font-bold text-ink-primary">
-          {tCommunity('no_users_found')}
+          {t('no_users_found')}
         </h2>
         <Button onClick={() => router.back()} variant="outline">
           {t('go_back')}
@@ -170,7 +169,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
                 loading={trustLoading}
                 leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
               >
-                {isTrusted ? tCommunity('following') : tCommunity('follow')}
+                {isTrusted ? t('following') : t('follow')}
               </Button>
             </div>
           )

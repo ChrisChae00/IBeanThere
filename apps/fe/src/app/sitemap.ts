@@ -7,8 +7,6 @@ const STATIC_PATHS = [
   '',
   '/discover/explore-map',
   '/learn/coffee',
-  '/shop',
-  '/community',
 ];
 
 // Next builds this route statically otherwise, baking it in once at build

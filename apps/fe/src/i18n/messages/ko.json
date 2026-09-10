@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "ibeanthere",
-    "description": "주변 로컬 카페를 발견하고, 커피 여행을 기록하며, 경험을 공유하세요"
+    "description": "커피가 정말 좋은 곳을 담은 지도. 좋았던 한 잔을 기억하고, 다음에 마실 커피와 집에서 내릴 원두를 찾으세요."
   },
   "common": {
     "app_name": "ibeanthere",
@@ -21,10 +21,6 @@
     "pending_spots_description": "검증 대기 중인 새로운 카페들",
     "dropbean": "커피콩 심기",
     "dropbean_description": "50m 이내 카페에 방문 기록 남기기",
-    "community": "커뮤니티",
-    "community_board": "게시판",
-    "community_badges": "뱃지 갤러리",
-    "community_activity": "친구 활동",
     "help": "도움말",
     "help_item_1": "자주 묻는 질문",
     "help_item_2": "문의하기",
@@ -35,11 +31,6 @@
     "my_beans_description": "각 카페에서 심은 커피콩 성장 현황",
     "register_cafe": "카페 등록",
     "register_cafe_description": "새 카페를 지도에 추가하기",
-    "shop": "공식몰",
-    "shop_essentials": "노마드 에센셜",
-    "shop_explorer": "탐험가 라인",
-    "shop_wearable": "웨어러블",
-    "shop_gift": "선물 패키지",
     "sign_in": "로그인",
     "sign_up": "회원가입",
     "profile": "프로필",
@@ -999,136 +990,10 @@
     "public_collections": "공개 컬렉션",
     "collections_public_label": "프로필에 공개",
     "collections_public_hint": "다른 사용자가 컬렉션을 볼 수 있습니다",
-    "view_photo": "사진 보기"
-  },
-  "shop": {
-    "hero_badge": "공식 스토어",
-    "hero_title": "커피 노마드를 위한 장비",
-    "hero_subtitle_line1": "커피와 카페를 진짜 좋아하는 사람들끼리만 눈치채는,",
-    "hero_subtitle_line2": "ibeanthere만의 신호.",
-    "explore_collection": "컬렉션 둘러보기",
-    "sections": {
-      "essentials": {
-        "title": "카페 노마드 에센셜",
-        "subtitle": "카페에서 작업하거나 휴식을 취하는 분들을 위한 실용적인 아이템입니다."
-      },
-      "explorer": {
-        "title": "탐험가 & 수집가",
-        "subtitle": "Founding Crew 시스템과 연계하여 소속감을 주는 굿즈입니다."
-      },
-      "wearable": {
-        "title": "웨어러블",
-        "subtitle": "편안한 '원마일 웨어' 혹은 '스트릿 무드' 의류입니다."
-      },
-      "gift": {
-        "title": "선물 패키지",
-        "subtitle": "지인에게 선물하기 좋은 구성입니다."
-      }
-    },
-    "product": {
-      "coming_soon": "Coming Soon",
-      "notify_me": "알림 받기",
-      "add_to_cart": "장바구니 담기"
-    },
-    "tags": {
-      "sustainable": "지속 가능",
-      "minimalist": "미니멀",
-      "waterproof": "방수",
-      "protective": "보호력",
-      "lightweight": "가벼움",
-      "durable": "내구성",
-      "collectible": "컬렉터블",
-      "accessory": "액세서리",
-      "stationery": "문구",
-      "analog": "아날로그",
-      "decoration": "데코레이션",
-      "fun": "재미",
-      "comfort": "편안함",
-      "streetwear": "스트릿웨어",
-      "vintage": "빈티지",
-      "casual": "캐주얼",
-      "selection": "셀렉션",
-      "premium": "프리미엄",
-      "home": "홈",
-      "design": "디자인"
-    },
-    "products": {
-      "tumbler": {
-        "title": "슬릭 리유저블 텀블러",
-        "desc": "무광 블랙/화이트 베이스의 미니멀한 디자인. 가방에 넣어도 새지 않는 밀폐형."
-      },
-      "pouch": {
-        "title": "노트북/아이패드 파우치",
-        "desc": "커피 얼룩에 강한 방수 재질. 'Work from Cafe' 디자인."
-      },
-      "ecobag": {
-        "title": "타이벡 에코백",
-        "desc": "가볍고 질긴 타이벡 소재. 크라프트지 질감에 로고 포인트."
-      },
-      "keyring": {
-        "title": "지도 마커 키링",
-        "desc": "지도 핀 모양의 키링. 내비게이터 등급을 뽐내세요."
-      },
-      "passport": {
-        "title": "카페 여권 노트",
-        "desc": "스탬프와 스티커를 위한 아날로그 노트. 당신의 여정을 기록하세요."
-      },
-      "stickers": {
-        "title": "리무버블 스티커 팩",
-        "desc": "노트북과 텀블러 꾸미기. 'Verified Cafe', 'Coffee Lover' 그래픽."
-      },
-      "hoodie": {
-        "title": "헤비웨이트 후드티",
-        "desc": "카페 투어를 위한 편안한 핏. 등판에 'Support Your Local Cafe' 슬로건."
-      },
-      "cap": {
-        "title": "빈티지 볼캡",
-        "desc": "깊은 핏의 모자에 커피 원두 자수. 빈티지한 워시드 컬러."
-      },
-      "dripbag": {
-        "title": "ibeanthere 셀렉션 드립백",
-        "desc": "플랫폼 내 평점 높은 로스터리의 큐레이션 드립백."
-      },
-      "coaster": {
-        "title": "지도 코스터",
-        "desc": "규조토 또는 가죽 재질. 컵을 올리면 완성되는 지도 디자인."
-      }
-    }
-  },
-  "community": {
-    "title": "커뮤니티",
-    "subtitle": "나의 Taste Mate들이 발견한 카페를 확인해보세요",
-    "login_required_title": "커뮤니티에 참여하세요",
-    "login_required_description": "로그인하여 Taste Mate들의 로그를 보고 새로운 카페를 발견하세요.",
-    "sign_in": "로그인",
-    "tab_feed": "피드",
-    "tab_explore": "탐색",
-    "explore_coming_soon": "탐색 기능이 곧 출시됩니다!",
-    "taste_mates_title": "Taste Mates",
-    "no_taste_mates": "아직 Taste Mate가 없습니다",
-    "no_taste_mates_hint": "취향이 맞는 유저를 신뢰하면 여기서 그들의 로그를 볼 수 있어요!",
-    "feed_empty": "아직 Taste Mate들의 로그가 없습니다",
-    "feed_empty_hint": "더 많은 유저를 신뢰하고 그들의 커피 발견을 확인해보세요!",
-    "loading": "로딩 중...",
-    "load_more": "더 보기",
-    "today": "오늘",
-    "yesterday": "어제",
-    "days_ago": "{count}일 전",
-    "view_cafe": "카페 보기",
-    "like": "좋아요",
-    "badge_gallery_title": "뱃지 갤러리",
-    "badge_gallery_description": "새로운 카페를 탐험하고 커피 여정을 공유하며 뱃지를 수집하세요. 모든 뱃지를 모을 수 있을까요?",
-    "collection_progress": "수집 현황",
-    "all_badges_earned": "축하합니다! 모든 뱃지를 획득하셨습니다!",
-    "badges_remaining": "아직 {count}개가 남았습니다",
-    "locked": "잠김",
-    "how_to_unlock": "획득 방법",
-    "search_users_placeholder": "커피 친구 찾기...",
-    "search_failed": "검색 실패",
-    "no_users_found": "검색 결과가 없습니다",
+    "view_photo": "사진 보기",
     "follow": "팔로우",
     "following": "팔로잉",
-    "feed_title": "커뮤니티 피드"
+    "no_users_found": "검색 결과가 없습니다"
   },
   "legal": {
     "disclaimer_translation": "이 번역은 편의를 위해 제공됩니다. 영문 원상과 차이가 있을 경우 영문 버전이 우선합니다.",
