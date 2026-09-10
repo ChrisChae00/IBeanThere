@@ -33,6 +33,11 @@ Applies to every visible string, both locales.
 - **Empty is an invitation, error is a fact.** An empty list offers the next action
   ("Be the first to add one"). An error says what failed and offers a retry — it never
   pretends the screen is merely empty.
+- **A failure never gets the success screen.** The password-reset form showed "Check
+  your email" for every error that did not mention a rate limit, so a send Supabase
+  refused looked exactly like one that went out, and the only symptom was a mail that
+  never came. It now prints the error. Supabase already answers an address with no
+  account with success, so the real error says nothing about who is registered.
 - **Labels are nouns, actions are verbs.** "Trending", "Nearby" / "Drop Bean",
   "Register a cafe".
 - **Korean is written, not translated.** Korean copy is written in Korean word order
@@ -278,6 +283,21 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   because the themes' own shadow colours are light in the dark themes and would paint a
   halo. Cards and controls carry no shadow at all. An inline `boxShadow` string is not
   theme-aware and cannot be.
+- **An auth screen is a photograph beside a form, and below `lg` it is only the form.**
+  `AuthLayout` splits the page in half: the landing hero's portrait still as an inset
+  card (`p-4`, `--radius-card`) on the left, a 420px form column on the right. On a
+  phone a half-width picture is a strip of wall above the fields, so it is not rendered,
+  and its tiles are lazy so it is not fetched either -- measured at 0 requests at 500px.
+  The form column owns the page's `h1` (`AuthHeading`), because it is the one thing every
+  width shows; the line on the photograph is a paragraph, and it does not repeat the
+  form's title -- two copies of "Reset your password" on one screen said nothing twice.
+- **Google comes before the email fields.** One press beats two fields for anyone who
+  has the account; the email form follows under a plain "or", not a micro-label.
+- **A primitive takes its caller's shape.** `Input` merges classes with `cn()`, so a
+  call site's `rounded-full` beats the base radius instead of leaving the winner to
+  stylesheet order. Merging also woke up two `bg-background/50` overrides on the reset
+  forms that had lost to the base fill all along; they were deleted with the change. A
+  class that "does nothing" on a primitive is a regression waiting for a merge.
 
 ## 6. Motion
 
@@ -292,6 +312,17 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **Scroll emphasis is a position calculation, not an IntersectionObserver.** IO is
   threshold-based; a fast scroll can put two rows past the line in one batch and leave
   the emphasis on the wrong one.
+- **Auth forms blur in** (`.blur-fade` on the heading, `.blur-fade-children` on the
+  form): 6px of blur and 6px of rise, 80ms apart. The stagger is positional, so an error
+  alert that mounts later takes the first slot and the rest change only their delay,
+  never restarting. The to-state is implicit, so no `filter` is left on a field once it
+  has landed.
+- **A picture that animates in waits for its pixels.** `PixelImage` (magicui's
+  pixel-image, rewritten as CSS) holds its tiles at the from-state until the photograph
+  has loaded. Started on page load, a photograph slower than the 2.3s sequence arrived
+  after the sequence had finished and simply appeared. Its tile delays are a
+  golden-ratio scatter rather than `Math.random()`: markup rendered on the server and
+  the client has to come out the same, or every tile's inline style fails hydration.
 - **`prefers-reduced-motion` gets the finished page**, not an empty one.
 - The base layer puts a 200ms transition on every `button, a, input, textarea, select`.
   Instant feedback requires an explicit `transition: none`.

@@ -125,6 +125,27 @@ apps/fe/
   framing the log was rewritten to drop. The badge gallery went with `/community`; a
   profile badge row is the open replacement.
 
+## Auth screens (`4ea7194`, `cd3f579`)
+
+- **One layout, five pages.** `features/auth/presentation/components/AuthLayout` is
+  sign-in, sign-up, forgot-password, reset-password and complete-profile: the landing
+  hero's still on the left as an inset card, the form on the right, only the form below
+  `lg`. The rules behind it are in `design-language.md` §5 and §6.
+- **`AuthHeading` is the page's `h1`, and a form renders its own.** A form with states
+  ("sent", "done", "link expired") changes its heading with them, so the heading lives
+  in the form component rather than the page. Sign-in and sign-up pass theirs from the
+  page because they have one state.
+- **`shared/ui/PixelImage`** is magicui's pixel-image rewritten as CSS
+  (`.pixel-tile`, `.pixel-color` in `globals.css`): deterministic tile delays, no timer,
+  held until the image loads, lazy `next/image` tiles that share one request.
+- **`shared/ui/Input` merges classes with `cn()`.** A caller's `className` now wins over
+  the base; the only other callers passing one were the two reset forms, whose dead
+  overrides went in the same commit.
+- **Reset emails go through Supabase's own mailer**, configured in the dashboard — not
+  the backend's Resend client. The forgot-password form used to show success for any
+  error but a rate limit; it now prints the error, which is the first place to look
+  when a mail does not arrive.
+
 ## Key Features
 
 - **Monorepo-style structure** utilizing App Router (`apps/fe/src/app`)
