@@ -93,7 +93,11 @@ export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
         <Script
           id="cafe-structured-data"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          // Name, address, phone and website come from cafe registration and map data,
+          // not from us. JSON.stringify leaves `</script>` alone, so a cafe named
+          // `</script><script>...` would close this tag and run on every visit to its
+          // page; `\u003c` is the same `<` to a JSON parser and nothing to an HTML one.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }}
         />
         <CafeDetailClient cafe={cafe} />
       </>

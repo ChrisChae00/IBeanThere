@@ -46,6 +46,17 @@ const ADMIN_REPORT_ERROR_MAP = {
   404: 'REPORT_NOT_FOUND',
 } as const;
 
+/*
+  Rows written before the API validated these fields can still hold anything. The
+  dashboard turns `targetUrl` into a link and every image URL into an <img>, so both are
+  filtered here, once, for every screen that reads a report: an http(s) link only, and
+  images only from the report form's own storage bucket -- an <img> on another host is a
+  pixel that tells its owner when an admin opened the report.
+*/
+const REPORT_IMAGE_PREFIX = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/reports/`;
+
+const isHttpUrl = (url: string) => /^https?:\/\/[^/]/i.test(url.trim());
+
 // Transform API response to domain entity
 function toDomainReport(response: ReportApiResponse): AdminReport {
   return {
@@ -56,9 +67,9 @@ function toDomainReport(response: ReportApiResponse): AdminReport {
     reportType: response.report_type as AdminReport['reportType'],
     targetType: response.target_type as TargetType,
     targetId: response.target_id,
-    targetUrl: response.target_url,
+    targetUrl: response.target_url && isHttpUrl(response.target_url) ? response.target_url : undefined,
     description: response.description,
-    imageUrls: response.image_urls || [],
+    imageUrls: (response.image_urls || []).filter((url) => url.startsWith(REPORT_IMAGE_PREFIX)),
     status: response.status as ReportStatus,
     adminNotes: response.admin_notes,
     createdAt: new Date(response.created_at),
