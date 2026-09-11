@@ -298,7 +298,7 @@
     "send_reset_link": "Send Reset Link",
     "back_to_login": "Back to Login",
     "reset_email_sent": "Check Your Email",
-    "reset_email_sent_subtitle": "We've sent a password reset link to {email}",
+    "reset_email_sent_subtitle": "If {email} has an account, a reset link is on its way.",
     "reset_password_title": "Create New Password",
     "reset_password_subtitle": "Enter your new password below",
     "new_password": "New Password",

@@ -70,15 +70,28 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
       );
 
       /*
-        A failure is shown, not dressed up as "sent". Supabase already answers an
-        address with no account with success, so a real error here says nothing about
-        who is registered -- it is a refused sender, a rate limit, a bad redirect.
-        Swallowing it is how a send that never left looked exactly like one that did.
+        Supabase answers an address with no account with success and sends nothing. The
+        errors it can return -- a per-account resend cooldown, a recipient the default
+        mailer refuses, a send that failed -- therefore only happen for addresses that
+        have an account, so printing them tells anyone which emails are registered.
+
+        Production shows the neutral "sent" screen for them (its copy says "if there is
+        an account"); the operator's view is the Supabase auth log. Development prints
+        the error, because a swallowed one is how a mail that never left looked exactly
+        like one that did. Only the per-IP request limit is shown everywhere: it trips
+        before the account lookup, so it is the same answer for every address. The email
+        send limit ("email rate limit exceeded") trips after it, and is account-specific.
       */
       if (!result.success) {
         const message = result.error?.message ?? '';
-        setError(message.includes('rate') ? tErrors('too_many_requests') : translateError(message));
-        return;
+        if (/request rate limit/i.test(message)) {
+          setError(tErrors('too_many_requests'));
+          return;
+        }
+        if (process.env.NODE_ENV === 'development') {
+          setError(translateError(message));
+          return;
+        }
       }
 
       setIsEmailSent(true);

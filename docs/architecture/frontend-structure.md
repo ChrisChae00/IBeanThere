@@ -142,9 +142,10 @@ apps/fe/
   the base; the only other callers passing one were the two reset forms, whose dead
   overrides went in the same commit.
 - **Reset emails go through Supabase's own mailer**, configured in the dashboard — not
-  the backend's Resend client. The forgot-password form used to show success for any
-  error but a rate limit; it now prints the error, which is the first place to look
-  when a mail does not arrive.
+  the backend's Resend client. When a mail does not arrive, look in the Supabase auth
+  log, or send from a development build: the forgot-password form prints the real error
+  only in development, because in production it would reveal which addresses have an
+  account (design-language §2).
 
 ## Key Features
 

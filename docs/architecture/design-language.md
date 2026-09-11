@@ -33,11 +33,15 @@ Applies to every visible string, both locales.
 - **Empty is an invitation, error is a fact.** An empty list offers the next action
   ("Be the first to add one"). An error says what failed and offers a retry — it never
   pretends the screen is merely empty.
-- **A failure never gets the success screen.** The password-reset form showed "Check
-  your email" for every error that did not mention a rate limit, so a send Supabase
-  refused looked exactly like one that went out, and the only symptom was a mail that
-  never came. It now prints the error. Supabase already answers an address with no
-  account with success, so the real error says nothing about who is registered.
+- **A success screen only claims what is true for every address.** The password-reset
+  form said "We've sent a link to {email}" whatever happened. It cannot print the real
+  error instead: Supabase answers an address with no account with success and sends
+  nothing, so every error it can return (a resend cooldown, a refused recipient, a failed
+  send) belongs to an address that has an account, and printing it tells anyone who is
+  registered. So the screen now says "if {email} has an account", production shows it for
+  those errors, and only development prints them -- a swallowed error is how a mail
+  that never left looked exactly like one that did. The per-IP request limit is the one
+  error shown everywhere; it trips before the account lookup.
 - **Labels are nouns, actions are verbs.** "Trending", "Nearby" / "Drop Bean",
   "Register a cafe".
 - **Korean is written, not translated.** Korean copy is written in Korean word order
