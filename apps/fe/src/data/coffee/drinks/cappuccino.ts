@@ -2,27 +2,93 @@ import type { CoffeeDrink } from '../types';
 
 const cappuccino: CoffeeDrink = {
   slug: 'cappuccino',
-  categoryId: 'milk-variations',
+  categoryId: 'espresso',
+  reviewed: '2026-09-11',
+  related: ['cafe-latte', 'flat-white', 'macchiato'],
   content: {
     en: {
       name: 'Cappuccino',
-      tagline: "Order a cappuccino after 11am in Rome, and the barista will know you're a tourist before you finish the sentence.",
+      title: 'Cappuccino: what it is, how it differs from a latte, and why it is named after friars',
       description:
-        "In Italy, cappuccino has a curfew. Order one after a meal, or past late morning, and you've broken an unwritten rule locals take seriously — they believe milk disrupts digestion, so it stays strictly a breakfast drink. Break it in a traditional Rome or Naples bar and don't expect a scolding, just a look, maybe a gentle reminder of the time.\n\nThe drink itself is built on precision: a strict 1:1:1 ratio of espresso, steamed milk, and thick, dry foam in a 150–180ml cup. That foam is the whole point — dense enough to sip through before you hit coffee underneath, splitting the drink into two acts. Even the name is a costume: it's named for Capuchin friars, whose brown robes matched the color of the cup.",
-      origin:
-        'The cappuccino\'s name comes from the Capuchin friars, whose brown robes resembled the color of the drink. The modern espresso-based cappuccino emerged in Italy in the early 20th century. The "wet cappuccino" (less foam, more steamed milk) and "dry cappuccino" (all foam, minimal milk) are American variations that diverged from the Italian original.',
-      funFact:
-        'In Italy, there\'s an unwritten rule: cappuccino is only for the morning. If you order one after noon in a traditional bar in Rome or Naples, the barista may give you a look. Some will politely remind you of the time.',
+        'A cappuccino is espresso with steamed milk under a thick layer of foam. The Italian certified proportions, how it differs from a latte, and what the name has to do with Capuchin friars.',
+      summary:
+        'A cappuccino is espresso with steamed milk and a thick layer of milk foam, in a smaller cup than a latte. The Italian Espresso National Institute’s certified cappuccino is 25 ml of espresso with 100 ml of steamed milk, its foam a tight mesh of very fine bubbles.',
+      summarySources: ['iei-espresso'],
+      line: 'Espresso with steamed milk and a thick layer of foam, in a smaller cup than a latte.',
+      facts: [
+        { label: 'In the cup', value: 'Espresso, steamed milk, foam' },
+        { label: 'Certified Italian recipe', value: '25 ml espresso, 100 ml steamed milk' },
+        { label: 'Foam', value: 'At least 1 cm by competition rules' },
+        { label: 'Name', value: 'From the colour of the Capuchin friars’ habit' },
+      ],
+      sections: [
+        {
+          id: 'vs-latte',
+          heading: 'What is the difference between a cappuccino and a latte?',
+          body: [
+            {
+              text: 'Foam and proportion. A cappuccino has less milk and much more foam, so it is smaller, tastes more of the coffee and feels lighter in the mouth; a latte is larger and milkier with a thin layer on top. Perfect Daily Grind notes that barista competitions require at least 1 cm of foam on a cappuccino, about twice what a flat white carries.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'name',
+          heading: 'Why is it called a cappuccino?',
+          body: [
+            {
+              text: 'For its colour. Treccani defines cappuccino as a drink of espresso and milk “so called for its colour,” and the Online Etymology Dictionary links that colour to the brown hoods of the Capuchin friars, recording the word in English from 1948.',
+              sources: ['treccani-cappuccino', 'etym-cappuccino'],
+            },
+            {
+              text: 'Vienna named a different drink after the same friars: its Kapuziner is an espresso with a few drops of cream.',
+              sources: ['austria-coffeehouse'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '카푸치노',
-      tagline: '로마에서 오전 11시 이후 카푸치노를 주문하면, 문장이 끝나기도 전에 바리스타는 당신이 관광객임을 알아챈다.',
+      title: '카푸치노란? 라테와의 차이와 수도사에게서 온 이름',
       description:
-        '이탈리아에서 카푸치노에는 통금 시간이 있습니다. 식사 후나 늦은 아침 이후에 주문하면, 현지인들이 진지하게 여기는 불문율을 어긴 것입니다. 우유가 소화를 방해한다고 믿기 때문에 카푸치노는 철저히 아침 음료로 남습니다. 로마나 나폴리의 전통 바에서 이 규칙을 어겨도 혼나지는 않습니다. 그저 의미심장한 눈빛, 혹은 정중하게 시간을 알려주는 정도죠.\n\n음료 자체는 정밀함으로 만들어집니다. 에스프레소, 스팀 밀크, 두껍고 단단한 폼을 1:1:1로 정확히 맞춰 150~180ml 컵에 담습니다. 이 폼이 핵심입니다. 충분히 단단해서 그걸 먼저 홀짝인 다음에야 아래의 커피에 닿게 되어, 음료를 두 장면으로 나눕니다. 이름조차 위장입니다. 갈색 수도복을 입은 카푸친 수도사에서 따온 이름으로, 수도복 색이 컵 색과 닮았기 때문입니다.',
-      origin:
-        '카푸치노라는 이름은 갈색 수도복을 입은 카푸친(Capuchin) 수도사에서 유래했습니다. 수도복 색깔이 음료 색과 닮았기 때문입니다. 현대적인 에스프레소 기반 카푸치노는 20세기 초 이탈리아에서 등장했습니다. "웻 카푸치노"(폼 적고 스팀 밀크 많음)와 "드라이 카푸치노"(폼만, 우유 최소)는 이탈리아 원본에서 갈라진 미국식 변형입니다.',
-      funFact:
-        '이탈리아에는 불문율이 있습니다. 카푸치노는 오직 아침에만. 로마나 나폴리의 전통 바에서 정오 이후에 카푸치노를 주문하면 바리스타가 의미심장한 눈빛을 보낼 수 있습니다. 정중하게 시간을 상기시켜주는 분도 있습니다.',
+        '카푸치노는 에스프레소에 스팀 우유와 두꺼운 거품층을 올린 음료입니다. 이탈리아 인증 비율, 라테와의 차이, 카푸친 수도회와 이름의 관계를 정리했습니다.',
+      summary:
+        '카푸치노는 에스프레소에 스팀 우유와 두꺼운 우유 거품을 올린 음료로, 라테보다 작은 잔에 담습니다. 이탈리아 국립 에스프레소 협회(INEI)가 인증하는 카푸치노는 에스프레소 25ml에 스팀 우유 100ml이고, 거품은 아주 고운 기포가 촘촘하게 짜인 상태여야 합니다.',
+      summarySources: ['iei-espresso'],
+      line: '에스프레소에 스팀 우유와 두꺼운 거품층을 올린, 라테보다 작은 음료.',
+      facts: [
+        { label: '재료', value: '에스프레소, 스팀 우유, 거품' },
+        { label: '이탈리아 인증 레시피', value: '에스프레소 25ml, 스팀 우유 100ml' },
+        { label: '거품', value: '대회 규정상 1cm 이상' },
+        { label: '이름', value: '카푸친 수도복의 색에서' },
+      ],
+      sections: [
+        {
+          id: 'vs-latte',
+          heading: '카푸치노와 라테는 무엇이 다른가',
+          body: [
+            {
+              text: '거품과 비율입니다. 카푸치노는 우유가 적고 거품이 훨씬 많아 잔이 작고, 커피 맛이 더 나며 입에 가볍게 느껴집니다. 라테는 더 크고 우유가 많으며 거품은 얇습니다. 퍼펙트 데일리 그라인드에 따르면 바리스타 대회는 카푸치노에 최소 1cm의 거품을 요구하는데, 플랫화이트의 두 배쯤입니다.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'name',
+          heading: '왜 카푸치노라고 부르나',
+          body: [
+            {
+              text: '색 때문입니다. 이탈리아어 사전 트레카니는 카푸치노를 ‘그 색 때문에 그렇게 불리는’ 에스프레소와 우유 음료로 정의하고, 온라인 어원 사전은 그 색을 카푸친 수도사들이 쓰던 갈색 두건과 연결하며 영어 기록을 1948년부터로 봅니다.',
+              sources: ['treccani-cappuccino', 'etym-cappuccino'],
+            },
+            {
+              text: '빈은 같은 수도사의 이름을 다른 음료에 붙였습니다. 빈의 카푸치너(Kapuziner)는 에스프레소에 크림을 몇 방울 떨어뜨린 커피입니다.',
+              sources: ['austria-coffeehouse'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

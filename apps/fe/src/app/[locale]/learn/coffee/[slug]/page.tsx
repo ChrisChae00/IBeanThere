@@ -1,10 +1,16 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { getAllDrinks, getDrinkBySlug, getCategory, getDrinksByCategory } from '@/data/coffee';
-import type { Locale } from '@/data/coffee/types';
+import { getAllDrinks, getDrinkBySlug, getCategory } from '@/data/coffee';
+import type { CoffeeDrink, Locale } from '@/data/coffee/types';
+import { getSource } from '@/data/coffee/sources';
 import CoffeeDrinkDetail from '@/components/learn/CoffeeDrinkDetail';
-import { buildAlternateLanguages, buildCanonical, type Locale as SeoLocale } from '@/lib/seo';
+import {
+  buildAlternateLanguages,
+  buildCanonical,
+  buildOrganizationSchema,
+  type Locale as SeoLocale,
+} from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -21,35 +27,75 @@ export async function generateMetadata({
   const drink = getDrinkBySlug(slug);
   if (!drink) return {};
 
-  const loc = locale as Locale;
-  const content = drink.content[loc];
+  const copy = drink.content[locale as Locale];
   const path = `/learn/coffee/${slug}`;
 
   return {
-    title: content.name,
-    description: content.tagline,
+    title: copy.title,
+    description: copy.description,
     alternates: {
       canonical: buildCanonical(locale as SeoLocale, path),
       languages: buildAlternateLanguages(path),
     },
+    // The layout's card names the site; without this, every shared link would too.
+    twitter: {
+      card: 'summary',
+      title: copy.title,
+      description: copy.description,
+    },
     openGraph: {
-      title: content.name,
-      description: content.tagline,
+      title: copy.title,
+      description: copy.description,
       type: 'article',
+      locale,
+      modifiedTime: drink.reviewed,
     },
   };
 }
 
-// JSON-LD component for structured data — content is our own static data, not user input
-function JsonLd({ data }: { data: Record<string, unknown> }) {
-  // eslint-disable-next-line react/no-danger
-  return (
-    <script
-      type="application/ld+json"
-      // Content is serialized from our own static TypeScript data files, not user input
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  );
+/*
+  Only what the page shows. `citation` is the sources printed beside the paragraphs,
+  `dateModified` the day they were checked (not the day of the build), and the author is
+  the site itself because no person is named on the page.
+*/
+function buildStructuredData(drink: CoffeeDrink, locale: string, guideName: string) {
+  const copy = drink.content[locale as Locale];
+  const url = buildCanonical(locale as SeoLocale, `/learn/coffee/${drink.slug}`);
+  const { '@context': _context, ...organization } = buildOrganizationSchema();
+  const cited = new Set([
+    ...(copy.summarySources ?? []),
+    ...copy.sections.flatMap(section => section.body.flatMap(p => p.sources ?? [])),
+  ]);
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: copy.name,
+        description: copy.description,
+        inLanguage: locale,
+        url,
+        mainEntityOfPage: url,
+        dateModified: drink.reviewed,
+        author: organization,
+        publisher: organization,
+        citation: [...cited].map(id => getSource(id).url),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: guideName,
+            item: buildCanonical(locale as SeoLocale, '/learn/coffee'),
+          },
+          { '@type': 'ListItem', position: 2, name: copy.name, item: url },
+        ],
+      },
+    ],
+  };
 }
 
 export default async function CoffeeDrinkPage({
@@ -64,47 +110,21 @@ export default async function CoffeeDrinkPage({
   const category = getCategory(drink.categoryId);
   if (!category) notFound();
 
+  const related = drink.related
+    .map(getDrinkBySlug)
+    .filter((d): d is CoffeeDrink => d !== undefined);
+
   const t = await getTranslations({ locale, namespace: 'learn.coffee' });
-
-  // drinkSlugs order is authoritative, so siblings double as reading order.
-  const allCategoryDrinks = getDrinksByCategory(drink.categoryId);
-  const relatedDrinks = allCategoryDrinks.filter(d => d.slug !== drink.slug);
-  const position = allCategoryDrinks.findIndex(d => d.slug === drink.slug);
-  const prev = position > 0 ? allCategoryDrinks[position - 1] : undefined;
-  const next = position >= 0 ? allCategoryDrinks[position + 1] : undefined;
-
-  const loc = locale as Locale;
-  const drinkContent = drink.content[loc];
-
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: drinkContent.name,
-    description: drinkContent.tagline,
-    inLanguage: locale,
-  };
-
-  const messages = {
-    backToRoadmap: t('backToRoadmap'),
-    origin: t('origin'),
-    funFact: t('funFact'),
-    relatedDrinks: t('relatedDrinks'),
-    prevDrink: t('prevDrink'),
-    nextDrink: t('nextDrink'),
-  };
+  const structuredData = buildStructuredData(drink, locale, t('breadcrumbRoot'));
 
   return (
     <>
-      <JsonLd data={jsonLd} />
-      <CoffeeDrinkDetail
-        drink={drink}
-        category={category}
-        relatedDrinks={relatedDrinks}
-        prev={prev}
-        next={next}
-        locale={locale}
-        messages={messages}
+      <script
+        type="application/ld+json"
+        // Our own static data, but escaped anyway: `</script>` in any string would close the tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }}
       />
+      <CoffeeDrinkDetail drink={drink} category={category} related={related} locale={locale} />
     </>
   );
 }

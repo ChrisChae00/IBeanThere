@@ -2,7 +2,7 @@
 
 ## Analytics
 
-Three events and a pageview, mounted once from `ClientProviders` as `AnalyticsWatcher`.
+Four events and a pageview, mounted once from `ClientProviders` as `AnalyticsWatcher`.
 `posthog-js` is imported at runtime rather than bundled, no URL leaves the browser with
 an identifier in it, and nothing is stored on the reader's device. Absent
 `NEXT_PUBLIC_POSTHOG_KEY` it is entirely inert, which is the local default. The CSP in
@@ -97,6 +97,36 @@ apps/fe/
     ├── styles/           # See Styling below
     └── types/            # App-wide TypeScript definitions
 ```
+
+## Coffee guide (`/learn/coffee`)
+
+- **Three kinds of thing, not a timeline.** The old "roadmap" joined five stages with a
+  rail and era pills, which told the reader that cold brew branched off espresso and that
+  a 1940s Irish coffee came after a 1980s flat white. The hub now groups pages by what
+  they are (brewing methods, espresso drinks, coffee with something added); dates live
+  in their own list, with no connecting line, where a year only claims a year.
+- **Content is data, both languages side by side.** `src/data/coffee/drinks/*.ts`, one
+  file per page. Each paragraph carries the `SourceId`s that back it, rendered directly
+  under it; `sources.ts` holds every title, publisher and URL once. `reviewed` is the day
+  the page's sources were last opened and feeds `dateModified` and the sitemap's
+  `lastmod` -- change it when the sources are checked again, never on deploy.
+- **Eight thin pages were folded into the page that answers the same question**
+  (hand-drip, iced-americano, ristretto, lungo, breve, dutch-coffee, nitro, con-panna).
+  `next.config.js` redirects them permanently; the list lives there only.
+- **Server components, no motion.** Everything, including sources, is in the server
+  HTML and readable with JavaScript off. The one client component is `MapPrompt`, for
+  the `learn_cta_clicked` event.
+- **Structured data states only what the page shows**: `Article` (headline = the H1,
+  `citation` = the linked sources, author and publisher = the site, no invented person)
+  and a two-item `BreadcrumbList`. No FAQ markup.
+- `npx tsx scripts/check-coffee-guide.ts` fails if the two languages drift apart: section
+  anchors, which paragraph cites which source, related links to merged pages, duplicate
+  titles.
+- **`.paper-grain`** (globals.css) is the hub and the drink page's own background, on top
+  of `--surface-page` rather than in place of it: a neutral SVG noise texture, tinted by
+  `mix-blend-mode: overlay` from whatever the theme's own page colour is, so one class
+  works unmodified across all four themes. Photos per drink are a later addition this
+  makes room for, not built yet.
 
 ## Profile and social (`0ecb396`, `882f917`)
 

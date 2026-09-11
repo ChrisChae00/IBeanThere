@@ -2,27 +2,91 @@ import type { CoffeeDrink } from '../types';
 
 const flatWhite: CoffeeDrink = {
   slug: 'flat-white',
-  categoryId: 'milk-variations',
+  categoryId: 'espresso',
+  reviewed: '2026-09-11',
+  related: ['cafe-latte', 'cappuccino', 'cortado'],
   content: {
     en: {
-      name: 'Flat White',
-      tagline: 'Australia and New Zealand have spent forty years fighting over who invented the flat white. Starbucks just called it a draw.',
+      name: 'Flat white',
+      title: 'Flat white vs latte, and who invented it: Australia or New Zealand',
       description:
-        'New Zealand says a Wellington café served it first in 1989. Australia has its own competing claims from the same decade, and neither side has backed down. The rivalry stayed a regional argument until Starbucks added the flat white to its global menu in 2015 — and a café-counter dispute suddenly became international news. Starbucks settled it the only safe way: crediting "Australia/New Zealand," no further comment.\n\nWhat both countries agree on is the drink itself. It\'s a double ristretto topped with microfoam — steamed milk textured into extremely fine, velvety bubbles — served small, around 150–160ml, with almost no surface foam, hence "flat." The result sits in a specific gap: more coffee-forward than a latte, smoother than a straight double shot. Everyone agrees on the taste. Nobody agrees on who made it first.',
-      origin:
-        'The flat white was independently developed in Australia and New Zealand in the 1980s, with both countries claiming ownership. The debate remains friendly but unresolved. It entered the global spotlight when Starbucks added it to their menu in 2015, at which point the Australia vs. New Zealand dispute briefly became an international conversation.',
-      funFact:
-        'The Australia vs. New Zealand rivalry over who invented the flat white is a genuine cultural flashpoint. New Zealand claims a Wellington café first served it in 1989; Australia has competing claims from the 1980s. Starbucks diplomatically calls it "originated in Australia/New Zealand."',
+        'A flat white is espresso with steamed milk and a thin layer of fine microfoam, smaller than a latte. How it differs from a latte and a cappuccino, and the two competing origin claims.',
+      summary:
+        'A flat white is espresso with steamed milk textured into fine microfoam, poured so that only a thin, flat layer of foam sits on top. It is smaller than a latte and has less milk, so the coffee comes through more strongly. Australia and New Zealand both claim it.',
+      line: 'Espresso with steamed milk and a thin layer of fine microfoam, smaller than a latte.',
+      facts: [
+        { label: 'In the cup', value: 'Espresso and steamed milk' },
+        { label: 'Foam', value: 'About 0.5 cm' },
+        { label: 'Size', value: 'Smaller than a latte or a cappuccino' },
+        { label: 'Origin', value: 'Claimed by both Australia and New Zealand' },
+      ],
+      sections: [
+        {
+          id: 'vs-latte',
+          heading: 'What is the difference between a flat white and a latte?',
+          body: [
+            {
+              text: 'Size, milk and foam. A flat white is the smaller drink, roughly two-thirds milk, with a thin layer of foam — Perfect Daily Grind puts it at about 0.5 cm, against at least 1 cm on a cappuccino. A latte is larger, with more milk for the same espresso, so the coffee is milder.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'origin',
+          heading: 'Who invented the flat white, Australia or New Zealand?',
+          body: [
+            {
+              text: 'Perfect Daily Grind calls the origin somewhat contentious, and both leading claims rest on the claimants’ own accounts. Alan Preston says he was the first café owner to put “flat white” permanently on a menu, at his Sydney café in the mid-1980s, for customers who asked for a “white coffee — flat”; his recipe used a double ristretto and milk with little foam. In New Zealand, Fraser McInnes says the name came from a cappuccino whose low-fat milk would not foam: “Sorry, it’s a flat white.”',
+              sources: ['pdg-flat-white'],
+            },
+            {
+              text: 'The words may be older than either story: Dictionary.com dates the first recorded use of “flat white” to 1970–75.',
+              sources: ['dictcom-flat-white'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '플랫화이트',
-      tagline: '호주와 뉴질랜드는 40년째 플랫화이트를 누가 만들었는지 다투고 있다. 스타벅스는 그냥 무승부라고 선언했다.',
+      title: '플랫화이트와 라테 차이, 호주와 뉴질랜드의 원조 논쟁',
       description:
-        '뉴질랜드는 1989년 웰링턴의 한 카페가 처음 만들었다고 주장합니다. 호주는 같은 시기의 자체 기원을 내세우며, 어느 쪽도 물러서지 않았습니다. 이 다툼은 지역 논쟁으로 남아 있다가 2015년 스타벅스가 플랫화이트를 글로벌 메뉴에 올리면서 갑자기 국제 뉴스가 됐습니다. 스타벅스는 가장 안전한 방식으로 정리했습니다. "호주/뉴질랜드 기원"이라고만 표기하고 더 이상 말을 얹지 않았죠.\n\n두 나라가 동의하는 건 음료 자체입니다. 플랫화이트는 더블 리스트레토에 마이크로폼 — 극도로 미세하고 벨벳 같은 기포로 스팀한 우유 — 을 올려 150~160ml의 작은 잔에 담고, 표면 폼이 거의 없어 "플랫"이라 불립니다. 라떼보다 커피 맛이 강하고 순수 더블 샷보다 부드러운, 그 중간 지점에 정확히 위치합니다. 맛에는 모두가 동의합니다. 원조에는 아무도 동의하지 않습니다.',
-      origin:
-        '플랫화이트는 1980년대 호주와 뉴질랜드에서 독립적으로 개발되었으며, 두 나라 모두 자국이 원조라고 주장합니다. 논쟁은 우호적이지만 미해결 상태입니다. 2015년 스타벅스가 메뉴에 추가하면서 전 세계적 주목을 받았고, 호주 대 뉴질랜드 논쟁이 잠시 국제적 화제가 되었습니다.',
-      funFact:
-        '플랫화이트 원조를 둘러싼 호주 대 뉴질랜드 경쟁은 진지한 문화적 논쟁입니다. 뉴질랜드는 1989년 웰링턴의 한 카페가 처음 선보였다고 주장하고, 호주는 1980년대 자국 기원을 주장합니다. 스타벅스는 외교적으로 "호주/뉴질랜드에서 유래"라고 표기합니다.',
+        '플랫화이트는 에스프레소에 고운 마이크로폼으로 질감을 낸 우유를 얇게 올린, 라테보다 작은 음료입니다. 라테·카푸치노와의 차이와 엇갈리는 두 기원 주장을 정리했습니다.',
+      summary:
+        '플랫화이트는 에스프레소에 고운 마이크로폼으로 질감을 낸 스팀 우유를 부어, 위에 얇고 평평한 거품층만 남긴 음료입니다. 라테보다 작고 우유가 적어 커피 맛이 더 또렷합니다. 호주와 뉴질랜드가 모두 원조를 주장합니다.',
+      line: '에스프레소에 고운 마이크로폼 우유를 얇게 올린, 라테보다 작은 음료.',
+      facts: [
+        { label: '재료', value: '에스프레소와 스팀 우유' },
+        { label: '거품', value: '약 0.5cm' },
+        { label: '크기', value: '라테나 카푸치노보다 작음' },
+        { label: '기원', value: '호주와 뉴질랜드가 모두 주장' },
+      ],
+      sections: [
+        {
+          id: 'vs-latte',
+          heading: '플랫화이트와 라테는 무엇이 다른가',
+          body: [
+            {
+              text: '크기, 우유의 양, 거품입니다. 플랫화이트는 더 작은 음료로 우유가 3분의 2 정도이고 거품층이 얇습니다. 커피 매체 퍼펙트 데일리 그라인드는 플랫화이트의 거품을 약 0.5cm, 카푸치노를 최소 1cm로 봅니다. 라테는 같은 에스프레소에 우유를 더 많이 넣은 큰 음료라 커피 맛이 순합니다.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'origin',
+          heading: '플랫화이트는 호주에서 왔나, 뉴질랜드에서 왔나',
+          body: [
+            {
+              text: '퍼펙트 데일리 그라인드는 기원이 ‘다소 논쟁적’이라고 적고, 두 주장 모두 당사자의 증언에 기대고 있습니다. 호주의 앨런 프레스턴은 1980년대 중반 시드니의 자기 카페에서 ‘화이트 커피, 플랫으로’를 찾는 손님들을 보고 처음으로 ‘플랫화이트’를 메뉴에 고정해 올렸다고 말합니다. 그의 레시피는 더블 리스트레토에 거품이 적은 우유였습니다. 뉴질랜드의 프레이저 매키니스는 저지방 우유로 카푸치노 거품이 나지 않자 “죄송해요, 플랫화이트예요”라고 한 데서 이름이 나왔다고 말합니다.',
+              sources: ['pdg-flat-white'],
+            },
+            {
+              text: '이 말 자체는 두 이야기보다 오래됐을 수도 있습니다. Dictionary.com은 ‘flat white’의 첫 기록을 1970~75년으로 봅니다.',
+              sources: ['dictcom-flat-white'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

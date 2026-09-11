@@ -5,7 +5,8 @@ import type { CaptureResult, PostHog } from 'posthog-js';
 
   `docs/product/direction.md` asks three things about the people who had a chance to
   come back: did the app pick where they went, did they return on their own, did they
-  look at what they wrote. That is three events and a pageview -- not a funnel builder,
+  look at what they wrote. That is three events and a pageview -- plus one for whether
+  the coffee guide sends anyone to the map -- not a funnel builder,
   not session replay, not autocapture. Autocapture in particular would record every
   click on a page whose whole content is other people's coffee logs, which is more of
   other people's writing than a usage question needs.
@@ -39,15 +40,20 @@ const HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
   - cafe_detail_opened: a cafe page was read.
   - cafe_action_taken:  a door out to the real world -- directions, or the map link.
   - coffee_log_saved:   a cup was written down. `mode` separates drinking from buying.
+  - learn_cta_clicked:  a reader of the coffee guide took its one prompt to the map.
+                        `cta` says which prompt (`cafe` or `beans`), `page` whether it
+                        was the guide itself or a drink page. Which drink is left out,
+                        for the same reason its slug is masked in the path.
 
-  All three carry `cafe_id`, and it is the uuid, never the slug: the same cafe is
-  reachable under both, and two names for one place is how "opened it, then took the
-  directions" stops being visible as one sequence.
+  The three cafe events carry `cafe_id`, and it is the uuid, never the slug: the same
+  cafe is reachable under both, and two names for one place is how "opened it, then took
+  the directions" stops being visible as one sequence.
 */
 export type AnalyticsEvent =
   | 'cafe_detail_opened'
   | 'cafe_action_taken'
-  | 'coffee_log_saved';
+  | 'coffee_log_saved'
+  | 'learn_cta_clicked';
 
 let client: PostHog | null = null;
 

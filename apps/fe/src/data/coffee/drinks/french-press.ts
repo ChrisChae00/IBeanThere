@@ -3,26 +3,92 @@ import type { CoffeeDrink } from '../types';
 const frenchPress: CoffeeDrink = {
   slug: 'french-press',
   categoryId: 'brewing',
+  reviewed: '2026-09-11',
+  related: ['pour-over', 'aeropress', 'cold-brew'],
   content: {
     en: {
-      name: 'French Press',
-      tagline: 'It\'s called a French press. An Italian patented it first, in Milan, in 1929.',
+      name: 'French press',
+      aka: 'Also called a cafetière or a plunger',
+      title: 'French press coffee: how it works and where the design came from',
       description:
-        'The name is a lie, sort of. The "French" press was actually patented by an Italian designer, Attilio Calimani, in Milan in 1929 — the French connection only exists because a similar design was patented in France around the same time. Somehow the wrong nationality won the branding war.\n\nWhat it actually does is simple: coarse grounds steep in hot water for four minutes, then a metal mesh plunger separates the two — no paper filter to strip out the coffee\'s natural oils. That\'s why French press tastes heavier and bolder than pour over, with cafestol and kahweol compounds intact (the same oils paper filters trap, which is why they\'re linked to a small bump in LDL cholesterol). A little sediment at the bottom is the price of that weight — and for drinkers who want depth over clarity, it\'s a price worth paying.',
-      origin:
-        'Despite the name, the French press was actually patented by an Italian designer, Attilio Calimani, in Milan in 1929. The French connection comes from a similar design patented in France. It became popular in Europe throughout the mid-20th century and later gained global status as the easiest premium home-brewing method.',
-      funFact:
-        'Studies show that regular French press consumption slightly raises LDL cholesterol due to the unfiltered cafestol and kahweol compounds. Paper filters in pour-over methods trap these — which is why filtered coffee is often recommended for people with cholesterol concerns.',
+        'A French press steeps coarse coffee in hot water, then presses a metal mesh filter through it. Why it tastes heavier than filter coffee, and the patents behind the design.',
+      summary:
+        'A French press brews by immersion: coarse grounds sit in hot water for a few minutes, then a plunger with a metal mesh filter pushes them to the bottom of the pot. The mesh lets coffee oils and very fine particles through, so the cup is fuller-bodied and slightly cloudier than filter coffee.',
+      line: 'Coarse coffee steeped in hot water, then held back by pressing a metal mesh filter down through the pot.',
+      facts: [
+        { label: 'In the cup', value: 'Coffee and water, strained through metal mesh' },
+        { label: 'Grind', value: 'Coarse' },
+        { label: 'Method', value: 'Steep, then press' },
+        { label: 'Body', value: 'Heavy, with a little sediment' },
+      ],
+      sections: [
+        {
+          id: 'history',
+          heading: 'Is the French press actually French?',
+          body: [
+            {
+              text: 'Partly. Two French inventors, Mayer and Delforge, patented a plunger device in 1852, but Barista Hustle’s history of the brewer found no evidence that their design was ever produced.',
+              sources: ['bh-french-press'],
+            },
+            {
+              text: 'The design most presses still follow comes from Milan. Ugo Paolini’s coffee press — a vessel with a piston-like filter held in place by a spring — was filed in Italy in 1928 and in the United States in 1929, with the rights assigned to Attilio Calimani and Giulio Moneta. The US patent was granted in 1931.',
+              sources: ['patent-paolini', 'bh-french-press'],
+            },
+          ],
+        },
+        {
+          id: 'oils',
+          heading: 'Why does French press coffee taste heavier?',
+          body: [
+            {
+              text: 'Only a mesh stands between the grounds and the cup, so the coffee’s oils come through with it. Those oils carry diterpenes such as cafestol, which Harvard’s Nutrition Source says can raise LDL cholesterol; filtered coffee contains almost none. Pouring the finished press through a paper filter removes them if that matters to you, at the cost of some of the body.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '프렌치프레스',
-      tagline: '\'프렌치\'프레스는 사실 1929년 밀라노에서 이탈리아 디자이너가 특허를 낸 제품이다.',
+      aka: '카페티에르, 플런저라고도 부릅니다',
+      title: '프렌치프레스 커피: 원리와 설계의 기원',
       description:
-        '이름부터 어폐가 있습니다. "프렌치"프레스는 사실 1929년 밀라노에서 이탈리아 디자이너 아틸리오 칼리마니가 특허를 낸 제품입니다. 프랑스라는 이름이 붙은 건 비슷한 시기 프랑스에서 유사한 디자인이 특허를 받았기 때문일 뿐이죠. 어쩌다 보니 국적이 틀린 쪽이 이름 경쟁에서 이겼습니다.\n\n작동 방식은 단순합니다. 굵게 간 원두를 뜨거운 물에 4분간 담근 뒤, 금속 메쉬 플런저로 가루와 액체를 분리합니다. 종이 필터가 없으니 커피 본연의 오일이 그대로 남죠. 그래서 프렌치프레스는 푸어오버보다 무겁고 굵직한 맛을 냅니다. 카페스톨과 카웨올 성분이 살아있기 때문인데(종이 필터가 걸러내는 바로 그 성분), 이게 LDL 콜레스테롤을 살짝 올린다는 연구도 있습니다. 바닥에 남는 미세한 찌꺼기는 그 묵직함의 대가입니다. 선명함보다 깊이를 원하는 사람에게는 충분히 치를 만한 값이죠.',
-      origin:
-        '이름과 달리 프렌치프레스는 사실 1929년 밀라노에서 이탈리아 디자이너 아틸리오 칼리마니(Attilio Calimani)가 특허를 낸 제품입니다. 프랑스 연결고리는 프랑스에서 비슷한 디자인이 특허를 받은 데서 비롯됩니다. 20세기 중반 유럽에서 대중화된 이후, 가장 쉬운 고급 홈브루잉 방법으로 전 세계에 자리잡았습니다.',
-      funFact:
-        '연구에 따르면 프렌치프레스를 꾸준히 마시면 필터링되지 않는 카페스톨과 카웨올 성분으로 인해 LDL 콜레스테롤이 약간 상승할 수 있습니다. 푸어오버의 종이 필터는 이 성분을 걸러내기 때문에, 콜레스테롤 수치가 걱정되는 분들에게 필터 커피가 자주 권장됩니다.',
+        '프렌치프레스는 굵게 간 원두를 뜨거운 물에 우린 뒤 금속 망 필터를 눌러 거르는 도구입니다. 필터 커피보다 묵직한 이유와 설계의 특허 기록을 정리했습니다.',
+      summary:
+        '프렌치프레스는 담가 우리는 방식입니다. 굵게 간 원두를 뜨거운 물에 몇 분 담가 둔 뒤, 금속 망이 달린 플런저를 눌러 가루를 바닥으로 밀어 냅니다. 망은 커피 기름과 아주 고운 입자를 통과시키기 때문에, 필터 커피보다 묵직하고 약간 탁합니다.',
+      line: '굵게 간 원두를 뜨거운 물에 우린 뒤, 금속 망 필터를 눌러 가루를 걸러 내는 방식.',
+      facts: [
+        { label: '재료', value: '원두와 물, 금속 망으로 거름' },
+        { label: '분쇄', value: '굵게' },
+        { label: '방식', value: '우린 뒤 누름' },
+        { label: '바디감', value: '묵직하고 약간의 앙금' },
+      ],
+      sections: [
+        {
+          id: 'history',
+          heading: '프렌치프레스는 정말 프랑스에서 왔나',
+          body: [
+            {
+              text: '절반만 맞습니다. 1852년 프랑스의 발명가 마이어와 델포르주가 플런저 장치로 특허를 받았지만, 바리스타 허슬은 이 설계가 실제로 생산됐다는 증거를 찾지 못했다고 적고 있습니다.',
+              sources: ['bh-french-press'],
+            },
+            {
+              text: '지금 쓰는 프레스 대부분의 원형은 밀라노에서 나왔습니다. 스프링으로 고정되는 피스톤형 필터를 단 우고 파올리니의 커피 프레스가 1928년 이탈리아에, 1929년 미국에 출원됐고, 권리는 아틸리오 칼리마니와 줄리오 모네타에게 넘어갔습니다. 미국 특허는 1931년에 등록됐습니다.',
+              sources: ['patent-paolini', 'bh-french-press'],
+            },
+          ],
+        },
+        {
+          id: 'oils',
+          heading: '왜 필터 커피보다 묵직한가',
+          body: [
+            {
+              text: '가루와 잔 사이에 금속 망 하나뿐이라 커피 기름이 함께 넘어옵니다. 이 기름에는 카페스톨 같은 디테르펜이 들어 있는데, 하버드 공중보건대학원의 Nutrition Source는 이것이 LDL 콜레스테롤을 높일 수 있고 필터 커피에는 거의 없다고 설명합니다. 신경이 쓰인다면 다 우린 커피를 종이 필터에 한 번 더 거르면 됩니다. 대신 묵직함도 일부 사라집니다.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

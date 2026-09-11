@@ -1,31 +1,55 @@
+import type { SourceId } from './sources';
+
 export type Locale = 'en' | 'ko';
 
-export type LocalizedContent = {
+/** A paragraph and the sources that back it, printed right under it. */
+export type Paragraph = {
+  text: string;
+  sources?: SourceId[];
+};
+
+/** One question the page answers. `id` is the section's anchor, shared by both locales. */
+export type Section = {
+  id: string;
+  heading: string;
+  body: Paragraph[];
+};
+
+export type DrinkCopy = {
   name: string;
-  tagline: string;
+  /** Other names the reader may know it by. */
+  aka?: string;
+  /** <title>. Unique per page. */
+  title: string;
+  /** Meta and structured-data description. Says the same thing the summary does. */
   description: string;
-  origin: string;
-  funFact: string;
+  /** The answer, first thing under the heading. Readable on its own. */
+  summary: string;
+  /** Backing for any figure or name the summary states that no section repeats. */
+  summarySources?: SourceId[];
+  /** One-line definition, used wherever the drink is listed. */
+  line: string;
+  facts: { label: string; value: string }[];
+  sections: Section[];
 };
 
 export type CoffeeDrink = {
   slug: string;
-  categoryId: string;
-  content: Record<Locale, LocalizedContent>;
+  categoryId: CategoryId;
+  /** The day the sources on this page were last checked. Change it only when they are. */
+  reviewed: string;
+  /** Up to three slugs, in the order worth reading them. */
+  related: string[];
+  content: Record<Locale, DrinkCopy>;
 };
 
-/** Which side of the two-tone ladder a stage sits on. Siblings alternate. */
-export type CategoryAccent = 'primary' | 'secondary';
+export type CategoryId = 'brewing' | 'espresso' | 'added';
 
 export type CoffeeCategory = {
-  id: string;
+  id: CategoryId;
   order: number;
-  icon: string;
-  /** Depth in the lineage tree. Drives the colour ladder: deeper = denser. */
-  depth: number;
-  accent: CategoryAccent;
-  /** Set when this stage grew out of another one rather than following it. */
-  branchFrom?: string;
-  content: Record<Locale, { name: string; subtitle: string; era: string }>;
+  /** Which map prompt closes a page in this category. */
+  cta: 'cafe' | 'beans';
+  content: Record<Locale, { name: string; definition: string }>;
   drinkSlugs: string[];
 };

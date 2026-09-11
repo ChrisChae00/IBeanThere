@@ -1,128 +1,80 @@
 import type { CoffeeCategory } from './types';
 
+/*
+  Three kinds of thing, sorted by what they are rather than when they appeared. The
+  guide used to be a timeline of "stages" joined by a line, which told the reader that
+  cold brew grew out of espresso and that an Irish coffee came after a flat white.
+  Neither is true; dates now live in their own list, where a year is only a year.
+*/
 export const categories: CoffeeCategory[] = [
   {
     id: 'brewing',
     order: 0,
-    icon: '🫖',
-    depth: 0,
-    accent: 'primary',
+    cta: 'beans',
     content: {
       en: {
-        name: 'Brewing',
-        subtitle: 'Water, grounds, and patience — where every cup starts.',
-        era: '~15th century',
+        name: 'Brewing methods',
+        definition:
+          'Ways of getting coffee out of the grounds. The same beans come out heavier or cleaner depending on which one you use.',
       },
       ko: {
-        name: '브루잉',
-        subtitle: '물과 원두, 그리고 기다림 — 모든 커피가 시작된 자리.',
-        era: '~15세기',
+        name: '추출법',
+        definition:
+          '원두에서 커피를 뽑아내는 방식입니다. 같은 원두도 어떤 방식으로 내리느냐에 따라 무겁게도, 깔끔하게도 나옵니다.',
       },
     },
     drinkSlugs: [
-      'turkish-coffee',
-      'hand-drip',
       'pour-over',
       'french-press',
       'aeropress',
-      'siphon',
       'moka-pot',
+      'siphon',
+      'turkish-coffee',
+      'cold-brew',
     ],
   },
   {
     id: 'espresso',
     order: 1,
-    icon: '☕',
-    depth: 1,
-    accent: 'primary',
+    cta: 'cafe',
     content: {
       en: {
-        name: 'Espresso Revolution',
-        subtitle: 'Italy put coffee under pressure and changed everything.',
-        era: '1901',
+        name: 'Espresso and what goes into it',
+        definition:
+          'One concentrated shot, then water or milk in different amounts. Most of a café menu is a variation on this.',
       },
       ko: {
-        name: '에스프레소 혁명',
-        subtitle: '이탈리아가 커피에 압력을 걸며 판도를 바꿨다.',
-        era: '1901년',
-      },
-    },
-    drinkSlugs: ['espresso', 'americano', 'ristretto', 'lungo'],
-  },
-  {
-    id: 'milk-variations',
-    order: 2,
-    icon: '🥛',
-    depth: 2,
-    accent: 'primary',
-    branchFrom: 'espresso',
-    content: {
-      en: {
-        name: 'Milk Variations',
-        subtitle: 'Italian barista culture, measured in foam.',
-        era: '1930s',
-      },
-      ko: {
-        name: '밀크 베리에이션',
-        subtitle: '거품의 비율로 갈리는 이탈리아 바리스타 문화.',
-        era: '1930년대',
+        name: '에스프레소와 그 변주',
+        definition:
+          '진한 한 샷에 물이나 우유를 얼마나 더하느냐의 차이입니다. 카페 메뉴 대부분이 여기에 속합니다.',
       },
     },
     drinkSlugs: [
-      'cafe-latte',
-      'cappuccino',
+      'espresso',
+      'americano',
       'macchiato',
-      'flat-white',
       'cortado',
-      'con-panna',
-      'breve',
+      'flat-white',
+      'cappuccino',
+      'cafe-latte',
     ],
   },
   {
-    id: 'cold-brew',
-    order: 3,
-    icon: '🧊',
-    depth: 2,
-    accent: 'secondary',
-    branchFrom: 'espresso',
+    id: 'added',
+    order: 2,
+    cta: 'cafe',
     content: {
       en: {
-        name: 'Cold Brew',
-        subtitle: 'Trade heat for time and the bitterness disappears.',
-        era: '1960s',
+        name: 'Coffee with something added',
+        definition:
+          'Cream, ice cream, whiskey, condensed milk, sugar. Drinks defined by what goes in with the coffee.',
       },
       ko: {
-        name: '콜드 계열',
-        subtitle: '열 대신 시간을 쓰면 쓴맛이 사라진다.',
-        era: '1960년대',
+        name: '무언가를 더한 커피',
+        definition:
+          '크림, 아이스크림, 위스키, 연유, 설탕. 커피와 함께 넣는 재료가 이름이 된 음료들입니다.',
       },
     },
-    drinkSlugs: ['cold-brew', 'dutch-coffee', 'nitro', 'iced-americano'],
-  },
-  {
-    id: 'signature',
-    order: 4,
-    icon: '🎨',
-    depth: 3,
-    accent: 'primary',
-    content: {
-      en: {
-        name: 'Signature & Fusion',
-        subtitle: 'Baristas stopped following the recipe.',
-        era: 'Now',
-      },
-      ko: {
-        name: '시그니처 & 퓨전',
-        subtitle: '바리스타가 레시피를 벗어나기 시작한 지점.',
-        era: '현재',
-      },
-    },
-    drinkSlugs: [
-      'affogato',
-      'einspanner',
-      'irish-coffee',
-      'vietnamese-coffee',
-      'dalgona',
-    ],
+    drinkSlugs: ['einspanner', 'affogato', 'irish-coffee', 'vietnamese-coffee', 'dalgona'],
   },
 ];

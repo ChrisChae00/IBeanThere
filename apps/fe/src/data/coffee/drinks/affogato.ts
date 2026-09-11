@@ -2,27 +2,91 @@ import type { CoffeeDrink } from '../types';
 
 const affogato: CoffeeDrink = {
   slug: 'affogato',
-  categoryId: 'signature',
+  categoryId: 'added',
+  reviewed: '2026-09-11',
+  related: ['espresso', 'einspanner', 'dalgona'],
   content: {
     en: {
       name: 'Affogato',
-      tagline: 'Its name literally means "drowned." That\'s the whole menu description you need.',
+      aka: 'In Italian: affogato al caffè',
+      title: 'Affogato: the espresso dessert, and what its name means',
       description:
-        'Pour a shot of hot espresso over a scoop of cold gelato and something starts happening immediately: the espresso melts a ring around the ice cream, then keeps eating into it, and the two never fully agree on being one drink or two. That tension is the point. Affogato — Italian for "drowned" — isn\'t trying to blend smoothly like a latte does.\n\nIt just sits there, scalding against frozen, bitter against sweet, and changes every thirty seconds you don\'t finish it. There\'s no brewing skill involved, no ratio to memorize. You pour, and then you eat something that\'s legally a dessert and functionally a coffee, and Italians still argue about which menu it belongs on.',
-      origin:
-        'Affogato originated in Italy as a dessert variation, with the exact origin uncertain. It\'s commonly associated with Milanese café culture of the mid-20th century. Despite being Italian in origin, it became globally popularized through specialty coffee culture and is now found worldwide in cafés that serve gelato.',
-      funFact:
-        'In Italy, there\'s debate about whether affogato belongs on the dessert menu or the coffee menu — it straddles both categories. Some traditional Italian bars serve it only after meals, while modern specialty cafés serve it any time of day.',
+        'An affogato is hot espresso poured over a scoop of ice cream and eaten as a dessert. What the Italian name means, and how it differs from Viennese Eiskaffee.',
+      summary:
+        'An affogato is a dessert more than a drink: hot espresso poured over a scoop of ice cream, usually vanilla, and eaten with a spoon as the two melt together. The name is Italian for “drowned.”',
+      summarySources: ['etym-affogato'],
+      line: 'A scoop of ice cream with a shot of hot espresso poured over it, eaten as dessert.',
+      facts: [
+        { label: 'In the cup', value: 'Ice cream and espresso' },
+        { label: 'Served', value: 'As a dessert, with a spoon' },
+        { label: 'Name', value: 'Italian for “drowned”' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: 'What does “affogato” mean?',
+          body: [
+            {
+              text: '“Drowned,” from the ice cream’s point of view. The Online Etymology Dictionary defines it as hot espresso poured over vanilla ice cream and served as a dessert, and records the word in English by 1999.',
+              sources: ['etym-affogato'],
+            },
+            {
+              text: 'Who first served it, and when, is not documented in any source we found.',
+            },
+          ],
+        },
+        {
+          id: 'eiskaffee',
+          heading: 'Is it the same as Eiskaffee?',
+          body: [
+            {
+              text: 'Close, but not the same. Vienna’s Eiskaffee, as the Austrian National Tourist Office describes it, is espresso with cold milk and two scoops of vanilla ice cream — a drink. The affogato has no milk and is eaten rather than drunk.',
+              sources: ['austria-coffeehouse'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '아포가토',
-      tagline: '이름 자체가 "익사시켰다"는 뜻. 메뉴 설명은 그걸로 끝이다.',
+      aka: '이탈리아어로 affogato al caffè',
+      title: '아포가토: 에스프레소 디저트와 이름의 뜻',
       description:
-        '차가운 젤라또 위에 뜨거운 에스프레소 한 샷을 부으면 바로 무슨 일이 시작됩니다. 에스프레소가 젤라또 둘레부터 녹이기 시작하더니, 계속 파고들며, 이 둘은 하나의 음료로 완전히 섞이는 데 좀처럼 동의하지 않습니다. 그 긴장감이 핵심입니다. 아포가토 — 이탈리아어로 "익사한" — 는 라떼처럼 부드럽게 섞이려 하지 않습니다.\n\n그냥 그렇게 놓여, 펄펄 끓는 것과 얼어붙은 것이, 쓴맛과 단맛이 대치한 채, 다 먹기 전 30초마다 계속 변합니다. 필요한 추출 기술도, 외워야 할 비율도 없습니다. 그냥 붓고, 법적으로는 디저트지만 실질적으로는 커피인 무언가를 먹게 되는 겁니다. 이탈리아 사람들은 아직도 이게 어느 메뉴에 속하는지 논쟁 중입니다.',
-      origin:
-        '아포가토는 이탈리아에서 디저트 변형으로 시작되었으며 정확한 기원은 불분명합니다. 일반적으로 20세기 중반 밀라노 카페 문화와 연관됩니다. 이탈리아에서 시작되었지만 스페셜티 커피 문화를 통해 전 세계적으로 인기를 얻었으며, 지금은 젤라또를 판매하는 전 세계 카페에서 찾아볼 수 있습니다.',
-      funFact:
-        '이탈리아에서 아포가토가 디저트 메뉴에 속하는지 커피 메뉴에 속하는지에 대한 논쟁이 있습니다. 두 카테고리에 걸쳐 있기 때문입니다. 일부 전통 이탈리아 바는 식사 후에만 제공하고, 현대 스페셜티 카페는 하루 중 언제든 제공합니다.',
+        '아포가토는 아이스크림 위에 뜨거운 에스프레소를 부어 먹는 디저트입니다. 이탈리아어 이름의 뜻과 빈의 아이스카페와의 차이를 정리했습니다.',
+      summary:
+        '아포가토는 음료라기보다 디저트입니다. 아이스크림 한 스쿱(주로 바닐라) 위에 뜨거운 에스프레소를 붓고, 둘이 녹아 섞이는 동안 숟가락으로 떠먹습니다. 이름은 이탈리아어로 ‘물에 빠진’이라는 뜻입니다.',
+      summarySources: ['etym-affogato'],
+      line: '아이스크림 위에 뜨거운 에스프레소 한 샷을 부어 떠먹는 디저트.',
+      facts: [
+        { label: '재료', value: '아이스크림과 에스프레소' },
+        { label: '제공', value: '디저트로, 숟가락과 함께' },
+        { label: '이름', value: '이탈리아어로 ‘물에 빠진’' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: '‘아포가토’는 무슨 뜻인가',
+          body: [
+            {
+              text: '아이스크림 입장에서 ‘빠져 버린’이라는 뜻입니다. 온라인 어원 사전은 이를 바닐라 아이스크림에 뜨거운 에스프레소를 부어 디저트로 내는 것으로 정의하고, 영어 기록은 1999년 무렵부터로 봅니다.',
+              sources: ['etym-affogato'],
+            },
+            {
+              text: '누가, 언제 처음 만들었는지는 우리가 찾은 어느 자료에도 기록돼 있지 않습니다.',
+            },
+          ],
+        },
+        {
+          id: 'eiskaffee',
+          heading: '빈의 아이스카페와 같은 것인가',
+          body: [
+            {
+              text: '비슷하지만 다릅니다. 오스트리아 관광청이 소개하는 빈의 아이스카페(Eiskaffee)는 에스프레소에 찬 우유와 바닐라 아이스크림 두 스쿱을 넣은 음료입니다. 아포가토에는 우유가 없고, 마시기보다 떠먹습니다.',
+              sources: ['austria-coffeehouse'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

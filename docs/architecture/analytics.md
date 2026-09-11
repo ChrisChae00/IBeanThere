@@ -3,6 +3,8 @@
 Three events and a pageview, to answer the four-week question in
 `docs/product/direction.md`: of the people who had a chance to come back, did the app
 pick where they went, did they return on their own, did they look at what they wrote.
+A fourth, `learn_cta_clicked`, measures one thing about the coffee guide: whether its
+readers go on to the map.
 
 Everything lives in `apps/fe/src/lib/analytics.ts` and one mounted component,
 `components/providers/AnalyticsWatcher.tsx`. No backend involvement: the events are about
@@ -16,14 +18,35 @@ what a reader did, and the backend only sees what they saved.
 | `cafe_detail_opened` | A cafe page renders | `cafe_id` |
 | `cafe_action_taken` | The Maps link or a directions app is chosen | `cafe_id`, `action` |
 | `coffee_log_saved` | `createLog` returns successfully | `cafe_id`, `mode` |
+| `learn_cta_clicked` | The coffee guide's map prompt is pressed | `cta` (`cafe`, `beans`), `page` (`guide`, `drink`) |
 
 `cafe_id` is always the uuid, never the slug. The same cafe is reachable under both, and
 two names for one place is how "opened it, then took the directions" stops being visible
 as one sequence.
 
-A fourth event is a product decision, not a convenience: `AnalyticsEvent` is a closed
+A new event is a product decision, not a convenience: `AnalyticsEvent` is a closed
 union, so adding one is an edit to this module. An event nobody agreed to collect is the
 one that turns up in a dashboard six months later with nobody able to say what it counts.
+
+### Reading the coffee guide (2026-09-11)
+
+The guide's funnel is three steps, each a separate row and none of them a visit:
+`$pageview` on `/learn/coffee` or `/learn/coffee/:id`, then `learn_cta_clicked`, then a
+`$pageview` on `/discover/explore-map` and, sometimes, `cafe_detail_opened` or
+`coffee_log_saved` in the same session. Which drink a reader was on does not travel -- the
+slug is masked in the path and left out of the event, as above -- so the event says whether
+the guide leads to the map, not which page does it best.
+
+Three numbers that are easy to conflate and must not be:
+
+- **Search impressions and clicks** live in Search Console and Bing Webmaster Tools, not
+  here.
+- **Visits referred by an AI product** are `$pageview`s whose `$referrer` is that product's
+  origin (for example `chatgpt.com`, `perplexity.ai`). Only the origin and path survive;
+  the `utm_source` some of them append is dropped with every other query string. A
+  product that sends no referrer is counted as direct.
+- **Being cited by an AI answer** is not measured at all. A citation nobody clicks leaves
+  no trace on this site, so it is never inferred from referrers.
 
 **A directions click is not a visit.** The direction doc says so outright, and nothing
 here should be read as attendance.

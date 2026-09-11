@@ -58,6 +58,28 @@ module.exports = (phase) => withBundleAnalyzer(withNextIntl({
   // A production build must not overwrite chunks used by a running dev server.
   distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next-dev' : '.next',
   reactStrictMode: true,
+  /*
+    Coffee guide pages folded into another page that answers the same question. A saved
+    link or an indexed URL still lands on the answer, and the redirect is permanent so
+    search engines move the old page's standing to the new one.
+  */
+  async redirects() {
+    const merged = {
+      'hand-drip': 'pour-over',
+      'iced-americano': 'americano',
+      ristretto: 'espresso',
+      lungo: 'espresso',
+      breve: 'cafe-latte',
+      'dutch-coffee': 'cold-brew',
+      nitro: 'cold-brew',
+      'con-panna': 'einspanner',
+    };
+    return Object.entries(merged).map(([from, to]) => ({
+      source: `/:locale(en|ko)/learn/coffee/${from}`,
+      destination: `/:locale/learn/coffee/${to}`,
+      permanent: true,
+    }));
+  },
   async headers() {
     return [
       {

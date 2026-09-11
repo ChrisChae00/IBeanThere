@@ -1,195 +1,112 @@
-'use client';
-
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Lightbulb, MapPin } from 'lucide-react';
-import type { CoffeeDrink, CoffeeCategory, Locale } from '@/data/coffee/types';
-import CoffeeNode from './CoffeeNode';
-import { MARKER_BASE, stageLadder } from './stageStyles';
+import { getTranslations } from 'next-intl/server';
+import type { CoffeeCategory, CoffeeDrink, Locale } from '@/data/coffee/types';
+import MapPrompt from './MapPrompt';
+import { DrinkList, SourceNote, TEXT_LINK, formatDay } from './GuideParts';
 
-type Messages = {
-  backToRoadmap: string;
-  origin: string;
-  funFact: string;
-  relatedDrinks: string;
-  prevDrink: string;
-  nextDrink: string;
-};
-
-type Props = {
-  drink: CoffeeDrink;
-  category: CoffeeCategory;
-  relatedDrinks: CoffeeDrink[];
-  prev?: CoffeeDrink;
-  next?: CoffeeDrink;
-  locale: string;
-  messages: Messages;
-};
-
-const CARD =
-  'rounded-3xl border border-border bg-cardBackground p-6 shadow-(--ibean-shadow-warm-sm)';
-
-export default function CoffeeDrinkDetail({
+/*
+  One drink, readable from a cold start: the answer first, the facts that define it,
+  then one section per question the page answers. Everything is in the server HTML;
+  nothing waits on a click or an animation.
+*/
+export default async function CoffeeDrinkDetail({
   drink,
   category,
-  relatedDrinks,
-  prev,
-  next,
+  related,
   locale,
-  messages,
-}: Props) {
+}: {
+  drink: CoffeeDrink;
+  category: CoffeeCategory;
+  related: CoffeeDrink[];
+  locale: string;
+}) {
+  const t = await getTranslations({ locale, namespace: 'learn.coffee' });
   const loc = locale as Locale;
-  const content = drink.content[loc];
-  const catContent = category.content[loc];
-  const { marker, era } = stageLadder(category.accent, category.depth);
-  const isDeepest = category.depth >= 3;
-  const animate = !useReducedMotion();
-
-  const rise = (delay: number) => ({
-    initial: animate ? { opacity: 0, y: 16 } : false,
-    animate: animate ? { opacity: 1, y: 0 } : undefined,
-    transition: { duration: 0.4, delay },
-  });
+  const copy = drink.content[loc];
+  const guideHref = `/${locale}/learn/coffee`;
+  const sourceLabel = (count: number) => (count > 1 ? t('sources') : t('source'));
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12 md:py-16">
-      <motion.div
-        initial={animate ? { opacity: 0, x: -12 } : false}
-        animate={animate ? { opacity: 1, x: 0 } : undefined}
-        transition={{ duration: 0.3 }}
-      >
-        <Link
-          href={`/${locale}/learn/coffee`}
-          className="inline-flex items-center gap-1.5 rounded-lg text-sm text-textSecondary transition-colors hover:text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        >
-          <ArrowLeft aria-hidden className="h-4 w-4" />
-          {messages.backToRoadmap}
-        </Link>
-      </motion.div>
+    <article className="paper-grain mx-auto max-w-3xl break-keep px-4 pb-20 pt-8 sm:px-6">
+      <nav aria-label={t('breadcrumbRoot')}>
+        <ol className="landing-micro flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-secondary">
+          <li>
+            <Link href={guideHref} className={`${TEXT_LINK} text-ink-secondary`}>
+              {t('breadcrumbRoot')}
+            </Link>
+          </li>
+          <li aria-hidden>/</li>
+          <li>
+            <Link href={`${guideHref}#${category.id}`} className={`${TEXT_LINK} text-ink-secondary`}>
+              {category.content[loc].name}
+            </Link>
+          </li>
+        </ol>
+      </nav>
 
-      {/* Hero — same marker + era pill as the stage it belongs to */}
-      <motion.header {...rise(0.05)} className="mt-8">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className={`${MARKER_BASE} ${marker} ${isDeepest ? 'text-primaryText' : ''}`}
-          >
-            {category.icon}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-text">
-              {catContent.name}
-            </p>
-            <p className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 ${era}`}>
-              <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-textSecondary">
-                {catContent.era}
-              </span>
-            </p>
-          </div>
-        </div>
+      <header className="mt-8">
+        <h1 className="landing-display text-[clamp(2.75rem,9vw,5rem)] text-ink-primary">{copy.name}</h1>
+        {copy.aka && <p className="mt-4 text-sm text-ink-secondary">{copy.aka}</p>}
+        <p className="mt-6 text-xl leading-relaxed text-ink-primary">{copy.summary}</p>
+        <SourceNote ids={copy.summarySources} label={sourceLabel(copy.summarySources?.length ?? 0)} className="mt-3" />
+      </header>
 
-        <h1 className="mt-6 text-text">{content.name}</h1>
-        <p className="mt-3 max-w-[52ch] text-lg leading-relaxed text-textSecondary">
-          {content.tagline}
-        </p>
-      </motion.header>
-
-      <div className="mt-10 max-w-[65ch] space-y-4">
-        {content.description.split('\n\n').map((paragraph, i) => (
-          <p key={i} className="type-body text-text">
-            {paragraph}
-          </p>
-        ))}
-      </div>
-
-      <section className={`mt-10 ${CARD}`}>
-        <h2 className="flex items-center gap-2 text-base font-semibold text-cardText">
-          <MapPin aria-hidden className="h-4 w-4 text-primary" />
-          {messages.origin}
+      <section aria-labelledby="at-a-glance" className="mt-10">
+        <h2 id="at-a-glance" className="landing-micro text-ink-secondary">
+          {t('atAGlance')}
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-cardTextSecondary">
-          {content.origin}
-        </p>
+        <dl className="mt-3 divide-y divide-edge-rule border-y border-edge-rule">
+          {copy.facts.map(fact => (
+            <div key={fact.label} className="grid gap-x-6 gap-y-0.5 py-3 sm:grid-cols-[11rem_1fr]">
+              <dt className="text-sm text-ink-secondary">{fact.label}</dt>
+              <dd className="text-ink-primary">{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      <section
-        className="mt-4 rounded-3xl border border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] p-6"
-      >
-        <h2 className="flex items-center gap-2 text-base font-semibold text-text">
-          <Lightbulb aria-hidden className="h-4 w-4 text-primary" />
-          {messages.funFact}
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-textSecondary">
-          {content.funFact}
-        </p>
-      </section>
+      {copy.sections.map(section => (
+        <section key={section.id} id={section.id} aria-labelledby={`${section.id}-heading`} className="mt-14 scroll-mt-24">
+          <h2 id={`${section.id}-heading`} className="font-display text-2xl leading-snug text-ink-primary sm:text-3xl">
+            {section.heading}
+          </h2>
+          {section.body.map((paragraph, i) => (
+            <div key={i} className="mt-4">
+              <p className="max-w-[65ch] text-[1.0625rem] leading-[1.75] text-ink-primary">{paragraph.text}</p>
+              <SourceNote ids={paragraph.sources} label={sourceLabel(paragraph.sources?.length ?? 0)} />
+            </div>
+          ))}
+        </section>
+      ))}
 
-      {(prev || next) && (
-        <nav
-          aria-label={catContent.name}
-          className="mt-12 grid grid-cols-1 gap-2 sm:grid-cols-2"
-        >
-          {prev ? (
-            <Link
-              href={`/${locale}/learn/coffee/${prev.slug}`}
-              className="group flex items-center gap-3 rounded-2xl border border-border bg-cardBackground px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-(--ibean-shadow-warm-sm) focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-            >
-              <ArrowLeft
-                aria-hidden
-                className="h-4 w-4 shrink-0 text-cardTextSecondary transition-transform group-hover:-translate-x-0.5"
-              />
-              <span className="min-w-0">
-                <span className="block text-xs text-cardTextSecondary">
-                  {messages.prevDrink}
-                </span>
-                <span className="block truncate text-sm font-medium text-cardText">
-                  {prev.content[loc].name}
-                </span>
-              </span>
-            </Link>
-          ) : (
-            <span aria-hidden />
-          )}
-
-          {next && (
-            <Link
-              href={`/${locale}/learn/coffee/${next.slug}`}
-              className="group flex items-center justify-end gap-3 rounded-2xl border border-border bg-cardBackground px-4 py-3 text-right transition-all duration-200 hover:-translate-y-0.5 hover:shadow-(--ibean-shadow-warm-sm) focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-            >
-              <span className="min-w-0">
-                <span className="block text-xs text-cardTextSecondary">
-                  {messages.nextDrink}
-                </span>
-                <span className="block truncate text-sm font-medium text-cardText">
-                  {next.content[loc].name}
-                </span>
-              </span>
-              <ArrowRight
-                aria-hidden
-                className="h-4 w-4 shrink-0 text-cardTextSecondary transition-transform group-hover:translate-x-0.5"
-              />
-            </Link>
-          )}
-        </nav>
-      )}
-
-      {relatedDrinks.length > 0 && (
-        <section className="mt-12">
-          <h2 className="type-caption">{messages.relatedDrinks}</h2>
-          <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {relatedDrinks.map(related => (
-              <li key={related.slug}>
-                <CoffeeNode
-                  drink={related}
-                  locale={locale}
-                  accent={category.accent}
-                  depth={category.depth}
-                />
-              </li>
-            ))}
-          </ul>
+      {related.length > 0 && (
+        <section aria-labelledby="read-next" className="mt-16">
+          <h2 id="read-next" className="landing-micro mb-3 text-ink-secondary">
+            {t('readNext')}
+          </h2>
+          <DrinkList drinks={related} locale={locale} />
         </section>
       )}
+
+      <MapPrompt
+        locale={locale}
+        text={category.cta === 'beans' ? t('ctaBeans') : t('ctaCafe')}
+        button={t('ctaButton')}
+        cta={category.cta}
+        page="drink"
+      />
+
+      <footer className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-secondary">
+        <p>
+          {t.rich('checked', {
+            date: formatDay(drink.reviewed, locale),
+            time: chunks => <time dateTime={drink.reviewed}>{chunks}</time>,
+          })}
+        </p>
+        <Link href={guideHref} className={`${TEXT_LINK} text-ink-secondary`}>
+          {t('backToGuide')}
+        </Link>
+      </footer>
     </article>
   );
 }
