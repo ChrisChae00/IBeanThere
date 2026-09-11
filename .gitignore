@@ -78,6 +78,7 @@ apps/be/scripts/migrations/*
 !apps/be/scripts/migrations/015_google_photo_usage.sql
 # Blacklist rollout and guarded seed entrypoints: docs/architecture/blacklists.md
 !apps/be/scripts/migrations/022_admin_blacklists.sql
+!apps/be/scripts/migrations/024_account_deletion.sql
 !apps/be/scripts/seed_kw_reviewed.py
 !apps/be/scripts/seed_real_cafes.py
 !apps/be/scripts/seed_with_google_places.py

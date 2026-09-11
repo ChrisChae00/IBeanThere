@@ -52,6 +52,15 @@ async def get_current_user(
             # migration.
             logger.exception("user_blacklist lookup failed; refusing the request")
             raise HTTPException(503, "Account status unavailable")
+        try:
+            deleting = supabase.table("account_deletion_requests").select("user_id").eq(
+                "user_id", user_id
+            ).limit(1).execute().data
+        except Exception:
+            logger.exception("Account deletion status unavailable")
+            raise HTTPException(503, "Account status unavailable")
+        if deleting:
+            raise HTTPException(403, "Account deletion in progress")
         if blocked:
             raise HTTPException(403, "Account blocked")
         try:

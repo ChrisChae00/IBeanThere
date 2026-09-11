@@ -1,16 +1,45 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Path
-from typing import List
+from typing import List, Literal
+from pydantic import BaseModel, ConfigDict
 import logging
 from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
 from app.models.collection import CollectionResponse
-from app.api.deps import get_supabase_client, get_current_user, get_optional_user
+from app.api.deps import get_supabase_client, get_current_user, get_optional_user, security
+from fastapi.security import HTTPAuthorizationCredentials
+from app.services.account_deletion import delete_account
 from app.services import badges as badges_service
 from app.core.permissions import require_permission, Permission
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+class AccountDeletion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["DELETE"]
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_account(
+    request: AccountDeletion,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    supabase: Client = Depends(get_supabase_client),
+):
+    # Blocked/deleting accounts may still finish deletion. Validate identity directly,
+    # without the normal account-status guard. No client-supplied target is accepted.
+    try:
+        result = supabase.auth.get_user(credentials.credentials)
+        if not result or not result.user:
+            raise ValueError("No authenticated user")
+    except Exception as exc:
+        raise HTTPException(401, "Authentication required") from exc
+    try:
+        delete_account(supabase, result.user.id)
+    except Exception as exc:
+        logger.exception("Account deletion incomplete")
+        raise HTTPException(503, "Account deletion incomplete; retry to finish") from exc
+
 
 @router.get("/profile/{display_name}", response_model=List[UserPublicResponse])
 async def get_user_profiles(display_name: str = Path(..., max_length=30), supabase: Client = Depends(get_supabase_client)):
