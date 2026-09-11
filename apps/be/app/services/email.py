@@ -11,6 +11,12 @@ from ..models.report import is_http_url
 
 logger = logging.getLogger(__name__)
 
+# Nobody reads no-reply@. A mail a user might answer carries Reply-To: support@, which
+# Cloudflare Email Routing forwards to the team inbox; that inbox's own address is never
+# shown to a user.
+SENDER = "ibeanthere <no-reply@ibeanthere.app>"
+SUPPORT_ADDRESS = "support@ibeanthere.app"
+
 # Lazy import resend to avoid errors if not installed
 resend = None
 
@@ -131,7 +137,7 @@ async def send_new_report_notification(
         
         # Send email
         response = resend_client.Emails.send({
-            "from": "ibeanthere <notifications@ibeanthere.app>",
+            "from": SENDER,
             "to": [settings.admin_email],
             "subject": f"[Report] New {report_type_display} - {target_type_display}",
             "html": html_content,
@@ -211,8 +217,9 @@ async def send_report_status_update(
 """
         
         response = resend_client.Emails.send({
-            "from": "ibeanthere <notifications@ibeanthere.app>",
+            "from": SENDER,
             "to": [reporter_email],
+            "reply_to": SUPPORT_ADDRESS,
             "subject": f"Your Report Update - {status_display}",
             "html": html_content,
         })

@@ -48,10 +48,10 @@ export default function FooterContactButton({ label }: FooterContactButtonProps)
               <div>
                 <p className="text-xs font-semibold mb-1">{t('contact_email_label')}</p>
                 <a
-                  href="mailto:ibeanthere.app@gmail.com"
+                  href="mailto:support@ibeanthere.app"
                   className="text-brand hover:underline break-all"
                 >
-                  ibeanthere.app@gmail.com
+                  support@ibeanthere.app
                 </a>
               </div>
               <div>

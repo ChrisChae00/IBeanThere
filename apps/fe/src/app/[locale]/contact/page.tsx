@@ -20,8 +20,8 @@ export default async function ContactPage({
         <div className="mt-8 pt-6 border-t border-border flex flex-col gap-6">
           <div>
             <h3 className="font-semibold mb-2 text-text">Email</h3>
-            <a href="mailto:ibeanthere.app@gmail.com" className="text-primary hover:underline text-lg">
-              ibeanthere.app@gmail.com
+            <a href="mailto:support@ibeanthere.app" className="text-primary hover:underline text-lg">
+              support@ibeanthere.app
             </a>
           </div>
           
