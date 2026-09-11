@@ -34,7 +34,19 @@ type NavSelectProps = {
     the trigger goes on reporting itself open.
   */
   container?: HTMLElement | null;
+  /*
+    The nav bar's own pill, kept as the default so the two header switchers need
+    nothing extra. A caller outside the bar -- Settings, so far -- draws a row-width
+    control instead and passes its own shape here; `group` still has to be in it, since
+    the chevron's rotation reads that class from the trigger.
+  */
+  triggerClassName?: string;
+  /** Matches the trigger's own width when the panel would otherwise be narrower than it. */
+  panelClassName?: string;
 };
+
+const DEFAULT_TRIGGER =
+  'nav-pill group font-medium text-sm text-text h-10 px-3 flex items-center gap-1.5 whitespace-nowrap cursor-pointer';
 
 export default function NavSelect({
   label,
@@ -43,6 +55,8 @@ export default function NavSelect({
   onChange,
   ariaLabel,
   container,
+  triggerClassName = DEFAULT_TRIGGER,
+  panelClassName = 'min-w-44',
 }: NavSelectProps) {
   /*
     `align="end"` rather than the trigger's centre: these sit at the right edge of the
@@ -68,7 +82,7 @@ export default function NavSelect({
         The z-index is the top slot in the nav stack rather than the header's own,
         because the portalled copy has to outrank the drawer that opened it.
       */}
-      <Menu.Popup className="menu-panel nav-opaque min-w-44 motion-slide-up">
+      <Menu.Popup className={`menu-panel nav-opaque motion-slide-up ${panelClassName}`}>
         <Menu.RadioGroup value={value} onValueChange={onChange}>
           {options.map((option) => (
             <Menu.RadioItem
@@ -94,10 +108,7 @@ export default function NavSelect({
 
   return (
     <Menu.Root>
-      <Menu.Trigger
-        aria-label={ariaLabel}
-        className="nav-pill group font-medium text-sm text-text h-10 px-3 flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-      >
+      <Menu.Trigger aria-label={ariaLabel} className={triggerClassName}>
         {label}
         <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[popup-open]:rotate-180" />
       </Menu.Trigger>

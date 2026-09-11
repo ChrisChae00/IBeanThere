@@ -27,11 +27,18 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-/* This repo's variant names predate shadcn's; map rather than rename 19 files. */
+/*
+  This repo's variant names predate shadcn's; map rather than rename 19 files.
+  `danger` maps to shadcn's own `outline`, not `destructive`: `destructive` is a 10% tint
+  under `--destructive` text, the pairing design-language.md §4 measured at 2.4-3.5:1 and
+  ruled out. `.btn-line-danger` below (this file's own class, not shadcn's) carries the
+  actual colour -- a rule at rest, filled solid only on hover/press -- so `danger` needs
+  shadcn's plainest base to draw over.
+*/
 const variantMap = {
   primary: 'default',
   secondary: 'secondary',
-  danger: 'destructive',
+  danger: 'outline',
   ghost: 'ghost',
   outline: 'outline'
 } as const;
@@ -50,11 +57,20 @@ const sizeClasses: Record<ButtonSize, string> = {
   State is carried by the fill, not by depth. An outline control inverts on hover
   (`control-flat`); a filled one presses inward (`btn-shade`) and keeps its brand fill,
   which is why the two are not the same class — putting `control-flat` on a filled
-  button would repaint the fill it is supposed to keep. The variant's own
-  colour-shifting hover is cancelled either way; tailwind-merge lets the later class win.
+  button would repaint the fill it is supposed to keep. `danger` gets a third shape,
+  `btn-line-danger`: an outline that fills solid in the danger colour, only on
+  hover/press, the same mechanic as `btn-line` with its own colour pair. The variant's
+  own colour-shifting hover is cancelled either way; tailwind-merge lets the later class
+  win, and `.btn-line-danger`'s own hover carries `!important` for the one case that
+  isn't a plain utility-vs-utility conflict (see its definition in globals.css).
 */
 const shape = 'rounded-(--btn-radius) font-semibold gap-2';
-const FILLED: ButtonVariant[] = ['primary', 'danger'];
+
+function fillClassFor(variant: ButtonVariant): string {
+  if (variant === 'primary') return 'btn-shade';
+  if (variant === 'danger') return 'btn-line-danger';
+  return 'control-flat';
+}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -81,7 +97,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         className={cn(
           shape,
-          FILLED.includes(variant) ? 'btn-shade' : 'control-flat',
+          fillClassFor(variant),
           sizeClasses[size],
           fullWidth && 'w-full',
           isDisabled && 'opacity-60 cursor-not-allowed shadow-none',

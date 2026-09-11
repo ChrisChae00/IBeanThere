@@ -372,10 +372,11 @@ export default function CollectionDetailModal({
               {t('remove_everywhere_confirm')}
             </p>
             {/*
-              A dot in the danger colour beside an ink label, not a red plate.
-              `variant="danger"` paints a 10% tint and sets the label in `--state-danger`
-              on top of it, which is the pairing this system measured at 2.4-3.5:1 and
-              ruled out: the state colour is emphasis, never the text colour.
+              A dot in the danger colour beside an ink label, not a red plate. Written
+              before `Button`'s own `danger` variant existed -- it now does the
+              equivalent thing (a rule that fills solid only on hover/press, never a
+              resting tint under danger-coloured text), and either reads the same here;
+              this one is left as the dot rather than churned to match.
             */}
             <Button
               variant="outline"

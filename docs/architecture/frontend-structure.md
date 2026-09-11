@@ -128,6 +128,61 @@ apps/fe/
   works unmodified across all four themes. Photos per drink are a later addition this
   makes room for, not built yet.
 
+## Settings (2026-09-11)
+
+- **The two OS-native `<select>`s are gone.** Theme and language now use `NavSelect`
+  (`components/layout/NavSelect.tsx`, already the header's own switcher), given two new
+  optional props -- `triggerClassName` and `panelClassName` -- so a caller outside the
+  nav bar can draw a row-width `control-flat` trigger instead of the pill. This was the
+  actual fix for "the dropdown isn't in our font": a native `<select>`'s closed box
+  already inherits the page's body font through Tailwind's preflight, but Chrome on
+  macOS renders the *open* option list in OS chrome regardless of CSS, which no
+  amount of `font-family` reaches. A custom-drawn popup is the only fix; other native
+  selects in the app (report reason, admin filters, cafe forms) carry the same
+  limitation and were left alone -- not requested, and a larger, riskier change.
+- **The page sits on one `--radius-card` panel** (`border-edge-rule`, `bg-surface-raised`,
+  no shadow) instead of directly on `--surface-page`, matching the panel convention
+  elsewhere (`PublicProfileClient`, `my-beans`). All four sections share one `py-10`, the
+  first included -- it started as `pb-10` only, which read as more space below the card
+  than above it.
+- **`Button`'s `danger` variant is fixed, not banned.** It used to map to shadcn's
+  `destructive` (a 10% tint under `--state-danger` text, 2.4-3.5:1, why design-language.md
+  §4 ruled it out) and most call sites drew a `bg-state-danger` dot beside an ink label by
+  hand instead. It now maps to shadcn's plain `outline` and draws `.btn-line-danger`
+  (globals.css) over it: a rule in the danger colour at rest, filled solid only on hover
+  or press, same mechanic as `btn-line`. Sign out and delete account (`variant="danger"`,
+  no dot) are the first callers; the hand-drawn dot elsewhere still reads the same and
+  was left alone. The hover text is `--ink-on-brand`, by direction rather than
+  measurement -- it clears Dark Roast's own danger fill (5.31:1) but not the three light
+  themes' (3.25-3.52:1, under the 4.5:1 body threshold); see design-language.md §4 and §7
+  for the reasoning and the fourth on-the-record exception this adds.
+- **An account with no password gets a real next step**, not just an explanation.
+  `SetPasswordPrompt` names the linked provider (`user.identities` from the server,
+  capitalised) and sends the same reviewed, rate-limited reset-link mail the sign-in
+  page's "forgot password" already does (`AuthRepository.sendPasswordResetEmail`) --
+  reused rather than a second client-side `updateUser` path with no current password to
+  verify. Unlike that flow, the confirmation names the reader's own email outright: they
+  are already authenticated as themself, so there is no enumeration question to hedge.
+- **Body text was already Inter/Pretendard everywhere** (`--font-body` in tokens.css);
+  nothing in `@theme`/`tokens.css` changed. The display serif (`h1`-`h3`,
+  `--font-display`) stays on the page's own `h1` -- the user chose to keep it when asked,
+  rather than flatten the editorial identity design-language.md §1 leads with. The four
+  section headings (`h2`) opt out with `font-sans`: read as data groupings, not headlines.
+- **Section copy is short on purpose, not accidentally missing.** Each of the four
+  sections keeps one line under its heading (`preferences_description` etc.) -- cut once
+  for being redundant restatement, put back shorter, cozy rather than clinical ("Make
+  yourself at home." / "원하는 분위기로 꾸며보세요"). The delete section's own line stays
+  a real warning, not decoration, and was never on the table.
+- **Korean settings copy is one register, 해요체**, not the 합니다체/해요체 mix it had.
+  Two strings stay formal by request -- the provider sign-in state and the delete
+  warning -- because they read as a status/consequence statement rather than the app
+  talking to the reader; the rest (confirmations, the preferences line, toasts) stays
+  casual. Section titles favour short compounds a Korean settings page would actually
+  use (`테마 및 언어`, `개인정보 및 이용 안내`) over a literal pairing of the English words.
+- **Account deletion**: the dialog calls `deleteCurrentUser` (`app/actions/account.ts`),
+  which forwards to the backend's `DELETE /users/me`. Full flow, release order (migration
+  024 before the backend release) and verification: `docs/architecture/account-deletion.md`.
+
 ## Profile and social (`0ecb396`, `882f917`)
 
 - **Trust is followers and following.** `user_trust` has one row per "A trusts B";

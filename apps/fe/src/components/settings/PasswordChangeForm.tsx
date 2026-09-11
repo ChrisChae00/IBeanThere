@@ -94,10 +94,10 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          {t('current_password')}
-        </label>
         <Input
+          label={t('current_password')}
+          autoComplete="current-password"
+          className="rounded-(--radius-control) bg-surface-page text-ink-primary shadow-none"
           type="password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
@@ -108,10 +108,10 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          {t('new_password')}
-        </label>
         <Input
+          label={t('new_password')}
+          autoComplete="new-password"
+          className="rounded-(--radius-control) bg-surface-page text-ink-primary shadow-none"
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
@@ -122,10 +122,10 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          {t('confirm_new_password')}
-        </label>
         <Input
+          label={t('confirm_new_password')}
+          autoComplete="new-password"
+          className="rounded-(--radius-control) bg-surface-page text-ink-primary shadow-none"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -136,14 +136,14 @@ export default function PasswordChangeForm({ onSuccess, onCancel }: PasswordChan
       </div>
 
       {error && (
-        <p className="text-sm text-error">{error}</p>
+        <p role="alert" className="text-sm text-ink-primary">{error}</p>
       )}
 
       {success && (
-        <p className="text-sm text-success">{t('password_changed')}</p>
+        <p role="status" className="text-sm text-ink-primary">{t('password_changed')}</p>
       )}
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <Button
           type="submit"
           disabled={isLoading || success || !currentPassword || !newPassword || !confirmPassword}

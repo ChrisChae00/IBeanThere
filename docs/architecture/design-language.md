@@ -272,11 +272,19 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   offers removing it from this collection and removing it from every collection it is
   saved in. The first is undone by the move-to modal in a press, so it happens on the
   press; the second cannot be undone from here, so it is asked first.
-- **A destructive confirm is an ink label with a danger dot, not a red button.**
-  `Button variant="danger"` paints a 10% tint and sets the label in `--state-danger` on
-  it, which is the pairing measured at 2.4-3.5:1 and ruled out in section 4. A solid
-  danger fill is no better -- white on the themes' own danger reaches 3.3-3.7:1 -- so the
-  state colour goes beside the label, never in it.
+- **A destructive confirm draws its rule in the danger colour and fills solid only on
+  hover or press** (`.btn-line-danger`, `Button variant="danger"`) -- the same mechanic
+  as `btn-line`, not a resting red plate. The earlier version of this rule banned
+  `variant="danger"` outright: it painted a 10% tint under `--state-danger` text (2.4-
+  3.5:1), which is still true and still avoided. The hover fill's own text is
+  `--ink-on-brand`, by direction rather than measurement: it clears the fill on Dark
+  Roast (5.31:1, that theme's on-brand already being a near-black) but not on the three
+  light themes (3.25-3.52:1, under the 4.5:1 body threshold) -- their on-brand is a
+  light cream chosen to sit on a dark *brand* fill, and this is a mid-brightness *danger*
+  red instead, a pairing no theme's own ink was chosen for either way. Known and kept.
+  Some call sites still draw the same idea by hand -- a `bg-state-danger` dot beside an
+  ink label, at rest, never as a fill on the label itself -- and either reads the same;
+  new destructive confirms reach for the variant.
 - **A page and its public twin share one component, and differ only in the slot.**
   The profile header was written once for your own page and once for someone else's,
   and the two had already drifted -- only the public copy grew an action row. What
@@ -337,12 +345,14 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   the map) 3:1 — in **all four themes**, measured, not eyeballed. Measure on
   `/[locale]/theme-demo`, which reads the live cascade; the numbers written into docs are
   snapshots, not the source.
-- **Three exceptions are on the record, and none is an oversight to fix on sight.**
+- **Four exceptions are on the record, and none is an oversight to fix on sight.**
   Matcha Latte's label on its brand is 3.37:1: the pair was read on screen and kept
   (`themes.css` says so beside the slot). `--marker-pending` is 2.21:1 on the map tiles
   in every theme; the white `--marker-ring` is what draws its edge. The log out row is
-  3.25:1, chosen so the warning is there before the press rather than after it. Anything
-  else below the threshold is a bug.
+  3.25:1, chosen so the warning is there before the press rather than after it.
+  `.btn-line-danger`'s hover text is `--ink-on-brand` on three light themes' own danger
+  fill (3.25-3.52:1) -- see section 5's destructive-confirm entry. Anything else below
+  the threshold is a bug.
 - Interactive targets are at least 44×44, even when the visible chrome is smaller -- a
   `before:` band restores the target without inflating the button.
 - **Every hover state has an `:active` twin.** A phone has no hover, so the press is the

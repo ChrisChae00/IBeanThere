@@ -311,6 +311,35 @@
 }
 
 @layer components {
+  /*
+    Paper grain for a long-read surface (the coffee guide, so far): a newsprint's
+    texture, not its colour. `--surface-page` stays the theme's own value in every
+    theme; this is an opaque noise layer painted above it, at a low `opacity`. The
+    noise comes from an SVG `feTurbulence` filter collapsed to grey -- not a themed
+    colour, just the standard way to generate it -- averaging to the mid grey that
+    `overlay` treats as a no-op, so each speckle only lightens or darkens the pixel
+    under it and the layer needs no per-theme tuning to read right on all four. An
+    earlier version mapped the noise to alpha over solid black instead: correct on a
+    light theme, where it faintly darkens, but invisible on a dark one, where black on
+    black is black. Grey noise moves both ways and shows on either.
+  */
+  .paper-grain {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .paper-grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='paper-grain-n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper-grain-n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
+
   .type-display {
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
@@ -489,6 +518,38 @@
     background-color: var(--btn-line-ink, var(--ink-primary));
     border-color: var(--btn-line-ink, var(--ink-primary));
     color: var(--btn-line-on, var(--surface-raised));
+  }
+
+  /*
+    `.btn-line`'s own mechanic, in the danger colour: a rule at rest, a solid fill on
+    press. Sign out and delete account are the two calls for it so far. `!important` on
+    the hover trio because `Button`'s `danger` variant still carries `BaseButton`'s own
+    generated hover utility at equal selector specificity (one class, one pseudo-class,
+    same as this rule) -- source order between hand-written CSS and Tailwind's own
+    generated layer is not something to depend on. The same escape the Leaflet overrides
+    already use in this file, for the same reason: guaranteed win, not a probable one.
+
+    The hover text is `--ink-on-brand`, by direction, not measured: it is the label that
+    reads correctly on Dark Roast's own danger fill (5.31:1, that theme's on-brand being
+    a near-black already) and on the light themes' own brand fill elsewhere, but not on
+    the light themes' danger fill specifically -- their on-brand is a light cream chosen
+    to sit on a dark brand colour, and on this red it lands at 3.25-3.52:1, under the
+    4.5:1 body threshold. Flagged and kept as directed.
+  */
+  .btn-line-danger {
+    border: 1px solid var(--state-danger);
+    background-color: transparent;
+    color: var(--state-danger);
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition);
+  }
+
+  .btn-line-danger:hover:not(:disabled),
+  .btn-line-danger:active:not(:disabled) {
+    background-color: var(--state-danger) !important;
+    border-color: var(--state-danger) !important;
+    color: var(--ink-on-brand) !important;
   }
 }
 
