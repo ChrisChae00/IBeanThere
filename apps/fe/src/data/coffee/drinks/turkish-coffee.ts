@@ -3,26 +3,106 @@ import type { CoffeeDrink } from '../types';
 const turkishCoffee: CoffeeDrink = {
   slug: 'turkish-coffee',
   categoryId: 'brewing',
+  reviewed: '2026-09-11',
+  related: ['french-press', 'espresso', 'moka-pot'],
   content: {
     en: {
-      name: 'Turkish Coffee',
-      tagline: 'In the Ottoman Empire, a wife could divorce her husband for one reason: he stopped making her coffee.',
+      name: 'Turkish coffee',
+      aka: 'In Turkish: Türk kahvesi',
+      title: 'Turkish coffee: how it is made and what is known of its history',
       description:
-        'In the Ottoman Empire, coffee was written into marriage contracts. A husband who stopped making his wife\'s daily cup could legally be divorced for it — no drink before or since has carried that kind of weight.\n\nThe method hasn\'t changed since. Coffee ground to near-powder simmers in a small copper cezve with water and sugar stirred in before heat, never after. Nothing gets filtered — you drink down to the thick, muddy last sip, then stop. In the Balkans and Middle East, what\'s left in the cup gets read like tea leaves, a ritual called tasseography practiced for centuries. UNESCO recognized the whole culture around it in 2013. Some coffee evolves. This one just got official protection for staying exactly the same.',
-      origin:
-        'Coffee reached the Ottoman Empire in the 15th century via Yemen and quickly became central to social life. The Turkish method of preparation — unfiltered, simmered in a cezve — spread across the empire and into Europe, becoming the template for how coffee was consumed worldwide until espresso changed everything in the 20th century. UNESCO recognized Turkish coffee culture as Intangible Cultural Heritage in 2013.',
-      funFact:
-        'In Ottoman times, a woman could divorce her husband if he failed to provide her with a daily supply of coffee. It was written into marriage contracts.',
+        'Turkish coffee is powder-fine coffee simmered with water in a small pot and served unfiltered. How it is made, why the sugar is chosen before brewing, and its documented history.',
+      summary:
+        'Turkish coffee is coffee ground to a fine powder and brewed slowly with cold water in a small pot until it foams, then poured into a small cup without being filtered. The grounds settle to the bottom, so it is sipped slowly and left before the sediment.',
+      line: 'Powder-fine coffee brewed slowly with water, and sugar if wanted, in a small pot and served unfiltered.',
+      facts: [
+        { label: 'In the cup', value: 'Coffee and water, with or without sugar; unfiltered' },
+        { label: 'Grind', value: 'A fine powder' },
+        { label: 'Pot', value: 'A cezve, also called an ibrik' },
+        { label: 'Served', value: 'In a small cup with a glass of water' },
+      ],
+      sections: [
+        {
+          id: 'how',
+          heading: 'How is Turkish coffee made?',
+          body: [
+            {
+              text: 'Freshly roasted beans are ground to a fine powder, and the coffee, cold water and sugar go into the pot together and are brewed slowly over heat to produce a foam. It is served in small cups with a glass of water, as UNESCO’s description of the tradition sets out.',
+              sources: ['unesco-turkish'],
+            },
+            {
+              text: 'Because the sugar is brewed in rather than stirred in afterwards, decide how sweet you want it when you order. And because nothing is filtered, the coffee keeps the oils a paper filter would catch: Harvard’s Nutrition Source lists Turkish coffee among the unfiltered brews whose diterpenes can raise LDL cholesterol.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: 'Where does Turkish coffee come from?',
+          body: [
+            {
+              text: 'Coffee houses opened in Istanbul in the early 1550s. The TDV Encyclopedia of Islam records that the chronicler Âlî Mustafa Efendi dated them to 1553, while İbrahim Peçevi, writing in the 17th century, credited two men — Hakem from Aleppo and Şems from Damascus — with opening the first in the Tahtakale district in 1554–55.',
+              sources: ['tdv-kahvehane'],
+            },
+            {
+              text: 'In 2013 UNESCO inscribed Turkish coffee culture and tradition on its list of the Intangible Cultural Heritage of Humanity. The listing describes the coffee as a sign of hospitality with a place in ceremonies such as engagements, and notes that the grounds left in the cup are often used to tell fortunes.',
+              sources: ['unesco-turkish'],
+            },
+            {
+              text: 'A story widely repeated online holds that an Ottoman wife could divorce a husband who failed to keep her supplied with coffee. We did not find a primary source for it.',
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '터키식 커피',
-      tagline: '오스만 제국에서는 아내에게 매일 커피를 타주지 않으면 이혼당할 수 있었다.',
+      aka: '튀르키예어로 Türk kahvesi',
+      title: '터키식 커피: 만드는 법과 기록으로 확인되는 역사',
       description:
-        '오스만 제국에서는 커피가 혼인 계약서에 명시된 의무였습니다. 남편이 아내에게 매일 커피를 타주지 않으면 이혼 사유가 될 수 있었죠. 어떤 음료도 이만큼 무거운 책임을 짊어진 적은 없습니다.\n\n방식은 그때나 지금이나 같습니다. 파우더에 가까울 정도로 곱게 간 원두를 작은 구리 체즈베에 물, 그리고 설탕을 (끓이기 전에) 넣고 천천히 끓입니다. 걸러내는 과정은 없습니다. 잔 바닥에 진한 찌꺼기가 남기 직전까지 마시고 멈추죠. 발칸반도와 중동에서는 잔에 남은 찌꺼기 모양으로 점을 치는 타세오그래피가 수백 년째 이어져 왔습니다. 2013년 유네스코는 이 문화 전체를 무형문화유산으로 지정했습니다. 대부분의 커피는 시대에 맞춰 변합니다. 이 커피는 변하지 않은 덕분에 공식적으로 보호받았습니다.',
-      origin:
-        '커피는 15세기 예멘을 통해 오스만 제국에 전해졌고, 빠르게 사교 생활의 중심이 되었습니다. 체즈베로 끓이는 터키식 방식은 제국 전역과 유럽으로 퍼지며, 20세기 에스프레소가 등장하기 전까지 전 세계 커피 소비의 기준이 되었습니다. 유네스코는 2013년 터키 커피 문화를 무형문화유산으로 등재했습니다.',
-      funFact:
-        '오스만 시대에는 남편이 아내에게 매일 커피를 제공하지 않으면, 아내가 이혼을 청구할 수 있었습니다. 결혼 계약서에 명시된 조항이었습니다.',
+        '터키식 커피는 가루처럼 간 원두를 작은 주전자에 물과 함께 끓여 거르지 않고 마시는 커피입니다. 만드는 법, 설탕을 먼저 정하는 이유, 기록으로 남은 역사를 정리했습니다.',
+      summary:
+        '터키식 커피는 가루처럼 곱게 간 원두를 찬물과 함께 작은 주전자에 넣고, 거품이 오를 때까지 천천히 끓여 거르지 않고 작은 잔에 따르는 커피입니다. 가루가 잔 바닥에 가라앉기 때문에 천천히 마시다가 앙금 앞에서 멈춥니다.',
+      line: '가루처럼 간 원두를 물(원하면 설탕까지)과 함께 작은 주전자에 천천히 끓여 거르지 않고 따르는 커피.',
+      facts: [
+        { label: '재료', value: '원두와 물, 설탕은 선택 · 거르지 않음' },
+        { label: '분쇄', value: '고운 가루' },
+        { label: '도구', value: '체즈베(이브릭이라고도 함)' },
+        { label: '제공', value: '작은 잔, 물 한 잔과 함께' },
+      ],
+      sections: [
+        {
+          id: 'how',
+          heading: '터키식 커피는 어떻게 만드나',
+          body: [
+            {
+              text: '갓 볶은 원두를 고운 가루로 갈고, 커피와 찬물, 설탕을 한꺼번에 주전자에 넣어 불 위에서 천천히 끓이며 거품을 냅니다. 유네스코가 정리한 이 전통의 설명에 따르면 작은 잔에 물 한 잔을 곁들여 냅니다.',
+              sources: ['unesco-turkish'],
+            },
+            {
+              text: '설탕을 나중에 젓는 게 아니라 함께 끓이기 때문에, 단맛은 주문할 때 정해야 합니다. 또 거르지 않으니 종이 필터가 잡아 줄 기름 성분이 그대로 남습니다. 하버드 공중보건대학원의 Nutrition Source는 터키식 커피를 LDL 콜레스테롤을 높일 수 있는 디테르펜이 든, 거르지 않은 커피의 예로 듭니다.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: '터키식 커피는 어디서 왔나',
+          body: [
+            {
+              text: '이스탄불에 커피하우스가 생긴 것은 1550년대 초입니다. TDV 이슬람 백과사전에 따르면 당대 역사가 알리 무스타파 에펜디는 1553년으로 기록했고, 17세기 역사가 이브라힘 페체비는 알레포 출신 하켐과 다마스쿠스 출신 셈스가 1554~55년 타흐타칼레에 첫 커피하우스를 열었다고 적었습니다.',
+              sources: ['tdv-kahvehane'],
+            },
+            {
+              text: '유네스코는 2013년 ‘터키 커피 문화와 전통’을 인류무형문화유산 대표목록에 올렸습니다. 등재 설명은 이 커피를 환대의 표시이자 약혼식 같은 의례의 일부로 소개하고, 잔에 남은 가루로 점을 치는 경우가 많다고 적고 있습니다.',
+              sources: ['unesco-turkish'],
+            },
+            {
+              text: '오스만 시대에 남편이 커피를 대 주지 않으면 아내가 이혼할 수 있었다는 이야기가 온라인에 널리 퍼져 있지만, 이를 뒷받침하는 1차 자료는 찾지 못했습니다.',
+            },
+          ],
+        },
+      ],
     },
   },
 };

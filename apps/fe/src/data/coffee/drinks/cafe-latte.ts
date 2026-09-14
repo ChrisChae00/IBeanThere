@@ -2,27 +2,103 @@ import type { CoffeeDrink } from '../types';
 
 const cafeLatte: CoffeeDrink = {
   slug: 'cafe-latte',
-  categoryId: 'milk-variations',
+  categoryId: 'espresso',
+  reviewed: '2026-09-11',
+  related: ['cappuccino', 'flat-white', 'macchiato'],
   content: {
     en: {
-      name: 'Café Latte',
-      tagline: "Order a 'latte' in Italy, and the barista hands you a plain glass of milk — no coffee at all.",
+      name: 'Café latte',
+      aka: 'In Italian: caffè latte or caffellatte; usually just “latte”',
+      title: 'Café latte: what it is, what “latte” means, and latte vs cappuccino',
       description:
-        "\"Latte\" just means milk in Italian — order one alone in Milan and you'll get a plain glass of it, no coffee in sight. The drink the world calls a latte is actually \"caffè latte,\" a modest home staple for generations. But it took an outsider to turn it global: Starbucks built its 1980s–90s menu around it until \"latte\" became shorthand everywhere but its birthplace.\n\nThe texture is why it stuck. One or two espresso shots meet steamed milk at roughly 1:3–1:5, finished with microfoam — tiny, uniform bubbles that give it a velvety pull. That same control lets baristas pour rosettas and swans on top, and the art isn't just decoration. It's proof the temperature and texture underneath are exactly right.",
-      origin:
-        'The word "latte" is Italian for milk, and in Italy, ordering a "latte" will literally get you a glass of milk. The "caffè latte" concept — espresso with milk — is Italian, but the modern latte as a named café menu item popularized globally was largely driven by Starbucks in the 1980s and 90s, which helped make it a worldwide standard.',
-      funFact:
-        'Latte art competitions are held worldwide, and the top competitors can create incredibly detailed images — animals, landscapes, even portraits — in steamed milk using nothing but a milk pitcher and a toothpick for detail work.',
+        'A café latte is espresso with plenty of steamed milk and a thin layer of foam. Why “latte” alone means milk in Italy, how it differs from a cappuccino and a flat white, and what a breve is.',
+      summary:
+        'A café latte is espresso topped up with plenty of steamed milk and a thin layer of foam, the largest and milkiest of the classic espresso drinks. In Italian latte simply means milk, so in Italy you ask for a caffè latte or caffellatte.',
+      line: 'Espresso with plenty of steamed milk and a thin layer of foam.',
+      facts: [
+        { label: 'In the cup', value: 'Espresso, steamed milk, a thin layer of foam' },
+        { label: 'Milk', value: 'The most of the classic espresso drinks' },
+        { label: 'Variations', value: 'Iced latte, breve (with half-and-half)' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: 'Why does “latte” mean milk?',
+          body: [
+            {
+              text: 'Because it does, in Italian. Treccani defines caffellatte as a drink of coffee and milk, taken mostly in the morning at breakfast. English borrowed the short form: the Online Etymology Dictionary dates “latte” for espresso with milk to around 1990.',
+              sources: ['treccani-caffellatte', 'etym-latte'],
+            },
+          ],
+        },
+        {
+          id: 'compared',
+          heading: 'Latte, cappuccino or flat white?',
+          body: [
+            {
+              text: 'The difference is the milk: how much, and how much of it is foam. A latte has the most milk and a thin layer of foam; a cappuccino has less milk under at least 1 cm of foam; a flat white is smaller than both, with about 0.5 cm. The table in the guide sets them side by side.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'breve',
+          heading: 'What is a breve?',
+          body: [
+            {
+              text: 'A latte-style drink made with steamed half-and-half, a mix of milk and cream, instead of milk. The extra fat makes it richer and heavier.',
+              sources: ['breville-breve'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
-      name: '카페라떼',
-      tagline: "이탈리아에서 '라떼'를 주문하면 커피 없이 그냥 우유 한 잔이 나온다.",
+      name: '카페라테',
+      aka: '이탈리아어로 caffè latte, caffellatte · 흔히 ‘라테’',
+      title: '카페라테란? ‘라테’의 뜻과 카푸치노·플랫화이트와의 차이',
       description:
-        "'라떼'는 이탈리아어로 그냥 우유라는 뜻입니다. 밀라노에서 '라떼'만 시키면 에스프레소는 빠지고 정말 우유 한 잔만 나옵니다. 우리가 라떼라 부르는 음료는 사실 '카페라떼'이고, 이마저도 이탈리아에서는 오랫동안 소박한 가정용 음료에 머물렀습니다. 하지만 이 음료를 전 세계로 퍼뜨린 건 이탈리아가 아니라 외부였습니다. 1980~90년대 스타벅스가 메뉴의 중심에 놓으면서, '라떼'는 정작 발상지를 제외한 모든 곳에서 표준 용어가 됐습니다.\n\n이 음료가 자리 잡은 이유는 질감에 있습니다. 에스프레소 1~2샷에 스팀 밀크를 약 1:3~1:5 비율로 더하고, 작고 균일한 기포의 마이크로폼으로 마무리하면 벨벳 같은 목넘김이 생깁니다. 같은 컨트롤로 바리스타는 표면에 로제타와 백조를 그려내는데, 이 아트는 장식이 아니라 아래 온도와 질감이 정확하다는 증거입니다.",
-      origin:
-        '"라떼(latte)"는 이탈리아어로 우유를 뜻합니다. 이탈리아에서 "라떼"를 주문하면 우유 한 잔이 나옵니다. "카페 라떼" 개념은 이탈리아에서 나왔지만, 오늘날과 같이 전 세계 카페 메뉴의 표준이 된 것은 1980~90년대 스타벅스의 영향이 결정적이었습니다.',
-      funFact:
-        '라떼 아트 대회는 전 세계에서 열리며, 상위 경쟁자들은 밀크 피처와 이쑤시개만으로 동물, 풍경, 심지어 인물 초상화까지 스팀 밀크에 만들어냅니다.',
+        '카페라테는 에스프레소에 스팀 우유를 넉넉히 붓고 얇은 거품을 올린 음료입니다. 이탈리아에서 ‘라테’가 우유를 뜻하는 이유, 카푸치노·플랫화이트와의 차이, 브레베를 정리했습니다.',
+      summary:
+        '카페라테는 에스프레소에 스팀 우유를 넉넉히 붓고 얇은 거품층으로 마무리한 음료로, 고전적인 에스프레소 음료 가운데 가장 크고 우유가 많습니다. 이탈리아어로 latte는 그냥 우유라서, 이탈리아에서는 카페 라테나 카펠라테라고 주문합니다.',
+      line: '에스프레소에 스팀 우유를 넉넉히 붓고 얇은 거품을 올린 음료.',
+      facts: [
+        { label: '재료', value: '에스프레소, 스팀 우유, 얇은 거품' },
+        { label: '우유', value: '고전 에스프레소 음료 중 가장 많음' },
+        { label: '변형', value: '아이스 라테, 브레베(하프앤하프)' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: '‘라테’는 왜 우유라는 뜻인가',
+          body: [
+            {
+              text: '이탈리아어로 정말 우유이기 때문입니다. 트레카니 사전은 카펠라테(caffellatte)를 주로 아침 식사 때 마시는 커피와 우유 음료로 풀이합니다. 영어는 줄임말을 가져갔고, 온라인 어원 사전은 에스프레소와 우유를 뜻하는 ‘latte’를 1990년 무렵부터로 봅니다.',
+              sources: ['treccani-caffellatte', 'etym-latte'],
+            },
+          ],
+        },
+        {
+          id: 'compared',
+          heading: '라테, 카푸치노, 플랫화이트는 어떻게 다른가',
+          body: [
+            {
+              text: '차이는 우유에 있습니다. 얼마나 넣는지, 그중 얼마가 거품인지. 라테는 우유가 가장 많고 거품이 얇으며, 카푸치노는 우유가 적고 거품이 1cm 이상, 플랫화이트는 둘보다 작고 거품이 약 0.5cm입니다. 가이드의 비교표에서 나란히 볼 수 있습니다.',
+              sources: ['pdg-flat-white'],
+            },
+          ],
+        },
+        {
+          id: 'breve',
+          heading: '브레베는 무엇인가',
+          body: [
+            {
+              text: '우유 대신 우유와 크림을 섞은 하프앤하프를 스팀해 만든 라테식 음료입니다. 지방이 많아 더 진하고 묵직합니다.',
+              sources: ['breville-breve'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

@@ -2,27 +2,85 @@ import type { CoffeeDrink } from '../types';
 
 const macchiato: CoffeeDrink = {
   slug: 'macchiato',
-  categoryId: 'milk-variations',
+  categoryId: 'espresso',
+  reviewed: '2026-09-11',
+  related: ['cortado', 'cafe-latte', 'espresso'],
   content: {
     en: {
       name: 'Macchiato',
-      tagline: 'Starbucks named a 400-calorie vanilla drink after an espresso shot you finish in twenty seconds — and the two share almost nothing.',
+      aka: 'In Italian: caffè macchiato',
+      title: 'Macchiato: what it means, and why a caramel macchiato is a different drink',
       description:
-        'Ask for a macchiato in Italy and you\'ll get an espresso with a single dollop of milk foam, maybe 10ml, gone in a few sips. Ask for one at Starbucks and you\'ll get a vanilla latte layered with caramel drizzle, built in the reverse order — milk first, espresso poured over it last. Both call themselves "macchiato," Italian for "stained," but only one earns the name honestly.\n\nThe real one is minimalist by design — a tiny mark of foam meant to soften straight espresso\'s bitterness without diluting its intensity, made for people who wanted the punch of a shot but not quite the full bite. Its mirror image, the latte macchiato, flips the ratio entirely: a splash of espresso staining a full glass of milk instead. Same word, opposite drink.',
-      origin:
-        'The macchiato originated in Italy as a practical solution for people who wanted the intensity of espresso but found the pure shot too bitter. A small spot of milk foam was the minimalist intervention. There\'s also "latte macchiato" — the reverse — where a small amount of espresso is added to a large glass of steamed milk, staining the milk instead.',
-      funFact:
-        'The Starbucks Caramel Macchiato, introduced in 1996, is made in the opposite order of a traditional macchiato: milk first, then espresso poured over the top. The "macchiato" in the name refers to the espresso "staining" the milk — technically accurate, but spiritually miles away from the Italian original.',
+        'A macchiato is an espresso marked with a little milk or foam. What the Italian word means, how it differs from a latte macchiato, and where the caramel macchiato came from.',
+      summary:
+        'A macchiato, caffè macchiato in Italian, is an espresso with a small amount of milk or milk foam added, just enough to mark it. It is espresso-sized. In many chain cafés, though, a “caramel macchiato” is a large, sweet milk drink, so it helps to know which one a menu means.',
+      line: 'Espresso “marked” with a small spot of milk or foam.',
+      facts: [
+        { label: 'In the cup', value: 'Espresso with a spot of milk or foam' },
+        { label: 'Size', value: 'About an espresso' },
+        { label: 'Name', value: 'Italian for “stained” or “marked”' },
+        { label: 'Not to be confused with', value: 'Latte macchiato, caramel macchiato' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: 'What does “macchiato” mean?',
+          body: [
+            {
+              text: 'Treccani’s entry for macchiare, to stain, includes adding a small amount of another liquid to a drink to change its taste or colour: macchiare il caffè with a little milk, or macchiare il latte with a little coffee. That gives two drinks. A caffè macchiato is coffee marked with milk; a latte macchiato is milk marked with coffee.',
+              sources: ['treccani-macchiare'],
+            },
+          ],
+        },
+        {
+          id: 'caramel-macchiato',
+          heading: 'Why is a caramel macchiato so different?',
+          body: [
+            {
+              text: 'Because it is a different drink. Starbucks introduced the Caramel Macchiato in 1996, developed by Hannah Su and a small team for the company’s 25th anniversary. Sprudge describes it as essentially a vanilla latte topped with caramel, called a macchiato because the espresso is poured over the milk, and notes that people who order “a macchiato” elsewhere can be surprised to receive a three-ounce espresso.',
+              sources: ['sprudge-caramel'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '마키아토',
-      tagline: '스타벅스는 20초 만에 다 마시는 에스프레소의 이름을 400칼로리 바닐라 음료에 붙였다 — 공통점은 거의 없다.',
+      aka: '이탈리아어로 caffè macchiato',
+      title: '마키아토 뜻, 그리고 카라멜 마키아토가 다른 음료인 이유',
       description:
-        '이탈리아에서 마키아토를 주문하면 에스프레소 위에 밀크 폼 한 방울, 약 10ml만 올라간 잔이 나와 몇 모금이면 끝납니다. 스타벅스에서 주문하면 바닐라 라떼에 캐러멜 드리즐을 올린, 순서마저 반대인 음료가 나옵니다 — 우유가 먼저, 에스프레소는 맨 마지막에 붓습니다. 둘 다 "얼룩진"이라는 뜻의 "마키아토"를 자처하지만, 그 이름값을 제대로 하는 건 하나뿐입니다.\n\n원조는 철저히 미니멀합니다. 순수 에스프레소가 너무 쓰다고 느끼지만 강도는 포기하고 싶지 않은 사람들을 위해, 폼 한 점으로 쓴맛만 살짝 눌러주는 방식입니다. 거울 반대편에 있는 라떼 마키아토는 비율을 완전히 뒤집어, 큰 잔의 우유에 에스프레소를 살짝 떨어뜨려 얼룩지게 합니다. 같은 이름, 정반대의 음료.',
-      origin:
-        '마키아토는 에스프레소의 강도는 원하지만 순수 샷이 너무 쓰다고 느끼는 사람들을 위한 실용적 해결책으로 이탈리아에서 탄생했습니다. 소량의 밀크 폼이 최소한의 개입이었습니다. 반대 방향의 "라떼 마키아토"도 있습니다. 큰 잔의 스팀 밀크에 소량의 에스프레소를 넣어 우유를 얼룩지게 하는 방식입니다.',
-      funFact:
-        '1996년 출시된 스타벅스 캐러멜 마키아토는 전통 마키아토와 반대 순서로 만들어집니다. 우유 먼저, 그 위에 에스프레소. "마키아토"라는 이름은 에스프레소가 우유를 "얼룩지게" 한다는 것을 지칭하는데, 기술적으로는 맞지만 이탈리아 원본과는 정신적으로 거리가 멉니다.',
+        '마키아토는 에스프레소에 우유나 거품을 조금 얹어 표시한 커피입니다. 이탈리아어의 뜻, 라테 마키아토와의 차이, 카라멜 마키아토가 생긴 경위를 정리했습니다.',
+      summary:
+        '마키아토, 이탈리아어로 카페 마키아토는 에스프레소에 우유나 우유 거품을 표시가 날 만큼만 조금 더한 커피입니다. 크기는 에스프레소와 비슷합니다. 다만 많은 프랜차이즈 카페에서 ‘카라멜 마키아토’는 크고 단 우유 음료이니, 메뉴가 어느 쪽을 말하는지 알아 두면 좋습니다.',
+      line: '에스프레소에 우유나 거품을 조금 얹어 ‘얼룩’을 낸 커피.',
+      facts: [
+        { label: '재료', value: '에스프레소와 약간의 우유·거품' },
+        { label: '크기', value: '에스프레소 정도' },
+        { label: '이름', value: '이탈리아어로 ‘얼룩진, 표시된’' },
+        { label: '헷갈리기 쉬운 음료', value: '라테 마키아토, 카라멜 마키아토' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: '‘마키아토’는 무슨 뜻인가',
+          body: [
+            {
+              text: '이탈리아어 사전 트레카니는 ‘얼룩지게 하다’라는 뜻의 macchiare에 음료에 다른 액체를 조금 더해 맛이나 색을 바꾼다는 뜻을 싣고, 커피에 우유를 조금 넣는 것과 우유에 커피를 조금 넣는 것을 예로 듭니다. 그래서 음료도 둘입니다. 카페 마키아토는 우유로 표시한 커피, 라테 마키아토는 커피로 표시한 우유입니다.',
+              sources: ['treccani-macchiare'],
+            },
+          ],
+        },
+        {
+          id: 'caramel-macchiato',
+          heading: '카라멜 마키아토는 왜 이렇게 다른가',
+          body: [
+            {
+              text: '다른 음료이기 때문입니다. 스타벅스는 창립 25주년을 맞아 해나 수와 작은 팀이 개발한 카라멜 마키아토를 1996년에 내놓았습니다. 커피 매체 스프러지(Sprudge)는 이를 사실상 카라멜을 얹은 바닐라 라테로 설명하며, 에스프레소를 우유 위에 부어 층이 생기기 때문에 마키아토라는 이름이 붙었다고 적습니다. 다른 카페에서 ‘마키아토’를 시켰다가 작은 에스프레소 한 잔을 받고 놀라는 사람이 있다는 것도요.',
+              sources: ['sprudge-caramel'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

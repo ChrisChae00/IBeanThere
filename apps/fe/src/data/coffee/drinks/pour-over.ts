@@ -3,26 +3,110 @@ import type { CoffeeDrink } from '../types';
 const pourOver: CoffeeDrink = {
   slug: 'pour-over',
   categoryId: 'brewing',
+  reviewed: '2026-09-11',
+  related: ['french-press', 'aeropress', 'cold-brew'],
   content: {
     en: {
-      name: 'Pour Over',
-      tagline: 'The most famous pour-over on earth wasn\'t designed by a barista. It was designed by a chemist — and MoMA still owns one.',
+      name: 'Pour-over',
+      aka: 'Also called hand drip or filter coffee',
+      title: 'Pour-over (hand drip) coffee: what it is and who invented the filter',
       description:
-        'Peter Schlumbohm didn\'t design the Chemex like a coffee maker — he designed it like a lab instrument, because he was a chemist, not a barista. That mindset stuck: MoMA now keeps one in its permanent collection, and it turned up in James Bond\'s apartment in the original films, on the strength of pure form.\n\nBut pour over earned its place in specialty coffee through what it does, not just how it looks. It became the third-wave movement\'s signature method because it hides nothing — you taste the coffee, not the technique. Grind size, water at 90–96°C, and a 30-45 second bloom that lets trapped CO₂ escape before extraction begins: get those right and nothing stands between you and the bean. Hario\'s V60, launched in 2004, turned chasing that precision into a global obsession among baristas.',
-      origin:
-        'The Chemex was invented in 1941 by Peter Schlumbohm, a chemist who designed it as much as a scientific instrument as a coffee brewer. The Hario V60, now the most widely used pour over in specialty coffee, was introduced by the Japanese glass company Hario in 2004 and became the object of intense global obsession among baristas.',
-      funFact:
-        'The Chemex appears in the permanent collection of MoMA (Museum of Modern Art) in New York. It was also spotted in the apartment of James Bond in the original films.',
+        'Pour-over, or hand drip, is filter coffee made by pouring hot water over ground coffee by hand. How it differs from French press, and the dated history of the paper filter.',
+      summary:
+        'Pour-over is filter coffee made by hand: hot water is poured slowly over ground coffee sitting in a filter, and gravity draws the coffee through into a cup or carafe. In Korea and Japan the same method is usually called hand drip. The filter holds back the grounds and most of the oils, so the cup is light-bodied and clear.',
+      line: 'Hot water poured by hand over ground coffee in a filter, dripping through into the cup.',
+      facts: [
+        { label: 'In the cup', value: 'Coffee and water, filtered' },
+        { label: 'Grind', value: 'Medium-fine' },
+        { label: 'Gear', value: 'A dripper and a filter, usually paper' },
+        { label: 'Body', value: 'Light, with almost no sediment' },
+      ],
+      sections: [
+        {
+          id: 'paper-filter',
+          heading: 'Who invented the coffee filter?',
+          body: [
+            {
+              text: 'On 20 June 1908 Melitta Bentz, a housewife in Dresden, registered a coffee filter with the Imperial Patent Office in Berlin: a cup with a domed underside and angled holes, lined with paper. Until then, the German Patent and Trade Mark Office notes, coffee was usually made by letting the grounds settle in the pot or by sieving them, which left grit and an unpleasant aftertaste in the cup.',
+              sources: ['dpma-melitta'],
+            },
+            {
+              text: 'The Chemex, designed in 1941 by the chemist Peter Schlumbohm, borrowed the same idea from the laboratory: a glass flask with a paper filter in its neck. The Denver Art Museum holds one in its collection.',
+              sources: ['denver-chemex'],
+            },
+          ],
+        },
+        {
+          id: 'vs-french-press',
+          heading: 'How is pour-over different from a French press?',
+          body: [
+            {
+              text: 'The filter is the difference. In a French press the grounds steep in the water and a metal mesh holds them back, so fine particles and coffee oils reach the cup. A paper filter catches both. Harvard’s Nutrition Source notes that filtered coffee contains almost none of the diterpenes, found in unfiltered coffee, that can raise LDL cholesterol.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+        {
+          id: 'ordering',
+          heading: 'What does “hand drip” mean on a café menu?',
+          body: [
+            {
+              text: 'Usually one cup brewed to order by pouring, often from a coffee you choose on the menu. It takes a few minutes longer than an espresso drink, and it is the plainest way to taste what a particular coffee is like.',
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '푸어오버',
-      tagline: '케멕스를 디자인한 사람은 바리스타가 아니라 화학자였다 — 그리고 지금 그 커피포트는 뉴욕 현대미술관에 있다.',
+      aka: '핸드드립, 필터 커피라고도 부릅니다',
+      title: '푸어오버(핸드드립) 커피란? 방식과 필터의 역사',
       description:
-        '피터 슐룸봄은 케멕스를 커피 기구가 아니라 실험 기구처럼 설계했습니다. 그는 바리스타가 아니라 화학자였으니까요. 그 접근은 결실을 맺어, 지금 뉴욕 현대미술관(MoMA)은 케멕스를 영구 소장품으로 두고 있고, 오리지널 007 영화 속 제임스 본드의 아파트에도 등장했습니다. 순전히 형태의 힘이었죠.\n\n하지만 푸어오버가 스페셜티 커피의 표준이 된 이유는 외형이 아니라 기능입니다. 아무것도 숨기지 않는 방식이기 때문에 2000년대 서드웨이브 운동의 상징이 되었습니다 — 기술이 아니라 커피 자체의 맛을 느끼게 하죠. 분쇄도, 90~96°C의 물 온도, 로스팅 중 갇힌 CO₂를 빼내는 30~45초의 블룸까지 제대로 맞추면 원두와 나 사이에 아무것도 남지 않습니다. 2004년 출시된 하리오 V60은 이 정밀함을 좇는 일을 전 세계 바리스타들의 집착으로 바꿔놓았습니다.',
-      origin:
-        '케멕스는 1941년 화학자 피터 슐룸봄(Peter Schlumbohm)이 발명했습니다. 그는 이것을 커피 기구인 동시에 과학 기구로 디자인했습니다. 현재 스페셜티 커피에서 가장 널리 사용되는 하리오 V60은 일본 유리 회사 하리오(Hario)가 2004년 출시한 제품으로, 전 세계 바리스타들의 집착 대상이 되었습니다.',
-      funFact:
-        '케멕스는 뉴욕 현대미술관(MoMA) 영구 소장품에 포함되어 있습니다. 제임스 본드 오리지널 영화 속 그의 아파트에서도 등장한 바 있습니다.',
+        '푸어오버, 곧 핸드드립은 분쇄한 원두 위에 뜨거운 물을 손으로 부어 내리는 필터 커피입니다. 프렌치프레스와의 차이와 종이 필터의 역사를 정리했습니다.',
+      summary:
+        '푸어오버는 손으로 내리는 필터 커피입니다. 필터에 담은 원두 가루 위로 뜨거운 물을 천천히 부으면, 커피가 중력으로 걸러져 잔이나 서버로 떨어집니다. 한국과 일본에서는 보통 핸드드립이라고 부릅니다. 필터가 가루와 기름 성분 대부분을 걸러 내기 때문에 맛이 가볍고 깔끔합니다.',
+      line: '필터에 담은 원두 가루 위로 뜨거운 물을 손으로 부어 잔으로 떨어뜨리는 방식.',
+      facts: [
+        { label: '재료', value: '원두와 물, 필터로 거름' },
+        { label: '분쇄', value: '중간보다 약간 고운 굵기' },
+        { label: '도구', value: '드리퍼와 필터(주로 종이)' },
+        { label: '바디감', value: '가볍고 찌꺼기가 거의 없음' },
+      ],
+      sections: [
+        {
+          id: 'paper-filter',
+          heading: '커피 필터는 누가 만들었나',
+          body: [
+            {
+              text: '1908년 6월 20일, 드레스덴의 주부 멜리타 벤츠가 베를린 제국특허청에 커피 필터를 등록했습니다. 바닥이 둥글고 비스듬한 구멍을 낸 컵에 종이를 깐 형태였습니다. 독일 특허상표청은 그 전까지 커피를 대개 가루가 가라앉기를 기다리거나 체로 걸러 마셨고, 그래서 잔에 가루와 텁텁한 뒷맛이 남았다고 설명합니다.',
+              sources: ['dpma-melitta'],
+            },
+            {
+              text: '1941년 화학자 페터 슐룸봄이 디자인한 케멕스는 같은 원리를 실험실에서 가져왔습니다. 유리 플라스크 목에 종이 필터를 끼운 모양입니다. 덴버 미술관이 실물을 소장하고 있습니다.',
+              sources: ['denver-chemex'],
+            },
+          ],
+        },
+        {
+          id: 'vs-french-press',
+          heading: '프렌치프레스와 무엇이 다른가',
+          body: [
+            {
+              text: '차이는 필터에 있습니다. 프렌치프레스는 가루를 물에 담가 우린 뒤 금속 망으로 거르기 때문에 미세한 입자와 커피 기름이 잔에 들어옵니다. 종이 필터는 둘 다 걸러 냅니다. 하버드 공중보건대학원의 Nutrition Source는 거르지 않은 커피에 LDL 콜레스테롤을 높일 수 있는 디테르펜이 들어 있고, 필터 커피에는 거의 없다고 설명합니다.',
+              sources: ['harvard-coffee'],
+            },
+          ],
+        },
+        {
+          id: 'ordering',
+          heading: '카페 메뉴의 ‘핸드드립’은 무엇을 뜻하나',
+          body: [
+            {
+              text: '대개 주문을 받은 뒤 한 잔씩 부어 내리는 커피이고, 메뉴에 있는 원두 가운데 하나를 고르는 경우가 많습니다. 에스프레소 음료보다 몇 분 더 걸리지만, 한 가지 원두의 맛을 가장 그대로 느낄 수 있는 방법입니다.',
+            },
+          ],
+        },
+      ],
     },
   },
 };

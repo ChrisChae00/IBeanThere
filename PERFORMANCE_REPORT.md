@@ -1,6 +1,6 @@
 # Performance Optimization Report: Spatial Query Indexing
 
-**Project:** IBeanThere (Coffee Community Platform)  
+**Project:** ibeanthere (Coffee Community Platform)  
 **Date:** August 2026  
 **Author:** Chris Chae
 
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This report documents a comprehensive performance optimization and data seeding initiative for IBeanThere's spatial proximity search system.
+This report documents a comprehensive performance optimization and data seeding initiative for ibeanthere's spatial proximity search system.
 
 **Results:**
 - **11.1x query speed improvement** (3.39ms → 0.31ms)
@@ -64,7 +64,7 @@ Photos:         Best-effort from Wikimedia Commons (no paid APIs)
 #### Frontend Integration
 - Added `source_type` field to CafeResponse API model
 - Updated TypeScript types (CafeMapData, CafeDetailResponse)
-- App-seeded cafes display label: "Added by IBeanThere"
+- App-seeded cafes display label: "Added by ibeanthere"
 - OSM ODbL attribution in footer
 
 ---
@@ -192,7 +192,7 @@ PostGIS GIST indices dramatically accelerate bounding box filtering:
 
 ### Frontend Changes
 1. Added `source_type` field to TypeScript interfaces
-2. Conditional rendering: show "Added by IBeanThere" label for app-seeded cafes without founders
+2. Conditional rendering: show "Added by ibeanthere" label for app-seeded cafes without founders
 3. OSM ODbL attribution in footer (legal requirement)
 
 ### Database Changes

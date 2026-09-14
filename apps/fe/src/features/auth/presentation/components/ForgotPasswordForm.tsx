@@ -3,15 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { MailCheck } from 'lucide-react';
 import { getAuthRepository } from '@/features/auth/data/repositories/AuthRepository';
-import {
-  MailIcon,
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  ErrorAlert,
-  Button,
-  Input
-} from '@/components/ui';
+import { useErrorTranslator } from '@/hooks/useErrorTranslator';
+import { AuthHeading } from './AuthLayout';
+import { ArrowLeftIcon, ErrorAlert, Button, Input } from '@/components/ui';
 
 interface ForgotPasswordFormProps {
   locale: string;
@@ -29,6 +25,7 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
   const [showEmailReminder, setShowEmailReminder] = useState(false);
 
   const authRepository = getAuthRepository();
+  const { translateError } = useErrorTranslator();
 
   // Countdown timer for resend button
   useEffect(() => {
@@ -72,12 +69,27 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
         getResetRedirectUrl()
       );
 
+      /*
+        Supabase answers an address with no account with success and sends nothing. The
+        errors it can return -- a per-account resend cooldown, a recipient the default
+        mailer refuses, a send that failed -- therefore only happen for addresses that
+        have an account, so printing them tells anyone which emails are registered.
+
+        Production shows the neutral "sent" screen for them (its copy says "if there is
+        an account"); the operator's view is the Supabase auth log. Development prints
+        the error, because a swallowed one is how a mail that never left looked exactly
+        like one that did. Only the per-IP request limit is shown everywhere: it trips
+        before the account lookup, so it is the same answer for every address. The email
+        send limit ("email rate limit exceeded") trips after it, and is account-specific.
+      */
       if (!result.success) {
-        // Supabase doesn't reveal if email exists, so we always show success
-        // But we can still show generic errors for rate limiting etc.
-        if (result.error?.message?.includes('rate')) {
+        const message = result.error?.message ?? '';
+        if (/request rate limit/i.test(message)) {
           setError(tErrors('too_many_requests'));
-          setIsLoading(false);
+          return;
+        }
+        if (process.env.NODE_ENV === 'development') {
+          setError(translateError(message));
           return;
         }
       }
@@ -110,124 +122,86 @@ export function ForgotPasswordForm({ locale }: ForgotPasswordFormProps) {
     setShowEmailReminder(false);
   };
 
-  // Success state - email sent
+  const backToSignIn = (
+    <p className="text-center">
+      <Link
+        href={`/${locale}/signin`}
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm text-ink-secondary hover:text-ink-primary"
+      >
+        <ArrowLeftIcon size={16} />
+        {t('back_to_login')}
+      </Link>
+    </p>
+  );
+
   if (isEmailSent) {
     return (
-      <div className="space-y-6 motion-fade-in text-center">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-success) 20%, var(--color-cardBackground))' }}>
-            <CheckCircleIcon size={32} style={{ color: 'var(--color-success)' }} />
-          </div>
+      <div className="blur-fade-children space-y-5">
+        <MailCheck aria-hidden className="mx-auto size-10 text-ink-primary" strokeWidth={1.5} />
+        <AuthHeading
+          title={t('reset_email_sent')}
+          subtitle={t('reset_email_sent_subtitle', { email })}
+        />
+
+        <ErrorAlert message={error} />
+
+        <div className="space-y-1 rounded-card border border-edge-rule p-4 text-sm text-ink-secondary break-keep">
+          {showEmailReminder ? (
+            <>
+              <p className="font-medium text-ink-primary">{t('didnt_receive_email')}</p>
+              <p>{t('double_check_email')}</p>
+            </>
+          ) : (
+            <>
+              <p>{t('check_spam_folder')}</p>
+              <p>{t('email_may_take_time')}</p>
+            </>
+          )}
         </div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
-            {t('reset_email_sent')}
-          </h2>
-          <p className="text-[var(--color-cardTextSecondary)]">
-            {t('reset_email_sent_subtitle', { email })}
-          </p>
-        </div>
+        <Button onClick={handleResend} disabled={!canResend} loading={isLoading} variant="outline" fullWidth>
+          {canResend ? t('resend_email') : `${t('resend_email')} (${countdown}s)`}
+        </Button>
 
-        <div className="bg-[var(--color-surface)] p-4 rounded-xl text-sm text-[var(--color-cardTextSecondary)] space-y-2">
-          <p>{t('check_spam_folder')}</p>
-          <p>{t('email_may_take_time')}</p>
-        </div>
-
-        {/* Email reminder after countdown */}
-        {showEmailReminder && (
-          <div className="p-4 rounded-xl text-sm motion-fade-in" style={{ backgroundColor: 'color-mix(in srgb, var(--color-warning) 15%, var(--color-cardBackground))', color: 'color-mix(in srgb, var(--color-warning) 70%, var(--color-cardText))' }}>
-            <p className="font-medium mb-2">{t('didnt_receive_email')}</p>
-            <p>{t('double_check_email')}</p>
-          </div>
-        )}
-
-        <div className="space-y-3 pt-4">
-          <Button
-            onClick={handleResend}
-            disabled={!canResend}
-            variant="outline"
-            fullWidth
-          >
-            {canResend 
-              ? t('resend_email')
-              : `${t('resend_email')} (${countdown}s)`
-            }
-          </Button>
-
-          <Button
+        <p className="text-center">
+          <button
+            type="button"
             onClick={handleTryDifferentEmail}
-            variant="ghost"
-            fullWidth
-            className="text-[var(--color-primary)]"
+            className="min-h-11 text-sm font-semibold text-ink-primary underline underline-offset-4 decoration-edge-rule hover:decoration-ink-primary"
           >
             {t('try_different_email')}
-          </Button>
+          </button>
+        </p>
 
-          <Link href={`/${locale}/signin`} className="block">
-            <Button
-              variant="ghost"
-              fullWidth
-              leftIcon={<ArrowLeftIcon size={18} />}
-              className="text-[var(--color-cardTextSecondary)]"
-            >
-              {t('back_to_login')}
-            </Button>
-          </Link>
-        </div>
+        {backToSignIn}
       </div>
     );
   }
 
-  // Initial state - email input form
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-[var(--color-cardText)] mb-2">
-          {t('forgot_password_title')}
-        </h2>
-        <p className="text-[var(--color-cardTextSecondary)]">
-          {t('forgot_password_subtitle')}
-        </p>
-      </div>
+    <>
+      <AuthHeading title={t('forgot_password_title')} subtitle={t('forgot_password_subtitle')} />
 
-      <ErrorAlert message={error} />
+      <form onSubmit={handleSubmit} className="blur-fade-children space-y-5" noValidate>
+        <ErrorAlert message={error} />
 
-      <div className="space-y-5">
         <Input
           label={t('email_address')}
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('email_placeholder')}
-          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className="rounded-full pl-5"
         />
-      </div>
 
-      <Button
-        type="submit"
-        fullWidth
-        size="lg"
-        loading={isLoading}
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
-      >
-        {t('send_reset_link')}
-      </Button>
+        <Button type="submit" fullWidth loading={isLoading}>
+          {t('send_reset_link')}
+        </Button>
 
-      <div className="text-center mt-6">
-        <Link href={`/${locale}/signin`}>
-          <Button
-            type="button"
-            variant="ghost"
-            leftIcon={<ArrowLeftIcon size={18} />}
-            className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)]"
-          >
-            {t('back_to_login')}
-          </Button>
-        </Link>
-      </div>
-    </form>
+        {backToSignIn}
+      </form>
+    </>
   );
 }

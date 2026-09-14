@@ -17,9 +17,27 @@ from app.models.report import (
     ReportStatus,
     TargetType
 )
+from app.config import settings
 from app.services.email import send_new_report_notification
 
 router = APIRouter()
+
+
+def is_own_report_image(url: str, user_id: str) -> bool:
+    """
+    True when `url` is a file this user uploaded through the report form.
+
+    The form uploads to the public `reports` bucket under the reporter's own id, and the
+    admin dashboard renders every stored URL as an <img>. Anything else -- another
+    host (a tracking pixel that reports the admin's IP when the report is opened), or
+    another user's upload -- is refused. The file name has to be a single segment: a
+    `/`, `\\`, `%` or `..` could walk the path out of the reporter's folder.
+    """
+    prefix = f"{settings.supabase_url.rstrip('/')}/storage/v1/object/public/reports/{user_id}/"
+    if not url.startswith(prefix):
+        return False
+    name = url[len(prefix):]
+    return bool(name) and not any(c in name for c in "/\\%") and ".." not in name
 
 
 @router.post("/reports", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
@@ -71,6 +89,12 @@ async def create_report(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Maximum 3 images allowed per report"
+        )
+
+    if not all(is_own_report_image(url, user_id) for url in report_data.image_urls):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Images must be uploaded through the report form"
         )
     
     # Create report

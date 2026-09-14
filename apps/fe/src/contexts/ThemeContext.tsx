@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { themes } from '@/lib/themes/palettes';
+import { themes, defaultThemeName } from '@/lib/themes/palettes';
 import { ThemePalette } from '@/lib/themes/types';
 
 interface ThemeContextType {
@@ -11,50 +11,33 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentThemeName, setCurrentThemeName] = useState<string>('morningCoffee');
-  const [isHydrated, setIsHydrated] = useState(false);
+/**
+ * Reads the theme the pre-hydration script in the root layout already applied, so the
+ * first client render agrees with what is on screen instead of flashing past it.
+ */
+function readAppliedTheme(): string {
+  if (typeof document === 'undefined') return defaultThemeName;
+  const applied = document.documentElement.dataset.theme;
+  return applied && themes[applied] ? applied : defaultThemeName;
+}
 
-  // Initialize CSS variables and handle hydration
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [currentThemeName, setCurrentThemeName] = useState<string>(defaultThemeName);
+
+  // The server cannot know the visitor's theme, so the first render always uses the
+  // default and this reconciles with whatever the pre-hydration script picked.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const root = document.documentElement;
-    
-    // Initialize with default theme first
-    const defaultTheme = themes['morningCoffee'];
-    Object.entries(defaultTheme.colors).forEach(([key, value]) => {
-      const cssVarName = `--color-${key}`;
-      root.style.setProperty(cssVarName, value);
-    });
-    
-    // Then check for saved theme
-    setIsHydrated(true);
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentThemeName(savedTheme);
-    }
+    setCurrentThemeName(readAppliedTheme());
   }, []);
 
-  // Update CSS variables when theme changes
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isHydrated) return;
-    
-    const root = document.documentElement;
-    const theme = themes[currentThemeName];
-    
-    Object.entries(theme.colors).forEach(([key, value]) => {
-      const cssVarName = `--color-${key}`;
-      root.style.setProperty(cssVarName, value);
-    });
-    
-    // Save to localStorage
-    localStorage.setItem('theme', currentThemeName);
-  }, [currentThemeName, isHydrated]);
-
   const setTheme = (themeName: string) => {
-    if (themes[themeName]) {
-      setCurrentThemeName(themeName);
+    if (!themes[themeName]) return;
+    setCurrentThemeName(themeName);
+    document.documentElement.dataset.theme = themeName;
+    try {
+      localStorage.setItem('theme', themeName);
+    } catch {
+      // Private browsing and blocked storage are fine; the theme just will not persist.
     }
   };
 

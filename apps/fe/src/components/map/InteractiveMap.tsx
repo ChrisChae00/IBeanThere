@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,24 +10,20 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import { CafeMapData, MapProps, getMarkerState } from '@/types/map';
 import { createCustomMarkerIcon, createUserLocationIcon, createSelectedLocationIcon, createClusterIcon, ClusterState } from '@/lib/markerStyles';
-import { useTheme } from '@/contexts/ThemeContext';
 import { UserLocationIcon } from '@/shared/ui';
 
 // ─── Map Resize Handler ─────────────────────────────────────
 
 /** Tailwind `lg` breakpoint — matches the 2-column grid in explore-map */
-const LG_BREAKPOINT = '(min-width: 1024px)';
-
 /**
- * Watches the map container for size changes and calls
- * `map.invalidateSize()` so Leaflet re-renders tiles to fill
- * the new container dimensions.
+ * Watches the map container for size changes and calls `map.invalidateSize()` so
+ * Leaflet re-renders tiles to fill the new dimensions.
  *
- * - **lg+ (2-column layout)**: Uses `ResizeObserver` because
- *   the TrendingCafesSection can change the map container height.
- * - **< lg (single-column)**: The map has a fixed height so
- *   continuous observation is skipped. Only the initial
- *   invalidateSize fires to handle dynamic-import timing.
+ * Observed at every width, not only in the two-column layout: the map's height is
+ * viewport-relative on a phone (`45svh`, which changes when the browser's own chrome
+ * collapses) and settles a frame or two after mount inside a flex column. A map that
+ * measured itself once keeps requesting tiles for the size it had then, which is what
+ * leaves the grey L-shape around whatever did load.
  */
 function MapResizeHandler() {
   const map = useMap();
@@ -44,43 +40,18 @@ function MapResizeHandler() {
     const container = map.getContainer();
     if (!container) return;
 
-    // Initial invalidateSize after dynamic import settles (all screen sizes)
+    // The dynamic import can settle after the first measurement.
     const initialTimer = setTimeout(() => {
       map.invalidateSize({ animate: false, pan: false });
     }, 300);
 
-    // Only observe continuous resizes on lg+ (2-column layout)
-    const mql = window.matchMedia(LG_BREAKPOINT);
-    let observer: ResizeObserver | null = null;
-
-    const startObserving = () => {
-      if (observer) return;
-      observer = new ResizeObserver(() => invalidate());
-      observer.observe(container);
-    };
-
-    const stopObserving = () => {
-      observer?.disconnect();
-      observer = null;
-    };
-
-    // React to viewport crossing the lg breakpoint
-    const handleBreakpointChange = (e: MediaQueryListEvent | MediaQueryList) => {
-      if (e.matches) {
-        startObserving();
-      } else {
-        stopObserving();
-      }
-    };
-
-    handleBreakpointChange(mql);
-    mql.addEventListener('change', handleBreakpointChange);
+    const observer = new ResizeObserver(() => invalidate());
+    observer.observe(container);
 
     return () => {
       clearTimeout(initialTimer);
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      stopObserving();
-      mql.removeEventListener('change', handleBreakpointChange);
+      observer.disconnect();
     };
   }, [map, invalidate]);
 
@@ -89,28 +60,11 @@ function MapResizeHandler() {
 
 // ─── Utilities ──────────────────────────────────────────────
 
-function getCSSVariable(name: string, fallback: string = ''): string {
-  if (typeof window !== 'undefined') {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim() || fallback;
-  }
-  return fallback;
-}
-
-// Fix for default marker icon in React Leaflet
-// _getIconUrl is a private property in Leaflet types but exists at runtime
-// We need to delete it to prevent SSR/hydration issues with default icons
-if (typeof window !== 'undefined') {
-  if ('_getIconUrl' in L.Icon.Default.prototype) {
-    delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-  }
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  });
-}
+/*
+  Every marker on this map supplies its own divIcon, so Leaflet's default icon is never
+  reached. The old override pointed it at unpkg, which the app's CSP img-src blocks —
+  deleting the override is the fix, not allowlisting a CDN we do not use.
+*/
 
 function BoundsUpdater({ 
   onBoundsChanged 
@@ -243,16 +197,19 @@ function MapCenterController({
 function ClusterLayer({
   cafes,
   onMarkerClick,
-  map
+  map,
+  selectedCafeId
 }: {
   cafes: CafeMapData[];
   onMarkerClick?: (cafe: CafeMapData) => void;
   map: L.Map;
+  selectedCafeId?: string | null;
 }) {
   const clusterGroupRef = useRef<any>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const t = useTranslations('map');
-  const tCommon = useTranslations('common');
+  /* The selected pin has to be repainted without rebuilding every marker, so the
+     markers are addressable by cafe id. */
+  const markersByIdRef = useRef<Map<string, L.Marker>>(new Map());
 
   useEffect(() => {
     if (!map) return;
@@ -320,13 +277,14 @@ function ClusterLayer({
 
     clusterGroupRef.current.clearLayers();
     markersRef.current = [];
+    markersByIdRef.current.clear();
 
     const newMarkers: L.Marker[] = [];
 
     cafes.forEach((cafe) => {
       const markerState = getMarkerState(cafe);
       const marker = L.marker([cafe.latitude, cafe.longitude], {
-        icon: createCustomMarkerIcon(markerState),
+        icon: createCustomMarkerIcon(markerState, cafe.id === selectedCafeId),
         cafeData: cafe
       } as any);
 
@@ -334,49 +292,119 @@ function ClusterLayer({
         onMarkerClick?.(cafe);
       });
 
-      const verifiedText = t('verified');
-      const navigatorText = t('navigator');
-      const unknownText = tCommon('unknown');
-      const checkInText = cafe.verification_count && cafe.verification_count > 1 ? t('check_ins') : t('check_in');
-      
-      const textSecondaryColor = getCSSVariable('--color-text-secondary', '#666');
-      const borderColor = getCSSVariable('--color-border', '#e5e7eb');
-      const primaryColor = getCSSVariable('--color-primary', '#3b82f6');
-      
-      const popupContent = `
-        <div style="padding: 8px; min-width: 200px;">
-          <h3 style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${cafe.name}</h3>
-          <p style="font-size: 14px; color: ${textSecondaryColor}; margin-bottom: 4px;">${cafe.address}</p>
-          ${cafe.rating ? `<p style="font-size: 14px; margin-bottom: 4px;">⭐ ${cafe.rating.toFixed(1)}</p>` : ''}
-          ${cafe.status === 'verified' ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; font-weight: 600; color: ${primaryColor};">${verifiedText}</p>
-              ${cafe.foundingCrew?.navigator ? `<p style="font-size: 12px; color: ${textSecondaryColor};">${navigatorText}: ${cafe.foundingCrew.navigator.username || unknownText}</p>` : ''}
-            </div>
-          ` : ''}
-          ${cafe.status === 'pending' && cafe.verification_count ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <p style="font-size: 12px; color: ${textSecondaryColor};">${cafe.verification_count} ${checkInText}</p>
-            </div>
-          ` : ''}
-          ${cafe.source_url ? `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-              <a href="${cafe.source_url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: ${primaryColor}; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                <span>📍</span>
-                <span style="text-decoration: underline;">View on Google Maps</span>
-              </a>
-            </div>
-          ` : ''}
-        </div>
-      `;
-
-      marker.bindPopup(popupContent);
+      /* No `bindPopup`: the details open in the panel anchored beside the pin, and a
+         Leaflet popup on top of it was a second card saying the same thing. */
       newMarkers.push(marker);
+      markersByIdRef.current.set(cafe.id, marker);
     });
 
     clusterGroupRef.current.addLayers(newMarkers);
     markersRef.current = newMarkers;
+    // `selectedCafeId` is deliberately not a dependency: selecting a pin repaints two
+    // icons below, rather than rebuilding every marker on the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cafes, onMarkerClick]);
+
+  useEffect(() => {
+    markersByIdRef.current.forEach((marker, id) => {
+      const cafe = (marker.options as any).cafeData as CafeMapData;
+      marker.setIcon(createCustomMarkerIcon(getMarkerState(cafe), id === selectedCafeId));
+      if (id === selectedCafeId) marker.setZIndexOffset(1000);
+      else marker.setZIndexOffset(0);
+    });
+  }, [selectedCafeId, cafes]);
+
+  return null;
+}
+
+/*
+  A full-width map on a phone is a scroll trap: every drag over it pans the map, so the
+  page under it can never be reached. The fix is the one Google's own embeds use — the
+  map does not take a gesture until the reader shows they meant it for the map.
+
+    one finger   -> the page scrolls, and a hint says how to move the map
+    two fingers  -> the map pans
+    tap          -> still places the pin, which is what this page is for
+    wheel        -> scrolls the page; only ctrl/cmd + wheel zooms
+
+  Leaflet's own handlers are toggled rather than the events being swallowed, so the map
+  keeps its inertia, its double-tap zoom and its keyboard panning.
+*/
+function GestureGate({ onHint }: { onHint: (visible: boolean) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+    /* The wheel rule is worth having on a desktop too: a tall page with a map in it
+       otherwise stops scrolling wherever the pointer happens to be. */
+    map.scrollWheelZoom.disable();
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        map.scrollWheelZoom.enable();
+      } else {
+        map.scrollWheelZoom.disable();
+      }
+    };
+    container.addEventListener('wheel', onWheel, { passive: true });
+
+    if (!isTouch) {
+      return () => {
+        container.removeEventListener('wheel', onWheel);
+      };
+    }
+
+    map.dragging.disable();
+
+    let hintTimer: ReturnType<typeof setTimeout> | undefined;
+    const showHint = () => {
+      onHint(true);
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => onHint(false), 1600);
+    };
+
+    let touchStartedAt: { x: number; y: number } | null = null;
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length >= 2) {
+        map.dragging.enable();
+        clearTimeout(hintTimer);
+        onHint(false);
+        return;
+      }
+      map.dragging.disable();
+      /* A tap is not a drag attempt, so the hint waits to see whether the finger moves. */
+      touchStartedAt = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || !touchStartedAt) return;
+      const moved =
+        Math.abs(event.touches[0].clientX - touchStartedAt.x) +
+        Math.abs(event.touches[0].clientY - touchStartedAt.y);
+      if (moved > 12) showHint();
+    };
+
+    const onTouchEnd = () => {
+      touchStartedAt = null;
+      map.dragging.disable();
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      clearTimeout(hintTimer);
+      container.removeEventListener('wheel', onWheel);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('touchend', onTouchEnd);
+      map.dragging.enable();
+      map.scrollWheelZoom.enable();
+    };
+  }, [map, onHint]);
 
   return null;
 }
@@ -385,7 +413,6 @@ function MapContent({
   cafes,
   userLocation,
   selectedLocation,
-  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
@@ -393,35 +420,75 @@ function MapContent({
   zoom,
   forceCenterUpdate,
   fitToMarkers,
-  useClustering
+  selectedCafe,
+  onSelectedPointChange
 }: {
   cafes: CafeMapData[];
   userLocation?: { lat: number; lng: number };
   selectedLocation?: { lat: number; lng: number };
-  userMarkerPalette?: string;
   onMarkerClick?: (cafe: CafeMapData) => void;
+  selectedCafe?: CafeMapData | null;
+  onSelectedPointChange?: (point: { x: number; y: number } | null) => void;
   onBoundsChanged?: (bounds: { ne: { lat: number; lng: number }; sw: { lat: number; lng: number } }) => void;
   onMapClick?: (coordinates: { lat: number; lng: number }) => void;
   center: { lat: number; lng: number };
   zoom: number;
   forceCenterUpdate?: boolean;
   fitToMarkers?: boolean;
-  useClustering: boolean;
 }) {
   const map = useMap();
-  const { currentTheme } = useTheme();
-  const [markerKey, setMarkerKey] = useState(0);
   const t = useTranslations('map');
-
-  useEffect(() => {
-    setMarkerKey(prev => prev + 1);
-  }, [currentTheme.name]);
 
   useEffect(() => {
     if (!fitToMarkers || cafes.length === 0) return;
     const bounds = L.latLngBounds(cafes.map(c => [c.latitude, c.longitude] as [number, number]));
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
   }, [fitToMarkers, cafes, map]);
+
+  /*
+    A tapped pin moves to a known place -- against the left edge, halfway down -- so the
+    card that opens has the rest of the frame to fill and the pin is never underneath it.
+    Same move on a phone; only the card's placement differs there.
+  */
+  const selectedId = selectedCafe?.id;
+  const selectedLat = selectedCafe?.latitude;
+  const selectedLng = selectedCafe?.longitude;
+  useEffect(() => {
+    if (selectedLat === undefined || selectedLng === undefined) return;
+
+    const size = map.getSize();
+    const target = L.point(Math.max(size.x * 0.18, 72), size.y * 0.5);
+    const delta = map.latLngToContainerPoint([selectedLat, selectedLng]).subtract(target);
+    if (Math.abs(delta.x) > 2 || Math.abs(delta.y) > 2) {
+      map.panBy(delta, { animate: true });
+    }
+    // Only when the selection changes: panning re-runs this effect through `map` moves
+    // otherwise, and the pin would be dragged back every time the reader moved the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  /*
+    The details panel is positioned in the map's own pixel space, so it has to be told
+    where the pin is now -- after every pan, zoom and resize, not only on the click.
+  */
+  useEffect(() => {
+    if (!onSelectedPointChange) return;
+    if (!selectedCafe) {
+      onSelectedPointChange(null);
+      return;
+    }
+
+    const report = () => {
+      const point = map.latLngToContainerPoint([selectedCafe.latitude, selectedCafe.longitude]);
+      onSelectedPointChange({ x: point.x, y: point.y });
+    };
+
+    report();
+    map.on('move zoom resize', report);
+    return () => {
+      map.off('move zoom resize', report);
+    };
+  }, [map, selectedCafe, onSelectedPointChange]);
 
   const selectedMarkerIcon = createSelectedLocationIcon(36);
 
@@ -431,19 +498,22 @@ function MapContent({
       <MapCenterController center={center} zoom={zoom} forceUpdate={forceCenterUpdate} />
       {onBoundsChanged && <BoundsUpdater onBoundsChanged={onBoundsChanged} />}
       {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
-      {useClustering && <ClusterLayer cafes={cafes} onMarkerClick={onMarkerClick} map={map} />}
+      <ClusterLayer
+        cafes={cafes}
+        onMarkerClick={onMarkerClick}
+        map={map}
+        selectedCafeId={selectedCafe?.id ?? null}
+      />
       {userLocation && (
         <Marker
-          key={`user-${markerKey}`}
           position={[userLocation.lat, userLocation.lng]}
-          icon={createUserLocationIcon(userMarkerPalette)}
+          icon={createUserLocationIcon()}
         >
           <Popup>{t('current_location')}</Popup>
         </Marker>
       )}
       {selectedLocation && (
         <Marker
-          key={`selected-${markerKey}`}
           position={[selectedLocation.lat, selectedLocation.lng]}
           icon={selectedMarkerIcon}
         >
@@ -460,31 +530,36 @@ export default function InteractiveMap({
   zoom,
   userLocation,
   selectedLocation,
-  userMarkerPalette,
   onMarkerClick,
   onBoundsChanged,
   onMapClick,
   forceCenterUpdate,
   fitToMarkers,
-  onLocationClick
+  onLocationClick,
+  selectedCafe,
+  onSelectedPointChange
 }: MapProps & {
   forceCenterUpdate?: boolean;
   fitToMarkers?: boolean;
   onLocationClick?: () => void;
+  selectedCafe?: CafeMapData | null;
+  onSelectedPointChange?: (point: { x: number; y: number } | null) => void;
 }) {
   const t = useTranslations('map');
-  const tCommon = useTranslations('common');
   const centerLatLng: [number, number] = [center.lat, center.lng];
-
-  const shouldUseClustering = cafes.length >= 5;
+  const [gestureHint, setGestureHint] = useState(false);
 
   return (
-    <div className="relative w-full h-full min-h-[500px] z-0">
+    /*
+      Shorter than the viewport on a phone, so there is always page above and below the
+      map to scroll by hand; the 500px floor returns once there is room for it.
+    */
+    <div className="relative z-0 h-full min-h-[45svh] w-full sm:min-h-[500px]">
       {/* Location button overlay on map */}
       {onLocationClick && (
         <button
           onClick={onLocationClick}
-          className="absolute top-4 right-4 z-[1000] bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
+          className="absolute top-4 right-4 z-(--z-map-chrome) bg-transparent hover:opacity-80 transition-opacity flex items-center justify-center"
           title={t('location_button')}
         >
           <UserLocationIcon size={32} color="var(--color-text)" />
@@ -495,22 +570,31 @@ export default function InteractiveMap({
         center={centerLatLng}
         zoom={zoom}
         maxZoom={19}
-        className="h-full w-full rounded-xl"
-        scrollWheelZoom={true}
+        /* The frame owns the corner; a hardcoded radius here fights every panel it sits in. */
+        className="h-full w-full rounded-[inherit]"
+        /* Off at mount; `GestureGate` turns it on for ctrl/cmd + wheel only. */
+        scrollWheelZoom={false}
         zoomControl={true}
         style={{ zIndex: 0 }}
       >
+        {/*
+          The OSM Foundation runs these tiles for its own services; a third-party app
+          living on them is against the tile usage policy, and the limit is per IP —
+          which means one shared campus or office network, not one user. Swap this URL
+          for a real provider before launch. See docs/HANDOFF.md §4.14.
+        */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
 
+        <GestureGate onHint={setGestureHint} />
+
         <MapContent 
           cafes={cafes} 
           userLocation={userLocation}
           selectedLocation={selectedLocation}
-          userMarkerPalette={userMarkerPalette}
           onMarkerClick={onMarkerClick}
           onBoundsChanged={onBoundsChanged}
           onMapClick={onMapClick}
@@ -518,121 +602,31 @@ export default function InteractiveMap({
           zoom={zoom}
           forceCenterUpdate={forceCenterUpdate}
           fitToMarkers={fitToMarkers}
-          useClustering={shouldUseClustering}
+          selectedCafe={selectedCafe}
+          onSelectedPointChange={onSelectedPointChange}
         />
 
-        {!shouldUseClustering && cafes.map((cafe) => {
-          const markerState = getMarkerState(cafe);
-          return (
-            <Marker
-              key={cafe.id}
-              position={[cafe.latitude, cafe.longitude]}
-              icon={createCustomMarkerIcon(markerState)}
-              eventHandlers={{
-                click: () => {
-                  onMarkerClick?.(cafe);
-                }
-              }}
-            >
-              <Popup>
-                <div 
-                  style={{
-                    padding: '8px',
-                    minWidth: '200px'
-                  }}
-                >
-                  <h3 style={{ fontWeight: 600, fontSize: '16px', marginBottom: '4px' }}>{cafe.name}</h3>
-                  <p 
-                    style={{ 
-                      fontSize: '14px', 
-                      color: getCSSVariable('--color-text-secondary', '#666'),
-                      marginBottom: '4px'
-                    }}
-                  >
-                    {cafe.address}
-                  </p>
-                  {cafe.rating && (
-                    <p style={{ fontSize: '14px', marginBottom: '4px' }}>⭐ {cafe.rating.toFixed(1)}</p>
-                  )}
-                  {cafe.status === 'verified' && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <p 
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          color: getCSSVariable('--color-primary', '#3b82f6')
-                        }}
-                      >
-                        {t('verified')}
-                      </p>
-                      {cafe.foundingCrew?.navigator && (
-                        <p 
-                          style={{
-                            fontSize: '12px',
-                            color: getCSSVariable('--color-text-secondary', '#666')
-                          }}
-                        >
-                          {t('navigator')}: {cafe.foundingCrew.navigator.username || tCommon('unknown')}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {cafe.status === 'pending' && cafe.verification_count && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <p 
-                        style={{
-                          fontSize: '12px',
-                          color: getCSSVariable('--color-text-secondary', '#666')
-                        }}
-                      >
-                        {cafe.verification_count} {cafe.verification_count > 1 ? t('check_ins') : t('check_in')}
-                      </p>
-                    </div>
-                  )}
-                  {cafe.source_url && (
-                    <div 
-                      style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: `1px solid ${getCSSVariable('--color-border', '#e5e7eb')}`
-                      }}
-                    >
-                      <a 
-                        href={cafe.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: '12px',
-                          color: getCSSVariable('--color-primary', '#3b82f6'),
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        <span>📍</span>
-                        <span style={{ textDecoration: 'underline' }}>View on Google Maps</span>
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+        <MapGestureHint visible={gestureHint} label={t('gesture_hint')} />
       </MapContainer>
+    </div>
+  );
+}
+
+/*
+  Inside the map so it is clipped by the frame, and `pointer-events-none` so it never
+  eats the gesture it is explaining.
+*/
+function MapGestureHint({ visible, label }: { visible: boolean; label: string }) {
+  return (
+    <div
+      aria-hidden={!visible}
+      className={`pointer-events-none absolute inset-0 z-(--z-map-chrome) flex items-center justify-center bg-scrim-media/60 transition-opacity duration-200 ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      <p className="landing-micro rounded-(--radius-pill) bg-surface-raised px-4 py-2 text-ink-primary">
+        {label}
+      </p>
     </div>
   );
 }

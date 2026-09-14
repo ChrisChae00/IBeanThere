@@ -9,6 +9,7 @@
 
 import { ReactNode } from 'react';
 import { AuthProvider } from '@/features/auth';
+import { AnalyticsWatcher } from './AnalyticsWatcher';
 
 interface ClientProvidersProps {
   children: ReactNode;
@@ -17,6 +18,8 @@ interface ClientProvidersProps {
 export function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <AuthProvider>
+      {/* Inside the provider: it reports who is reading, so it needs the session. */}
+      <AnalyticsWatcher />
       {children}
     </AuthProvider>
   );

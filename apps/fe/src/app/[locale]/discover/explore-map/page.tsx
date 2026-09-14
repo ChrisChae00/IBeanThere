@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { getTrendingCafes } from '@/lib/api/cafes';
 import ExploreMapClient from './ExploreMapClient';
-import { PlusIcon } from '@/components/ui';
 import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
 import { CAFE_GRID_ITEMS_PER_PAGE } from '@/lib/constants/cafe';
 
@@ -43,27 +41,18 @@ export default async function ExploreMapPage({
   const initialCafes = await getTrendingCafes(CAFE_GRID_ITEMS_PER_PAGE, 0);
 
   return (
-    <main className="min-h-screen bg-[var(--color-background)]">
+    <main className="min-h-screen bg-surface-page">
       {/* Page Title Section — rendered on server, no JS needed */}
-      <section className="pt-6 pb-4 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
+      <section className="pt-10 pb-4">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-4">
-                {t('title')}
-              </h1>
-              <p className="text-xl text-[var(--color-text-secondary)]">
-                {t('subtitle')}
-              </p>
-            </div>
-            <Link
-              href={`/${locale}/discover/register-cafe`}
-              className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] flex items-center gap-2 whitespace-nowrap"
-            >
-              <PlusIcon className="text-xl font-bold" />
-              {t('be_navigator')}
-            </Link>
-          </div>
+          <h1 className="landing-display text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
+            {t('title')}
+          </h1>
+          <p className="mt-3 text-lg text-ink-secondary">{t('subtitle')}</p>
+        </div>
+        {/* The rule under the masthead, the way the landing sets a section off. */}
+        <div className="max-w-8xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-edge-rule" />
         </div>
       </section>
 

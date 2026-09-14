@@ -14,20 +14,11 @@ import { UserLocationIcon } from '@/shared/ui';
 const InteractiveMap = dynamic(() => import('@/components/map/InteractiveMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-[var(--color-background)]">
+    <div className="flex h-full items-center justify-center bg-surface-page">
       <LoadingSpinner size="lg" />
     </div>
   ),
 });
-
-function getCSSVariable(name: string, fallback: string = ''): string {
-  if (typeof window !== 'undefined') {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim() || fallback;
-  }
-  return fallback;
-}
 
 export default function RegisterCafePage() {
   const params = useParams();
@@ -79,7 +70,7 @@ export default function RegisterCafePage() {
   };
   
   const handleCancel = () => {
-    router.push(`/${locale}/discover/pending-spots`);
+    router.back();
   };
   
   if (authLoading || !user) {
@@ -91,44 +82,46 @@ export default function RegisterCafePage() {
   }
   
   return (
-    <main className="min-h-screen bg-[var(--color-background)]">
-      {/* Page Title Section */}
-      <section className="pt-6  bg-gradient-to-b from-[var(--color-background)] to-[var(--color-surface)]/30">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-2">
-              {t('title')}
-            </h1>
+    <main className="min-h-screen bg-surface-page">
+      {/* Masthead, then the rule — the shape every Discover page opens with. */}
+      <section className="pt-10 pb-4">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="landing-display text-[clamp(2.5rem,6vw,4.5rem)] text-ink-primary">
+            {t('title')}
+          </h1>
+          <p className="mt-3 text-lg text-ink-secondary">{t('select_on_map_hint')}</p>
+        </div>
+        <div className="max-w-8xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-edge-rule" />
         </div>
       </section>
-      
-      {/* Main Content: Map on Left, Form on Right */}
-      <section className="py-6">
+
+      <section className="py-6 pb-20">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* Left: Interactive Map */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg flex flex-col">
-              <div className="p-6">
-                <h2 className="px-2 text-2xl font-bold text-[var(--color-text)] mb-2">
-                  {tMap('map_title')}
-                </h2>
-                <div className="px-2 flex items-center justify-between gap-4">
-                  <p className="text-[var(--color-text-secondary)]">
-                    {t('select_on_map_hint')}
-                  </p>
-                  <button
-                    onClick={handleReturnToCurrentLocation}
-                    className="flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
-                    title={tMap('location_button')}
-                    disabled={!coords}
-                  >
-                    <UserLocationIcon 
-                      size={32} 
-                      color={getCSSVariable('--color-userMarkerMap') || getCSSVariable('--color-secondary') || '#8C5A3A'} 
-                    />
-                  </button>
-                </div>
+          <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
+            {/*
+              The map is the frame and nothing is stacked inside it: its one control —
+              recentre on me — sits on the frame's edge, above the picture it changes.
+            */}
+            <div className="flex min-h-[28rem] flex-col gap-3">
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-2xl text-ink-primary">{tMap('map_title')}</h2>
+                {/*
+                  The same 44px square the map's own controls are, and the same pin
+                  colour, so "me" means one thing across the app. It is not a group
+                  because there is only the one verb here.
+                */}
+                <button
+                  onClick={handleReturnToCurrentLocation}
+                  aria-label={t('return_to_current_location')}
+                  title={t('return_to_current_location')}
+                  className="flex h-11 w-11 items-center justify-center rounded-(--radius-pill) border border-edge-rule bg-surface-raised text-ink-primary hover:bg-surface-hover active:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand disabled:opacity-60 disabled:hover:bg-surface-raised"
+                  disabled={!coords}
+                >
+                  <UserLocationIcon size={20} color="var(--marker-user)" />
+                </button>
               </div>
-              <div className="flex-1 relative min-h-0 p-6 mt-[-30px]">
+              <div className="relative min-h-0 flex-1 overflow-hidden rounded-(--radius-card) border border-edge-rule">
                 {mapCenter ? (
                   <InteractiveMap
                     cafes={[]}
@@ -139,16 +132,16 @@ export default function RegisterCafePage() {
                     onMapClick={handleMapClick}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full bg-[var(--color-background)]">
-                    <div className="text-center">
+                  <div className="flex h-full items-center justify-center bg-surface-raised p-8 text-center">
+                    <div>
                       <LoadingSpinner size="lg" />
-                      <p className="mt-4 text-[var(--color-text-secondary)]">
+                      <p className="mt-4 text-ink-secondary">
                         {locationLoading ? tMap('loading_location') : tMap('location_permission_title')}
                       </p>
                       {!locationLoading && !locationError && (
                         <button
                           onClick={() => getCurrentLocation().catch(() => {})}
-                          className="mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                          className="btn-shade mt-4 min-h-11 rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
                         >
                           {tMap('share_location')}
                         </button>
@@ -158,15 +151,24 @@ export default function RegisterCafePage() {
                 )}
               </div>
             </div>
-            
-            {/* Right: Registration Form */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-lg">
-              <RegisterCafeForm
-                initialLocation={selectedLocation || undefined}
-                userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
-                onSuccess={handleRegistrationSuccess}
-                onCancel={handleCancel}
-              />
+
+            {/*
+              The form is framed the way the map is, so the two halves read as one
+              spread. Its own heading sits on the same line as the map's, which is what
+              keeps the page from looking like a form dropped onto a background.
+            */}
+            <div className="flex flex-col gap-3">
+              <h2 className="flex min-h-11 items-center text-2xl text-ink-primary">
+                {t('form_title')}
+              </h2>
+              <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-6">
+                <RegisterCafeForm
+                  initialLocation={selectedLocation || undefined}
+                  userLocation={coords ? { lat: coords.latitude, lng: coords.longitude } : undefined}
+                  onSuccess={handleRegistrationSuccess}
+                  onCancel={handleCancel}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -174,4 +176,3 @@ export default function RegisterCafePage() {
     </main>
   );
 }
-

@@ -1,9 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { getAllCategories, getDrinksByCategory } from '@/data/coffee';
-import type { Locale } from '@/data/coffee/types';
-import CoffeeRoadmap from '@/components/learn/CoffeeRoadmap';
-import { buildAlternateLanguages, buildCanonical, type Locale as SeoLocale } from '@/lib/seo';
+import CoffeeGuide from '@/components/learn/CoffeeGuide';
+import { buildAlternateLanguages, buildCanonical, type Locale } from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -18,60 +16,32 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'learn.coffee' });
 
   return {
-    title: t('title'),
-    description: t('subtitle'),
+    title: t('metaTitle'),
+    description: t('description'),
     alternates: {
-      canonical: buildCanonical(locale as SeoLocale, PATH),
+      canonical: buildCanonical(locale as Locale, PATH),
       languages: buildAlternateLanguages(PATH),
     },
+    // The layout's card names the site; without this, every shared link would too.
+    twitter: {
+      card: 'summary',
+      title: t('metaTitle'),
+      description: t('description'),
+    },
     openGraph: {
-      title: t('title'),
-      description: t('subtitle'),
+      title: t('metaTitle'),
+      description: t('description'),
       type: 'website',
+      locale,
     },
   };
 }
 
-export default async function CoffeeRoadmapPage({
+export default async function CoffeeGuidePage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'learn.coffee' });
-
-  const loc = locale as Locale;
-  const categories = getAllCategories();
-  const drinksByCategory = Object.fromEntries(
-    categories.map(cat => [cat.id, getDrinksByCategory(cat.id)])
-  );
-
-  const branchLabels = Object.fromEntries(
-    categories.flatMap(cat => {
-      const parent = categories.find(c => c.id === cat.branchFrom);
-      return parent
-        ? [[cat.id, t('branchFrom', { name: parent.content[loc].name })]]
-        : [];
-    })
-  );
-
-  const messages = {
-    title: t('title'),
-    subtitle: t('subtitle'),
-    eyebrow: t('eyebrow'),
-    stageCount: t('stageCount', { count: categories.length }),
-    drinkCount: t('drinkCount', {
-      count: Object.values(drinksByCategory).reduce((n, d) => n + d.length, 0),
-    }),
-  };
-
-  return (
-    <CoffeeRoadmap
-      categories={categories}
-      drinksByCategory={drinksByCategory}
-      branchLabels={branchLabels}
-      locale={locale}
-      messages={messages}
-    />
-  );
+  return <CoffeeGuide locale={locale} />;
 }

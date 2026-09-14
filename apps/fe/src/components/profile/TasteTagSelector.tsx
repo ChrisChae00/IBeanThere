@@ -2,17 +2,17 @@
 
 import { useTranslations } from 'next-intl';
 import { TasteTag as TasteTagType } from '@/types/api';
-import { TasteTag } from '@/shared/ui';
 
 const ALL_TASTE_TAGS: TasteTagType[] = [
-  'acidic',
-  'full_body',
+  'bean_hunter',
+  'origin_chaser',
+  'filter_first',
+  'roaster_pilgrim',
   'light_roast',
-  'dessert_lover',
+  'dark_roast',
+  'quiet_corner',
   'work_friendly',
-  'cozy',
-  'roastery',
-  'specialty',
+  'sweet_tooth',
 ];
 
 export interface TasteTagSelectorProps {
@@ -43,15 +43,15 @@ export default function TasteTagSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-[var(--color-text)]">
+        <label className="block text-sm font-medium text-ink-primary">
           {t('taste_tags_label')}
         </label>
-        <span className="text-xs text-[var(--color-text-secondary)]">
+        <span className="text-xs text-ink-secondary">
           {selectedTags.length}/{maxTags}
         </span>
       </div>
       
-      <p className="text-xs text-[var(--color-text-secondary)]">
+      <p className="text-xs text-ink-secondary">
         {t('select_taste_tags')}
       </p>
       
@@ -66,24 +66,18 @@ export default function TasteTagSelector({
               type="button"
               onClick={() => handleTagClick(tag)}
               disabled={isDisabled}
-              className={`
-                inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium
-                transition-all duration-200 border
-                ${isSelected
-                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                  : isDisabled
-                    ? 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-[var(--color-border)] opacity-50 cursor-not-allowed'
-                    : 'bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-                }
-              `}
+              aria-pressed={isSelected}
+              className={`control-flat inline-flex items-center gap-1 rounded-(--radius-pill) px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+                isSelected ? 'is-active' : ''
+              }`}
             >
-              <span className="opacity-70">#</span>
+              {/* No tick beside the label: the brand fill is what "chosen" means on
+                  every other group of controls in the app, and a mark on top of it
+                  says the same thing twice while making the pill jump a few pixels
+                  wider the moment it is picked. `aria-pressed` carries it for a
+                  reader who cannot see the fill. */}
+              <span aria-hidden="true" className="opacity-70">#</span>
               {t(`taste_tags.${tag}`)}
-              {isSelected && (
-                <svg className="w-3.5 h-3.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
             </button>
           );
         })}

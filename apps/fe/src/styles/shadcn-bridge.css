@@ -1,0 +1,97 @@
+/*
+  shadcn / Base UI bridge.
+
+  shadcn's primitives are written against a fixed vocabulary — `bg-primary`,
+  `text-muted-foreground`, `border-border`, and raw `var(--secondary)` inside
+  `color-mix()` calls. That vocabulary is not ours. This file is the adapter: it
+  defines shadcn's names in terms of the semantic tokens from `tokens.css`, so a
+  generated component inherits all four coffee themes without being edited.
+
+  It is the same strangler move as `legacy-tokens.css` (decision #8), pointed the
+  other way: that file translates the OLD vocabulary forward, this one translates a
+  VENDOR vocabulary inward. Unlike `legacy-tokens.css`, this file is permanent —
+  it is deleted only if shadcn is.
+
+  Two things deliberately NOT imported from shadcn's own stylesheet:
+
+  1. **The radius scale.** shadcn derives `--radius-sm/md/lg/xl` from a single
+     `--radius`. Tailwind v4 already ships that scale, and `rounded-lg` alone appears
+     168 times in this codebase. Redefining it would silently resize every one of
+     them. Tailwind's defaults stand; our own `--radius-control/card/pill` are
+     unrelated and stay.
+  2. **`--chart-*` and `--sidebar-*`.** No component here uses them yet. They get
+     added with the first component that does, not before.
+*/
+
+/*
+  shadcn primitives ship `dark:` variants. This project has no light/dark axis —
+  decision #3: four complete themes, and espresso IS the dark one. Without this,
+  every `dark:` utility in a generated component would be dead code and the dark
+  theme would render with light-theme treatments.
+*/
+@custom-variant dark (&:where([data-theme='espresso'], [data-theme='espresso'] *));
+
+/*
+  Raw names. Needed as real custom properties — not just `@theme` entries — because
+  base-nova components read them directly, e.g. the Button's
+  `hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]`.
+
+  These inherit from the semantic layer, so they re-resolve per theme automatically.
+*/
+:root {
+  --background: var(--surface-page);
+  --foreground: var(--ink-primary);
+
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink-primary);
+
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink-primary);
+
+  /* shadcn's "primary" is the brand action colour, which is our --brand. */
+  --primary: var(--brand);
+  --primary-foreground: var(--ink-on-brand);
+
+  --secondary: var(--brand-hover);
+  --secondary-foreground: var(--ink-on-brand);
+
+  --muted: var(--surface-sunken);
+  --muted-foreground: var(--ink-secondary);
+
+  /*
+    shadcn's "accent" is a subtle hover ground, NOT a brand colour — the opposite of
+    what this repo used to call --accent. That collision is why the semantic token was
+    renamed to --brand; --brand-muted is the pale tint shadcn actually wants here, so
+    both systems now agree on the name and the meaning.
+  */
+  --accent: var(--brand-muted);
+  --accent-foreground: var(--ink-primary);
+
+  --destructive: var(--state-danger);
+
+  --border: var(--edge-default);
+  --input: var(--edge-default);
+  --ring: var(--brand);
+}
+
+/*
+  Utility names. Only the ones `globals.css` does not already map are declared here;
+  --color-primary, --color-secondary, --color-background, --color-border and
+  --color-accent are defined there and resolve to the same values, so they are left
+  alone rather than declared twice.
+*/
+@theme inline {
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}

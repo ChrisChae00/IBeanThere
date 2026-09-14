@@ -35,7 +35,7 @@ export function buildOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'IBeanThere',
+    name: 'ibeanthere',
     url: siteUrl,
     logo: new URL('/icons/coffee-logo.svg', siteUrl).toString(),
   };
@@ -45,7 +45,7 @@ export function buildWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'IBeanThere',
+    name: 'ibeanthere',
     url: getSiteUrl().toString(),
   };
 }

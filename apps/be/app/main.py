@@ -3,12 +3,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.config import settings
+from app.core.rate_limit import limiter
 from app.api.v1.router import router as api_v1_router
 
 # Load .env file from apps/be directory
@@ -16,9 +16,7 @@ env_path = Path(__file__).parent.parent / '.env'
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 
-limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
-
-app = FastAPI(title="IBeanThere API")
+app = FastAPI(title="ibeanthere API")
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -50,4 +48,4 @@ def health_check():
 
 @app.get("/")
 def root():
-    return {"message": "IBeanThere API", "version": "1.0.0"}
+    return {"message": "ibeanthere API", "version": "1.0.0"}

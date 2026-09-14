@@ -3,6 +3,7 @@ from typing import List
 import logging
 from supabase import Client
 from app.api.deps import get_supabase_client, get_current_user
+from app.services import badges as badges_service
 from app.models.social import (
     VisitLikeResponse,
     BadgeResponse,
@@ -181,81 +182,20 @@ async def check_and_award_badges(
 ):
     """
     Check badge eligibility and award new badges.
-    Called after relevant actions (log created, trusted, etc.)
-    Returns list of newly awarded badges.
+
+    The rules live in `app/services/badges.py`, because three other places award
+    badges too (dropping a bean, registering at a cafe that already exists, an
+    auto-detected visit) and four copies of "which badges has this person earned"
+    is four chances for them to disagree.
     """
     try:
-        newly_awarded = []
-        user_id = current_user.id
-        
-        # Get existing badges
-        existing = supabase.table("user_badges").select("badge_code").eq("user_id", user_id).execute()
-        existing_codes = [b["badge_code"] for b in existing.data] if existing.data else []
-        
-        # 1. Bean Sprout: First log recorded
-        if "bean_sprout" not in existing_codes:
-            log_count = supabase.table("cafe_visits").select("id", count="exact").eq("user_id", user_id).execute()
-            if log_count.count and log_count.count >= 1:
-                supabase.table("user_badges").insert({
-                    "user_id": user_id,
-                    "badge_code": "bean_sprout"
-                }).execute()
-                newly_awarded.append("bean_sprout")
-        
-        # 2. Cafe Explorer: 5 cafe verifications (Navigator/Vanguard)
-        if "cafe_explorer" not in existing_codes:
-            nav_count = supabase.table("cafes").select("id", count="exact").eq("navigator_id", user_id).execute()
-            navigator_count = nav_count.count if nav_count.count is not None else 0
-            van_result = supabase.table("cafes").select("vanguard_ids").filter(
-                "vanguard_ids", "cs", f'[{{"user_id": "{user_id}"}}]'
-            ).execute()
-            vanguard_count = len(van_result.data) if van_result.data else 0
-            if (navigator_count + vanguard_count) >= 5:
-                supabase.table("user_badges").insert({
-                    "user_id": user_id,
-                    "badge_code": "cafe_explorer"
-                }).execute()
-                newly_awarded.append("cafe_explorer")
-        
-        # 3. Coffee Connoisseur: Trusted by 10 users
-        if "coffee_connoisseur" not in existing_codes:
-            trust_count = supabase.table("user_trust").select("id", count="exact").eq("trustee_id", user_id).execute()
-            if trust_count.count and trust_count.count >= 10:
-                supabase.table("user_badges").insert({
-                    "user_id": user_id,
-                    "badge_code": "coffee_connoisseur"
-                }).execute()
-                newly_awarded.append("coffee_connoisseur")
-        
-        # 4. Second Home: 5 logs at same cafe on different days
-        if "second_home" not in existing_codes:
-            # Query visits grouped by cafe_id and count distinct days
-            # Due to Supabase limitations, we'll do a simpler approach
-            visits = supabase.table("cafe_visits").select("cafe_id, visited_at").eq("user_id", user_id).execute()
-            if visits.data:
-                from collections import defaultdict
-                cafe_days = defaultdict(set)
-                for v in visits.data:
-                    # Extract just the date part
-                    visit_date = v["visited_at"][:10] if v["visited_at"] else None
-                    if visit_date:
-                        cafe_days[v["cafe_id"]].add(visit_date)
-                
-                # Check if any cafe has 5 or more unique days
-                for cafe_id, days in cafe_days.items():
-                    if len(days) >= 5:
-                        supabase.table("user_badges").insert({
-                            "user_id": user_id,
-                            "badge_code": "second_home"
-                        }).execute()
-                        newly_awarded.append("second_home")
-                        break
-        
+        newly_awarded = badges_service.award_badges(supabase, current_user.id)
         return {
             "newly_awarded": newly_awarded,
             "badge_details": [BADGE_DEFINITIONS[code] for code in newly_awarded]
         }
     except Exception as e:
+        logger.exception("Error checking badges")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to check badges"
@@ -297,11 +237,11 @@ async def get_community_feed(
         offset = (page - 1) * page_size
         
         # Get public visits from trusted users
-        visits = supabase.table("cafe_visits").select("""
-            id, cafe_id, user_id, visited_at, rating, comment, photo_urls, coffee_type,
-            users!inner(username, display_name, avatar_url),
-            cafes!inner(name)
-        """).in_("user_id", trustee_ids).eq("is_public", True).order("visited_at", desc=True).range(offset, offset + page_size - 1).execute()
+        # One line for the same reason as above: a newline in `select` loses the embeds.
+        visits = supabase.table("cafe_visits").select(
+            "id, cafe_id, user_id, visited_at, rating, comment, photo_urls, coffee_type,"
+            "users!inner(username, display_name, avatar_url),cafes!inner(name)"
+        ).in_("user_id", trustee_ids).eq("is_public", True).order("visited_at", desc=True).range(offset, offset + page_size - 1).execute()
         
         # Get total count
         count_result = supabase.table("cafe_visits").select("id", count="exact").in_("user_id", trustee_ids).eq("is_public", True).execute()
@@ -370,10 +310,13 @@ async def get_taste_mates(
         user_id = current_user.id
         
         # Get trust relationships with user details
-        trusts = supabase.table("user_trust").select("""
-            trustee_id, created_at,
-            users!user_trust_trustee_id_fkey(id, username, display_name, avatar_url)
-        """).eq("truster_id", user_id).order("created_at", desc=True).execute()
+        # One line, no newlines. PostgREST cannot parse a `select` containing them and
+        # falls back to every column *silently* -- the embed simply is not there, the
+        # `if user_data` below skips every row, and the endpoint answers `[]` with a 200.
+        # "Who do I follow" was empty everywhere it was asked because of this.
+        trusts = supabase.table("user_trust").select(
+            "trustee_id, created_at, users!user_trust_trustee_id_fkey(id, username, display_name, avatar_url)"
+        ).eq("truster_id", user_id).order("created_at", desc=True).execute()
         
         if not trusts.data:
             return []

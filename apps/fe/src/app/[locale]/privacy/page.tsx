@@ -2,6 +2,13 @@ import { getTranslations } from 'next-intl/server';
 
 export const revalidate = 86400;
 
+/* Sections that name a third party owe the reader that party's own policy. Second one
+   of these, so it stops being an `if` on a literal section name. */
+const POLICY_LINKS: Record<string, string> = {
+  google_maps: 'https://policies.google.com/privacy',
+  analytics: 'https://posthog.com/privacy',
+};
+
 export default async function PrivacyPage({
   params
 }: {
@@ -25,6 +32,8 @@ export default async function PrivacyPage({
     'retention',
     'rights',
     'changes',
+    'google_maps',
+    'analytics',
     'contact'
   ];
 
@@ -35,14 +44,14 @@ export default async function PrivacyPage({
       <div className="prose prose-slate dark:prose-invert max-w-none">
         
         {/* Helper for non-English users */}
-        <div className="bg-[var(--color-background)] p-4 rounded border border-[var(--color-border)] mb-8 text-sm text-[var(--color-text-secondary)]">
+        <div className="bg-background p-4 rounded-sm border border-border mb-8 text-sm text-ink-secondary">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
-            {tLegal('last_updated', { date: '2026-01-19' })}
+            {tLegal('last_updated', { date: '2026-09-13' })}
           </p>
         </div>
 
-        <div className="bg-[var(--color-card)] p-8 rounded-lg shadow-sm border border-[var(--color-border)] space-y-8">
+        <div className="bg-surface-raised p-8 rounded-lg shadow-xs border border-border space-y-8">
           {/* Introduction */}
           <div>
             <h2 className="text-xl font-semibold mb-3">{t('intro.title')}</h2>
@@ -73,6 +82,16 @@ export default async function PrivacyPage({
             <div key={section}>
               <h2 className="text-xl font-semibold mb-3">{t(`${section}.title`)}</h2>
               <p className="whitespace-pre-wrap">{t(`${section}.content`)}</p>
+              {POLICY_LINKS[section] ? (
+                <a
+                  href={POLICY_LINKS[section]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  {t(`${section}.link_label`)}
+                </a>
+              ) : null}
             </div>
           ))}
         </div>

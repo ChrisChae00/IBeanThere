@@ -1,251 +1,203 @@
-<h1 align="center">
-  IBeanThere
-</h1>
+<h1 align="center">ibeanthere</h1>
 
 <p align="center">
-  <em>"I Bean There" (I've been there) — A community-driven coffee journaling platform where coffee lovers discover, verify, and record their cafe visits together.</em>
+  <em>A map for remembering the cup you liked, and finding the next coffee and the beans to take home.</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Active_Development-success?style=flat-square" alt="Status" />
-  <img src="https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/Version-2.0.0-blue?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/Status-Live-success?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Market-Kitchener--Waterloo-8C5A3A?style=flat-square" alt="Market" />
 </p>
 
 <p align="center">
-  <strong>🔗 Live App: <a href="https://ibeanthere.app">ibeanthere.app</a></strong>
+  <strong><a href="https://ibeanthere.app">ibeanthere.app</a></strong>
 </p>
 
 <p align="center">
-  <a href="#about">About</a> •
-  <a href="#key-features">Key Features</a> •
-  <a href="#thematic-color-palettes">Thematic Palettes</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#engineering-evolution-log">Engineering Log</a> •
-  <a href="#architecture--project-structure">Architecture</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#api-reference">API Overview</a>
-</p>
-
-<hr>
-
-## About
-
-**IBeanThere** is a modern, gamified coffee logging application. Unlike traditional map apps providing pre-populated databases, IBeanThere relies entirely on **User-Generated Content (UGC)**. Users become pioneers, discovering hidden gem cafes, checking in, and verifying locations through real community participation.
-
-### Core Philosophy
-
-- **User-Generated Map:** Build a community-verified coffee map from the ground up.
-- **Pioneer System (Gamification):** The first to check-in becomes the **Navigator**. The 2nd and 3rd become **Scouts**. Get permanently recorded in the cafe's history!
-- **Community Verification:** A registered cafe only becomes strictly "verified" once 3 independent users visit and review it.
-- **Local Coffee Only:** Franchises and non-coffee venues are turned away at registration. The map is for independent cafes that actually serve coffee.
-- **Zero-Cost Infrastructure:** Powered by OpenStreetMap + Leaflet (No expensive Google Maps API required).
-
----
-
-## Key Features
-
-### Community-Driven Cafe Discovery
-- **Register New Spots:** Pin new cafes directly on the map with robust Google Maps link resolution (enforces user location presence and physical proximity within 100m).
-- **Anti-Duplicate System:** 25m radius conflict detection prevents spamming the same location, along with deduplication of overlapping map markers.
-- **Algorithmic Curation:** Chains (100+ locations worldwide) and non-coffee venues (bubble tea, tea houses, juice bars) are rejected at registration, judged from OpenStreetMap brand and cuisine data rather than a hardcoded brand list — so the rule holds in any market. See [Cafe Curation Rules](./docs/architecture/cafe-curation.md).
-- **Admin & Community Verification:** Pending spots turn verified automatically after 3 user check-ins. Admins have a comprehensive management view with status filtering to manually review pending cafes, plus per-brand and per-cafe overrides when the algorithm gets one wrong.
-- **Interactive Map Exploration:** Built using Leaflet with custom clustering, progressive radius expansion, and a discovery fallback system.
-
-### Advanced Coffee Journaling
-- **Geo-fenced Check-ins:** Visit tracking activates when your location is within 100m.
-- **Rich Coffee Logs:** Rate beans, atmospheric vibes, drop comments, and upload photo galleries.
-- **Collections & Trending:** 14-day trending algorithm surfaces hot cafes. Users can build their own curated collections.
-- **Community & Follows:** See what cafes your friends or community members are exploring.
-
-### Enterprise-Grade Security
-- **Role-based Access Control (RBAC):** Strict JWT verifications for Admin/User endpoints natively tied with Supabase metadata.
-- **Rate Limiting & Hardened CORS:** API endpoints are protected against brute-force and DDoS via advanced proxy rate-limiters (`slowapi`) and security headers.
-- **Input Sanitization:** URL parameters and payloads are strictly typed (`max_length` constraints, rigorous Pydantic models).
-
-### Global & Accessible
-- **Internationalization (i18n):** Native support for English (`/en`) and Korean (`/ko`).
-- **Dynamic Theming:** Switch between curated coffee aesthetics matching your mood.
-
----
-
-## Thematic Color Palettes
-
-IBeanThere supports dynamic theme switching powered by a React Context state system. Here are the curated palettes available to users:
-
-| Theme | Preview | Primary | Background | Card BG | Text | Design Aesthetic |
-|---|---|---|---|---|---|---|
-| **Morning Coffee** | ![#8C5A3A](https://img.shields.io/badge/-%238C5A3A-8C5A3A?style=flat-square) ![#e9d6c0](https://img.shields.io/badge/-%23e9d6c0-e9d6c0?style=flat-square) | `#8C5A3A` | `#e9d6c0` | `#f5f0e8` | `#442f19` | Cozy, warm colors resembling morning filter coffee and cream. |
-| **Dark Roast (Espresso)** | ![#d4c7b8](https://img.shields.io/badge/-%23d4c7b8-d4c7b8?style=flat-square) ![#1A120B](https://img.shields.io/badge/-%231A120B-1A120B?style=flat-square) | `#d4c7b8` | `#1A120B` | `#2A1A13` | `#e9ded2` | Deep contrast, dark mode aesthetic tailored for night coffee logs. |
-| **Matcha Latte** | ![#85a035](https://img.shields.io/badge/-%2385a035-85a035?style=flat-square) ![#e0e8d0](https://img.shields.io/badge/-%23e0e8d0-e0e8d0?style=flat-square) | `#85a035` | `#e0e8d0` | `#f0f2e8` | `#4a5c2a` | Calming, desaturated green hues reflecting high-quality green tea. |
-| **Vanilla Latte** | ![#362C1D](https://img.shields.io/badge/-%23362C1D-362C1D?style=flat-square) ![#FFF8DC](https://img.shields.io/badge/-%23FFF8DC-FFF8DC?style=flat-square) | `#362C1D` | `#FFF8DC` | `#FFF9F0` | `#362C1D` | Creamy white and sweet vanilla shades for a soft and minimal look. |
-
----
-
-## Tech Stack
-
-### Frontend (Next.js)
-<p align="left">
-  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
-  <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet" />
-  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase Auth" />
-</p>
-
-### Backend (FastAPI)
-<p align="left">
-  <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white" alt="Pydantic" />
-  <img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="OSM" />
+  <a href="#why-20-exists">Why 2.0</a> •
+  <a href="#decisions-worth-defending">Decisions</a> •
+  <a href="#results">Results</a> •
+  <a href="#engineering-notes">Engineering</a> •
+  <a href="#stack">Stack</a> •
+  <a href="#run-it-locally">Run it</a>
 </p>
 
 ---
 
-## Engineering Highlights
+## Why 2.0 exists
 
-Major challenges solved and optimizations completed:
+Version 1 promised "an app for saving independent cafes." Google Maps and Naver already do that, with more data and a decade of head start. Saving a place is not a problem anyone had.
 
-### Spatial Query Indexing & Performance Optimization
-- **Impact:** **11.1x query speedup** (3.39ms → 0.31ms) on proximity search via PostGIS GIST indices
-- **Methodology:** 
-  - Benchmarked before/after with 10,000-row Docker dataset (isolated from production)
-  - Seeded **1,172 real cafes** from OpenStreetMap (OSM) into production
-  - Achieved **88% reduction in buffer I/O** (257 → 31 blocks)
-  - Maintained production integrity (zero impact from benchmarking)
-- **Result:** Proximity search now returns 20 cafes in sub-millisecond time
-- **Details:** See [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md)
+The version 2 promise is narrower and, so far, unclaimed:
 
-### Spatial Proximity & GPS Verification
-- **Challenge:** Mobile GPS erratic, causing false negatives on cafe check-ins/registrations.
-- **Solution:** Widened geofence from **50m to 100m**, refined Google Maps + Nominatim coordinate resolution.
+> Remember the cup you liked. Find the next coffee, and the beans to take home.
 
-### Map Rendering & UX Performance
-- **Challenge:** Hundreds of overlapping markers caused lag on mobile.
-- **Solution:** 
-  - Integrated `leaflet.markercluster` with custom clustering configuration
-  - Wrote coordinate deduplication (merge markers within 25-meter radius)
-  - Progressive "Load More" pagination for list rendering
-  - High-zoom level clustering toggle for real-time performance
+That reframing changed the data model, the map, the badges and the onboarding, because the unit of value moved from **a place you saved** to **a coffee you drank**.
 
-### Access Control (RBAC) & Admin Workflow
-- **Challenge:** Preventing unauthorized cafe listing manipulation.
-- **Solution:** 
-  - Administrative portal with live status filters (Pending/Verified/Flagged)
-  - Role-Based Access Control via Supabase Auth metadata
-  - Fixed cache invalidation bug ("Ghost Images" on admin updates)
+### Who it is for
 
-### Algorithmic Cafe Curation
-- **Challenge:** Keeping a "local coffee" map local. A hardcoded brand blocklist does not survive crossing a border, and name matching misfires — a global name count flags the Toronto cafe "The Link" as a 217-location chain.
-- **Solution:**
-  - Brand size resolved from OpenStreetMap `brand:wikidata` and counted via Overpass, cached per brand so a rejection costs one indexed read
-  - Non-coffee venues detected from the OSM `cuisine` tag; a coffee marker always wins, so cafes that also sell bubble tea stay
-  - Coordinate-proximity plus name matching to link stored rows to map nodes — exact-coordinate matching silently missed 24 "Starbucks Coffee Company" rows
-  - Fail-open by design: an unclassifiable venue is listed and queued for review, never rejected
-  - Identity borrowed rather than invented: a cafe is the OpenStreetMap node id or Google place id it already has, each under a partial UNIQUE index, with a 25 m proximity check for the new local shop that is in neither dataset
-- **Result:** 627 → 314 cafes. 253 franchise locations, 42 tea/juice venues and 18 duplicates removed; every survivor carries its brand verdict and descriptive traits.
+Someone local who tries new coffee and buys beans when they like one. Coffee knowledge is not an entry requirement. Early users are picked by a recent decision they struggled with, not by "likes coffee" as an interest.
 
-### Automated API Verification & Testing
-- **Coverage:** 100% pass rate across core integration suites (Healthcheck, Spatial Proximity Search, Geofencing, RBAC Auth Guards, and OSM Reverse Geocoding).
-- **Execution Speed:** Fast API verification suite runs with sub-second latency, ensuring continuous regression prevention across all core endpoints.
+### The three moments it plans for
+
+1. Before going somewhere new for coffee.
+2. When the bag at home runs out and the next one has to be chosen.
+3. When trying to remember what that good coffee actually was.
+
+**Daily opens are not a goal.** Consumption frequency and app frequency are different problems: someone who drinks the same beans every morning has no reason to log it every morning. Notifications and streak badges can force the number up. This bets on being the thing that comes to mind in those three moments instead.
+
+### First market: Kitchener-Waterloo, on purpose
+
+The promise is completeness, not density:
+
+> Every place in KW where you can buy beans is here.
+
+A small pool is why this market was chosen: it is the only size where auditing every cafe by hand over two weekends is realistic. It is also a university town, so every September and January regenerates a cohort of people who just moved and do not know where the coffee is. Ontario expansion waits until KW is proven; the seed script already carries the bounding box.
 
 ---
 
-## Architecture & Project Structure
+## Decisions worth defending
 
-This repository uses a monorepo-style structure separating the React frontend and Python backend, ensuring a clear boundary of concerns.
+Each one lists what was rejected, because that is where the reasoning lives.
+
+| Decision | Why | Rejected |
+|---|---|---|
+| A log is an experience; the bean is optional | "I drank this here, liked it, bought the bag" is one record. Requiring origin, process and price to create a bean makes the first log a chore | Bean as the unit of record, with a mandatory catalogue entry before you can log anything |
+| A cafe's bean list is derived from public logs | One source of truth, and it can never expose more than the author chose to show | A `cafe_bean_offerings` table fed automatically by every log, which would have leaked who drank what from private and anonymous entries |
+| Trait claims need evidence or a queue | Registering means passing a 100m check while standing there; a purchase logged inside the shop means the same check plus having bought the bag. Those write straight through. Everything else waits for review | Trusting every button press on a cafe page, and a review queue nobody drains |
+| Franchise filtering reads OpenStreetMap, not a brand list | A hardcoded blocklist stops working the moment you cross a border. Name counting misfires: a global count flags the Toronto cafe "The Link" as a 217-location chain | Maintaining a blocklist by hand, and matching on names |
+| Cafe identity is borrowed, not invented | A cafe is the OSM node id or Google place id it already has, each under a partial UNIQUE index | Generating an internal identity and reconciling duplicates later |
+| Unclassifiable venues are listed, not rejected | A wrong rejection is invisible to everyone, including the operator. A wrong listing shows up in the review queue | Failing closed on the classifier |
+| Badges count coming back | Ranking who arrived first rewards the calendar, not the coffee | The 1.x pioneer system (Navigator, Scout), removed in the pivot |
+
+---
+
+## Results
+
+| | Before | After |
+|---|---|---|
+| Proximity query (20 cafes) | 3.39ms | **0.31ms** (11.1x, PostGIS GIST) |
+| Buffer I/O per proximity query | 257 blocks | **31 blocks** |
+| False 429s over 70 rotating client IPs | 11 | **0** |
+| Muted text contrast, light themes | 2.35:1 | **≥4.5:1** (WCAG AA) |
+| Korean font payload actually downloaded | 887KB | **883KB** (repo 6.1MB → 1.8MB) |
+| Feature files touched to swap 5 UI primitives | — | **0** |
+| Blocking browser dialogs in app code | 11 | **0** |
+| Cafes on the map | 627 | **64 verified KW cafes** (314 after franchise and duplicate removal, then 302 more purged in the pivot and the market re-seeded by hand) |
+
+---
+
+## Engineering notes
+
+### Curation: keeping a local coffee map local
+
+Brand size is resolved from the OpenStreetMap `brand:wikidata` tag and counted through Overpass, then cached per brand, so a rejection costs one indexed read. Non-coffee venues are detected from the OSM `cuisine` tag, where a coffee marker always wins, so a cafe that also sells bubble tea stays. Linking stored rows to map nodes uses coordinate proximity plus name matching after exact-coordinate matching silently missed 24 rows named "Starbucks Coffee Company". New local shops in neither dataset get a 25m proximity check instead.
+
+The pass removed 253 franchise locations, 42 tea and juice venues, and 18 duplicates. Every cafe that survived carries its brand verdict and its descriptive traits. Rules: [cafe curation](./docs/architecture/cafe-curation.md).
+
+### Spatial search
+
+The GIST index existed and was unused, with Haversine distance computed in Python. Benchmarking ran against a 10,000-row Docker dataset isolated from production, which is how the 11.1x number has a before and an after instead of a vibe. Full method: [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md).
+
+### Client IP behind a proxy
+
+Behind Render's load balancer, `request.client.host` returned the same value for every user, so a `60/minute` limiter throttled everyone as one bucket. The fix trusts only private ranges, which makes `X-Forwarded-For` parse from the right, past the segment a client can write itself. Setting `--forwarded-allow-ips=*` would have been one flag and would have handed anyone a header that disables throttling. The same audit found the rate-limit key falling back to an unauthenticated `user_id` query parameter, so `?user_id=1,2,3…` bypassed it indefinitely. Removed.
+
+### Design system
+
+Two colour systems had diverged, and forty theme variables were injected by `useEffect` after first paint, so every load flashed. Rebuilding them as three token layers was routine. The proof surface built to check the tokens was not: it found muted text at 2.35:1, a Matcha accent label at 2.62:1, and five CSS variables that 48 files referenced and nothing ever defined. The muted hierarchy had never actually rendered.
+
+Button, Card, Badge, Modal and Tooltip moved onto Base UI behind the existing prop API, so no feature file changed. Accessibility was the reason, not tidiness. The old Modal had no focus trap, no Escape handler and no focus return, which left keyboard and screen reader users tabbing out of an open dialog with no way back.
+
+Fonts are self-hosted because the CSP blocks font CDNs outright. Hahmlet was chosen over Noto Serif KR on what a Korean reader downloads, 883KB against 887KB, rather than on the 3.4x repository size difference that would have picked the other one.
+
+### Security and correctness
+
+Findings that shipped as fixes: report text is escaped in the admin email and dashboard; the password reset form no longer reveals which addresses have an account, and no longer reports success when the mail failed; the follow list had been silently returning empty for every user; map services are held to their published rate limits; five message keys that resolved to nothing now resolve.
+
+Browser-native dialogs are gone from the app. Deleting a coffee log could freeze the tab outright, which left no way to remove a mistaken entry short of deleting the account. Eleven `confirm()` and `alert()` calls now route through the app's own dialog and toast, which also means they are translated, and toasts are announced to screen readers.
+
+### Testing
+
+12 backend test files cover registration policy, trait suggestion evidence, visit privacy, blacklists, account deletion, report safety, badges, and the OSM rate gate. The frontend is verified end to end against a running stack with a real account rather than by build alone: the current run has ten sessions of recorded results, which is where the log deletion freeze, the drop-bean radius mismatch and the silent photo upload failure were found. Results and evidence live in `docs/testing/`.
+
+---
+
+## Stack
+
+**Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Base UI, next-intl (en/ko), Leaflet, PostHog
+
+**Backend:** FastAPI, Python 3.11, Pydantic, slowapi, PostgreSQL + PostGIS, Supabase (auth and storage), OpenStreetMap and Overpass
+
+**Four themes** (Morning Coffee, Dark Roast, Matcha Latte, Vanilla Latte) run on the token layer, so contrast is a property of the system rather than of each screen.
+
+---
+
+## Architecture
 
 ```text
 IBeanThere/
 ├── apps/
-│   ├── fe/                    # Next.js 14 Frontend App
-│   │   ├── src/app/           # Localized App Router ([locale]/...)
-│   │   ├── src/shared/ui/     # Reusable UI component library
-│   │   ├── src/components/    # Feature-specific components
-│   │   └── tailwind.config.js # Thematic configurations
+│   ├── fe/                    # Next.js 15 frontend
+│   │   ├── src/app/[locale]/  # Localized App Router
+│   │   ├── src/shared/ui/     # Primitives (base/ holds the vendor layer)
+│   │   ├── src/components/    # Feature components
+│   │   ├── src/lib/themes/    # Theme palettes
+│   │   └── src/i18n/messages/ # en.json / ko.json
 │   │
-│   └── be/                    # FastAPI Backend Service
-│       ├── app/api/v1/        # Endpoints (auth, cafes, users, collections, etc.)
-│       ├── app/core/          # Configs, Security, deps.py (RBAC)
-│       └── scripts/           # DB Migrations / Utilities
-├── docs/                      # Architecture & Implementation Plans
-└── package.json               # Monorepo/Root tools
+│   └── be/                    # FastAPI service
+│       ├── app/api/v1/        # ~90 routes: cafes, visits, users, collections, admin
+│       ├── app/services/      # Overpass, dedupe, curation
+│       ├── app/core/          # Config, security, RBAC dependencies
+│       └── tests/             # 12 test modules
+└── docs/                      # Direction, architecture, plans, testing evidence
 ```
 
-> **For detailed system designs, see the `/docs/` folder.** (Includes routing strategy, module separation rules, the UGC verification flow diagrams, and the [cafe curation rules](./docs/architecture/cafe-curation.md)).
+`docs/product/direction.md` is the single source for what this product is and is not. `docs/architecture/` holds the system designs.
 
 ---
 
-## Getting Started
+## Run it locally
 
-### Prerequisites
-
-- Node.js 18+
-- Python 3.11+
-- A Supabase Project (Database & Authentication set up)
-
-### 1. Backend Setup
+**Prerequisites:** Node.js 18+, Python 3.11+, a Supabase project.
 
 ```bash
+# Backend
 cd apps/be
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env          # add SUPABASE_URL and SUPABASE_SERVICE_KEY
+uvicorn app.main:app --reload --port 8000   # docs at /docs
 
-# Create environment file
-cp .env.example .env
-# Edit .env with your SUPABASE_URL and SUPABASE_SERVICE_KEY
-```
-
-Run the API:
-
-```bash
-uvicorn app.main:app --reload --port 8000
-```
-
-> API Docs available at: `http://localhost:8000/docs`
-
-### 2. Frontend Setup
-
-```bash
+# Frontend
 cd apps/fe
 npm install
-
-# Create environment file
-cp .env.local.example .env.local
-# Edit .env.local with NEXT_PUBLIC_SUPABASE variables
+cp .env.local.example .env.local            # add NEXT_PUBLIC_SUPABASE_*
+npm run dev                                 # http://localhost:3000
 ```
-
-Run the Client:
-
-```bash
-npm run dev
-```
-
-> App available at: `http://localhost:3000`
 
 ---
 
-## Key API Reference (`/api/v1`)
+## API surface (`/api/v1`)
 
-| Module            | Purpose                              | Key Endpoints                                                    |
-| ----------------- | ------------------------------------ | ---------------------------------------------------------------- |
-| **Auth**          | User session and profile metadata    | `/auth/me`, `/auth/verify`                                       |
-| **Cafes**         | Discovery, Geocoding, Verification   | `GET /cafes`, `POST /cafes/register`, `GET /cafes/admin/pending` |
-| **Visits & Logs** | Journaling and physical check-ins    | `POST /cafes/{id}/visit`, `POST /cafes/{id}/log`                 |
-| **Users**         | Public profiles, badges              | `GET /users/profile/{name}`                                      |
-| **Collections**   | Custom groupings of cafes (My Beans) | `GET /collections`, `POST /collections`                          |
-| **Reports**       | Security & moderation flagging       | `POST /reports`                                                  |
-| **Community**     | Social feeds, trending algorithms    | `GET /community/trending`                                        |
+| Module | Purpose | Key endpoints |
+|---|---|---|
+| **Auth** | Session and profile metadata | `/auth/me`, `/auth/verify` |
+| **Cafes** | Discovery, geocoding, verification | `GET /cafes`, `POST /cafes/register`, `GET /cafes/{id}/beans`, `GET /cafes/admin/pending` |
+| **Visits & logs** | Journaling and geofenced check-ins | `POST /cafes/{id}/visit`, `PATCH /visits/{id}`, `DELETE /visits/{id}` |
+| **Beans** | Bean and roaster catalogue, trait suggestions | `GET /beans`, `POST /roasters`, `POST /cafes/{id}/traits` |
+| **Users** | Public profiles, follows, badges, deletion | `GET /users/profile/{name}`, `DELETE /users/me` |
+| **Collections** | Curated groupings, shareable by token | `GET /collections`, `POST /collections/{id}/share` |
+| **Admin** | Review queue, blacklists, deletion history | `GET /admin/blacklists/{kind}`, `DELETE /admin/cafes/{id}` |
+| **Reports** | Moderation flagging | `POST /reports` |
 
 ---
 
 ## Contributing
 
-This is currently a private/personal project shaping the future of coffee mapping, but feedback and feature requests are highly welcome. Feel free to open issues or discussions in the repository.
+A personal project, currently open to feedback rather than pull requests. Issues and discussions are welcome.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE)

@@ -3,26 +3,90 @@ import type { CoffeeDrink } from '../types';
 const siphon: CoffeeDrink = {
   slug: 'siphon',
   categoryId: 'brewing',
+  reviewed: '2026-09-11',
+  related: ['moka-pot', 'french-press', 'pour-over'],
   content: {
     en: {
-      name: 'Siphon',
-      tagline: 'It looks like a chemistry experiment about to go wrong. It\'s just coffee — and it\'s cleaner than a French press.',
+      name: 'Siphon coffee',
+      aka: 'Also called syphon or vacuum pot',
+      title: 'Siphon (vacuum pot) coffee: how it works and who invented it',
       description:
-        'Two glass globes, a flame, and a coffee that has to fight its way uphill before it\'s allowed to come back down — siphon brewing looks less like making coffee and more like a chemistry demo mid-malfunction. Heat builds vapor pressure in the lower globe, forcing water up into the grounds waiting above; pull the heat away and the resulting vacuum drags the brewed coffee back down through a filter.\n\nThe theater isn\'t the point, though — it\'s a side effect of a genuinely precise method. What comes out is cleaner than French press but rounder than paper-filtered pour over, with a clarity and delicate sweetness that takes 5–8 minutes of full attention to earn. Some Tokyo kissaten have used the same siphon units since the 1960s — decades of running the same small drama, one cup at a time.',
-      origin:
-        'The siphon was invented in Germany in the 1830s and refined throughout the 19th century. It peaked in popularity in the mid-20th century in Japan, where Kōno and Hario developed refined versions that remain popular in high-end cafés. In Japan, siphon coffee is often served as a premium "theater" experience at counter-style specialty bars.',
-      funFact:
-        'Siphon brewers were so popular in mid-century Japan that many older coffee shops still use them exclusively — decades-old machines maintained with devotion. Some Tokyo kissaten (traditional coffee shops) use the same siphon units purchased in the 1960s.',
+        'A siphon brewer uses steam to push water up to the coffee and a vacuum to pull it back down. How the two glass chambers work, and what is known about its 19th-century origin.',
+      summary:
+        'A siphon brewer has two glass chambers stacked over a heat source. Steam pressure pushes hot water from the lower chamber into the upper one, where it steeps with the coffee; when the heat is taken away, the steam condenses and the brewed coffee is drawn back down through a filter, leaving the grounds above.',
+      line: 'Two glass chambers: steam pushes water up to the coffee, and a vacuum pulls the brew back down.',
+      facts: [
+        { label: 'In the cup', value: 'Coffee and water, filtered' },
+        { label: 'Method', value: 'Steeping, moved by steam and vacuum' },
+        { label: 'Brewing water', value: 'Just below boiling' },
+        { label: 'Gear', value: 'Two glass chambers, a filter, a burner' },
+      ],
+      sections: [
+        {
+          id: 'how',
+          heading: 'How does a siphon coffee maker work?',
+          body: [
+            {
+              text: 'Heating the lower chamber builds steam pressure, which pushes the water up a tube into the upper chamber. It only needs enough pressure to overcome gravity and the atmosphere, so the water that reaches the coffee stays below 100 °C. When the heat is removed, the steam condenses and leaves a partial vacuum; atmospheric pressure then pushes the coffee back down through the filter.',
+              sources: ['bh-syphon-science'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: 'Who invented the siphon?',
+          body: [
+            {
+              text: 'The record is thin. Barista Hustle credits Johann Nörremberg, a physics teacher who in 1826 built a steam-driven brewer to show his students what steam could do, and described it in a German physics journal the following year without patenting it. Earlier vacuum brewers, it notes, had relied on mechanical pumps.',
+              sources: ['bh-syphon-history'],
+            },
+            {
+              text: 'Other histories name different inventors in Berlin and Lyon in the 1830s and 1840s. We could not check their patents directly, so they are left out here.',
+            },
+          ],
+        },
+      ],
     },
     ko: {
-      name: '사이폰',
-      tagline: '당장 터질 듯한 화학 실험처럼 보이지만, 사실은 그냥 커피다 — 프렌치프레스보다도 깨끗한.',
+      name: '사이폰 커피',
+      aka: '배큐엄 포트라고도 부릅니다',
+      title: '사이폰 커피: 작동 원리와 발명의 기록',
       description:
-        '두 개의 유리 구, 불꽃, 그리고 위로 억지로 밀려 올라갔다가 다시 허락을 받고서야 내려오는 커피. 사이폰 추출은 커피를 내린다기보다 잘못되기 직전의 화학 실험처럼 보입니다. 열이 아래 구에 증기압을 만들어 물을 위 챔버의 원두로 밀어 올리고, 열을 치우면 생기는 진공이 추출된 커피를 필터를 통해 다시 아래로 끌어내립니다.\n\n하지만 이 연극 같은 과정은 사실 정교함의 부산물일 뿐입니다. 결과물은 프렌치프레스보다 깨끗하면서 종이 필터 푸어오버보다 둥근 바디를 지니고 있고, 5~8분간 온전히 집중해야 얻을 수 있는 선명함과 섬세한 단맛을 냅니다. 도쿄의 일부 킷사텐은 1960년대에 산 사이폰을 지금도 그대로 씁니다 — 같은 작은 연극을 한 잔씩, 수십 년째 반복하고 있는 것입니다.',
-      origin:
-        '사이폰은 1830년대 독일에서 발명되어 19세기에 걸쳐 발전했습니다. 20세기 중반 일본에서 코노(Kōno)와 하리오(Hario)가 정교하게 발전시켜 최고의 인기를 누렸으며, 지금도 고급 카페에서 즐겨 사용됩니다. 일본에서 사이폰 커피는 카운터형 스페셜티 바의 프리미엄 "연극" 경험으로 제공됩니다.',
-      funFact:
-        '20세기 중반 일본에서 사이폰 브루어는 매우 인기가 높아 많은 오래된 커피숍이 수십 년이 지난 지금도 이것만 사용합니다. 도쿄의 일부 킷사텐(전통 커피숍)에서는 1960년대에 구매한 사이폰을 여전히 사용하고 있습니다.',
+        '사이폰은 증기로 물을 원두까지 밀어 올리고, 진공으로 커피를 다시 끌어내리는 추출기입니다. 두 유리 용기의 원리와 19세기 기원에 대해 알려진 것을 정리했습니다.',
+      summary:
+        '사이폰은 열원 위에 유리 용기 두 개를 위아래로 겹친 추출기입니다. 아래 용기에서 생긴 증기 압력이 뜨거운 물을 위 용기로 밀어 올리면 그곳에서 원두와 함께 우러나고, 불을 끄면 증기가 식으면서 커피가 필터를 지나 다시 아래로 빨려 내려갑니다. 가루는 위에 남습니다.',
+      line: '증기가 물을 원두까지 밀어 올리고, 진공이 커피를 다시 끌어내리는 두 개의 유리 용기.',
+      facts: [
+        { label: '재료', value: '원두와 물, 필터로 거름' },
+        { label: '방식', value: '증기와 진공으로 옮기며 우림' },
+        { label: '추출 온도', value: '끓는점보다 약간 낮음' },
+        { label: '도구', value: '유리 용기 두 개, 필터, 버너' },
+      ],
+      sections: [
+        {
+          id: 'how',
+          heading: '사이폰은 어떻게 작동하나',
+          body: [
+            {
+              text: '아래 용기를 데우면 증기 압력이 생겨 물을 관을 따라 위 용기로 밀어 올립니다. 중력과 대기압을 이길 만큼만 압력이 있으면 되기 때문에, 원두에 닿는 물은 100°C보다 낮게 유지됩니다. 불을 끄면 증기가 응결하면서 부분 진공이 생기고, 대기압이 커피를 필터 너머 아래로 밀어 내립니다.',
+              sources: ['bh-syphon-science'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: '사이폰은 누가 만들었나',
+          body: [
+            {
+              text: '기록이 많지 않습니다. 바리스타 허슬은 물리 교사 요한 뇌렘베르크가 1826년 학생들에게 증기의 힘을 보여 주려고 증기식 추출기를 만들었고, 이듬해 독일 물리학 학술지에 설명을 실었지만 특허는 내지 않았다고 봅니다. 그보다 앞선 진공 추출기들은 기계식 펌프를 썼다고 합니다.',
+              sources: ['bh-syphon-history'],
+            },
+            {
+              text: '1830~40년대 베를린과 리옹의 다른 발명가를 드는 자료도 있지만, 해당 특허를 직접 확인하지 못해 여기에는 적지 않았습니다.',
+            },
+          ],
+        },
+      ],
     },
   },
 };

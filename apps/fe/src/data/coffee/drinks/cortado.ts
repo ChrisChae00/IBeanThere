@@ -2,27 +2,93 @@ import type { CoffeeDrink } from '../types';
 
 const cortado: CoffeeDrink = {
   slug: 'cortado',
-  categoryId: 'milk-variations',
+  categoryId: 'espresso',
+  reviewed: '2026-09-11',
+  related: ['macchiato', 'flat-white', 'cafe-latte'],
   content: {
     en: {
       name: 'Cortado',
-      tagline: "In early-2010s California, ordering a cortado wasn't really about the drink — it was a password.",
+      aka: 'In Spanish: café cortado',
+      title: 'Cortado: what it is and how it compares with a macchiato and a flat white',
       description:
-        'Walk into a specialty coffee bar in 2011 and say "cortado," and you weren\'t just ordering — you were signaling. The word marked you as someone who took coffee seriously, back before the drink normalized, and for a few years it functioned almost like a status symbol in third-wave circles. Underneath the reputation, though, is a genuinely simple idea, borrowed from Spain: "cortado" means "cut."\n\nEspresso gets cut with warm, barely textured milk — not steamed into foam, just enough to soften the acidity — at a 1:1 or 1:2 ratio, in a small 60–90ml glass. It\'s not a latte in miniature; it\'s espresso with the edges filed down. Order one today and nobody blinks — the password expired, but the drink never needed it.',
-      origin:
-        'The cortado originated in Spain — most likely in the Basque country or Galicia — and is deeply embedded in the coffee culture of Spain and Portugal (where it\'s called "garoto" in the north or "meia de leite" in a slightly larger form). It became a global specialty coffee trend in the early 2010s.',
-      funFact:
-        'In some parts of California, ordering a cortado at a specialty coffee bar in the early 2010s was seen as a shiboleth — a way to signal that you were "serious" about coffee. The drink became almost a status symbol in third-wave coffee circles before it normalized.',
+        'A cortado is espresso cut with a small amount of warm milk. What the Spanish name means, how much milk it has, and where it sits between a macchiato and a flat white.',
+      summary:
+        'A cortado is espresso “cut” with a small amount of warm milk. The Spanish dictionary of the Real Academia Española defines it as coffee with very little milk; Dictionary.com, an American dictionary, describes roughly equal parts espresso and steamed milk. Either way it is small, and the coffee leads.',
+      summarySources: ['rae-cafe', 'dictcom-cortado'],
+      line: 'Espresso “cut” with a small amount of warm milk, up to about equal parts.',
+      facts: [
+        { label: 'In the cup', value: 'Espresso and a little steamed milk' },
+        { label: 'Milk', value: 'Very little, up to about as much as the espresso' },
+        { label: 'Name', value: 'Spanish, from cortar, “to cut”' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: 'What does “cortado” mean?',
+          body: [
+            {
+              text: 'It is the past participle of the Spanish verb cortar, to cut. The Real Academia Española’s dictionary lists café cortado as “coffee with very little milk.”',
+              sources: ['rae-cortado', 'rae-cafe'],
+            },
+            {
+              text: 'Dictionary.com, an American dictionary, puts the steamed milk at approximately the same amount as the espresso.',
+              sources: ['dictcom-cortado'],
+            },
+          ],
+        },
+        {
+          id: 'compared',
+          heading: 'Cortado, macchiato or flat white?',
+          body: [
+            {
+              text: 'Think of them by the amount of milk. A macchiato has a spot; a cortado has a little, up to about as much as the coffee; a flat white has more, textured into fine microfoam. The table in the guide sets the espresso-and-milk drinks side by side.',
+              sources: ['treccani-macchiare', 'dictcom-cortado', 'pdg-flat-white'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '코르타도',
-      tagline: '2010년대 초 캘리포니아에서 코르타도를 주문하는 건 커피 주문이 아니라 일종의 암구호였다.',
+      aka: '스페인어로 café cortado',
+      title: '코르타도란? 마키아토·플랫화이트와의 차이',
       description:
-        '2011년 스페셜티 커피 바에 들어가 "코르타도"라고 말하면, 그건 그냥 주문이 아니라 신호였습니다. 아직 이 음료가 대중화되기 전, 그 단어 하나가 당신이 커피에 진심이라는 걸 드러냈고, 몇 년간 서드웨이브 커피 세계에서 거의 지위 상징처럼 기능했습니다. 하지만 그 명성 아래에는 스페인에서 온 아주 단순한 아이디어가 있을 뿐입니다. "코르타도"는 "자르다"라는 뜻입니다.\n\n에스프레소를 따뜻하고 살짝만 텍스처를 준 우유로 자릅니다 — 폼을 만들 정도로 스팀하지 않고, 산미를 누그러뜨릴 만큼만 — 1:1 또는 1:2 비율로 작은 60~90ml 잔에 담습니다. 미니 라떼를 흉내 내는 게 아니라, 모서리만 다듬은 에스프레소로 남으려는 겁니다. 오늘 코르타도를 주문해도 아무도 신경 쓰지 않습니다. 암구호는 유효기간이 끝났지만, 이 음료는 애초에 그게 필요하지 않았습니다.',
-      origin:
-        '코르타도는 스페인 — 아마도 바스크 지방이나 갈리시아 — 에서 유래했으며 스페인과 포르투갈의 커피 문화에 깊이 뿌리내리고 있습니다. 2010년대 초 글로벌 스페셜티 커피 트렌드가 되었습니다.',
-      funFact:
-        '2010년대 초 캘리포니아의 일부 지역에서 스페셜티 커피 바에서 코르타도를 주문하는 것은 일종의 암호 같은 것이었습니다. "나 커피에 진심이야"라는 신호였죠. 일반화되기 전에 서드웨이브 커피 세계에서 거의 지위 상징이 된 음료입니다.',
+        '코르타도는 에스프레소에 따뜻한 우유를 조금 더해 ‘자른’ 커피입니다. 스페인어 이름의 뜻, 우유의 양, 마키아토와 플랫화이트 사이의 자리를 정리했습니다.',
+      summary:
+        '코르타도는 에스프레소를 따뜻한 우유 조금으로 ‘자른’ 커피입니다. 스페인 왕립 학술원 사전은 우유를 아주 조금 넣은 커피로 정의하고, 미국 사전 Dictionary.com은 에스프레소와 스팀 우유를 비슷한 양으로 섞은 음료로 설명합니다. 어느 쪽이든 작고, 커피 맛이 앞섭니다.',
+      summarySources: ['rae-cafe', 'dictcom-cortado'],
+      line: '에스프레소를 따뜻한 우유 조금으로 ‘자른’ 커피. 많아야 비슷한 양입니다.',
+      facts: [
+        { label: '재료', value: '에스프레소와 약간의 스팀 우유' },
+        { label: '우유', value: '아주 조금에서 에스프레소와 비슷한 양까지' },
+        { label: '이름', value: '스페인어 cortar(자르다)에서' },
+      ],
+      sections: [
+        {
+          id: 'name',
+          heading: '‘코르타도’는 무슨 뜻인가',
+          body: [
+            {
+              text: '스페인어 동사 cortar(자르다)의 과거분사입니다. 스페인 왕립 학술원(RAE) 사전은 café cortado를 ‘우유를 아주 조금 넣은 커피’로 풀이합니다.',
+              sources: ['rae-cortado', 'rae-cafe'],
+            },
+            {
+              text: '미국 사전 Dictionary.com은 스팀 우유의 양을 에스프레소와 비슷한 정도로 봅니다.',
+              sources: ['dictcom-cortado'],
+            },
+          ],
+        },
+        {
+          id: 'compared',
+          heading: '코르타도, 마키아토, 플랫화이트는 어떻게 다른가',
+          body: [
+            {
+              text: '우유의 양으로 나누면 쉽습니다. 마키아토는 한 점, 코르타도는 조금에서 커피와 비슷한 양까지, 플랫화이트는 그보다 많고 고운 마이크로폼으로 질감을 냅니다. 가이드의 비교표에서 우유를 넣는 에스프레소 음료를 한눈에 볼 수 있습니다.',
+              sources: ['treccani-macchiare', 'dictcom-cortado', 'pdg-flat-white'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

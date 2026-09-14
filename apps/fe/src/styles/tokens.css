@@ -1,0 +1,213 @@
+/*
+  Layers 2 and 3 — semantic and component tokens.
+
+  Authored once, never per theme. Everything here resolves through the layer-1 slots
+  in themes.css, so switching themes swaps one block and the whole vocabulary follows.
+
+  Feature code should read from layer 2. Layer 3 exists so a control's shape is
+  described in one place instead of being re-typed as utilities on every instance.
+*/
+
+:root {
+  /* ---- Layer 2: surfaces ---- */
+  --surface-page: var(--c-page);
+  --surface-raised: var(--c-raised);
+  --surface-elevated: var(--c-elevated);
+  --surface-sunken: color-mix(in srgb, var(--c-page) 92%, var(--c-ink));
+  --surface-hover: color-mix(in srgb, var(--c-raised) 88%, var(--c-ink));
+  /*
+    The inverted band defaults to the ink, which is the one slot guaranteed to contrast
+    with every surface in the theme. A theme can name `--c-inverse` to take it off that
+    default: on a dark theme the ink is a near-white, and a full-width block of it is a
+    lamp rather than a band.
+  */
+  --surface-inverse: var(--c-inverse, var(--c-ink));
+
+  /* ---- Layer 2: ink ---- */
+  --ink-primary: var(--c-ink);
+  --ink-secondary: var(--c-ink-soft);
+  --ink-on-brand: var(--c-on-brand);
+  --ink-on-media: var(--c-on-media);
+  --ink-inverse: var(--c-page);
+
+  /*
+    The wash that goes over a photograph so light ink can sit on it. It is its own
+    slot and not `--brand` because the two are opposite kinds of colour: brand is a
+    foreground that `--ink-on-brand` sits on top of, so a dark theme has to make it
+    light, and a scrim is a darkener that has to stay dark in every theme or it
+    stops doing its job. Espresso is where that difference shows - its brand is
+    `#d4c7b8`, which washed the hero white.
+
+    Each theme's value is its own darkest hue rather than a shared black, so the
+    hero still reads as that theme.
+  */
+  --scrim-media: var(--c-scrim);
+
+  /* ---- Layer 2: accent ---- */
+  --brand: var(--c-brand);
+  --brand-hover: var(--c-brand-soft);
+  --brand-muted: var(--c-accent);
+
+  /* ---- Layer 2: edges ---- */
+  --edge-subtle: color-mix(in srgb, var(--c-edge) 50%, transparent);
+  --edge-default: var(--c-edge);
+  --edge-strong: var(--c-brand);
+  /*
+    A rule that has to stay visible on every theme. The edge slots are surface-derived,
+    so on the dark themes they sit within ~1.2:1 of the panel they divide and disappear;
+    this one comes off the ink instead, which is the one colour guaranteed to contrast
+    with the surface it is printed on.
+  */
+  --edge-rule: color-mix(in srgb, var(--ink-primary) 18%, transparent);
+
+  /* ---- Layer 2: state ---- */
+  --state-success: var(--c-success);
+  --state-warning: var(--c-warning);
+  --state-danger: var(--c-danger);
+  --state-pending: #9CA3AF;
+
+  /* ---- Layer 2: domain ---- */
+  --star-filled: var(--c-star);
+  --star-empty: var(--c-star-off);
+  --star-empty-edge: var(--c-star-off-edge);
+  --marker-cafe: var(--c-marker-cafe);
+  /*
+    The user pin is fixed, not theme-derived: it marks "you are here" on OpenStreetMap's
+    tiles, which stay light in every theme, and it is the one pin a reader has to find
+    at a glance. Letting it change hue per theme made it read as a different kind of
+    marker in each one.
+  */
+  --marker-user: #D24C28;
+  /*
+    The two built-in collections. Fixed rather than theme-derived, same reasoning as the
+    map pin: a heart is red and a bookmark is blue everywhere a reader has ever seen one,
+    and these two icons are how a saved cafe is picked out of a list at a glance. Both
+    are icons, so the bar is the 3:1 non-text threshold, which they clear on all four
+    grounds. They were eight copies of `#ef4444` / `#3b82f6` before this slot existed.
+  */
+  --collection-favourite: #ef4444;
+  --collection-saved: #3b82f6;
+
+  --marker-pending: var(--state-pending);
+  /*
+    The ring and the count sit on the marker against OpenStreetMap's tiles, which stay
+    light in every theme, so both are fixed rather than theme-derived -- a dark theme's
+    on-brand ink would put a dark ring on a dark pin and lose the cut-out entirely.
+  */
+  --marker-ring: #ffffff;
+
+  /* ---- Typography ---- */
+  /*
+    A serif for headings and a sans for everything else, in both languages, so the two
+    locales read as one system. Each stack lists the other locale's face as its
+    fallback: cafe names on the English site are Korean, so that path is used in
+    practice, not just in theory.
+
+    The weight stays a token because the two display faces do not carry the same weight
+    at the same number - Playfair's 700 and Hahmlet's 600 sit at a comparable density on
+    screen, and matching the number instead of the density makes one locale look heavier
+    than the other.
+  */
+  --font-display: 'Playfair Display', 'Hahmlet', Georgia, serif;
+  --font-display-weight: 700;
+  --font-body:
+    'Inter', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+
+  /* ---- Relief shadows ---- */
+  /*
+    Composed once so the utilities stay readable and every state is guaranteed to share
+    one light source: highlight up-left, shadow down-right.
+  */
+  /*
+    A floating panel - a popover, the cafe card over the map - is separated from what it
+    covers by one plain drop shadow. It is fixed rather than theme-derived for the same
+    reason the marker shadow is: the themes' own shadow colours are light in the dark
+    themes and would paint a halo. The neumorphic pair this replaced lit the panel from
+    the top left, which read as an embossed plate rather than as something in front.
+  */
+  --shadow-panel: 0 12px 28px -10px rgb(0 0 0 / 0.28);
+
+  /*
+    Map markers sit on OpenStreetMap's own tiles, which stay light whatever the theme, so
+    this one shadow is deliberately not theme-derived: `--c-shadow` is a light colour in
+    the dark themes and would paint a halo instead of a shadow. One offset, fixed.
+  */
+  --shadow-marker: 0 2px 4px rgb(0 0 0 / 0.3);
+
+  /* ---- Radius ---- */
+  /* Two values and a pill. Anything that needs a third is asking the wrong question. */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+
+  /* ---- Layer 3: component ---- */
+  /*
+    Settled at the pill after comparing it against `--radius-card` (16px, what buttons
+    carried as `rounded-2xl` before Phase 2b) and `--radius-control` (10px, which would
+    have matched the inputs).
+
+    Hardcoded `rounded-full` utilities elsewhere in the app do not read this token, so
+    they are migrated onto it as each file is touched.
+  */
+  --btn-radius: var(--radius-pill);
+  --btn-height-sm: 40px;
+  --btn-height-md: 48px;
+  --btn-height-lg: 56px;
+
+  --card-radius: var(--radius-card);
+  --card-pad: 1.5rem;
+  --card-edge: var(--edge-default);
+  --card-surface: var(--surface-raised);
+
+  /* ---- Layer 3: navigation stacking ---- */
+  /*
+    The header's own stack, written down because it spans three stacking contexts and
+    two portals, which is how it went wrong: the mobile drawer portals to `<body>` at
+    9999 and the switcher menus portal to `<body>` at 50, so a menu opened from inside
+    the drawer rendered behind the drawer that owns it.
+
+    The rule is that a popup outranks whatever opened it. These five are the only
+    layers in the nav; the rest of the app has its own numbers (modals at 1000-2000,
+    map chrome in the hundreds) and is deliberately left alone -- renumbering the nav
+    down into that range is what would start the next collision.
+  */
+  --z-nav: 50;
+  --z-nav-progress: 60;
+  --z-nav-scrim: 9998;
+  --z-nav-drawer: 9999;
+  --z-nav-popover: 10000;
+
+  /*
+    Map chrome sits above Leaflet's own controls, which globals.css pins at 1000, and
+    below the nav band. The cafe modal sits above the chrome that opened it -- same
+    rule as the nav: a popup outranks whatever opened it.
+  */
+  --z-map-chrome: 1100;
+  --z-map-modal: 1200;
+
+  /*
+    The modal stack, written down for the same reason the nav's is: a collection modal
+    opens a move-to modal, and a row's own menu has to clear both. The rule does not
+    change -- a popup outranks whatever opened it. A menu inside a modal cannot be
+    positioned inside the panel instead: the list it belongs to scrolls, and an
+    absolutely placed menu is clipped by that scroll box and reachable only by scrolling
+    down to it.
+  */
+  --z-modal: 1000;
+  --z-modal-nested: 1002;
+  --z-modal-popover: 1300;
+
+  --input-height: 48px;
+  --input-radius: var(--radius-control);
+  --input-edge: var(--edge-default);
+  --input-surface: var(--surface-raised);
+}
+
+:root:lang(ko) {
+  --font-display: 'Hahmlet', 'Playfair Display', serif;
+  --font-display-weight: 600;
+  --font-body:
+    'Pretendard Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+}

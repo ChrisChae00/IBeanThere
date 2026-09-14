@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult } from '@/types/api';
+import { TrendingCafeResponse, CafeSearchResponse, CafeRegistrationRequest, CafeRegistrationResponse, LocationSearchResult, CafeDetailResponse, GooglePlacesLookupResult, GoogleCafePhoto, TraitSummary, TraitSuggestion, CafeBeansResponse } from '@/types/api';
 import { API_BASE_URL, getAuthHeaders, handleResponse, apiFetch, ApiError } from './client';
 
 export async function registerCafe(
@@ -200,6 +200,20 @@ export async function getTrendingCafes(
   }
 }
 
+export async function getGoogleCafePhoto(cafeId: string): Promise<GoogleCafePhoto | null> {
+  try {
+    const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/google-photo`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    if (response.status === 204 || response.status === 429 || response.status === 502) return null;
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getPendingCafes(): Promise<CafeSearchResponse> {
   const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/pending`, {
     method: 'GET',
@@ -237,4 +251,113 @@ export async function searchCafes(
   );
 
   return handleResponse<CafeSearchResponse>(response);
+}
+
+/**
+ * Find cafes by name or address across the whole database, not only the area the map
+ * has loaded. Returns an empty list on failure -- the caller is a search box, and a
+ * thrown error there would take the map down with it.
+ */
+export async function searchCafesByText(query: string, limit = 20): Promise<CafeSearchResponse['cafes']> {
+  try {
+    const response = await apiFetch(
+      `${API_BASE_URL}/api/v1/cafes/search/text?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    if (!response.ok) return [];
+    const result = await handleResponse<CafeSearchResponse>(response);
+    return result.cafes || [];
+  } catch (error) {
+    console.error('Error searching cafes by text:', error);
+    return [];
+  }
+}
+
+/*
+  Coffee traits and the beans seen at a cafe.
+
+  Both are derived from what people have written, and both change the moment
+  somebody writes something -- so `no-store`. A cached "sells beans" is a promise
+  the shop stopped keeping last month.
+*/
+export async function getCafeTraits(cafeId: string): Promise<TraitSummary[]> {
+  /* Signed out is a normal way to read this page, so the token is optional here --
+     the backend uses it only to fill in `mine`, and refuses nothing without it. */
+  const headers = await getAuthHeaders(false);
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits`, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
+  return handleResponse<TraitSummary[]>(response);
+}
+
+/*
+  A claim made from the cafe page is a suggestion, not a change. The server decides
+  that, not this call -- there is no status in the body to forge. The summary comes
+  back unmoved, which is the honest answer: nothing counts until someone reviews it.
+*/
+export async function suggestTraitObservation(
+  cafeId: string,
+  trait: string,
+  value: boolean,
+  note?: string,
+  observedAt?: string
+): Promise<{ submitted: boolean; traits: TraitSummary[] }> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits/${trait}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ value, note, observed_at: observedAt }),
+  });
+  return handleResponse<{ submitted: boolean; traits: TraitSummary[] }>(response);
+}
+
+export async function clearTraitObservation(cafeId: string, trait: string): Promise<TraitSummary[]> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/traits/${trait}`, {
+    method: 'DELETE',
+    headers,
+  });
+  return handleResponse<TraitSummary[]>(response);
+}
+
+export async function getCafeBeans(cafeId: string): Promise<CafeBeansResponse> {
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/${cafeId}/beans`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
+  return handleResponse<CafeBeansResponse>(response);
+}
+
+
+/* The admin queue: cafe-page suggestions and researched seed claims -- see
+   TraitSuggestionsList. */
+export async function getTraitSuggestions(): Promise<TraitSuggestion[]> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/cafes/traits/suggestions`, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
+  const data = await handleResponse<{ suggestions: TraitSuggestion[] }>(response);
+  return data.suggestions;
+}
+
+export async function approveTraitSuggestion(suggestionId: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/v1/cafes/traits/suggestions/${suggestionId}/approve`,
+    { method: 'POST', headers }
+  );
+  await handleResponse(response);
+}
+
+export async function rejectTraitSuggestion(suggestionId: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/v1/cafes/traits/suggestions/${suggestionId}`,
+    { method: 'DELETE', headers }
+  );
+  await handleResponse(response);
 }

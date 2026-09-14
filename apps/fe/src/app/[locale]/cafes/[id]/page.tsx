@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: CafeDetailPageProps): Promise
     const cafe = await getCafeDetail(id);
     const t = await getTranslations('cafe.detail');
 
-    const title = `${cafe.name} - ${cafe.address || ''} | IBeanThere`;
+    const title = `${cafe.name} - ${cafe.address || ''} | ibeanthere`;
     const description = cafe.average_rating
       ? `${cafe.name} - ${t('average_rating')}: ${cafe.average_rating.toFixed(1)}/5 ${t('from')} ${cafe.log_count} ${t('coffee_logs')}`
       : `${cafe.name} - ${cafe.address || ''}`;
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: CafeDetailPageProps): Promise
     };
   } catch (error) {
     return {
-      title: 'Cafe | IBeanThere',
+      title: 'Cafe | ibeanthere',
     };
   }
 }
@@ -93,7 +93,11 @@ export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
         <Script
           id="cafe-structured-data"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          // Name, address, phone and website come from cafe registration and map data,
+          // not from us. JSON.stringify leaves `</script>` alone, so a cafe named
+          // `</script><script>...` would close this tag and run on every visit to its
+          // page; `\u003c` is the same `<` to a JSON parser and nothing to an HTML one.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }}
         />
         <CafeDetailClient cafe={cafe} />
       </>
@@ -107,10 +111,10 @@ export default async function CafeDetailPage({ params }: CafeDetailPageProps) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--color-cardText)] mb-4">
+          <h1 className="text-2xl font-bold text-cardText mb-4">
             Cafe not found
           </h1>
-          <p className="text-[var(--color-cardTextSecondary)]">
+          <p className="text-cardTextSecondary">
             The cafe you're looking for doesn't exist or has been removed.
           </p>
         </div>

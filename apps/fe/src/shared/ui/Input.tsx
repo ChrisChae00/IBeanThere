@@ -4,6 +4,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes
 } from 'react';
+import { cn } from '@/lib/cn';
 
 type InputElementProps = InputHTMLAttributes<HTMLInputElement> &
   TextareaHTMLAttributes<HTMLTextAreaElement>;
@@ -20,8 +21,10 @@ export interface InputProps extends Omit<InputElementProps, 'size'> {
   fullWidth?: boolean;
 }
 
+/* `read-only:` so a field that is showing an answer rather than taking one looks
+   like it — the caller sets `readOnly`, the styling does not have to be repeated. */
 const baseFieldClasses =
-  'w-full rounded-2xl border bg-[var(--color-cardBackground)] text-[var(--color-cardText)] placeholder:text-[var(--color-cardTextSecondary)] focus:outline-none transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
+  'w-full rounded-2xl border bg-cardBackground text-cardText placeholder:text-cardTextSecondary focus:outline-hidden transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] read-only:opacity-70 read-only:cursor-default read-only:focus:ring-0';
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
   (
@@ -52,19 +55,19 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       hasLeftIcon ? 'pl-12' : 'pl-4',
       needsRightPadding ? 'pr-12' : 'pr-4'
     ].join(' ');
-    const fieldClasses = [
+    /* Merged, not joined: a caller's `rounded-*` or `pl-*` has to beat the base
+       rather than land beside it and leave the stylesheet order to decide. */
+    const fieldClasses = cn(
       baseFieldClasses,
       'min-h-[48px] py-3',
       paddingWithIcon,
-      fullWidth ? 'w-full' : '',
+      fullWidth && 'w-full',
       error
-        ? 'border-[var(--color-error)] focus:ring-2 focus:ring-[var(--color-error)]/30'
-        : 'border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary)]/30',
-      multiline ? 'resize-none leading-relaxed' : '',
+        ? 'border-error focus:ring-2 focus:ring-error/30'
+        : 'border-border focus:ring-2 focus:ring-primary/30',
+      multiline && 'resize-none leading-relaxed',
       className
-    ]
-      .filter(Boolean)
-      .join(' ');
+    );
 
     return (
       <label
@@ -74,13 +77,13 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
         htmlFor={fieldId}
       >
         {label && (
-          <span className="text-[var(--color-cardText)]">{label}</span>
+          <span className="text-cardText">{label}</span>
         )}
 
         <div className="relative">
           {icon && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 z-10 text-[var(--color-cardTextSecondary)] ${
+              className={`absolute top-1/2 -translate-y-1/2 z-10 text-cardTextSecondary ${
                 iconPosition === 'left' ? 'left-4' : 'right-4'
               }`}
             >
@@ -107,8 +110,8 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
           <span
             className={`text-xs ${
               error
-                ? 'text-[var(--color-error)]'
-                : helperTextClassName || 'text-[var(--color-cardTextSecondary)]'
+                ? 'text-error'
+                : helperTextClassName || 'text-cardTextSecondary'
             }`}
           >
             {error || helperText}

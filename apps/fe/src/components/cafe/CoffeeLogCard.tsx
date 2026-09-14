@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CoffeeLog } from '@/types/api';
-import { Card } from '@/components/ui';
+import { Card } from '@/shared/ui';
 import dynamic from 'next/dynamic';
 import { StarRating } from '@/shared/ui';
 import { Avatar } from '@/shared/ui';
@@ -38,59 +38,22 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   
-  const hasAdvancedData = (() => {
-    // Check if outlet_info has actual data (could be JSON string)
-    const hasOutletInfo = (() => {
-      if (!log.outlet_info) return false;
-      try {
-        const parsed = JSON.parse(log.outlet_info);
-        return parsed.availability || parsed.location || parsed.comment;
-      } catch {
-        return Boolean(log.outlet_info && log.outlet_info.trim());
-      }
-    })();
-    
-    // Check if parking_info has actual data (could be JSON string)
-    const hasParkingInfo = (() => {
-      if (!log.parking_info) return false;
-      try {
-        const parsed = JSON.parse(log.parking_info);
-        return parsed.type;
-      } catch {
-        return Boolean(log.parking_info && log.parking_info.trim());
-      }
-    })();
-    
-    // Check Coffee & Taste data
-    const hasCoffeeTasteData = Boolean(
-      (log.overall_taste_rating !== undefined && log.overall_taste_rating !== null) ||
-      (log.bean_origin && log.bean_origin.trim()) ||
-      (log.processing_method && log.processing_method.trim()) ||
-      (log.roast_level && log.roast_level.trim()) ||
-      (log.extraction_method && log.extraction_method.trim()) ||
-      (log.extraction_equipment && log.extraction_equipment.trim()) ||
-      (log.aroma_rating !== undefined && log.aroma_rating !== null) ||
-      (log.acidity_rating !== undefined && log.acidity_rating !== null) ||
-      (log.sweetness_rating !== undefined && log.sweetness_rating !== null) ||
-      (log.bitterness_rating !== undefined && log.bitterness_rating !== null) ||
-      (log.body_rating !== undefined && log.body_rating !== null) ||
-      (log.aftertaste_rating !== undefined && log.aftertaste_rating !== null)
-    );
-    
-    // Check Space & Work Environment data
-    const hasSpaceWorkData = Boolean(
-      (log.wifi_quality && log.wifi_quality.trim()) ||
-      (log.wifi_rating !== undefined && log.wifi_rating !== null) ||
-      hasOutletInfo ||
-      (log.furniture_comfort && log.furniture_comfort.trim()) ||
-      (log.noise_level && log.noise_level.trim()) ||
-      (log.noise_rating !== undefined && log.noise_rating !== null) ||
-      (log.temperature_lighting && log.temperature_lighting.trim()) ||
-      hasParkingInfo
-    );
-    
-    return hasCoffeeTasteData || hasSpaceWorkData;
-  })();
+  /*
+    Only the taste sliders are foldable now. The workspace block and its two JSON
+    parsers are gone with the columns that fed them -- wifi and outlets described a
+    place to sit, which is not what this app remembers.
+  */
+  const TASTE_FIELDS = [
+    ['overall_taste', log.overall_taste_rating],
+    ['aroma', log.aroma_rating],
+    ['acidity', log.acidity_rating],
+    ['sweetness', log.sweetness_rating],
+    ['bitterness', log.bitterness_rating],
+    ['body', log.body_rating],
+    ['aftertaste', log.aftertaste_rating],
+  ] as const;
+
+  const tasteNotes = TASTE_FIELDS.filter(([, value]) => value !== undefined && value !== null);
 
   useEffect(() => {
     if (cafeName || !log.cafe_id) {
@@ -184,16 +147,16 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
     <Card>
       {/* Cafe Name */}
       {!hideCafeName && cafe && (
-        <div className="pb-2 border-b border-[var(--color-border)]">
+        <div className="pb-2 border-b border-edge-rule">
           {cafePath ? (
             <Link
               href={cafePath}
-              className="text-base font-semibold text-[var(--color-cardText)] hover:text-[var(--color-secondary)] transition-colors"
+              className="text-base font-semibold text-ink-primary hover:text-ink-primary transition-colors"
             >
               {cafe.name}
             </Link>
           ) : (
-            <p className="text-base font-semibold text-[var(--color-cardText)]">
+            <p className="text-base font-semibold text-ink-primary">
               {isLoadingCafe ? 'Loading...' : cafe.name}
             </p>
           )}
@@ -211,10 +174,10 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                   size="sm"
                 />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-cardText)]">
+                  <p className="text-sm font-medium text-ink-primary">
                     {log.anonymous ? t('anonymous') : (log.author_display_name || 'User')}
                   </p>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                  <p className="text-xs text-ink-secondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -226,17 +189,17 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                     src={log.author_avatar_url}
                     alt={log.author_display_name || 'User'}
                     size="sm"
-                    className="cursor-pointer hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
+                    className="cursor-pointer hover:ring-2 hover:ring-brand transition-all"
                   />
                 </Link>
                 <div>
                   <Link 
                     href={`/${locale}/profile/${log.author_username}`}
-                    className="text-sm font-medium text-[var(--color-cardText)] hover:text-[var(--color-primary)] transition-colors"
+                    className="text-sm font-medium text-ink-primary hover:text-ink-primary transition-colors"
                   >
                     {log.author_display_name || 'User'}
                   </Link>
-                  <p className="text-xs text-[var(--color-cardTextSecondary)]">
+                  <p className="text-xs text-ink-secondary">
                     {formatRelativeDate(log.visited_at)}
                   </p>
                 </div>
@@ -244,7 +207,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             )
           )}
           {hideUserInfo && (
-            <p className="text-xs text-[var(--color-cardTextSecondary)]">
+            <p className="text-xs text-ink-secondary">
               {formatRelativeDate(log.visited_at)}
             </p>
           )}
@@ -253,7 +216,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onEdit && (
               <button
                 onClick={() => onEdit(log)}
-                className="text-sm text-[var(--color-cardText)] hover:text-[var(--color-secondary)] hover:underline transition-colors"
+                className="text-sm text-ink-primary hover:text-ink-primary hover:underline transition-colors"
               >
                 {t('edit')}
               </button>
@@ -261,7 +224,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             {onDelete && (
               <button
                 onClick={() => onDelete(log.id)}
-                className="text-sm text-[var(--color-error)] hover:underline"
+                className="text-sm text-state-danger hover:underline"
               >
                 {t('delete')}
               </button>
@@ -272,10 +235,28 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Rating & Atmosphere Tags */}
       <div className="flex flex-wrap items-center gap-2">
-        {log.rating && (
-          <div className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-surface)] rounded-lg">
+        {/*
+          Only a purchase says so. Drinking is what almost every log is, and a chip
+          on all of them labels the ordinary -- it reads as noise and pushes the
+          rating and the tags along. A drink log already looks like one: it has
+          stars and a coffee type. What needs saying is the exception.
+        */}
+        {log.mode === 'purchase' && (
+          <span className="landing-micro rounded-(--radius-pill) border border-edge-rule px-2 py-1 text-ink-secondary">
+            {t('mode_purchase')}
+          </span>
+        )}
+        {/* No stars at all on a log with no rating: an empty five would read as
+            "rated zero", and a purchase is not a bad cup. */}
+        {log.rating ? (
+          <div className="inline-flex items-center gap-2 px-2 py-1 bg-surface-elevated rounded-lg">
             <StarRating rating={log.rating} size="sm" textColor="surface" />
           </div>
+        ) : null}
+        {log.want_again !== undefined && log.want_again !== null && (
+          <span className="landing-micro text-ink-secondary">
+            {t(log.want_again ? 'want_again_yes_label' : 'want_again_no_label')}
+          </span>
         )}
         {(() => {
           // Parse atmosphere_tags if it's a string (JSONB from database)
@@ -293,7 +274,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-2 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full border border-[var(--color-border)]"
+                    className="inline-block px-2 py-1 text-xs font-medium bg-brand/12 text-ink-primary rounded-full border border-edge-rule"
                   >
                     {t(`atmosphere_${tag}`)}
                   </span>
@@ -316,7 +297,7 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
                 setLightboxIndex(index);
                 setLightboxOpen(true);
               }}
-              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-brand"
             >
               <img
                 src={url}
@@ -332,14 +313,14 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
       {(log.coffee_type || log.price) && (
         <div className="flex items-center gap-3 mb-3">
           {log.coffee_type && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-brand text-ink-on-brand rounded-lg">
               <svg 
                 width="14" 
                 height="14" 
                 viewBox="0 0 142 96" 
                 fill="none" 
                 xmlns="http://www.w3.org/2000/svg"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <path d="M27.15 88.25 c-3.50 -1.50 -4.10 -6.45 -1.10 -8.95 l1.55 -1.30 45.45 0 c48.90 0 47.60 -0.05 48.95 2.45 1 1.95 0.60 4.90 -0.95 6.65 l-1.45 1.65 -45.45 0.10 c-38.30 0.10 -45.65 0 -47 -0.60z" fill="currentColor"/>
                 <path d="M53.65 72 c-4.05 -0.85 -8.30 -3.65 -10.40 -7 -2.60 -4.15 -2.75 -5.55 -2.75 -27.80 0 -12.20 0.20 -21.15 0.50 -21.90 0.25 -0.70 1.20 -1.75 2.10 -2.30 1.60 -0.95 2.55 -1 35.40 -1 19 0 35 0.20 36.65 0.50 16.30 2.65 23.90 21.55 13.90 34.65 -4.25 5.60 -9.45 8.15 -17.70 8.75 l-5.10 0.35 -0.35 2.40 c-0.90 6.50 -6.45 12.10 -13.10 13.30 -3.50 0.65 -35.95 0.65 -39.15 0.05z m61.05 -27.55 c4.70 -1.20 7.80 -5.45 7.80 -10.80 0 -6.30 -5.05 -10.65 -12.30 -10.65 l-3.65 0 -0.15 10.80 c-0.10 5.95 -0.05 10.90 0.05 11 0.45 0.40 6.20 0.20 8.25 -0.35z" fill="currentColor"/>
@@ -348,17 +329,27 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
             </span>
           )}
           {log.price !== undefined && log.price !== null && (
-            <span className="text-sm font-medium text-[var(--color-cardText)]">
+            <span className="text-sm font-medium text-ink-primary">
               {formatPrice(log.price, log.price_currency) ?? log.price}
             </span>
           )}
         </div>
       )}
 
+      {/* Which bean. The catalogue name when the reader linked one, otherwise what
+          they wrote off the bag -- a smaller claim, still worth showing. */}
+      {(log.bean || log.bean_name_raw) && (
+        <div className="mb-3 text-sm text-ink-primary">
+          {log.bean
+            ? `${log.bean.name}${log.bean.roaster_name ? ` · ${log.bean.roaster_name}` : ''}`
+            : log.bean_name_raw}
+        </div>
+      )}
+
       {/* Dessert */}
       {log.dessert && (
         <div className="mb-3">
-          <span className="text-xs text-[var(--color-cardTextSecondary)]">
+          <span className="text-xs text-ink-secondary">
             {t('dessert')}: {log.dessert}
           </span>
         </div>
@@ -366,161 +357,42 @@ export default function CoffeeLogCard({ log, onEdit, onDelete, cafeName, hideCaf
 
       {/* Comment */}
       {log.comment && (
-        <div className="mb-4 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
-          <p className="text-sm text-[var(--color-cardText)] whitespace-pre-wrap">
+        <div className="mb-4 p-3 bg-surface-elevated rounded-lg border border-edge-rule">
+          <p className="text-sm text-ink-primary whitespace-pre-wrap">
             {log.comment}
           </p>
         </div>
       )}
 
-      {/* Advanced Logging Section */}
-      {hasAdvancedData && (
-        <div className="border-t border-[var(--color-border)] pt-4 mt-4">
+      {tasteNotes.length > 0 && (
+        <div className="mt-4 border-t border-edge-rule pt-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-sm text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition-colors"
+            className="flex w-full items-center justify-between text-sm text-ink-secondary transition-colors hover:text-ink-primary"
             aria-expanded={showAdvanced}
           >
-            <span>{t('detailed_review')}</span>
+            <span>{t('tasting_notes')}</span>
             <svg
-              className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+              className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
+
           {showAdvanced && (
-            <div className="mt-4 space-y-4 text-sm">
-              {/* Coffee & Taste Advanced */}
-              {(() => {
-                const hasCoffeeTasteData = Boolean(
-                  (log.overall_taste_rating !== undefined && log.overall_taste_rating !== null) ||
-                  (log.bean_origin && log.bean_origin.trim()) ||
-                  (log.processing_method && log.processing_method.trim()) ||
-                  (log.roast_level && log.roast_level.trim()) ||
-                  (log.extraction_method && log.extraction_method.trim()) ||
-                  (log.extraction_equipment && log.extraction_equipment.trim()) ||
-                  (log.aroma_rating !== undefined && log.aroma_rating !== null) ||
-                  (log.acidity_rating !== undefined && log.acidity_rating !== null) ||
-                  (log.sweetness_rating !== undefined && log.sweetness_rating !== null) ||
-                  (log.bitterness_rating !== undefined && log.bitterness_rating !== null) ||
-                  (log.body_rating !== undefined && log.body_rating !== null) ||
-                  (log.aftertaste_rating !== undefined && log.aftertaste_rating !== null)
-                );
-
-                if (!hasCoffeeTasteData) return null;
-
-                return (
-                  <div className="space-y-2">
-                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('coffee_taste_advanced')}</h5>
-                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
-                      {log.overall_taste_rating !== undefined && log.overall_taste_rating !== null && <div className="font-medium text-[var(--color-cardText)]">{t('overall_taste')}: {log.overall_taste_rating}/10</div>}
-                      {log.bean_origin && log.bean_origin.trim() && <div>{t('bean_origin')}: {log.bean_origin}</div>}
-                      {log.processing_method && log.processing_method.trim() && <div>{t('processing_method')}: {log.processing_method}</div>}
-                      {log.roast_level && log.roast_level.trim() && <div>{t('roast_level')}: {log.roast_level}</div>}
-                      {log.extraction_method && log.extraction_method.trim() && <div>{t('extraction_method')}: {log.extraction_method}</div>}
-                      {log.extraction_equipment && log.extraction_equipment.trim() && <div>{t('extraction_equipment')}: {log.extraction_equipment}</div>}
-                      {log.aroma_rating !== undefined && log.aroma_rating !== null && <div>{t('aroma')}: {log.aroma_rating}/10</div>}
-                      {log.acidity_rating !== undefined && log.acidity_rating !== null && <div>{t('acidity')}: {log.acidity_rating}/10</div>}
-                      {log.sweetness_rating !== undefined && log.sweetness_rating !== null && <div>{t('sweetness')}: {log.sweetness_rating}/10</div>}
-                      {log.bitterness_rating !== undefined && log.bitterness_rating !== null && <div>{t('bitterness')}: {log.bitterness_rating}/10</div>}
-                      {log.body_rating !== undefined && log.body_rating !== null && <div>{t('body')}: {log.body_rating}/10</div>}
-                      {log.aftertaste_rating !== undefined && log.aftertaste_rating !== null && <div>{t('aftertaste')}: {log.aftertaste_rating}/10</div>}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Space & Work Environment */}
-              {(() => {
-                // Check if outlet_info has actual data
-                const hasOutletInfo = (() => {
-                  if (!log.outlet_info) return false;
-                  try {
-                    const parsed = JSON.parse(log.outlet_info);
-                    return parsed.availability || parsed.location || parsed.comment;
-                  } catch {
-                    return Boolean(log.outlet_info && log.outlet_info.trim());
-                  }
-                })();
-                
-                // Check if parking_info has actual data
-                const hasParkingInfo = (() => {
-                  if (!log.parking_info) return false;
-                  try {
-                    const parsed = JSON.parse(log.parking_info);
-                    return parsed.type;
-                  } catch {
-                    return Boolean(log.parking_info && log.parking_info.trim());
-                  }
-                })();
-                
-                const hasSpaceWorkData = Boolean(
-                  (log.wifi_quality && log.wifi_quality.trim()) ||
-                  (log.wifi_rating !== undefined && log.wifi_rating !== null) ||
-                  hasOutletInfo ||
-                  (log.furniture_comfort && log.furniture_comfort.trim()) ||
-                  (log.noise_level && log.noise_level.trim()) ||
-                  (log.noise_rating !== undefined && log.noise_rating !== null) ||
-                  (log.temperature_lighting && log.temperature_lighting.trim()) ||
-                  hasParkingInfo
-                );
-                
-                if (!hasSpaceWorkData) return null;
-                
-                return (
-                  <div className="space-y-2">
-                    <h5 className="font-semibold text-[var(--color-cardText)]">{t('space_work_environment')}</h5>
-                    <div className="space-y-1 text-[var(--color-cardTextSecondary)] pl-2">
-                      {log.wifi_rating !== undefined && log.wifi_rating !== null && <div>{t('wifi_rating')}: {log.wifi_rating}/5</div>}
-                      {log.wifi_quality && log.wifi_quality.trim() && <div>{t('wifi_quality')}: {log.wifi_quality}</div>}
-                      {log.outlet_info && (() => {
-                        try {
-                          const outlet = JSON.parse(log.outlet_info);
-                          if (outlet.availability) {
-                            const availabilityLabel = t(`outlet_availability_${outlet.availability}`);
-                            const locationLabel = outlet.location ? ` - ${t(`outlet_location_${outlet.location}`)}` : '';
-                            const commentLabel = outlet.comment ? ` (${outlet.comment})` : '';
-                            return <div>{t('outlet_info')}: {availabilityLabel}{locationLabel}{commentLabel}</div>;
-                          }
-                        } catch {
-                          // Legacy format: just display as-is
-                          if (log.outlet_info && log.outlet_info.trim()) {
-                            return <div>{t('outlet_info')}: {log.outlet_info}</div>;
-                          }
-                        }
-                        return null;
-                      })()}
-                      {log.furniture_comfort && log.furniture_comfort.trim() && <div>{t('furniture_comfort')}: {log.furniture_comfort}</div>}
-                      {log.noise_rating !== undefined && log.noise_rating !== null && <div>{t('noise_rating')}: {log.noise_rating}/5</div>}
-                      {log.noise_level && log.noise_level.trim() && <div>{t('noise_level')}: {log.noise_level}</div>}
-                      {log.temperature_lighting && log.temperature_lighting.trim() && <div>{t('temperature_lighting')}: {log.temperature_lighting}</div>}
-                      {log.parking_info && (() => {
-                        try {
-                          const parking = JSON.parse(log.parking_info);
-                          if (parking.type) {
-                            const typeLabel = t(`parking_type_${parking.type}`);
-                            const paidLabel = parking.paid ? ` (${t('parking_paid')})` : '';
-                            const commentLabel = parking.comment ? ` - ${parking.comment}` : '';
-                            return <div>{t('parking_availability')}: {typeLabel}{paidLabel}{commentLabel}</div>;
-                          }
-                        } catch {
-                          // Legacy format: just display as-is
-                          if (log.parking_info && log.parking_info.trim()) {
-                            return <div>{t('parking_availability')}: {log.parking_info}</div>;
-                          }
-                        }
-                        return null;
-                      })()}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
+            <dl className="mt-4 space-y-1 pl-2 text-sm text-ink-secondary">
+              {tasteNotes.map(([key, value]) => (
+                <div key={key} className="flex gap-2">
+                  <dt>{t(key)}</dt>
+                  <dd className="text-ink-primary">{value}/10</dd>
+                </div>
+              ))}
+            </dl>
           )}
         </div>
       )}

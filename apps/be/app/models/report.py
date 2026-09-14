@@ -1,10 +1,17 @@
 """
 Report models for the reports API.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Literal
 from datetime import datetime
 from enum import Enum
+from urllib.parse import urlsplit
+
+
+def is_http_url(value: str) -> bool:
+    """True for an absolute http(s) URL with a host -- the only kind safe to print as a link."""
+    parts = urlsplit(value.strip())
+    return parts.scheme.lower() in ("http", "https") and bool(parts.netloc)
 
 
 class ReportType(str, Enum):
@@ -49,9 +56,18 @@ class ReportCreate(BaseModel):
     report_type: ReportType
     target_type: TargetType
     target_id: Optional[str] = Field(None, description="ID of the reported user/cafe/review")
-    target_url: Optional[str] = Field(None, description="URL of the reported content")
+    target_url: Optional[str] = Field(None, max_length=2048, description="URL of the reported content")
     description: str = Field("", max_length=2000, description="Detailed description")
     image_urls: List[str] = Field(default_factory=list, max_length=3, description="URLs of attached images (max 3)")
+
+    @field_validator("target_url")
+    @classmethod
+    def target_url_is_http(cls, value: Optional[str]) -> Optional[str]:
+        # It becomes a link in the admin email and the admin dashboard, so a
+        # `javascript:` or `data:` URL here is a script waiting for an admin's click.
+        if value is not None and not is_http_url(value):
+            raise ValueError("target_url must be an http(s) URL")
+        return value
 
 
 class ReportUpdate(BaseModel):

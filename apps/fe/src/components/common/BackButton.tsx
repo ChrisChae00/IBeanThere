@@ -18,7 +18,7 @@ export function BackButton({ className = '' }: BackButtonProps) {
   return (
     <button
       onClick={handleBack}
-      className={`inline-flex items-center text-sm text-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors ${className}`}
+      className={`inline-flex items-center text-sm text-primary hover:text-text transition-colors ${className}`}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 

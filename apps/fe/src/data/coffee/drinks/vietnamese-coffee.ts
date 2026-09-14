@@ -2,27 +2,95 @@ import type { CoffeeDrink } from '../types';
 
 const vietnameseCoffee: CoffeeDrink = {
   slug: 'vietnamese-coffee',
-  categoryId: 'signature',
+  categoryId: 'added',
+  reviewed: '2026-09-11',
+  related: ['pour-over', 'dalgona', 'cold-brew'],
   content: {
     en: {
-      name: 'Vietnamese Coffee',
-      tagline: 'It takes five patient minutes to drip. Then it hits with almost double the caffeine tourists were expecting.',
+      name: 'Vietnamese coffee',
+      aka: 'Iced with condensed milk: cà phê sữa đá',
+      title: 'Vietnamese coffee: the phin filter, condensed milk, and robusta',
       description:
-        'A phin filter doesn\'t rush. Drop by drop, dark-roast Robusta coffee falls through a stacked metal filter straight into a pool of sweetened condensed milk — a habit born from French colonial Vietnam, where fresh milk was scarce but condensed milk, imported from France, wasn\'t. Sitting through those four or five minutes isn\'t a delay; it\'s the point.\n\nWhat arrives is deceptively sweet — thick, caramelized milk swirled with strong, slightly bitter coffee, poured over ice. But Robusta carries roughly twice the caffeine of Arabica, so a drink that tastes like dessert can out-buzz a double espresso. Tourists who order it expecting "just coffee" often find that out the hard way, one very awake hour later.',
-      origin:
-        'Vietnamese coffee culture developed during the French colonial period (19th–20th centuries) when the French introduced coffee cultivation to Vietnam. Because fresh milk was scarce, sweetened condensed milk (imported from France) became the standard addition. Vietnam is now the world\'s second-largest coffee producer, growing primarily Robusta beans which are stronger and more bitter than Arabica.',
-      funFact:
-        'Vietnam produces primarily Robusta beans, which contain about twice the caffeine of Arabica beans. A single cup of Vietnamese coffee can pack more caffeine than a double espresso. When tourists order it thinking it\'s "just coffee," they\'re sometimes blindsided by the intensity.',
+        'Vietnamese coffee is dark-roasted coffee dripped through a small metal phin, usually with sweetened condensed milk. What goes in it, how to order it, and how coffee reached Vietnam.',
+      summary:
+        'Vietnamese coffee usually means strong, dark-roasted coffee dripped slowly through a phin — a small metal filter that sits on top of the cup — then mixed with sweetened condensed milk. Over ice it is cà phê sữa đá; black, it is cà phê đen.',
+      summarySources: ['barista-mag-vietnam'],
+      line: 'Dark-roasted coffee dripped through a small metal phin filter, usually over condensed milk.',
+      facts: [
+        { label: 'Brewer', value: 'Phin, a small metal drip filter' },
+        { label: 'Coffee', value: 'Mostly robusta, usually dark-roasted' },
+        { label: 'Sweetener', value: 'Sweetened condensed milk' },
+        { label: 'To order', value: 'cà phê đen (black), cà phê sữa (with milk), đá (iced)' },
+      ],
+      sections: [
+        {
+          id: 'robusta',
+          heading: 'What coffee is used?',
+          body: [
+            {
+              text: 'Mostly robusta, because that is most of what Vietnam grows. Daily Coffee News, reporting the US Department of Agriculture’s forecast, puts the country’s 2026/27 harvest at 32.5 million 60-kilogram bags, 31.4 million of them robusta and 1.1 million arabica.',
+              sources: ['dcn-vietnam'],
+            },
+            {
+              text: 'The traditional cup is dark-roasted, sometimes with chicory or corn in the blend, and condensed milk offsets its dark, smoky flavour.',
+              sources: ['barista-mag-vietnam'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: 'How did coffee reach Vietnam?',
+          body: [
+            {
+              text: 'Under French colonial rule in the 19th century. Barista Magazine’s history starts with a French priest who brought an arabica tree to Vietnam in 1857. Condensed milk is usually explained by fresh milk being hard to find, and to keep, when coffee arrived — a reasonable account, though not one we could trace to a primary source.',
+              sources: ['barista-mag-vietnam'],
+            },
+          ],
+        },
+      ],
     },
     ko: {
       name: '베트남 커피',
-      tagline: '핀 필터가 다 내려오기까지 5분. 그 다음엔 예상보다 거의 두 배 강한 카페인이 기다린다.',
+      aka: '연유를 넣은 아이스는 cà phê sữa đá(카페 쓰어 다)',
+      title: '베트남 커피: 핀 필터, 연유, 그리고 로부스타',
       description:
-        '핀(phin) 필터는 서두르지 않습니다. 진한 다크 로스트 로부스타 커피가 겹겹이 쌓인 금속 필터를 통해 한 방울씩 떨어져 달콤한 연유 웅덩이 속으로 들어갑니다. 신선한 우유는 귀했지만 프랑스에서 수입한 연유는 구할 수 있었던 프랑스 식민지 시대 베트남에서 생긴 습관입니다. 그 4~5분을 앉아서 기다리는 건 지연이 아니라, 이 음료의 핵심입니다.\n\n완성된 한 잔은 속기 쉬울 만큼 달콤합니다 — 진하고 카라멜화된 연유가 강하고 살짝 쓴 커피와 섞여 얼음 위에 부어집니다. 하지만 로부스타는 아라비카보다 카페인이 거의 두 배 많아서, 디저트 같은 맛을 내는 이 음료가 더블 에스프레소보다 더 강하게 각성시킬 수 있습니다. "그냥 커피"인 줄 알고 주문한 관광객들은 한 시간쯤 뒤, 잠이 완전히 달아난 채로 그 사실을 깨닫곤 합니다.',
-      origin:
-        '베트남 커피 문화는 프랑스가 베트남에 커피 재배를 도입한 프랑스 식민지 시대(19~20세기)에 발전했습니다. 신선한 우유가 부족했기 때문에 (프랑스에서 수입한) 연유가 표준 첨가물이 되었습니다. 베트남은 현재 세계 2위의 커피 생산국으로, 주로 아라비카보다 더 강하고 쓴 로부스타 원두를 재배합니다.',
-      funFact:
-        '베트남은 주로 로부스타 원두를 생산하는데, 로부스타의 카페인 함량은 아라비카의 약 2배입니다. 베트남 커피 한 잔은 더블 에스프레소보다 더 많은 카페인을 함유할 수 있습니다. "그냥 커피"라고 생각하고 주문한 관광객들이 그 강도에 놀라는 경우가 있습니다.',
+        '베트남 커피는 강하게 볶은 원두를 작은 금속 필터 핀으로 내려 연유와 섞는 커피입니다. 재료, 주문하는 법, 커피가 베트남에 들어온 경위를 정리했습니다.',
+      summary:
+        '베트남 커피는 보통 강하게 볶은 진한 커피를 핀(phin), 곧 잔 위에 올리는 작은 금속 필터로 천천히 내려 가당 연유와 섞은 것을 말합니다. 얼음에 부으면 카페 쓰어 다(cà phê sữa đá), 블랙은 카페 덴(cà phê đen)입니다.',
+      summarySources: ['barista-mag-vietnam'],
+      line: '강하게 볶은 원두를 작은 금속 필터 핀으로 내려, 대개 연유와 섞는 커피.',
+      facts: [
+        { label: '도구', value: '핀, 작은 금속 드립 필터' },
+        { label: '원두', value: '주로 로부스타, 대개 강배전' },
+        { label: '단맛', value: '가당 연유' },
+        { label: '주문', value: 'cà phê đen(블랙), cà phê sữa(연유), đá(아이스)' },
+      ],
+      sections: [
+        {
+          id: 'robusta',
+          heading: '어떤 원두를 쓰나',
+          body: [
+            {
+              text: '주로 로부스타입니다. 베트남에서 나는 커피 대부분이 로부스타이기 때문입니다. 미국 농무부 전망을 전한 데일리 커피 뉴스에 따르면 2026/27년 베트남 수확량은 60kg 자루 3,250만 개이고, 그중 3,140만 개가 로부스타, 110만 개가 아라비카입니다.',
+              sources: ['dcn-vietnam'],
+            },
+            {
+              text: '전통적인 한 잔은 강하게 볶고 치커리나 옥수수를 섞기도 하며, 연유가 그 어둡고 스모키한 맛을 눌러 줍니다.',
+              sources: ['barista-mag-vietnam'],
+            },
+          ],
+        },
+        {
+          id: 'history',
+          heading: '커피는 어떻게 베트남에 들어왔나',
+          body: [
+            {
+              text: '19세기 프랑스 식민 통치 시기입니다. 바리스타 매거진은 1857년 한 프랑스 신부가 아라비카 나무를 들여온 데서 시작한다고 정리합니다. 연유를 넣게 된 것은 커피가 들어왔을 때 신선한 우유를 구하고 보관하기 어려웠기 때문이라고 흔히 설명하는데, 그럴듯하지만 1차 자료로는 확인하지 못했습니다.',
+              sources: ['barista-mag-vietnam'],
+            },
+          ],
+        },
+      ],
     },
   },
 };

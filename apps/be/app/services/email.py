@@ -4,10 +4,18 @@ Uses Resend API for email delivery.
 """
 
 import logging
+from html import escape
 from typing import Optional
 from ..config import settings
+from ..models.report import is_http_url
 
 logger = logging.getLogger(__name__)
+
+# Nobody reads no-reply@. A mail a user might answer carries Reply-To: support@, which
+# Cloudflare Email Routing forwards to the team inbox; that inbox's own address is never
+# shown to a user.
+SENDER = "ibeanthere <no-reply@ibeanthere.app>"
+SUPPORT_ADDRESS = "support@ibeanthere.app"
 
 # Lazy import resend to avoid errors if not installed
 resend = None
@@ -62,7 +70,19 @@ async def send_new_report_notification(
         # Format report type for display
         report_type_display = report_type.replace('_', ' ').title()
         target_type_display = target_type.capitalize()
-        
+
+        # Every value below is written by the reporter or derived from what they sent,
+        # and lands in HTML an admin opens. Escaped, a report can say anything and only
+        # ever be text; the link is printed only for an http(s) URL, since `href` is
+        # where escaping stops helping -- `javascript:` survives it intact.
+        description_html = escape(description[:500]) + ('...' if len(description) > 500 else '')
+        reporter_html = escape(reporter_username or 'Unknown')
+        target_link_html = (
+            f'<p><strong>Target URL:</strong> <a href="{escape(target_url)}">{escape(target_url)}</a></p>'
+            if target_url and is_http_url(target_url)
+            else ''
+        )
+
         # Build email content
         html_content = f"""
 <!DOCTYPE html>
@@ -87,27 +107,27 @@ async def send_new_report_notification(
             <h1 style="margin: 0;">☕ New Report Submitted</h1>
         </div>
         <div class="content">
-            <p>A new report has been submitted on IBeanThere.</p>
+            <p>A new report has been submitted on ibeanthere.</p>
             
             <p>
-                <span class="badge badge-type">{target_type_display}</span>
-                <span class="badge badge-pending">{report_type_display}</span>
+                <span class="badge badge-type">{escape(target_type_display)}</span>
+                <span class="badge badge-pending">{escape(report_type_display)}</span>
             </p>
             
             <div class="description">
                 <strong>Description:</strong><br/>
-                {description[:500]}{'...' if len(description) > 500 else ''}
+                {description_html}
             </div>
             
-            <p><strong>Reporter:</strong> {reporter_username or 'Unknown'}</p>
-            <p><strong>Report ID:</strong> {report_id}</p>
-            
-            {f'<p><strong>Target URL:</strong> <a href="{target_url}">{target_url}</a></p>' if target_url else ''}
+            <p><strong>Reporter:</strong> {reporter_html}</p>
+            <p><strong>Report ID:</strong> {escape(report_id)}</p>
+
+            {target_link_html}
             
             <a href="https://ibeanthere.app/admin/reports" class="button">View in Dashboard</a>
             
             <div class="footer">
-                <p>This is an automated notification from IBeanThere.</p>
+                <p>This is an automated notification from ibeanthere.</p>
             </div>
         </div>
     </div>
@@ -117,7 +137,7 @@ async def send_new_report_notification(
         
         # Send email
         response = resend_client.Emails.send({
-            "from": "IBeanThere <notifications@ibeanthere.app>",
+            "from": SENDER,
             "to": [settings.admin_email],
             "subject": f"[Report] New {report_type_display} - {target_type_display}",
             "html": html_content,
@@ -185,11 +205,11 @@ async def send_report_status_update(
         <div class="content">
             <p>Your report has been updated.</p>
             
-            <p class="status">{status_emoji} Status: <strong>{status_display}</strong></p>
+            <p class="status">{status_emoji} Status: <strong>{escape(status_display)}</strong></p>
+
+            {f'<div class="notes"><strong>Admin Notes:</strong><br/>{escape(admin_notes)}</div>' if admin_notes else ''}
             
-            {f'<div class="notes"><strong>Admin Notes:</strong><br/>{admin_notes}</div>' if admin_notes else ''}
-            
-            <p>Thank you for helping us improve IBeanThere!</p>
+            <p>Thank you for helping us improve ibeanthere!</p>
         </div>
     </div>
 </body>
@@ -197,8 +217,9 @@ async def send_report_status_update(
 """
         
         response = resend_client.Emails.send({
-            "from": "IBeanThere <notifications@ibeanthere.app>",
+            "from": SENDER,
             "to": [reporter_email],
+            "reply_to": SUPPORT_ADDRESS,
             "subject": f"Your Report Update - {status_display}",
             "html": html_content,
         })

@@ -32,9 +32,12 @@ export class HeicNotSupportedError extends Error {
  * Convert a HEIC/HEIF file to WebP, resizing to MAX_DIMENSION if needed.
  *
  * Strategy:
- *  1. Canvas API — works natively in Safari/iOS (the primary source of HEIC).
- *     Also resizes large photos to stay under the upload size limit.
- *  2. heic2any (WASM) — fallback for other browsers.
+ *  1. createImageBitmap — works natively in Safari/iOS (the primary source of
+ *     HEIC), decoding off the main thread. Also resizes large photos to stay under
+ *     the upload size limit.
+ *  2. heic-to (libheif WASM) — fallback for browsers that cannot decode HEIC,
+ *     which is every browser except Safari. It is asked for raw pixels, not an
+ *     encoded image, so the resize and the single encode happen here.
  *  3. Both fail → throw HeicNotSupportedError so callers can show a
  *     browser-specific hint.
  */
@@ -44,62 +47,72 @@ export async function convertHeicToWebp(file: File): Promise<File> {
   try {
     return await convertViaCanvas(file, baseName);
   } catch (canvasError) {
-    console.warn('Canvas HEIC conversion failed, trying heic2any:', canvasError);
+    console.warn('Canvas HEIC conversion failed, trying libheif:', canvasError);
     try {
-      return await convertViaHeic2any(file, baseName);
-    } catch (heic2anyError) {
-      console.warn('heic2any conversion also failed:', heic2anyError);
+      return await convertViaLibheif(file, baseName);
+    } catch (libheifError) {
+      console.warn('libheif conversion also failed:', libheifError);
       throw new HeicNotSupportedError();
     }
   }
 }
 
 async function convertViaCanvas(file: File, baseName: string): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
+  /*
+    `createImageBitmap` decodes off the main thread and rejects rather than firing an
+    error event, so the native path is both cheaper and easier to fall through than
+    the `new Image()` + object URL dance it replaces.
+  */
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error('Browser cannot decode this HEIC file natively');
+  }
 
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-
-      const canvas = document.createElement('canvas');
-      const scale = Math.min(1, MAX_DIMENSION / Math.max(img.naturalWidth, img.naturalHeight));
-      canvas.width = Math.round(img.naturalWidth * scale);
-      canvas.height = Math.round(img.naturalHeight * scale);
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Canvas 2D context unavailable'));
-        return;
-      }
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error('canvas.toBlob returned null'));
-            return;
-          }
-          resolve(new File([blob], `${baseName}.webp`, { type: 'image/webp' }));
-        },
-        'image/webp',
-        WEBP_QUALITY
-      );
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Browser cannot decode this HEIC file natively'));
-    };
-
-    img.src = url;
-  });
+  try {
+    return await encodeBitmap(bitmap, baseName);
+  } finally {
+    bitmap.close();
+  }
 }
 
-async function convertViaHeic2any(file: File, baseName: string): Promise<File> {
-  const heic2any = (await import('heic2any')).default;
-  const result = await heic2any({ blob: file, toType: 'image/webp', quality: WEBP_QUALITY });
-  const blob = Array.isArray(result) ? result[0] : result;
+async function convertViaLibheif(file: File, baseName: string): Promise<File> {
+  /* Loaded on demand: the decoder is a WASM bundle nobody who uploads a JPEG needs. */
+  const { heicTo } = await import('heic-to');
+
+  /*
+    `type: 'bitmap'` hands back the decoded pixels instead of an encoded image. Asking
+    for WebP here instead would encode the photo at full resolution, then require a
+    second decode before the resize could happen — two of the three expensive steps
+    exist only to throw the result away. One decode, one encode, at the size that is
+    actually uploaded.
+  */
+  const bitmap = await heicTo({ blob: file, type: 'bitmap' });
+  try {
+    return await encodeBitmap(bitmap, baseName);
+  } finally {
+    bitmap.close();
+  }
+}
+
+async function encodeBitmap(bitmap: ImageBitmap, baseName: string): Promise<File> {
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas 2D context unavailable');
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY)
+  );
+  if (!blob) throw new Error('canvas.toBlob returned null');
+
   return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
 }

@@ -25,6 +25,12 @@ export interface UserProfile {
   display_name: string;
   username: string;
   avatar_url?: string | null;
+  /*
+    Carried so that "is this an admin" is answered by the profile the app already
+    fetched. It was dropped here, which is why a second `/users/me` went out on every
+    page: the same request, for one field this mapper had thrown away.
+  */
+  role?: string;
 }
 
 /**

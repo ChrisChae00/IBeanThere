@@ -3,13 +3,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import MapSection from '@/components/map/MapSection';
-import { getTrendingCafes, type TrendingSortBy } from '@/lib/api/cafes';
-import { TrendingCafeResponse } from '@/types/api';
+import Link from 'next/link';
+import { getGoogleCafePhoto, getTrendingCafes, searchCafesByText, type TrendingSortBy } from '@/lib/api/cafes';
+import { PlusIcon, SearchIcon } from '@/shared/ui';
+import { GoogleCafePhoto, TrendingCafeResponse } from '@/types/api';
 import { useLocation } from '@/hooks/useLocation';
-import { TrendingCafesSection, CafeGridCard } from '@/components/cafe';
-import { CAFE_GRID_ITEMS_PER_PAGE, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
+import { TrendingCafesSection, CafeCard } from '@/components/cafe';
+import { CAFE_GRID_ITEMS_PER_PAGE, GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT, TRENDING_CAFES_COUNT } from '@/lib/constants/cafe';
+import { RegisterCafeCTA } from '@/components/cafe/TrendingCafesSection';
 
 type FilterType = 'all' | 'closest' | 'most_popular';
+type GooglePhotoState = GoogleCafePhoto | null | 'loading';
+
+const resolvedGooglePhoto = (photo?: GooglePhotoState) =>
+  photo === 'loading' ? undefined : photo;
 
 // Sorting happens on the server: the grid only ever holds the pages fetched so
 // far, so sorting client-side would only reorder those and leave later pages
@@ -39,11 +46,40 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
   const [hasMore, setHasMore] = useState(initialCafes.length === CAFE_GRID_ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [googlePhotos, setGooglePhotos] = useState<Record<string, GooglePhotoState>>({});
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<TrendingCafeResponse[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const requestedGooglePhotos = useRef(new Set<string>());
 
   const location = useMemo(
     () => (coords ? { lat: coords.latitude, lng: coords.longitude } : undefined),
     [coords]
   );
+
+  useEffect(() => {
+    const remaining = GOOGLE_PLACE_PHOTO_PER_PAGE_LIMIT - requestedGooglePhotos.current.size;
+    if (remaining <= 0) return;
+
+    const candidates = [...trendingCafes, ...cafes].filter(
+      (cafe, index, all) =>
+        !cafe.main_image && !cafe.image &&
+        !requestedGooglePhotos.current.has(cafe.id) &&
+        all.findIndex((item) => item.id === cafe.id) === index
+    ).slice(0, remaining);
+    if (!candidates.length) return;
+
+    candidates.forEach((cafe) => requestedGooglePhotos.current.add(cafe.id));
+    setGooglePhotos((current) => ({
+      ...current,
+      ...Object.fromEntries(candidates.map((cafe) => [cafe.id, 'loading'])),
+    }));
+    candidates.forEach((cafe) => {
+      getGoogleCafePhoto(cafe.id).then((photo) => {
+        setGooglePhotos((current) => ({ ...current, [cafe.id]: photo }));
+      });
+    });
+  }, [trendingCafes, cafes]);
 
   // Refresh the trending panel once coordinates arrive so it shows local results
   useEffect(() => {
@@ -108,11 +144,60 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
     setHasMore(true);
   };
 
-  const filterButtonClass = (filter: FilterType) =>
-    `px-6 py-3 rounded-full font-medium transition-colors min-h-[44px] ${
-      activeFilter === filter
-        ? 'bg-[var(--color-primary)] text-[var(--color-primaryText)]'
-        : 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]/80'
+  /*
+    The grid searches every cafe, not the pages it happens to hold: a name the reader
+    types is a name they expect to find whether or not it has been paged in yet. An
+    active search replaces the grid, so the sort filters and the pager step aside.
+  */
+  const term = query.trim();
+  useEffect(() => {
+    if (term.length < 2) {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      searchCafesByText(term, CAFE_GRID_ITEMS_PER_PAGE).then((cafes) => {
+        if (cancelled) return;
+        setSearchResults(
+          cafes.map((cafe) => ({
+            id: cafe.id || '',
+            slug: cafe.slug,
+            name: cafe.name || '',
+            address: cafe.address || '',
+            latitude: Number(cafe.latitude) || 0,
+            longitude: Number(cafe.longitude) || 0,
+            status: cafe.status,
+            view_count_14d: 0,
+            visit_count_14d: 0,
+            trending_score: 0,
+            main_image: cafe.main_image,
+          }))
+        );
+        setIsSearching(false);
+      });
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [term]);
+
+  const gridCafes = searchResults ?? cafes;
+  const gridLoading = searchResults ? isSearching : isLoading;
+
+  /*
+    Filters carry their state in the fill: the selected one takes the brand, the rest are
+    a rule and ink. The page's one filled control is still the register action -- a
+    selected filter is a state, not a second primary.
+  */
+  const filterClass = (filter: FilterType) =>
+    `landing-micro min-h-11 rounded-(--radius-pill) px-5 disabled:opacity-50 control-flat ${
+      activeFilter === filter ? 'is-active' : ''
     }`;
 
   return (
@@ -132,39 +217,9 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
             <TrendingCafesSection
               cafes={trendingCafes}
               locale={locale}
-              isLoading={false}
+              isLoading={isLoading && trendingCafes.length === 0}
+              googlePhotos={googlePhotos}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Filter Section */}
-      <section className="py-6">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-3 justify-center">
-            <button
-              onClick={() => setActiveFilter('all')}
-              className={filterButtonClass('all')}
-            >
-              {t('filter_all')}
-            </button>
-            <button
-              onClick={() => setActiveFilter('closest')}
-              disabled={!coords}
-              className={`${filterButtonClass('closest')} ${!coords ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={!coords ? t('no_location') : ''}
-            >
-              {t('filter_closest')}
-            </button>
-            <button
-              onClick={() => setActiveFilter('most_popular')}
-              className={filterButtonClass('most_popular')}
-            >
-              {t('filter_most_popular')}
-            </button>
-          </div>
-          <div className="text-center mt-4 text-sm text-[var(--color-text-secondary)]">
-            {t('showing_cafes', { count: cafes.length })}
           </div>
         </div>
       </section>
@@ -172,30 +227,75 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       {/* Cafe Grid Section */}
       <section className="py-6">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {isLoading ? (
+          {/*
+            The sorts on the left, the two things a reader does with the grid on the
+            right: find one cafe, or add the one that is missing. The old "showing N"
+            count said nothing the grid was not already showing.
+          */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setActiveFilter('all')} className={filterClass('all')}>
+                {t('filter_all')}
+              </button>
+              <button
+                onClick={() => setActiveFilter('closest')}
+                disabled={!coords}
+                title={!coords ? t('no_location') : ''}
+                className={filterClass('closest')}
+              >
+                {t('filter_closest')}
+              </button>
+              <button
+                onClick={() => setActiveFilter('most_popular')}
+                className={filterClass('most_popular')}
+              >
+                {t('filter_most_popular')}
+              </button>
+            </div>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <label className="relative flex items-center">
+                <SearchIcon size={16} className="pointer-events-none absolute left-3 text-ink-secondary" />
+                <span className="sr-only">{tMap('filters.search')}</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={tMap('filters.search_placeholder')}
+                  className="h-11 w-56 rounded-(--radius-pill) border border-edge-rule bg-surface-raised pl-9 pr-3 text-sm text-ink-primary placeholder:text-ink-secondary focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+                />
+              </label>
+              <Link
+                href={`/${locale}/discover/register-cafe`}
+                className="btn-shade flex min-h-11 items-center gap-2 whitespace-nowrap rounded-(--btn-radius) bg-brand px-5 font-semibold text-ink-on-brand"
+              >
+                <PlusIcon size={16} />
+                {tMap('register_new_cafe')}
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {gridLoading ? (
               Array.from({ length: CAFE_GRID_ITEMS_PER_PAGE }).map((_, index) => (
-                <div key={index} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden animate-pulse">
-                  <div className="h-44 bg-[var(--color-surface)]/50"></div>
-                  <div className="p-4">
-                    <div className="h-4 bg-[var(--color-surface)]/50 rounded mb-2"></div>
-                    <div className="h-3 bg-[var(--color-surface)]/50 rounded w-2/3 mb-3"></div>
-                    <div className="h-3 bg-[var(--color-surface)]/50 rounded w-1/2"></div>
+                <div key={index} className="animate-pulse overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface">
+                  <div className="h-[200px] bg-surface-hover"></div>
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 rounded-sm bg-surface-hover"></div>
+                    <div className="h-3 w-2/3 rounded-sm bg-surface-hover"></div>
+                    <div className="mt-3 h-8 w-1/2 rounded-(--radius-pill) bg-surface-hover"></div>
                   </div>
                 </div>
               ))
-            ) : cafes.length === 0 ? (
-              <div className="col-span-full text-center py-16 space-y-4">
-                <div className="text-lg font-medium text-[var(--color-text-secondary)]">
-                  {tMap('no_cafes_available')}
-                </div>
-              </div>
+            ) : gridCafes.length === 0 ? (
+              <RegisterCafeCTA variant="empty" />
             ) : (
-              cafes.map((cafe) => (
-                <CafeGridCard
+              gridCafes.map((cafe) => (
+                <CafeCard
                   key={cafe.id}
                   cafe={cafe}
                   locale={locale}
+                  googlePhoto={resolvedGooglePhoto(googlePhotos[cafe.id])}
+                  googlePhotoLoading={googlePhotos[cafe.id] === 'loading'}
                 />
               ))
             )}
@@ -204,7 +304,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
       </section>
 
       {/* Load More Section */}
-      {!isLoading && (hasMore || cafes.length > CAFE_GRID_ITEMS_PER_PAGE) ? (
+      {!searchResults && !isLoading && (hasMore || cafes.length > CAFE_GRID_ITEMS_PER_PAGE) ? (
         <section className="py-6">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-4 justify-center">
@@ -212,7 +312,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-secondary)] transition-colors shadow-lg min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="btn-shade min-h-11 rounded-(--btn-radius) bg-brand px-6 font-semibold text-ink-on-brand disabled:opacity-60"
                 >
                   {tMap('load_more')}
                 </button>
@@ -220,7 +320,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
               {cafes.length > CAFE_GRID_ITEMS_PER_PAGE && (
                 <button
                   onClick={handleShowLess}
-                  className="border border-[var(--color-border)] text-[var(--color-text)] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[var(--color-surface)] transition-colors min-h-[44px]"
+                  className="control-flat min-h-11 rounded-(--btn-radius) border border-edge-rule px-6 font-medium text-ink-primary"
                 >
                   {tMap('show_less')}
                 </button>

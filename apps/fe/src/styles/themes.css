@@ -1,0 +1,151 @@
+/*
+  Layer 1 — primitive.
+
+  Muted ink in the three light themes was a mid-tone on a near-white ground and failed
+  WCAG AA (as low as 2.35:1). Each was pulled toward its own theme's text colour until
+  every surface it lands on clears 4.5:1, so no theme gained a new hue. Dark Roast
+  already passed and is unchanged. Matcha Latte's accent was also too light to carry a
+  button label, so it took over the darker green the theme already owned and its hover
+  moved down to make room.
+
+  "Every surface" includes the two derived in tokens.css - `--surface-sunken` and
+  `--surface-hover` are the page and raised grounds mixed toward ink, so they are darker
+  than either. Tuning muted ink to just clear on `page` leaves it failing on everything
+  derived from it; these values are set against the darkest of the four, not the
+  lightest. Widening the muted/primary gap in a theme means re-checking all four.
+
+  The only file that contains theme colour literals. Each theme fills the same set of
+  slots; every other token is derived from these in tokens.css, so a new theme means
+  filling in this block and nothing else. (A handful of theme-independent literals live
+  elsewhere - the neutral pending grey, plain white, the warm drop shadows - because
+  they do not change per theme and a slot for them would be four identical entries.)
+
+  The four themes are complete visual themes, not a light/dark pair: Dark Roast IS the
+  dark mode.
+
+  `--c-brand-soft` is the hover of a filled brand control (`--brand-hover`, reached as
+  `bg-secondary`), and it also fills the auth panel and the secondary badge. In all three
+  the label on top is `--ink-on-brand`, so hover has to hold 4.5:1 against that ink. Every
+  theme used to move it the wrong way -- toward the ink rather than away from it -- and
+  three of four failed: Morning Coffee 3.40, Dark Roast 2.04, Vanilla Latte 2.28, Matcha
+  3.38. The rule now is one line: hover deepens the contrast it already has. A dark brand
+  gets darker, a light brand gets lighter, roughly a fifth of the way toward the theme's
+  own extreme, which is a visible step without becoming a second colour.
+*/
+
+:root,
+[data-theme='morningCoffee'] {
+  --c-brand: #8C5A3A;
+  /* Hover deepens: 5.86:1 on `--c-on-brand`. Was #AB7743, which lightened to 3.40:1. */
+  --c-brand-soft: #7f5234;
+  --c-accent: #D9B896;
+  --c-page: #e9d6c0;
+  --c-raised: #f5f0e8;
+  --c-elevated: #f5f0e8;
+  --c-ink: #442f19;
+  --c-ink-soft: #685138;
+  --c-edge: #c2ac93;
+  --c-on-brand: #f5f0e8;
+  --c-on-media: #f5f0e8;
+  --c-scrim: #442f19;
+  --c-shadow: #8C5A3A;
+  --c-star: #FFA500;
+  --c-star-off: #D3D3D3;
+  --c-star-off-edge: #B0B0B0;
+  --c-marker-cafe: #8C5A3A;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+}
+
+[data-theme='espresso'] {
+  --c-brand: #b79d85;
+  /*
+    The one theme whose brand is light and whose ink is dark, so deepening means going
+    lighter: 12.30:1. Was #5e432d, a dark brown that inverted the button on hover and
+    left its dark label at 2.04:1.
+  */
+  --c-brand-soft: #dcd1c5;
+  --c-accent: #6B4F3A;
+  --c-page: #1A120B;
+  --c-raised: #2A1A13;
+  --c-elevated: #3C2A21;
+  --c-ink: #e8ddd2;
+  --c-ink-soft: #d4c7b8;
+  /*
+    The inverted band, dimmed off the ink: at the ink's own value it is a near-white
+    plate in a theme whose page is #1A120B. This is the theme's existing warm mid tone,
+    so it is one fewer colour in the file, and the dark ink on it still reads at 11.15:1.
+  */
+  --c-inverse: #d4c7b8;
+  --c-edge: #5e432d;
+  --c-on-brand: #1A120B;
+  --c-on-media: #e8ddd2;
+  --c-scrim: #0f0906;
+  --c-shadow: #d4c7b8;
+  --c-star: #FFB347;
+  --c-star-off: #808080;
+  --c-star-off-edge: #606060;
+  --c-marker-cafe: #1A120B;
+  --c-success: #66BB6A;
+  --c-warning: #FFA726;
+  --c-danger: #EF5350;
+}
+
+/*
+  Built around the matcha palette's own greens rather than a derived ramp: the brand is
+  its mid green and the ink on it is the palette's lightest cream. The pairing is
+  3.37:1, below AA, and is kept deliberately -- it was read on screen and judged legible
+  at the sizes it is used, so the number is a known exception here and not an oversight
+  to "fix" on sight. Every other pairing in this theme clears AA and stays that way.
+*/
+[data-theme='matchaLatte'] {
+  --c-brand: #6B8E23;
+  --c-brand-soft: #93af3f;
+  --c-accent: #b9cc8a;
+  --c-page: #e0e8d0;
+  --c-raised: #f4f7ea;
+  --c-elevated: #f4f7ea;
+  --c-ink: #3a4a20;
+  --c-ink-soft: #4e6130;
+  --c-edge: #c3d29b;
+  --c-on-brand: #F4F1E8;
+  --c-on-media: #F4F1E8;
+  --c-scrim: #2b3818;
+  --c-shadow: #607848;
+  --c-star: #FF8C00;
+  --c-star-off: #A0A0A0;
+  --c-star-off-edge: #808080;
+  --c-marker-cafe: #607848;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+}
+
+[data-theme='vanillaLatte'] {
+  --c-brand: #362C1D;
+  /*
+    Hover deepens: 14.61:1. Was #C7A17A, a caramel that read as a different colour
+    rather than a state and put its light label at 2.28:1.
+  */
+  --c-brand-soft: #2c2418;
+  --c-accent: #F5E6A3;
+  --c-page: #FFF8DC;
+  --c-raised: #FFF9F0;
+  --c-elevated: #FFF9F0;
+  --c-ink: #362C1D;
+  --c-ink-soft: #735f45;
+  --c-edge: #F5E6A3;
+  --c-on-brand: #FFF9F0;
+  --c-on-media: #FFF9F0;
+  --c-scrim: #241d13;
+  --c-shadow: #9d6345;
+  --c-star: #FF7F50;
+  --c-star-off: #A0A0A0;
+  --c-star-off-edge: #808080;
+  --c-marker-cafe: #362C1D;
+  --c-success: #4CAF50;
+  --c-warning: #FFC107;
+  --c-danger: #F44336;
+}
+

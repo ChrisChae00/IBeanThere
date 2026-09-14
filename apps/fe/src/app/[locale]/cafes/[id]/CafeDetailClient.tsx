@@ -1,29 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
+import { Images, Plus } from 'lucide-react';
 import { CafeDetailResponse } from '@/types/api';
 import { GalleryImage } from '@/types/gallery';
 import CafeInfoSection from '@/components/cafe/CafeInfoSection';
+import FoundingCrewAvatars from '@/components/cafe/FoundingCrewAvatars';
+import CafePhotoHero from '@/components/cafe/CafePhotoHero';
+import { ActionsMenu } from '@/shared/ui';
 import CoffeeLogFeed from '@/components/cafe/CoffeeLogFeed';
+import CafeTraits from '@/components/cafe/CafeTraits';
+import CafeBeansRecent from '@/components/cafe/CafeBeansRecent';
 import DropBeanButton from '@/components/cafe/DropBeanButton';
 import SaveButtons from '@/components/cafe/SaveButtons';
 import CollectionSelectorModal from '@/components/cafe/CollectionSelectorModal';
-import dynamic from 'next/dynamic';
-import { StarRating } from '@/shared/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { ReportButton, ReportModal, useReportModal } from '@/features/report';
+import { ReportModal, useReportModal } from '@/features/report';
+import { capture } from '@/lib/analytics';
 
 const ImageGalleryModal = dynamic(() => import('@/shared/ui/ImageGalleryModal'), { ssr: false });
-const ImageLightbox = dynamic(() => import('@/shared/ui/ImageLightbox'), { ssr: false });
-
 
 interface CafeDetailClientProps {
   cafe: CafeDetailResponse;
 }
 
+/*
+  The page opens on the photograph. Everything that used to compete with it — a
+  strip of six thumbnails in its own titled section, a "View All" link, a stats
+  card of three numbers — either folded into the cards below or became one door:
+  the photograph itself opens the collection, and so does the count beside the
+  cafe's details.
+*/
 export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const t = useTranslations('cafe.detail');
   const tReport = useTranslations('report');
@@ -32,16 +43,22 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
   const locale = params.locale as string;
   const { user } = useAuth();
   const { modalState, openCafeReport, closeModal } = useReportModal();
-  
-  // Gallery state
-  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  
-  // Collection modal state
+
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
-  
-  // Convert images to GalleryImage format
+  /* Closing the picker is the moment the save buttons can be wrong, so it is the
+     moment they re-read what is actually saved. */
+  const [saveSync, setSaveSync] = useState(0);
+
+  /* Keyed on the cafe rather than the mount: the router keeps this component alive
+     across a slug change, and the uuid is what joins this to `cafe_action_taken` --
+     the URL may carry either a slug or an id for the same place. */
+  useEffect(() => {
+    capture('cafe_detail_opened', { cafe_id: cafe.id });
+  }, [cafe.id]);
+
+  const foundingCrew = cafe.founding_crew;
+
   const galleryImages: GalleryImage[] = (cafe.images || [])
     .filter((url) => url && typeof url === 'string' && url.trim().length > 0)
     .map((url, index) => ({
@@ -50,168 +67,175 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
       source: 'log' as const
     }));
 
-  const handleWriteLog = (e: React.MouseEvent) => {
-    if (!user) {
-      e.preventDefault();
-      router.push(`/${locale}/signin`);
+  const requireAuth = (then: () => void) => (e?: React.MouseEvent) => {
+    if (user) {
+      then();
       return;
     }
-  };
-
-  const handleReportClick = () => {
-    if (!user) {
-      router.push(`/${locale}/signin`);
-      return;
-    }
-    openCafeReport(cafe.id, cafe.name);
+    e?.preventDefault();
+    router.push(`/${locale}/signin`);
   };
 
   const cafePath = cafe.slug || cafe.id;
   const logPagePath = `/${locale}/cafes/${cafePath}/log`;
+  const hasStats =
+    cafe.average_rating !== undefined ||
+    (cafe.total_beans_dropped ?? 0) > 0 ||
+    (cafe.log_count ?? 0) > 0;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      {/* Cafe Info Section Card */}
-      <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 sm:gap-2">
-          <h1 className="text-3xl font-bold text-[var(--color-cardText)] break-words">{cafe.name}</h1>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {/* Collection Save Buttons */}
-            <SaveButtons
-              cafeId={cafe.id}
-              onOpenCollectionSelector={() => setCollectionModalOpen(true)}
+    <div className="container mx-auto max-w-4xl px-4 py-6">
+      {/*
+        The photograph and the cafe's details are one card, not two: they are the same
+        subject, and a gap between them read as the photograph belonging to the page
+        rather than to this cafe. The image is flush to the card's edges, so the card's
+        own radius is what rounds it.
+      */}
+      <section className="mb-8 overflow-hidden rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+        <CafePhotoHero
+          images={galleryImages}
+          cafeName={cafe.name}
+          onOpen={() => setGalleryOpen(true)}
+          /*
+            The overflow lives on the photograph's far corner, away from the crew and
+            away from the actions the reader came for.
+          */
+          cornerAction={
+            <ActionsMenu
+              label={t('more_actions')}
+              onMedia
+              items={[
+                {
+                  key: 'report',
+                  label: tReport('report_issue'),
+                  onClick: requireAuth(() => openCafeReport(cafe.id, cafe.name)),
+                },
+              ]}
             />
-            <ReportButton
-              onClick={handleReportClick}
-              size="md"
-              label={tReport('report_issue')}
-            />
-            <DropBeanButton
-              cafeId={cafe.id}
-              cafeLat={cafe.latitude}
-              cafeLng={cafe.longitude}
-              size="md"
-              showGrowthInfo={true}
-            />
-          </div>
-        </div>
-        <div className="h-px bg-[var(--color-border)] mb-4"></div>
-        <CafeInfoSection cafe={cafe} />
-      </div>
+          }
+          overlay={
+            foundingCrew?.navigator ? (
+              <FoundingCrewAvatars variant="stack" navigator={foundingCrew.navigator} />
+            ) : null
+          }
+        />
 
-      {/* Photos Section - Google Maps Style */}
-      {galleryImages.length > 0 && (
-        <div className="mb-6 p-4 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-[var(--color-cardText)]">
-              {t('photos')}
-            </h2>
-            {galleryImages.length > 1 && (
-              <button
-                onClick={() => setGalleryModalOpen(true)}
-                className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors"
-              >
-                {t('view_all')} ({galleryImages.length})
-              </button>
-            )}
-          </div>
-          {/* Compact horizontal scrollable gallery */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {galleryImages.slice(0, 6).map((image, index) => (
-              <div
-                key={index}
-                className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer group"
-                onClick={() => {
-                  setLightboxIndex(index);
-                  setLightboxOpen(true);
-                }}
-              >
-                <img
-                  src={image.url}
-                  alt={image.alt || `Photo ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                {/* Show remaining count on last visible image */}
-                {index === 5 && galleryImages.length > 6 && (
-                  <div
-                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setGalleryModalOpen(true);
-                    }}
-                  >
-                    <span className="text-white text-sm font-semibold">
-                      +{galleryImages.length - 6}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Stats Card */}
-      {(cafe.average_rating !== undefined || (cafe.total_beans_dropped ?? 0) > 0 || (cafe.log_count ?? 0) > 0) && (
-        <div className="mb-6 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('average_rating')}</p>
-              <p className="text-2xl font-bold text-[var(--color-cardText)]">
-                {cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-'}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('total_logs')}</p>
-              <p className="text-2xl font-bold text-[var(--color-cardText)]">{cafe.log_count}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('beans_dropped') || '심긴 콩'}</p>
-              <p className="text-2xl font-bold text-[var(--color-primary)]">{cafe.total_beans_dropped || 0}</p>
+        <div className="p-6">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+            {/* A cafe's name is data, not the page's own voice: body face, like the cards. */}
+            <h1 className="font-sans text-3xl font-bold wrap-break-word text-ink-primary">
+              {cafe.name}
+            </h1>
+            <div className="flex shrink-0 flex-wrap items-center gap-1">
+              <SaveButtons
+                cafeId={cafe.id}
+                syncToken={saveSync}
+                onOpenCollectionSelector={() => setCollectionModalOpen(true)}
+              />
+              <DropBeanButton
+                cafeId={cafe.id}
+                cafeLat={cafe.latitude}
+                cafeLng={cafe.longitude}
+                size="sm"
+                showGrowthInfo={true}
+              />
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Coffee Logs Feed Card */}
-      <div className="mb-8 p-6 bg-[var(--color-cardBackground)] rounded-lg shadow-[var(--color-cardShadow)]">
-        <div className="flex flex-col gap-4 mb-4">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-[var(--color-cardText)]">{t('coffee_logs')}</h2>
+          {/* Every rule on this page is drawn in the brand: these separate the card's
+              own sections rather than dividing fields inside one, and the brand is what
+              says the section belongs to this app rather than to the record. */}
+          <div className="mt-2 mb-4 h-px bg-brand" />
+
+          <CafeInfoSection cafe={cafe} showFoundingCrew={false} />
+
+          {galleryImages.length > 0 && (
+            /*
+              The second door into the collection, for a reader who has scrolled
+              past the photograph and is reading the details.
+            */
+            <button
+              type="button"
+              onClick={() => setGalleryOpen(true)}
+              className="control-flat mt-6 inline-flex min-h-11 items-center gap-2 rounded-(--btn-radius) px-5 text-sm font-medium"
+            >
+              <Images className="size-4" aria-hidden />
+              {t('photos')} {galleryImages.length}
+            </button>
+          )}
+
+          {hasStats && (
+            /*
+              Subgrid, so the three numbers share one row no matter how many lines
+              each label takes. On a phone "AVERAGE RATING" and "BEANS DROPPED" wrap
+              to two lines and "TOTAL LOGS" does not, which left the numbers sitting
+              at three different heights -- and numbers meant to be read across have
+              to sit on one line. A min-height on the label would fix today's three
+              strings and break on the first translation that needs a third line.
+            */
+            <div className="mt-6 grid grid-cols-3 grid-rows-[auto_auto] gap-x-4 border-t border-brand pt-6">
+              {[
+                {
+                  label: t('average_rating'),
+                  value: cafe.average_rating ? `${cafe.average_rating.toFixed(1)}/5` : '-',
+                },
+                { label: t('total_logs'), value: cafe.log_count },
+                { label: t('beans_dropped'), value: cafe.total_beans_dropped || 0 },
+              ].map((stat) => (
+                <div key={stat.label} className="row-span-2 grid grid-rows-subgrid">
+                  <p className="landing-micro text-ink-secondary">{stat.label}</p>
+                  <p className="mt-1 text-2xl font-bold text-ink-primary">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* The coffee, before the logs. Someone opening this page wants to know what
+          they can drink and what they can carry home; the log feed is who said so. */}
+      <section className="mb-8 rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+        <div className="space-y-6 p-6">
+          {/* "The Coffee" titles the whole card, and its brand rule sits under that
+              title. What separates the traits from the bean lists is a hairline: they
+              are two parts of one section, not two sections. */}
+          <CafeTraits cafeId={cafe.id} />
+          <div className="h-px bg-edge-rule" />
+          <CafeBeansRecent cafeId={cafe.id} />
+        </div>
+      </section>
+
+      <section className="mb-8 rounded-(--radius-card) border border-edge-rule bg-surface-raised">
+        <div className="p-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2 className="text-xl font-bold text-ink-primary">{t('coffee_logs')}</h2>
             {user ? (
               <Link
                 href={logPagePath}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                className="btn-line relative inline-flex items-center gap-1.5 rounded-(--radius-control) px-3 py-1.5 text-xs font-medium text-ink-primary before:absolute before:inset-x-0 before:-inset-y-[7px] before:content-['']"
                 aria-label={t('write_log')}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus className="size-4" aria-hidden />
                 {t('write_log')}
               </Link>
             ) : (
               <button
-                onClick={handleWriteLog}
-                className="bg-[var(--color-primary)] text-[var(--color-primaryText)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium flex items-center gap-1.5"
+                onClick={requireAuth(() => router.push(logPagePath))}
+                className="btn-line relative inline-flex items-center gap-1.5 rounded-(--radius-control) px-3 py-1.5 text-xs font-medium text-ink-primary before:absolute before:inset-x-0 before:-inset-y-[7px] before:content-['']"
                 aria-label={t('write_log')}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus className="size-4" aria-hidden />
                 {t('write_log')}
               </button>
             )}
           </div>
-          <div className="h-px bg-[var(--color-border)]"></div>
+          {/* Ruled in the ink, not the hairline: this line closes the card's header
+              rather than dividing two fields inside it. */}
+          <div className="mb-4 h-px bg-brand" />
+          <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
         </div>
-        <CoffeeLogFeed cafeId={cafe.id} initialLogs={cafe.recent_logs || []} />
-      </div>
+      </section>
 
-      {/* Report Modal */}
       <ReportModal
         isOpen={modalState.isOpen}
         onClose={closeModal}
@@ -220,31 +244,28 @@ export default function CafeDetailClient({ cafe }: CafeDetailClientProps) {
         targetUrl={modalState.targetUrl}
       />
 
-      {/* Image Gallery Modal */}
       <ImageGalleryModal
         images={galleryImages}
-        isOpen={galleryModalOpen}
-        onClose={() => setGalleryModalOpen(false)}
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
         title={cafe.name}
       />
 
-      {/* Image Lightbox */}
-      <ImageLightbox
-        images={galleryImages}
-        initialIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-      />
-
-      {/* Collection Selector Modal */}
+      {/*
+        Opened by the save press itself, so the cafe is already filed under "Saved for
+        later" by the time the list appears: choosing a list moves it rather than
+        adding a second copy.
+      */}
       <CollectionSelectorModal
         isOpen={collectionModalOpen}
-        onClose={() => setCollectionModalOpen(false)}
+        onClose={() => {
+          setCollectionModalOpen(false);
+          setSaveSync((n) => n + 1);
+        }}
+        moveOutOfSaveLater
         cafeId={cafe.id}
         cafeName={cafe.name}
       />
     </div>
   );
 }
-
-

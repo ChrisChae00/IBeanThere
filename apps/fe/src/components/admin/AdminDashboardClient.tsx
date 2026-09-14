@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, Coffee } from 'lucide-react';
-import PendingCafesList from './PendingCafesList';
+import { AlertCircle, Coffee, SlidersHorizontal } from 'lucide-react';
+import BlacklistManager from './BlacklistManager';
+import TraitSuggestionsList from './TraitSuggestionsList';
 import AllCafesList from './AllCafesList';
 import { getAdminReportsRepository, ReportsList } from '@/features/admin';
 
-type Tab = 'cafes' | 'reports';
+type Tab = 'cafes' | 'traits' | 'reports' | 'cafe_blacklist' | 'user_blacklist';
 type CafeSubTab = 'pending' | 'all';
 
 export default function AdminDashboardClient() {
@@ -15,6 +16,13 @@ export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<Tab>('cafes');
   const [cafeSubTab, setCafeSubTab] = useState<CafeSubTab>('pending');
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const mapText = useTranslations('map.filters');
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setQuery(search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -32,13 +40,14 @@ export default function AdminDashboardClient() {
   return (
     <div>
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-4 mb-8 border-b border-[var(--color-border)] overflow-x-auto">
+      <div className="flex items-center gap-4 mb-8 border-b border-border overflow-x-auto">
+        {(['cafe_blacklist', 'user_blacklist'] as const).map(tab => <button key={tab} onClick={() => setActiveTab(tab)} aria-pressed={activeTab === tab} className={`px-4 py-3 whitespace-nowrap border-b-2 ${activeTab === tab ? 'border-primary' : 'border-transparent'}`}>{t(tab)}</button>)}
         <button
           onClick={() => setActiveTab('cafes')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'cafes'
-              ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-ink-secondary hover:text-text'
           }`}
         >
           <Coffee size={18} />
@@ -46,17 +55,29 @@ export default function AdminDashboardClient() {
         </button>
 
         <button
+          onClick={() => setActiveTab('traits')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'traits'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-ink-secondary hover:text-text'
+          }`}
+        >
+          <SlidersHorizontal size={18} />
+          {t('trait_suggestions')}
+        </button>
+
+        <button
           onClick={() => setActiveTab('reports')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'reports'
-              ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-ink-secondary hover:text-text'
           }`}
         >
           <AlertCircle size={18} />
           {t('reports.page_title')}
           {pendingReportsCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 text-xs font-semibold rounded-full bg-[var(--color-error)] text-white">
+            <span className="ml-1 px-2 py-0.5 text-xs font-semibold rounded-full bg-error text-white">
               {pendingReportsCount}
             </span>
           )}
@@ -67,7 +88,7 @@ export default function AdminDashboardClient() {
       {activeTab === 'cafes' && (
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-2">
+            <h2 className="text-2xl font-semibold text-text mb-2">
               {t('cafes_tab')}
             </h2>
           </div>
@@ -78,8 +99,8 @@ export default function AdminDashboardClient() {
               onClick={() => setCafeSubTab('pending')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 cafeSubTab === 'pending'
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text)]'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface text-ink-secondary border border-border hover:text-text'
               }`}
             >
               {t('sub_tab_pending')}
@@ -88,27 +109,38 @@ export default function AdminDashboardClient() {
               onClick={() => setCafeSubTab('all')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 cafeSubTab === 'all'
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text)]'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface text-ink-secondary border border-border hover:text-text'
               }`}
             >
               {t('sub_tab_all')}
             </button>
           </div>
 
-          {cafeSubTab === 'pending' && <PendingCafesList />}
-          {cafeSubTab === 'all' && <AllCafesList />}
+          <input type="search" aria-label={mapText('search_placeholder')} placeholder={mapText('search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} maxLength={100} className="h-11 w-full mb-4 rounded border border-border bg-surface px-3" />
+          <AllCafesList key={`${cafeSubTab}:${query}`} query={query} initialStatus={cafeSubTab === 'pending' ? 'pending' : 'all'} />
+        </div>
+      )}
+
+      {activeTab === 'traits' && (
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-text mb-2">{t('trait_suggestions')}</h2>
+          </div>
+          <TraitSuggestionsList />
         </div>
       )}
 
       {/* Reports Tab */}
+      {activeTab === 'cafe_blacklist' && <BlacklistManager key="cafes" kind="cafes" />}
+      {activeTab === 'user_blacklist' && <BlacklistManager key="users" kind="users" />}
       {activeTab === 'reports' && (
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-2">
+            <h2 className="text-2xl font-semibold text-text mb-2">
               {t('reports.page_title')}
             </h2>
-            <p className="text-[var(--color-textSecondary)] text-sm">
+            <p className="text-textSecondary text-sm">
               {t('reports.page_description')}
             </p>
           </div>

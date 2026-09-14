@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraIcon from './CameraIcon';
+import { useToast } from '@/contexts/ToastContext';
 import { uploadCafeImage } from '@/shared/lib/supabase/storage';
 import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
@@ -27,6 +28,7 @@ export default function PhotoUploadWithMain({
 }: PhotoUploadWithMainProps) {
   const t = useTranslations('cafe.register');
   const tLog = useTranslations('cafe.log');
+  const { showToast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [convertingCount, setConvertingCount] = useState(0);
@@ -47,9 +49,11 @@ export default function PhotoUploadWithMain({
           file = await convertHeicToWebp(file);
         } catch (error) {
           console.error('Error converting HEIC file:', error);
-          alert(error instanceof HeicNotSupportedError
+          /* Toasts, not `alert()`: a picker can hand over several files at once, and a
+             stack of blocking dialogs is one per bad file with the page frozen between. */
+          showToast(error instanceof HeicNotSupportedError
             ? tLog('heic_browser_not_supported')
-            : tLog('heic_conversion_failed'));
+            : tLog('heic_conversion_failed'), 'error');
           setConvertingCount(prev => prev - 1);
           continue;
         }
@@ -57,12 +61,12 @@ export default function PhotoUploadWithMain({
       }
 
       if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(tLog('photo_too_large', { maxSize: maxSizeMB }));
+        showToast(tLog('photo_too_large', { maxSize: maxSizeMB }), 'error');
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
-        alert(tLog('invalid_file_type'));
+        showToast(tLog('invalid_file_type'), 'error');
         continue;
       }
 
@@ -71,7 +75,9 @@ export default function PhotoUploadWithMain({
         const url = await uploadCafeImage(file, userId);
         newPhotos.push(url);
       } catch (error) {
+        // Say so. A photo that silently never arrives reads as one the reader added.
         console.error('Error uploading file:', error);
+        showToast(tLog('photo_upload_error'), 'error');
       } finally {
         setUploadingCount(prev => prev - 1);
       }
@@ -127,10 +133,10 @@ export default function PhotoUploadWithMain({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-[var(--color-text)]">
+      <label className="block text-sm font-medium text-text">
         {t('photos_label')} ({photos.length}/{maxPhotos})
       </label>
-      <p className="text-xs text-[var(--color-text-secondary)] mb-2">
+      <p className="text-xs text-ink-secondary mb-2">
         {t('photos_hint')}
       </p>
 
@@ -150,8 +156,8 @@ export default function PhotoUploadWithMain({
                 onClick={() => setAsMain(index)}
                 className={`absolute top-1 left-1 p-1.5 rounded-full transition-all ${
                   mainIndex === index
-                    ? 'bg-[var(--color-accent)] text-white'
-                    : 'bg-black/50 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-[var(--color-accent)] hover:text-white'
+                    ? 'bg-accent text-white'
+                    : 'bg-black/50 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-accent hover:text-white'
                 }`}
                 title={mainIndex === index ? t('main_photo') : t('set_as_main')}
               >
@@ -164,7 +170,7 @@ export default function PhotoUploadWithMain({
               <button
                 type="button"
                 onClick={() => removePhoto(index)}
-                className="absolute top-1 right-1 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--color-error)]"
+                className="absolute top-1 right-1 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error"
                 title={tLog('remove')}
               >
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,7 +180,7 @@ export default function PhotoUploadWithMain({
 
               {/* Main label */}
               {mainIndex === index && (
-                <div className="absolute bottom-0 left-0 right-0 bg-[var(--color-accent)] text-white text-xs text-center py-1 font-medium">
+                <div className="absolute bottom-0 left-0 right-0 bg-accent text-white text-xs text-center py-1 font-medium">
                   {t('main_photo')}
                 </div>
               )}
@@ -184,7 +190,7 @@ export default function PhotoUploadWithMain({
       )}
 
       {convertingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+        <div className="flex items-center gap-2 text-sm text-ink-secondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -194,7 +200,7 @@ export default function PhotoUploadWithMain({
       )}
 
       {uploadingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+        <div className="flex items-center gap-2 text-sm text-ink-secondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -211,17 +217,17 @@ export default function PhotoUploadWithMain({
           onClick={() => !isProcessing && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
             isProcessing
-              ? 'border-[var(--color-border)] opacity-50 cursor-not-allowed'
+              ? 'border-border opacity-50 cursor-not-allowed'
               : isDragging
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 cursor-pointer'
-              : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50 cursor-pointer'
+              ? 'border-primary bg-primary/10 cursor-pointer'
+              : 'border-border hover:border-primary/50 cursor-pointer'
           }`}
         >
-          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-secondary)]" />
-          <p className="text-sm text-[var(--color-text-secondary)]">
+          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-ink-secondary" />
+          <p className="text-sm text-ink-secondary">
             {tLog('drag_drop_photos')} {tLog('or')} {tLog('click_to_upload')}
           </p>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+          <p className="text-xs text-ink-secondary mt-1">
             {tLog('max_photos', { max: maxPhotos })} ({tLog('max_size')}: {maxSizeMB}MB)
           </p>
           <input

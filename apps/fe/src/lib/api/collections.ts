@@ -121,6 +121,24 @@ export async function removeCafeFromCollection(
   return handleResponse<void>(response);
 }
 
+/**
+ * Take a cafe out of every collection it is saved in.
+ *
+ * There is no endpoint for this: the save-status call is what knows where a cafe
+ * currently lives, so this reads that and removes it from each. Returns the collections
+ * it was actually removed from, so a caller can correct its own counts without asking
+ * for them again.
+ */
+export async function removeCafeFromAllCollections(cafeId: string): Promise<string[]> {
+  const { saved_collection_ids } = await getCafeSaveStatus(cafeId);
+
+  await Promise.all(
+    saved_collection_ids.map((collectionId) => removeCafeFromCollection(collectionId, cafeId)),
+  );
+
+  return saved_collection_ids;
+}
+
 // =========================================================
 // Sharing
 // =========================================================

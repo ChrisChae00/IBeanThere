@@ -1,72 +1,70 @@
 'use client';
 
+import Image from 'next/image';
+
+/*
+  The five growth stages, as painted art rather than drawn icons. What this replaces
+  was five inline SVGs whose every colour came from a `--growth-*` token, so each
+  theme repainted the bean, the soil and the leaves; the illustrations are one fixed
+  set instead, for the same reason the map's own pins are fixed -- the paper they are
+  painted on does not change with the theme, and a stage a reader recognises should
+  look the same wherever it appears.
+
+  The files in `public/growth/` are the delivered art itself -- square, full bleed, no
+  crop and no mask, and no second copy under `media-src/` because there is nothing to
+  derive. A circular cut was tried first and is not here: the soil is painted to the
+  frame's own edge, so it either left a band of sky under the ground or clipped the
+  leaves, and the stages are due to be redrawn anyway. Next/image resizes per call
+  site, so the source can stay as large as it arrived.
+*/
+const STAGES = [
+  { src: '/growth/bean-growth-seed.png', name: 'Bean Dropped' },
+  { src: '/growth/bean-growth-sprout.png', name: 'Sprouting' },
+  { src: '/growth/bean-growth-growing.png', name: 'Growing' },
+  { src: '/growth/bean-growth-tree.png', name: 'Sapling' },
+  { src: '/growth/bean-growth-harvest.png', name: 'Fruiting Tree' },
+] as const;
+
 interface GrowthIconProps {
-  level: number;  // 0-5
+  /** 0 for a cafe with no bean in it yet, 1-5 for the stages above. */
+  level: number;
+  /**
+     A pixel box, for the places that draw the badge at one fixed size. Left out, the
+     badge takes its size from `className`, which is what a responsive row needs.
+   */
   size?: number;
-  animate?: boolean;
   className?: string;
 }
 
-import { SeedIcon, SproutIcon, GrowingIcon, TreeIcon, HarvestIcon } from '../landing/GrowthJourneyIcons';
+export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
+  const box = size ? { width: size, height: size } : undefined;
 
-/**
- * GrowthIcon - Visual representation of bean growth level
- * 
- * Levels:
- * 0 - No bean (empty)
- * 1 - Bean Dropped 🫘 (Seed)
- * 2 - Sprouting 🌱 (Sprout)
- * 3 - Growing 🌿 (Growing)
- * 4 - Sapling 🌳 (Tree)
- * 5 - Fruiting Tree 🍒 (Harvest)
- */
-export function GrowthIcon({ 
-  level, 
-  size = 24, 
-  animate = false,
-  className = '' 
-}: GrowthIconProps) {
-  
-  // Empty state
-  if (level === 0) {
+  // No bean here yet. An empty frame rather than a faded stage: nothing has started.
+  if (level < 1) {
     return (
-      <span 
-        className={`inline-flex items-center justify-center rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] ${className}`}
-        style={{ width: size, height: size }}
+      <span
+        className={`inline-block border border-border bg-surface ${className}`}
+        style={box}
         title="No bean"
       />
     );
   }
 
-  const iconClass = `w-full h-full ${animate ? 'animate-bounce' : ''}`;
+  const stage = STAGES[Math.min(level, STAGES.length) - 1];
 
   return (
-    <div 
-      className={`inline-flex items-center justify-center ${className}`}
-      style={{ width: size, height: size }}
-      title={getLevelName(level)}
-      role="img"
-      aria-label={getLevelName(level)}
+    <span
+      className={`relative inline-block ${className}`}
+      style={box}
+      title={stage.name}
     >
-      {level === 1 && <SeedIcon className={iconClass} />}
-      {level === 2 && <SproutIcon className={iconClass} />}
-      {level === 3 && <GrowingIcon className={iconClass} />}
-      {level === 4 && <TreeIcon className={iconClass} />}
-      {level >= 5 && <HarvestIcon className={iconClass} />}
-    </div>
+      {/*
+        `sizes` is the largest the badge is ever drawn (the landing index, 96px), so a
+        phone is not handed the 3x file for a 24px row in the beans list.
+      */}
+      <Image src={stage.src} alt={stage.name} fill sizes="96px" className="object-cover" />
+    </span>
   );
-}
-
-function getLevelName(level: number): string {
-  switch (level) {
-    case 0: return 'No bean';
-    case 1: return 'Bean Dropped';
-    case 2: return 'Sprouting';
-    case 3: return 'Growing';
-    case 4: return 'Sapling';
-    case 5: return 'Fruiting Tree';
-    default: return 'Unknown';
-  }
 }
 
 // Export level thresholds for reference

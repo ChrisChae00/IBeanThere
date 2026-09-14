@@ -41,6 +41,79 @@ class GooglePlacesService:
     
     def __init__(self, api_key: str):
         self.api_key = api_key
+
+    async def get_first_photo(self, place_id: str) -> Optional[Dict[str, Any]]:
+        """Return fresh metadata for the first usable photo; photo names are never cached."""
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                f"{self.PLACES_API_BASE}/{place_id}",
+                headers={
+                    "X-Goog-Api-Key": self.api_key,
+                    "X-Goog-FieldMask": "id,photos",
+                },
+            )
+            response.raise_for_status()
+
+        photos = response.json().get("photos") or []
+        if not photos or not photos[0].get("googleMapsUri"):
+            return None
+        return photos[0]
+
+    async def get_photo_uri(self, photo_name: str) -> str:
+        """Resolve a short-lived Google-hosted URI without following the redirect."""
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                f"https://places.googleapis.com/v1/{photo_name}/media",
+                headers={"X-Goog-Api-Key": self.api_key},
+                params={
+                    "maxWidthPx": 800,
+                    "maxHeightPx": 600,
+                    "skipHttpRedirect": "true",
+                },
+            )
+            response.raise_for_status()
+
+        photo_uri = response.json().get("photoUri")
+        if not photo_uri:
+            raise ValueError("Google Place Photo response omitted photoUri")
+        return photo_uri
+
+    async def find_place_id_for_cafe(
+        self, name: str, address: str, latitude: float, longitude: float
+    ) -> Optional[Dict[str, Any]]:
+        """Use IDs-only search, then fetch only the candidate id and location."""
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            search = await client.post(
+                f"{self.PLACES_API_BASE}:searchText",
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Goog-Api-Key": self.api_key,
+                    "X-Goog-FieldMask": "places.id",
+                },
+                json={
+                    "textQuery": " ".join(part for part in (name, address) if part),
+                    "locationBias": {
+                        "circle": {
+                            "center": {"latitude": latitude, "longitude": longitude},
+                            "radius": 200.0,
+                        }
+                    },
+                },
+            )
+            search.raise_for_status()
+            places = search.json().get("places") or []
+            if not places:
+                return None
+
+            details = await client.get(
+                f"{self.PLACES_API_BASE}/{places[0]['id']}",
+                headers={
+                    "X-Goog-Api-Key": self.api_key,
+                    "X-Goog-FieldMask": "id,location",
+                },
+            )
+            details.raise_for_status()
+            return details.json()
     
     async def lookup_from_url(self, url: str) -> Optional[Dict[str, Any]]:
         """

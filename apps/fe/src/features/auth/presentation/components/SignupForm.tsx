@@ -7,16 +7,16 @@ import { createClient } from '@/shared/lib/supabase/client';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
 import { useErrorTranslator } from '@/hooks/useErrorTranslator';
 import {
-  MailIcon,
-  LockIcon,
   EyeIcon,
   EyeOffIcon,
   GoogleIcon,
-
   ErrorAlert,
   Button,
   Input
 } from '@/components/ui';
+
+/* Pill fields, matching the pill buttons above and below them. */
+const FIELD = 'rounded-full pl-5';
 
 interface SignupFormProps {
   locale: string;
@@ -296,151 +296,136 @@ export function SignupForm({ locale }: SignupFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 motion-fade-in" noValidate>
+    <form onSubmit={handleSubmit} className="blur-fade-children space-y-5" noValidate>
       <ErrorAlert message={displayError} />
+
+      <Button
+        type="button"
+        onClick={handleGoogleSignUp}
+        disabled={oauthLoading}
+        variant="outline"
+        fullWidth
+        leftIcon={<GoogleIcon size={20} />}
+      >
+        {t('continue_with_google')}
+      </Button>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1 border-t border-edge-rule" />
+        <span className="text-sm text-ink-secondary">{t('or')}</span>
+        <div className="flex-1 border-t border-edge-rule" />
+      </div>
 
       <div className="space-y-5">
         <Input
           label={t('username')}
           name="username"
+          autoComplete="username"
           value={formData.username}
           onChange={handleInputChange}
           placeholder={t('username_placeholder')}
           helperText={usernameHelperText}
-          helperTextClassName={isUsernameAvailable && !usernameInputError ? 'text-[var(--color-success)]' : ''}
+          helperTextClassName={isUsernameAvailable && !usernameInputError ? 'text-success' : ''}
           error={usernameInputError}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className={FIELD}
         />
 
         <Input
           label={t('email_address')}
           type="email"
           name="email"
+          autoComplete="email"
           value={formData.email}
           onChange={handleInputChange}
           placeholder={t('email_placeholder')}
-          icon={<MailIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
           required
-          className="bg-[var(--color-background)]/50 backdrop-blur-sm"
+          className={FIELD}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Input
-            label={t('password')}
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            placeholder={t('create_password_placeholder')}
-            icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
-            required
-            className="bg-[var(--color-background)]/50 backdrop-blur-sm"
-            endAdornment={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
-              >
-                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-              </button>
-            }
-          />
+        <Input
+          label={t('password')}
+          type={showPassword ? 'text' : 'password'}
+          name="password"
+          autoComplete="new-password"
+          value={formData.password}
+          onChange={handleInputChange}
+          placeholder={t('create_password_placeholder')}
+          required
+          className={FIELD}
+          endAdornment={
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? t('hide_password') : t('show_password')}
+              className="rounded-full p-1 text-ink-secondary hover:text-ink-primary"
+            >
+              {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
+          }
+        />
 
-          <Input
-            label={t('confirm_password')}
-            type={showConfirmPassword ? 'text' : 'password'}
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            placeholder={t('confirm_password_placeholder')}
-            icon={<LockIcon size={20} className="text-[var(--color-cardTextSecondary)]" />}
-            required
-            className="bg-[var(--color-background)]/50 backdrop-blur-sm"
-            endAdornment={
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="text-[var(--color-cardTextSecondary)] hover:text-[var(--color-cardText)] transition p-1 hover:bg-[var(--color-surface)]/50 rounded-full"
-              >
-                {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-              </button>
-            }
-          />
-        </div>
+        <Input
+          label={t('confirm_password')}
+          type={showConfirmPassword ? 'text' : 'password'}
+          name="confirmPassword"
+          autoComplete="new-password"
+          value={formData.confirmPassword}
+          onChange={handleInputChange}
+          placeholder={t('confirm_password_placeholder')}
+          required
+          className={FIELD}
+          endAdornment={
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? t('hide_password') : t('show_password')}
+              className="rounded-full p-1 text-ink-secondary hover:text-ink-primary"
+            >
+              {showConfirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
+          }
+        />
       </div>
 
-      {/* Terms Agreement */}
-      <div className="flex items-start space-x-3 pt-2">
-        <div className="relative flex items-center pt-1">
-          <input
-            type="checkbox"
-            checked={agreeToTerms}
-            onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="w-5 h-5 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)] cursor-pointer accent-[var(--color-primary)]"
-            required
-          />
-        </div>
-        <label className="text-sm text-[var(--color-text-secondary)] leading-relaxed select-none">
+      <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-ink-secondary select-none break-keep">
+        <input
+          type="checkbox"
+          checked={agreeToTerms}
+          onChange={(e) => setAgreeToTerms(e.target.checked)}
+          className="mt-1 size-4 shrink-0 cursor-pointer accent-brand"
+          required
+        />
+        <span>
           {t('terms_agreement')}{' '}
-          <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/terms`} target="_blank" rel="noopener noreferrer" className="text-ink-primary underline underline-offset-4 decoration-edge-rule hover:decoration-ink-primary">
             {t('terms_of_service')}
           </Link>{' '}
           {t('and')}{' '}
-          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] underline font-medium transition-colors hover:no-underline">
+          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener noreferrer" className="text-ink-primary underline underline-offset-4 decoration-edge-rule hover:decoration-ink-primary">
             {t('privacy_policy')}
           </Link>
-        </label>
-      </div>
+        </span>
+      </label>
 
-      {/* Submit Button */}
-      <Button 
-        type="submit" 
-        fullWidth 
-        size="lg" 
-        loading={isLoading} 
-        disabled={isCheckingUsername || !!usernameInputError} 
-        className="mt-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-[var(--color-primary)] text-[var(--color-primaryText)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]"
+      <Button
+        type="submit"
+        fullWidth
+        loading={isLoading}
+        disabled={isCheckingUsername || !!usernameInputError}
       >
         {t('create_account')}
       </Button>
 
-      {/* Divider */}
-      <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 border-t border-[var(--color-border)]/50"></div>
-        <span className="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wider text-xs px-2">
-          {t('or_sign_up_with')}
-        </span>
-        <div className="flex-1 border-t border-[var(--color-border)]/50"></div>
-      </div>
-
-      {/* Social Sign Up */}
-      <div className="w-full">
-        <Button
-          type="button"
-          onClick={handleGoogleSignUp}
-          disabled={oauthLoading}
-          variant="outline"
-          fullWidth
-          leftIcon={<GoogleIcon size={20} />}
-          className="bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:text-black active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md font-medium h-[56px] hover:font-bold"
+      <p className="text-center text-sm text-ink-secondary">
+        {t('already_have_account')}{' '}
+        <Link
+          href={`/${locale}/signin`}
+          className="font-semibold text-ink-primary underline underline-offset-4 decoration-edge-rule hover:decoration-ink-primary"
         >
-          {t('google')}
-        </Button>
-      </div>
-
-      {/* Sign In Link */}
-      <div className="text-center mt-8">
-        <p className="text-[var(--color-text-secondary)] text-sm">
-          {t('already_have_account')}{' '}
-          <Link
-            href={`/${locale}/signin`}
-            className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] font-bold hover:underline decoration-2 underline-offset-4 transition-all"
-          >
-            {t('sign_in_link')}
-          </Link>
-        </p>
-      </div>
+          {t('sign_in_link')}
+        </Link>
+      </p>
     </form>
   );
 }

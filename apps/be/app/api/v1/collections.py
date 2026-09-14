@@ -641,38 +641,29 @@ async def get_cafe_save_status(
     Returns whether the cafe is in Favourites, Save for Later, or any custom collections.
     """
     user_id = current_user.id
-    
-    # Get user's collections that contain this cafe
-    collections = supabase.table("cafe_collections").select(
-        "id, icon_type"
-    ).eq("user_id", user_id).execute()
-    
-    if not collections.data:
-        return {
-            "is_favourited": False,
-            "is_saved": False,
-            "saved_collection_ids": []
-        }
-    
-    collection_ids = [c["id"] for c in collections.data]
-    collection_map = {c["id"]: c["icon_type"] for c in collections.data}
-    
-    # Check which collections contain this cafe
+
+    # One round trip, not two. This ran as "list the user's collections" followed by
+    # "which of them hold this cafe", and against a hosted database those two waits are
+    # what the cafe page spends before it can show a filled bookmark. The join asks the
+    # same question once: the rows of collection_items for this cafe whose collection
+    # belongs to this user.
     items = supabase.table("collection_items").select(
-        "collection_id"
-    ).eq("cafe_id", cafe_id).in_("collection_id", collection_ids).execute()
-    
+        "collection_id, cafe_collections!inner(icon_type, user_id)"
+    ).eq("cafe_id", cafe_id).eq("cafe_collections.user_id", user_id).execute()
+
     saved_ids = [item["collection_id"] for item in (items.data or [])]
-    
-    is_favourited = any(
-        collection_map.get(cid) == "favourite" 
-        for cid in saved_ids
-    )
-    is_saved = any(
-        collection_map.get(cid) == "save_later" 
-        for cid in saved_ids
-    )
-    
+    icon_types = [
+        (item.get("cafe_collections") or {}).get("icon_type")
+        for item in (items.data or [])
+    ]
+
+    is_favourited = any(icon == "favourite" for icon in icon_types)
+    # The bookmark means "filed somewhere", not "in Save for Later": one press files a
+    # cafe under Save for Later and the picker can then move it into a real list, and a
+    # bookmark that emptied itself on that move would tell the reader they had lost the
+    # save. Favourites are excluded because the heart is a separate mark, not a filing.
+    is_saved = any(icon != "favourite" for icon in icon_types)
+
     return {
         "is_favourited": is_favourited,
         "is_saved": is_saved,

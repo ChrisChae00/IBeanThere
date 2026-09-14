@@ -5,10 +5,13 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from '@/hooks/useLocation';
 import { useToast } from '@/contexts/ToastContext';
-import { Button } from '@/shared/ui';
+import CoffeeBean from '@/shared/ui/CoffeeBean';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
 import confetti from 'canvas-confetti';
+
+// What `cafes.py` enforces on the way in; the copy names it too.
+const DROP_RADIUS_M = 50;
 
 interface DropBeanButtonProps {
   cafeId: string;
@@ -173,10 +176,13 @@ export default function DropBeanButton({
         userLng = position.longitude;
       }
 
-      // Check distance client-side first
+      /*
+        The same 50m the server enforces, not a roomier client gate. A wider one
+        only bought the reader a round trip that comes back as the API's own
+        English sentence; refusing here says the distance in their language.
+      */
       const distance = calculateDistance(userLat, userLng, cafeLat, cafeLng);
-      // Allow slightly larger radius for better UX (75m instead of 50m strict)
-      if (distance > 75) {
+      if (distance > DROP_RADIUS_M) {
         showToast(t('too_far', { distance: Math.round(distance) }), 'error');
         setIsLoading(false);
         return;
@@ -196,13 +202,19 @@ export default function DropBeanButton({
       );
 
       if (!response.ok) {
-        const data = await response.json();
+        /*
+          Every branch answers in the reader's language. `data.detail` is written for
+          a developer reading a log, in English whatever the locale -- it goes to the
+          console, not to a toast.
+        */
+        const data = await response.json().catch(() => null);
+        console.error('Drop bean rejected:', response.status, data);
         if (response.status === 409) {
           showToast(t('already_today'), 'error');
         } else if (response.status === 400) {
-          showToast(data.detail || t('too_far'), 'error');
+          showToast(t('too_far', { distance: Math.round(distance) }), 'error');
         } else {
-          showToast(data.detail || t('error'), 'error');
+          showToast(t('error'), 'error');
         }
         setIsLoading(false);
         return;
@@ -256,35 +268,56 @@ export default function DropBeanButton({
     <div className="relative flex flex-col items-center gap-2">
       {showGrowthInfo && beanStatus?.has_bean && (
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-xs font-medium text-[var(--color-text-secondary)]">
+          <span className="text-xs font-medium text-ink-secondary">
             {t('drops', { count: dropCount })}
           </span>
         </div>
       )}
       
-      <Button
+      {/*
+        The label slides out and the bean rides in behind it, while the dot the
+        label sat beside grows into the fill. It is one gesture read two ways: the
+        bean is the thing being dropped, and the button fills the way a cup does.
+
+        Written here rather than pulled from a variant, because the whole point is
+        the two stacked layers -- a `variant` prop cannot express a control whose
+        content moves.
+      */}
+      <button
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleDropBean();
         }}
         disabled={!canDrop || isLoading || locationLoading}
-        size={size}
-        variant="primary"
-        className="whitespace-nowrap shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-100 disabled:cursor-not-allowed"
+        className={`group relative overflow-hidden whitespace-nowrap rounded-(--btn-radius) border border-brand bg-surface-raised font-semibold text-ink-primary disabled:cursor-not-allowed disabled:opacity-60 ${
+          size === 'sm' ? 'h-(--btn-height-sm) px-5 text-sm' : 'h-(--btn-height-md) px-6'
+        }`}
       >
-        {isLoading || locationLoading ? (
-          <div className="flex items-center gap-2">
-             <LoadingSpinner size="sm" className="text-[var(--color-primaryText)]" />
-             <span className="opacity-90">{t('button')}</span>
-          </div>
-        ) : (
-          canDrop ? t('button') : t('already_today')
-        )}
-      </Button>
+        <span className="flex items-center justify-center gap-2">
+          {isLoading || locationLoading ? (
+            <LoadingSpinner size="sm" />
+          ) : (
+            /*
+              `scale-[100]` on a 8px dot covers any button this system builds; the
+              growth is what paints the fill, so there is no colour transition to
+              keep in sync with it.
+            */
+            <span className="size-2 rounded-full bg-brand transition-transform duration-300 ease-out group-hover:scale-[100] group-disabled:scale-100" />
+          )}
+          <span className="inline-block transition-all duration-300 group-hover:translate-x-10 group-hover:opacity-0 group-disabled:translate-x-0 group-disabled:opacity-100">
+            {canDrop ? t('button') : t('already_today')}
+          </span>
+        </span>
+
+        <span className="absolute inset-0 z-10 flex translate-x-10 items-center justify-center gap-2 text-ink-on-brand opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-disabled:opacity-0">
+          <span>{canDrop ? t('button') : t('already_today')}</span>
+          <CoffeeBean size="inherit" className="size-4" />
+        </span>
+      </button>
 
       {!canDrop && showGrowthInfo && nextLevelAt && (
-        <div className="text-[10px] text-[var(--color-text-secondary)] text-center mt-0.5 opacity-80">
+        <div className="text-[10px] text-ink-secondary text-center mt-0.5 opacity-80">
           {t('next_level', { drops: nextLevelAt - dropCount })}
         </div>
       )}

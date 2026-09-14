@@ -14,12 +14,8 @@ export interface PendingCafe {
   verification_count: number;
   verified_at: string | null;
   admin_verified: boolean;
+  has_deletion_history?: boolean;
   navigator_id: string | null;
-  vanguard_ids: Array<{
-    user_id: string;
-    role: string;
-    verified_at: string;
-  }>;
   created_at: string;
   updated_at: string | null;
   business_hours?: BusinessHours;
@@ -90,6 +86,12 @@ export interface CafeUpdateData {
   business_hours?: BusinessHours;
   main_image?: string;
   images?: string[];
+  /* What a Google Maps lookup corrected. The backend refuses a move of more than
+     100m -- past that the URL is a different shop, not a better address for this one. */
+  latitude?: number;
+  longitude?: number;
+  google_place_id?: string;
+  source_url?: string;
 }
 
 export interface AdminUpdateResponse {
@@ -98,6 +100,7 @@ export interface AdminUpdateResponse {
 }
 
 export interface AllCafesParams {
+  q?: string;
   page?: number;
   pageSize?: number;
   status?: 'pending' | 'verified' | 'disputed';
@@ -106,6 +109,7 @@ export interface AllCafesParams {
 export async function getAllCafes(params?: AllCafesParams): Promise<PendingCafesResponse> {
   const headers = await getAuthHeaders();
   const searchParams = new URLSearchParams();
+  if (params?.q) searchParams.set('q', params.q);
   if (params?.page) searchParams.set('page', String(params.page));
   if (params?.pageSize) searchParams.set('page_size', String(params.pageSize));
   if (params?.status) searchParams.set('status', params.status);

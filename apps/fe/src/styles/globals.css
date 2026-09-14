@@ -1,6 +1,165 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@import './fonts.css';
+@import './themes.css';
+@import './tokens.css';
+@import './legacy-tokens.css';
+@import './shadcn-bridge.css';
+
+@theme {
+  --container-8xl: 90rem;
+  --font-logo: 'Playfair Display', Georgia, serif;
+  /*
+    `font-sans` is the body face, so a heading that should read as data rather than as
+    a headline -- a cafe's name in a list, for one -- can opt out of the display serif
+    without naming a family.
+  */
+  --font-sans: var(--font-body);
+
+  /*
+    New vocabulary. Feature code written from here on uses these: `bg-surface-raised`,
+    `text-ink-secondary`, `border-edge-default`, `bg-brand`.
+  */
+  --color-surface-page: var(--surface-page);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-inverse: var(--surface-inverse);
+
+  --color-ink-primary: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-on-brand: var(--ink-on-brand);
+  --color-ink-on-media: var(--ink-on-media);
+  --color-ink-inverse: var(--ink-inverse);
+  --color-scrim-media: var(--scrim-media);
+
+  /*
+    The brand colour is exposed as `brand`, not `accent`. The old palette already had an
+    `accent` - a pale tint used for tinted chips, soft borders and button hovers - and
+    unmigrated pages still ask for it by that name. Handing `accent` to the brand colour
+    would silently repaint all of them, so the legacy meaning keeps the name and the new
+    semantic takes its own.
+  */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+
+  --color-edge-subtle: var(--edge-subtle);
+  --color-edge-default: var(--edge-default);
+  --color-edge-strong: var(--edge-strong);
+  /*
+    Missing until now, which meant every `border-edge-rule` in the app was not a class
+    at all: the utility was never generated, the border fell back to `currentColor`,
+    and the hairline the design language asks for was being drawn at full ink strength.
+    Adding it makes those borders the rule they were written to be.
+  */
+  --color-edge-rule: var(--edge-rule);
+
+  --color-state-success: var(--state-success);
+  --color-state-warning: var(--state-warning);
+  --color-state-danger: var(--state-danger);
+  --color-state-pending: var(--state-pending);
+
+  /*
+    The star pair, under the layer-2 names. The legacy `--color-starFilled` /
+    `--color-starEmpty` below say the same thing and are still read by the shared
+    `StarRating`; both sets go when that primitive moves in Phase 6.
+  */
+  --color-collection-favourite: var(--collection-favourite);
+  --color-collection-saved: var(--collection-saved);
+
+  --color-star-filled: var(--star-filled);
+  --color-star-empty: var(--star-empty);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+
+  /*
+    Tailwind ships `inset-shadow-2xs/xs/sm` and stops. Those three are all offset
+    downward - `inset 0 1px`, `inset 0 2px` - which describes a lip catching light
+    at the top, not a face pressed inward. These two continue the scale with the
+    other shape: no offset at all, so the falloff is equal on all four edges and
+    the depth reads as the whole surface sinking rather than one edge lifting.
+
+    A band that is solid at the rim and softens as it goes in, at a reach measured
+    in single-digit pixels rather than half the control. Zero offset means all four
+    edges get the same band, so this reads as a face set into its own outline rather
+    than as a surface under a light source — which is the whole difference between
+    this and the lit relief the controls used to carry.
+
+    That is what the spread and blur are doing, and the order matters: the
+    positive spread sets how far the solid part reaches in, the blur softens only
+    its inner boundary. Both stay small so the middle of the control is untouched.
+
+    The colour is `--edge-subtle` - the theme's own outline, at the outline's own
+    weight. It resolves light on the light themes' dark fills and dark on Dark
+    Roast's light ones, exactly as the relief set already does, because in both
+    cases what is being drawn is the rim catching the theme's own light.
+  */
+  --inset-shadow-md: inset 0 0 8px 2px var(--edge-subtle);
+  --inset-shadow-lg: inset 0 0 12px 4px var(--edge-subtle);
+
+  /*
+    Legacy names, kept so unmigrated pages keep their utility classes. DELETE IN PHASE 6
+    together with legacy-tokens.css.
+  */
+  --color-primary: var(--brand);
+  --color-primaryText: var(--ink-on-brand);
+  --color-secondary: var(--brand-hover);
+  /* The old palette's pale accent, which is exactly what `--accent-muted` holds. */
+  --color-accent: var(--brand-muted);
+  --color-background: var(--surface-page);
+  --color-cardBackground: var(--surface-raised);
+  --color-surface: var(--surface-elevated);
+  --color-text: var(--ink-primary);
+  --color-textSecondary: var(--ink-secondary);
+  --color-border: var(--edge-default);
+  --color-success: var(--state-success);
+  --color-warning: var(--state-warning);
+  --color-error: var(--state-danger);
+  --color-textHero: var(--ink-on-media);
+  --color-cardText: var(--ink-primary);
+  --color-cardTextSecondary: var(--ink-secondary);
+  --color-surfaceText: var(--ink-primary);
+  --color-surfaceTextSecondary: var(--ink-secondary);
+  --color-starFilled: var(--star-filled);
+  --color-starEmpty: var(--star-empty);
+  --color-starEmptyOutline: var(--star-empty-edge);
+  --color-cardShadow: var(--c-shadow);
+  --color-pending: var(--state-pending);
+  --color-userMarkerMap: var(--marker-user);
+  --color-cafeMarker: var(--marker-cafe);
+
+  --shadow-primary:
+    0 4px 6px -1px var(--brand), 0 2px 4px -1px var(--brand);
+  --shadow-primary-lg:
+    0 10px 15px -3px var(--brand), 0 4px 6px -2px var(--brand);
+  --shadow-primary-xl:
+    0 12px 16px -4px var(--brand), 0 4px 8px -2px var(--brand);
+  --shadow-inset-primary:
+    inset -5px -10px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 5px 6px 10px -3px color-mix(in srgb, var(--c-shadow) 40%, transparent),
+    inset 0px 0px 12px color-mix(in srgb, var(--c-shadow) 50%, transparent);
+  --shadow-inset-background: inset 0 0 8px var(--surface-page);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @keyframes accordionDown {
   from { height: 0; }
@@ -30,103 +189,205 @@
   --ibean-transition: 200ms ease;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/*
+  Element-level rules must live in `@layer base`. Tailwind v4 emits utilities
+  into a real `@layer utilities`, and unlayered CSS outranks every layer, so
+  anything left outside a layer here would override the utility classes.
+*/
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    overflow-y: auto;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    /*
+      Never let the browser fake a weight. Every face here ships the weights it needs,
+      and a synthetic bold on a display serif looks like a mistake rather than emphasis.
+    */
+    font-synthesis-weight: none;
+    line-height: 1.6;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+    font-feature-settings:
+      "liga" on,
+      "calt" on;
+  }
+
+  /*
+    Headings drive their weight through the variation axis, not just `font-weight`.
+
+    112 headings across the app still carry `font-bold` from before the display faces
+    existed, and a utility beats the base layer. On Korean that pushed Hahmlet to 700,
+    where its serif detail flattens into a plain gothic - losing the one thing it was
+    chosen for. `font-variation-settings` wins over `font-weight` on a variable font, so
+    the token governs regardless.
+
+    The consequence is deliberate: weight utilities do nothing to a heading. Display
+    weight is a system decision, set in tokens.css, not a per-instance one. Both display
+    faces are variable, so this holds for either locale.
+  */
+  h1 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
+    font-size: clamp(1.5rem, 2vw, 1.75rem);
+    line-height: 1.3;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition),
+      border-color var(--ibean-transition),
+      box-shadow var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
 }
 
-html {
-  overflow-y: auto;
+@layer components {
+  /*
+    A scroll region inside a small panel: the bar itself is chrome the reader did not
+    ask for, so it stays out of the layout and only shows as a thin mark while the
+    pointer is over the region. Firefox gets the thin variant; it has no hover form.
+  */
+  .scrollbar-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-quiet:hover {
+    scrollbar-color: var(--edge-rule) transparent;
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--radius-pill);
+  }
+
+  .scrollbar-quiet:hover::-webkit-scrollbar-thumb {
+    background-color: var(--edge-rule);
+  }
+
+  .scrollbar-quiet::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
-body {
-  background-color: var(--color-background);
-  color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", sans-serif;
-  line-height: 1.6;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-  font-feature-settings:
-    "liga" on,
-    "calt" on;
-}
+@layer components {
+  /*
+    Paper grain for a long-read surface (the coffee guide, so far): a newsprint's
+    texture, not its colour. `--surface-page` stays the theme's own value in every
+    theme; this is an opaque noise layer painted above it, at a low `opacity`. The
+    noise comes from an SVG `feTurbulence` filter collapsed to grey -- not a themed
+    colour, just the standard way to generate it -- averaging to the mid grey that
+    `overlay` treats as a no-op, so each speckle only lightens or darkens the pixel
+    under it and the layer needs no per-theme tuning to read right on all four. An
+    earlier version mapped the noise to alpha over solid black instead: correct on a
+    light theme, where it faintly darkens, but invisible on a dark one, where black on
+    black is black. Grey noise moves both ways and shows on either.
+  */
+  .paper-grain {
+    position: relative;
+    isolation: isolate;
+  }
 
-h1,
-.type-display {
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-}
+  .paper-grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='paper-grain-n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper-grain-n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+  }
 
-h2 {
-  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  font-weight: 600;
-}
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-variation-settings: 'wght' var(--font-display-weight);
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
 
-h3 {
-  font-size: clamp(1.5rem, 2vw, 1.75rem);
-  line-height: 1.3;
-  font-weight: 600;
-}
+  .type-subtitle {
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--color-textSecondary);
+  }
 
-.type-subtitle {
-  font-size: 1.125rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--color-textSecondary);
-}
+  .type-body {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
 
-.type-body {
-  font-size: 1rem;
-  line-height: 1.7;
-}
+  .type-caption {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-textSecondary);
+  }
 
-.type-caption {
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-textSecondary);
-}
+  .cozy-card {
+    border-radius: var(--ibean-radius-xl);
+    background: var(--color-cardBackground);
+    border: 1px solid var(--color-border);
+    padding: var(--ibean-space-sm);
+    box-shadow: var(--ibean-shadow-warm-md);
+  }
 
-button,
-a,
-input,
-textarea,
-select {
-  transition:
-    background-color var(--ibean-transition),
-    color var(--ibean-transition),
-    border-color var(--ibean-transition),
-    box-shadow var(--ibean-transition),
-    transform var(--ibean-transition);
-}
+  .glass-panel {
+    border-radius: var(--ibean-radius-lg);
+    background: color-mix(in srgb, var(--color-cardBackground) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    box-shadow: var(--ibean-shadow-warm-sm);
+    backdrop-filter: blur(16px);
+  }
 
-.cozy-card {
-  border-radius: var(--ibean-radius-xl);
-  background: var(--color-cardBackground);
-  border: 1px solid var(--color-border);
-  padding: var(--ibean-space-sm);
-  box-shadow: var(--ibean-shadow-warm-md);
-}
-
-.glass-panel {
-  border-radius: var(--ibean-radius-lg);
-  background: color-mix(in srgb, var(--color-cardBackground) 75%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
-  box-shadow: var(--ibean-shadow-warm-sm);
-  backdrop-filter: blur(16px);
-}
-
-.section-spacing {
-  padding-block: var(--ibean-space-lg);
-  padding-inline: clamp(var(--ibean-space-xs), 5vw, var(--ibean-space-lg));
+  .section-spacing {
+    padding-block: var(--ibean-space-lg);
+    padding-inline: clamp(var(--ibean-space-xs), 5vw, var(--ibean-space-lg));
+  }
 }
 
 /* Motion animations */
@@ -152,12 +413,464 @@ select {
   }
 }
 
-.motion-fade-in {
-  animation: fadeIn 300ms var(--ibean-transition) both;
+@layer utilities {
+  /*
+    Flat controls. A control is a rule and a fill, never a raised plate: state is carried
+    by inverting the fill, which is the one move that reads the same in all four themes
+    and needs no shadow to be legible. The neumorphic relief this replaced signalled
+    state with a soft double shadow and a 1px lift, which made every button look like it
+    was floating slightly off the page.
+
+    `control-flat` is the outline control - hairline rule, page-level fill, ink label -
+    and it inverts on hover. `.is-active` marks the selected member of a group, which
+    takes the brand fill rather than a tint: a 12% wash of the brand is a lit background,
+    not a chosen state.
+
+    The three button shapes are `btn-fill` (the page's one primary action),
+    `btn-line` (a rule in the current ink that inverts on hover) and `control-flat`
+    (the same idea for a control that owns a surface rather than sitting on one).
+    Size stays at the call site — height, padding and type differ per context and are
+    not what makes these one family.
+
+    Nothing here moves: no `translate`, no `scale`. Colour is the whole vocabulary.
+
+    In the utilities layer, not components: the shadcn button ships `border-transparent`
+    and a `hover:bg-muted` as utilities, and a components-layer rule loses to both no
+    matter how it is written.
+  */
+  .control-flat {
+    border: 1px solid var(--edge-rule);
+    background-color: var(--surface-raised);
+    color: var(--ink-primary);
+    transition:
+      background-color var(--ibean-transition),
+      border-color var(--ibean-transition),
+      color var(--ibean-transition);
+  }
+
+  /*
+    `:active` alongside `:hover` everywhere below, because a phone has no hover: the
+    only signal that a tap landed is the state it takes while the finger is down. A
+    control whose whole vocabulary is colour has to spend it here too.
+  */
+  .control-flat:hover:not(:disabled),
+  .control-flat:active:not(:disabled),
+  .control-flat[aria-expanded='true'] {
+    background-color: var(--ink-primary);
+    border-color: var(--ink-primary);
+    color: var(--surface-raised);
+  }
+
+  .control-flat.is-active,
+  .control-flat[aria-pressed='true'] {
+    background-color: var(--brand);
+    border-color: var(--brand);
+    color: var(--ink-on-brand);
+  }
+
+  /*
+    The selected control keeps its fill on hover. Inverting it too would make the
+    strongest state in the group read as a hover of the weakest.
+  */
+  .control-flat.is-active:hover:not(:disabled),
+  .control-flat.is-active:active:not(:disabled) {
+    background-color: var(--brand);
+    border-color: var(--brand);
+    color: var(--ink-on-brand);
+  }
+
+  /*
+    The primary action: brand fill, and a press that sinks into it rather than
+    swapping to a second colour.
+  */
+  .btn-fill {
+    background-color: var(--brand);
+    color: var(--ink-on-brand);
+  }
+
+  /*
+    The secondary action, and the one shape that works on a photograph, a dark band
+    and a card without being re-specified: it draws its rule in whatever ink it has
+    inherited, and hover fills with that same ink.
+
+    Which colour the label flips to cannot be derived — it is the surface *behind* the
+    button, which the button cannot see. `--btn-line-on` carries it, defaulting to the
+    raised surface because that is where most of them sit; a section on another ground
+    sets the variable once rather than every button on it re-specifying its hover.
+  */
+  .btn-line {
+    border: 1px solid currentColor;
+    background-color: transparent;
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition);
+  }
+
+  /*
+    The fill is a variable, not `currentColor`: this rule also changes `color`, and
+    `background-color: currentColor` resolves against the *new* colour — the label ends
+    up painted in its own background. `--btn-line-ink` is the ink the button draws with,
+    `--btn-line-on` the surface behind it; a section on another ground sets the pair
+    once instead of every button on it re-specifying its hover.
+  */
+  .btn-line:hover:not(:disabled),
+  .btn-line:active:not(:disabled) {
+    background-color: var(--btn-line-ink, var(--ink-primary));
+    border-color: var(--btn-line-ink, var(--ink-primary));
+    color: var(--btn-line-on, var(--surface-raised));
+  }
+
+  /*
+    `.btn-line`'s own mechanic, in the danger colour: a rule at rest, a solid fill on
+    press. Sign out and delete account are the two calls for it so far. `!important` on
+    the hover trio because `Button`'s `danger` variant still carries `BaseButton`'s own
+    generated hover utility at equal selector specificity (one class, one pseudo-class,
+    same as this rule) -- source order between hand-written CSS and Tailwind's own
+    generated layer is not something to depend on. The same escape the Leaflet overrides
+    already use in this file, for the same reason: guaranteed win, not a probable one.
+
+    The hover text is `--ink-on-brand`, by direction, not measured: it is the label that
+    reads correctly on Dark Roast's own danger fill (5.31:1, that theme's on-brand being
+    a near-black already) and on the light themes' own brand fill elsewhere, but not on
+    the light themes' danger fill specifically -- their on-brand is a light cream chosen
+    to sit on a dark brand colour, and on this red it lands at 3.25-3.52:1, under the
+    4.5:1 body threshold. Flagged and kept as directed.
+  */
+  .btn-line-danger {
+    border: 1px solid var(--state-danger);
+    background-color: transparent;
+    color: var(--state-danger);
+    transition:
+      background-color var(--ibean-transition),
+      color var(--ibean-transition);
+  }
+
+  .btn-line-danger:hover:not(:disabled),
+  .btn-line-danger:active:not(:disabled) {
+    background-color: var(--state-danger) !important;
+    border-color: var(--state-danger) !important;
+    color: var(--ink-on-brand) !important;
+  }
 }
 
-.motion-slide-up {
-  animation: slideUp 400ms var(--ibean-transition) both;
+@layer components {
+  /*
+    Overlay header. On the landing page the header sits on top of the hero photo
+    instead of above it, so its ink has to come from `--ink-on-media` rather than
+    the theme's page ink - three of the four themes use a dark `--ink-primary`
+    that is invisible over a photograph.
+
+    The swap is done by re-pointing the shared colour vars inside the header
+    rather than by editing every control. The logo, the two switchers, the
+    profile trigger and the mobile hamburger all read `text-text` / `bg-background`
+    / `border-border` already, so they follow without knowing this state exists.
+
+    `--color-primary` is deliberately NOT re-pointed: the "get started" button is
+    opaque and keeps its brand fill, and an active nav link handles itself in
+    Header.tsx. Repointing it would make that button light-on-light.
+  */
+  .nav-over-media {
+    --color-text: var(--ink-on-media);
+    --color-textSecondary: color-mix(in srgb, var(--ink-on-media) 75%, transparent);
+    --color-background: transparent;
+    --color-surface: color-mix(in srgb, var(--ink-on-media) 14%, transparent);
+    --color-border: color-mix(in srgb, var(--ink-on-media) 32%, transparent);
+    /* The brand hue is invisible against the scrim; the light ink is not. */
+    --nav-hover-fill: color-mix(in srgb, var(--ink-on-media) 16%, transparent);
+  }
+
+  /*
+    Popovers live inside the header in the DOM, so they inherit the swap above and
+    would render light ink on their own light panel. They are opaque surfaces in
+    their own right and always take the theme's page vocabulary back.
+  */
+  .nav-opaque {
+    --color-text: var(--ink-primary);
+    --color-textSecondary: var(--ink-secondary);
+    --color-background: var(--surface-page);
+    --color-surface: var(--surface-elevated);
+    --color-border: var(--edge-default);
+  }
+
+  /*
+    The scrim. Measured against the crop that sits behind it: the top 64px of the
+    hero photo is the greenhouse skylight, averaging 54-76% luminance with several
+    blown-out stretches at ~100%. CSS composites in sRGB, so black at alpha `a`
+    leaves `photo * (1 - a)`; the darkest `--ink-on-media` (#e9ded2) needs a ground
+    at or below sRGB 0.396 to clear 4.5:1, which puts the floor at a = 0.60 even
+    over the blown stretches.
+
+    It is taller than the 64px bar so the falloff happens below the text rather
+    than through it, and the blur is masked on the same curve so it does not leave
+    a hard edge across the photograph.
+  */
+  /*
+    One falloff, not two. This used to fade in the background AND again in the
+    mask, on different curves; where the two knees landed the eye read a line
+    across the photograph. The fill is flat now and the mask alone shapes it, so
+    there is a single curve to be smooth - and the blur, which the mask also
+    feathers, falls off on exactly the same one.
+
+    The stops trace a smoothstep rather than a straight ramp. A linear fade over
+    this distance changes slope abruptly at every stop, and those slope changes
+    are what show up as banding once the bar is over a light page rather than a
+    photograph.
+  */
+  /*
+    The drawer's scrim. Same slot as the header's, and for the same reason: the
+    brand is a light foreground colour in two of the four themes, so a wash painted
+    with it stops darkening anything. Flat rather than masked - this one covers the
+    whole page instead of feathering out under a bar.
+  */
+  .nav-drawer-scrim {
+    background: color-mix(in srgb, var(--scrim-media) 60%, transparent);
+  }
+
+  .nav-scrim {
+    /*
+      Tinted per theme, but from `--scrim-media` rather than `--brand`. Brand is a
+      foreground colour a dark theme has to make light - Dark Roast's is `#d4c7b8`
+      - and a scrim painted with it stops darkening anything. The scrim slot is the
+      one that is dark in all four themes and still carries each one's hue.
+
+      0.72 rather than the 0.66 a flat black needed: a tinted scrim is lighter than
+      black at the same alpha, and Morning Coffee's `#442f19` is the lightest of
+      the four. At 0.72 it still lands on the 0.396 sRGB ground that the darkest
+      `--ink-on-media` needs to clear 4.5:1, even over a blown-out frame.
+    */
+    background: color-mix(in srgb, var(--scrim-media) 72%, transparent);
+    backdrop-filter: blur(3px);
+    mask-image: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0%,
+      rgb(0 0 0 / 1) 40%,
+      rgb(0 0 0 / 0.94) 50%,
+      rgb(0 0 0 / 0.82) 58%,
+      rgb(0 0 0 / 0.65) 66%,
+      rgb(0 0 0 / 0.46) 74%,
+      rgb(0 0 0 / 0.29) 82%,
+      rgb(0 0 0 / 0.15) 89%,
+      rgb(0 0 0 / 0.06) 95%,
+      transparent 100%
+    );
+  }
+
+  /*
+    Nav hover. A filled pill rather than a brightening label, so the pointer's
+    position is read as an object under it instead of a change of shade.
+
+    The glow is the fill repeated as a zero-offset shadow: same colour, spread
+    outward, which bleeds the pill's edge instead of drawing one. Deliberately
+    not a border - a crisp outline snapping in under the cursor is the thing
+    this replaces.
+  */
+  /*
+    No transition in either direction. Any duration at all turns a fast sweep
+    along the row into a trail of half-faded pills that arrive after the cursor
+    has gone; instant in and instant out is what makes the pill feel stuck to
+    the pointer rather than chasing it.
+
+    Stated rather than omitted: every button and anchor already carries a 200ms
+    transition from the base layer, and this class has to turn it off.
+  */
+  .nav-pill {
+    border-radius: var(--radius-pill);
+    transition: none;
+  }
+
+  /*
+    Hover for a filled button that keeps its fill. Swapping to a second brand
+    colour reads as a different button; shading the same one reads as the same
+    button gaining depth.
+
+    The shadow has no offset, so it falls off equally from all four edges and the
+    face reads as pressed in rather than as a lip catching light along one edge.
+    That is the whole difference between this and Tailwind's own inset scale, and
+    the reason `--inset-shadow-lg` had to be defined rather than borrowed.
+
+    It is a pseudo-element rather than a `box-shadow` on the button itself
+    because the buttons that use this already spend their own `box-shadow` on
+    an outer drop shadow, and the two would collide on the same property.
+    `isolation` plus a negative z-index puts it over the fill and under the
+    label without wrapping the label.
+
+    No transition, like `.nav-pill`: the press has to land the instant the
+    pointer does, not catch up to it a beat later.
+  */
+  .btn-shade {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .btn-shade::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: var(--inset-shadow-lg);
+    opacity: 0;
+    /* No transition, same as `.nav-pill` - the press has to land under the pointer, not after it. */
+    transition: none;
+  }
+
+  .btn-shade:hover::after,
+  .btn-shade:active::after {
+    opacity: 1;
+  }
+
+  /*
+    The brand tint is the fallback rather than a declaration on `.nav-pill`: an
+    element's own custom property beats one inherited from an ancestor, so
+    setting it here would win over `.nav-over-media` and put an invisible brown
+    glow on the photo.
+  */
+  .nav-pill:hover,
+  .nav-pill:active,
+  .nav-pill[data-popup-open] {
+    background: var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
+    box-shadow: 0 0 12px 4px
+      var(--nav-hover-fill, color-mix(in srgb, var(--brand) 12%, transparent));
+  }
+
+  /*
+    One shape for every dropdown in the app. There are four of them -- the header's
+    journey menu, the two switchers, the profile menu, and the map-app chooser on a
+    cafe page -- and before this they each drew their own panel and their own row,
+    so a change to one silently left the other three behind.
+
+    The row is a rounded rectangle inside a padded panel, never a band running edge
+    to edge: a band reads as a list being highlighted, an inset rectangle reads as a
+    control being pointed at, which is what these are. That is also why the panel no
+    longer needs `overflow-hidden` -- it existed to stop full-bleed rows painting
+    over the panel's own rounded corners, and an inset row never reaches them.
+
+    Rows rest at secondary ink and rise to primary on hover. Not `--brand`: Dark
+    Roast sets its brand to the same value as its secondary ink, so a brand hover
+    would have been a colour change that changed no colour.
+
+    These live in `@layer components`, so a utility on any single instance still
+    wins -- that is how the logout row takes its danger colour without a variant
+    here for it.
+  */
+  .menu-panel {
+    /* 6px, not 4: the rows inside are `--radius-control` and sit flush against this
+       padding, so the panel's own `--radius-card` has to leave exactly that much room
+       for the two curves to stay concentric -- 16 - 6 = 10. See "Nested radii" in
+       docs/architecture/design-language.md. */
+    padding: 0.375rem;
+    border: 1px solid var(--edge-default);
+    border-radius: var(--radius-card);
+    background: var(--surface-raised);
+    box-shadow: var(--ibean-shadow-warm-md);
+  }
+
+  .menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: left;
+    color: var(--ink-secondary);
+    cursor: pointer;
+  }
+
+  /*
+    `:active` alongside `:hover`, for the same reason every control in this file
+    carries it: a phone has no hover, so the press is the only moment a row can
+    show that the tap landed. Without it the drawer's rows answered a finger with
+    nothing at all.
+  */
+  .menu-item:hover,
+  .menu-item:active,
+  .menu-item[data-highlighted] {
+    background: var(--surface-hover);
+    color: var(--ink-primary);
+  }
+
+  /*
+    The row you are already on, in either vocabulary: `data-checked` is what Base UI
+    puts on the selected radio row, `is-active` is what the hand-rolled menus set
+    from the current path. Weight carries it as well as colour, so the state survives
+    a hover landing on one of its neighbours.
+  */
+  .menu-item[data-checked],
+  .menu-item.is-active {
+    color: var(--ink-primary);
+    font-weight: 500;
+  }
+
+  /*
+    A row's mark. Colour is handled here so every menu gets it for free; the movement
+    is not, because it is chosen per row from what the row does -- the gear turns, the
+    exit arrow steps toward the door -- and that belongs at the call site.
+  */
+  .menu-mark {
+    height: 1rem;
+    width: 1rem;
+    flex-shrink: 0;
+    color: var(--ink-secondary);
+    transition:
+      color var(--ibean-transition),
+      transform var(--ibean-transition);
+  }
+
+  .menu-item:hover .menu-mark,
+  .menu-item:active .menu-mark,
+  .menu-item[data-highlighted] .menu-mark {
+    color: var(--ink-primary);
+  }
+
+  .motion-fade-in {
+    animation: fadeIn 300ms var(--ibean-transition) both;
+  }
+
+  .motion-slide-up {
+    animation: slideUp 400ms var(--ibean-transition) both;
+  }
+}
+
+/*
+  Leaflet paints its popup and controls white. Its stylesheet is imported from the map
+  component, so it lands after this file and outside any cascade layer -- which beats a
+  layered rule whatever its specificity. Hence `!important`, the same escape the z-index
+  overrides below already use. Without this the popup content, which reads theme tokens,
+  puts light ink on white paper in the dark themes.
+*/
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--surface-raised) !important;
+  color: var(--ink-primary) !important;
+  box-shadow: var(--shadow-marker) !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--ink-secondary) !important;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--surface-raised) !important;
+  color: var(--ink-primary) !important;
+  border-bottom-color: var(--edge-default) !important;
+}
+
+.leaflet-bar a:hover {
+  background: var(--surface-hover) !important;
+}
+
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface-raised) 85%, transparent) !important;
+  color: var(--ink-secondary) !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--ink-secondary) !important;
 }
 
 /* Leaflet Map z-index fixes */
@@ -188,4 +901,308 @@ select {
 
 .leaflet-popup-pane {
   z-index: 40 !important;
+}
+
+.font-logo {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+
+/*
+  Landing page.
+
+  Everything is prefixed `landing-`: these are the broadsheet's own type scales
+  and entrances, and nothing outside the landing should pick them up by accident.
+*/
+@layer components {
+  /*
+    Load-triggered entrances, done in CSS rather than in JS.
+
+    Anything above the fold must not park itself out of sight in a style the
+    HTML ships, because then the copy is invisible until the motion bundle
+    parses and hydrates -- a blank page on a cold load. A stylesheet is
+    render-blocking, so a CSS animation's from-state and its run both happen on
+    the first paint, with no JS involved and nothing to wait for.
+
+    View-triggered entrances still belong to JS: an element below the fold that
+    is invisible before hydration is invisible to the reader anyway.
+  */
+  @keyframes landingRise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes landingWordRise {
+    from { transform: translateY(110%); }
+    to { transform: none; }
+  }
+
+  .landing-rise {
+    animation: landingRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--landing-delay, 0s);
+  }
+
+  /*
+    Each word rides in its own clipping row, so it rises out of the line instead
+    of fading in place. `both` holds the from-state before the delay elapses,
+    which is what makes the stagger read as type being set.
+  */
+  /*
+    The row clips the word on its way up, so it has to be bigger than the word's
+    own box in every direction the glyphs reach past it.
+
+    Vertically: at `line-height: 0.88` the tail of a `y` or a `p` falls outside
+    the line box. Horizontally: a display serif's terminals overhang their
+    advance width, so the last letter of a word -- the `r` of "your" is the one
+    that shows it -- loses its serif to the clip.
+
+    Each padding is cancelled by an equal negative margin, so none of it reaches
+    the layout: the words still set on the same measure and the same baseline.
+  */
+  .landing-word-row {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.26em;
+    margin-bottom: -0.26em;
+    padding-inline: 0.09em;
+    margin-inline: -0.09em;
+  }
+
+  .landing-word {
+    display: inline-block;
+    animation: landingWordRise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--landing-delay, 0s);
+  }
+
+  /*
+    View-triggered word rise. The animation is declared as usual but held at its
+    first frame until an observer adds `.is-in`; `animation-play-state` is what
+    lets the trigger be a class instead of a second set of keyframes.
+
+    Only for headlines below the fold. Above the fold the animation must run on
+    load -- a paused one there is the blank-page problem again, since the
+    observer needs JS.
+  */
+  .landing-words-view .landing-word { animation-play-state: paused; }
+  .landing-words-view.is-in .landing-word { animation-play-state: running; }
+
+  /*
+    Blur fade, for the auth forms: each block arrives out of focus and settles, one after
+    another. `.blur-fade` is a single block (the heading); `.blur-fade-children` staggers
+    its direct children one step behind it.
+
+    Positional, so a block that mounts later (an error above the form) takes the first
+    slot and the rest keep their delay without restarting: only the delay changes, never
+    the animation. The to-state is implicit, so nothing is left blurred or transformed
+    once it lands -- a leftover `filter` would put the fields in their own layer.
+  */
+  @keyframes blurFade {
+    from { opacity: 0; filter: blur(6px); transform: translateY(6px); }
+  }
+
+  .blur-fade,
+  .blur-fade-children > * {
+    animation: blurFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .blur-fade-children > * { animation-delay: 80ms; }
+  .blur-fade-children > :nth-child(2) { animation-delay: 160ms; }
+  .blur-fade-children > :nth-child(3) { animation-delay: 240ms; }
+  .blur-fade-children > :nth-child(4) { animation-delay: 320ms; }
+  .blur-fade-children > :nth-child(5) { animation-delay: 400ms; }
+  .blur-fade-children > :nth-child(6) { animation-delay: 480ms; }
+  .blur-fade-children > :nth-child(n + 7) { animation-delay: 560ms; }
+
+  /*
+    `PixelImage`: the photograph arrives as a grid of tiles fading in out of order, in
+    grey, and takes its colour once they have all landed. Pure CSS so the tiles are
+    server-rendered at their from-state and wait there for the photograph to load. Each
+    tile's delay is inline; the colour waits for the last tile.
+  */
+  @keyframes pixelIn {
+    from { opacity: 0; }
+  }
+
+  @keyframes pixelColor {
+    from { filter: grayscale(1); }
+  }
+
+  .pixel-tile {
+    animation: pixelIn 1s ease-out both;
+  }
+
+  .pixel-color {
+    animation: pixelColor 1s cubic-bezier(0.4, 0, 0.2, 1) 1.3s both;
+  }
+
+  /* Held at the from-state until the photograph is in; see `PixelImage`. */
+  .pixel-color:not([data-loaded]),
+  .pixel-color:not([data-loaded]) .pixel-tile {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-rise,
+    .blur-fade,
+    .blur-fade-children > *,
+    .pixel-tile,
+    .pixel-color,
+    .landing-word { animation: none; }
+    .landing-words-view .landing-word { animation-play-state: running; }
+  }
+
+  /*
+    Broadsheet display type. The project's display face at newspaper scale:
+    tight leading and negative tracking are what stop 8rem type from reading as
+    a slide deck. `text-wrap: balance` keeps a two-line headline from leaving
+    one orphaned word on line two.
+  */
+  .landing-display {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  /*
+    Korean needs its own leading here, not a smaller version of the same number.
+
+    Measured off the shipped subsets: a Hahmlet syllable block inks from -0.106em to
+    0.796em, so it occupies 0.902em of vertical space on every line, because a syllable
+    is built to fill that square. A line box of 0.88em is smaller than the glyphs
+    standing in it, so consecutive lines meet - and the taller the type, the further
+    they run into each other. Latin gets away with the same number only because most
+    lines carry no descender and cap height stops around 0.70em.
+
+    1.06 leaves 0.158em of clear air between one line's descenders and the next line's
+    ascenders. That is a newspaper's leading, not a comfortable one, which is the point;
+    anything under 0.91 is not tight, it is broken.
+
+    The tracking eases off for the same reason. Negative tracking on Latin closes the
+    space between letterforms that are mostly vertical stems; on syllable blocks it
+    closes the space between the blocks themselves, which is the only thing separating
+    one word from the next.
+  */
+  :root:lang(ko) .landing-display {
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+  }
+
+  /*
+    Micro-label. Every piece of chrome on the press variant is one of these:
+    the page has no buttons-that-look-like-buttons outside the primary action,
+    so the labels have to carry the structure.
+  */
+  /*
+    `FlipText`. The host is the interactive element -- the whole link, including the
+    space between its text and its underline -- so the letters turn wherever the
+    pointer lands on the control, not only when it happens to be over a glyph.
+
+    Depth is small (320px): at 11px type a long perspective flattens the turn into a
+    vertical squash and the letter stops reading as a solid thing.
+  */
+  /*
+    `inline-block`, not `inline-flex`. Flex blockifies its children, and a selection
+    serialiser puts a newline after every block-level box -- which turned a copied
+    "Open the map" into one letter per line. The letters flow inline on their own;
+    `pre` is what keeps the spaces between the words.
+  */
+  .flip-text {
+    display: inline-block;
+    perspective: 320px;
+    white-space: pre;
+  }
+
+  .flip-text__char {
+    display: inline-block;
+    position: relative;
+    height: 1em;
+    line-height: 1em;
+    transform-style: preserve-3d;
+    /*
+      Decelerating, not bouncing. A letter is a solid object arriving in place; the
+      overshoot that would make it charming is the thing that makes it feel cheap.
+    */
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--flip-delay, 0ms);
+  }
+
+  /*
+    Upward. The letter leaves over its own top edge and the next face arrives from
+    below, which reads as the word rising to meet the pointer rather than dropping
+    away from it.
+  */
+  .flip-host:hover .flip-text__char,
+  .flip-host:focus-visible .flip-text__char {
+    transform: rotateX(90deg);
+  }
+
+  /*
+    The front face stays in flow: it is what gives the box its width. `inline-block`,
+    not `block` -- a block-level box makes the selection serialiser put a newline
+    after every letter, so "Open the map" copied out as "O\nP\nE\nN...".
+  */
+  .flip-text__face {
+    display: inline-block;
+    backface-visibility: hidden;
+  }
+
+  .flip-text__face--front {
+    transform: translateZ(0.5em);
+  }
+
+  /*
+    The back face is a duplicate of a letter that is already on the page, so it is
+    hidden from the accessibility tree AND from selection. `aria-hidden` alone left
+    "Open the map" copying out as "OOppeenn  tthhee  mmaapp": a selection range does
+    not consult ARIA.
+  */
+  .flip-text__face--back {
+    position: absolute;
+    inset: 0;
+    transform: rotateX(-90deg) translateZ(0.5em);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The finished word, not a half-turned one. */
+    .flip-text__char {
+      transition: none;
+    }
+
+    .flip-host:hover .flip-text__char,
+    .flip-host:focus-visible .flip-text__char {
+      transform: none;
+    }
+  }
+
+  .landing-micro {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  /*
+    Marquee. Duration scales with content width via `--landing-marquee-duration` so
+    a longer strip does not run faster.
+  */
+  .landing-marquee {
+    display: flex;
+    width: max-content;
+    animation: landingMarquee var(--landing-marquee-duration, 40s) linear infinite;
+  }
+
+  @keyframes landingMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-marquee { animation: none; }
+  }
 }

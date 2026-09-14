@@ -6,35 +6,157 @@ Cafe API endpoints for UGC verification system.
 - Get cafe details (with Founding Crew info)
 """
 
-from fastapi import APIRouter, Query, HTTPException, status, Depends, Body
+from fastapi import APIRouter, Query, HTTPException, status, Depends, Body, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from decimal import Decimal
 import re
 import math
+import time
 from app.models.cafe import (
     CafeSearchParams,
     CafeSearchResponse,
     CafeResponse,
     CafeRegistrationRequest,
     GooglePlacesLookupRequest,
-    GooglePlacesLookupResponse
+    GooglePlacesLookupResponse,
+    TraitSummary,
+    TraitObservationCreate,
+    CafeBeanEntry,
+    CafeBeansResponse,
 )
-from app.services.osm_service import OSMService
+from app.services import traits as traits_service
+from app.services.coffee_logs import public_logs
+from app.services.osm_service import OSMService, format_address
+from app.services import badges as badges_service
 from app.services import franchise_service, venue_category
 from app.database.supabase import get_supabase_client
-from app.api.deps import get_current_user, require_admin_role
+from app.api.deps import get_current_user, get_optional_user, require_admin_role
 from app.core.permissions import Permission, require_permission
 from app.core.fraud_detection import check_location_consistency
+from app.core.rate_limit import limiter
+from app.config import settings
+from app.services.google_places_service import GooglePlacesService
 from app.utils.timezone import get_timezone_from_coords
 from supabase import Client
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
+import httpx
 from dateutil import parser as date_parser
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+PHOTO_SKU = "place_photo"
+
+
+def _google_billing_month(now: Optional[datetime] = None) -> str:
+    pacific = (now or datetime.now(timezone.utc)).astimezone(
+        ZoneInfo("America/Los_Angeles")
+    )
+    return pacific.strftime("%Y-%m-01")
+
+
+def _reserve_photo_slot(supabase: Client) -> int:
+    result = supabase.rpc(
+        "reserve_google_api_slot",
+        {
+            "p_sku": PHOTO_SKU,
+            "p_billing_month": _google_billing_month(),
+            "p_cap": settings.google_place_photo_monthly_cap,
+        },
+    ).execute()
+    count = int(result.data or 0)
+    if count in (720, 810, 900):
+        logger.warning(
+            "google_place_photo_usage_threshold",
+            extra={"sku": PHOTO_SKU, "reserved_count": count},
+        )
+    return count
+
+
+@router.get("/{cafe_id}/google-photo")
+@limiter.limit("12/minute")
+async def get_google_photo(cafe_id: str, request: Request):
+    """Return a fresh Google photo URI for explore cards only."""
+    no_store = {"Cache-Control": "no-store"}
+    if not settings.google_place_photo_enabled or not settings.google_places_api_key:
+        return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+    try:
+        supabase = get_supabase_client()
+        cafe_result = supabase.table("cafes").select("*").eq("id", cafe_id).limit(1).execute()
+        cafe = (cafe_result.data or [None])[0]
+        if not cafe:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "Cafe not found"},
+                headers=no_store,
+            )
+        if cafe.get("main_image") or cafe.get("image"):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        visit_result = supabase.table("cafe_visits").select("photo_urls").eq(
+            "cafe_id", cafe_id
+        ).eq("is_public", True).not_.is_("photo_urls", "null").order(
+            "visited_at", desc=True
+        ).execute()
+        if any((row.get("photo_urls") or []) for row in (visit_result.data or [])):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        place_id = cafe.get("google_place_id")
+        if not place_id:
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        service = GooglePlacesService(settings.google_places_api_key)
+        photo = await service.get_first_photo(place_id)
+        if not photo or not photo.get("googleMapsUri"):
+            return Response(status_code=status.HTTP_204_NO_CONTENT, headers=no_store)
+
+        if _reserve_photo_slot(supabase) == 0:
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={"detail": "PHOTO_MONTHLY_CAP_REACHED"},
+                headers=no_store,
+            )
+
+        image_url = await service.get_photo_uri(photo["name"])
+        attributions = [
+            {
+                "display_name": item.get("displayName"),
+                "uri": item.get("uri"),
+                "photo_uri": item.get("photoUri"),
+            }
+            for item in (photo.get("authorAttributions") or [])
+        ]
+        return JSONResponse(
+            content={
+                "image_url": image_url,
+                "source_url": photo["googleMapsUri"],
+                "provider": "Google Maps",
+                "author_attributions": attributions,
+            },
+            headers=no_store,
+        )
+    except HTTPException:
+        raise
+    except (httpx.HTTPError, ValueError):
+        logger.warning("Google Place Photo request failed", exc_info=True)
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content={"detail": "GOOGLE_PLACE_PHOTO_FAILED"},
+            headers=no_store,
+        )
+    except Exception:
+        logger.exception("Google Place Photo endpoint failed")
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content={"detail": "GOOGLE_PLACE_PHOTO_FAILED"},
+            headers=no_store,
+        )
 
 def slugify(name: str) -> str:
     slug = name.lower().strip()
@@ -338,12 +460,13 @@ async def search_cafes(
                 "verified_at": cafe.get("verified_at"),
                 "admin_verified": cafe.get("admin_verified", False),
                 "navigator_id": cafe.get("navigator_id"),
-                "vanguard_ids": cafe.get("vanguard_ids", []),
-                "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
+                    "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
                 "updated_at": cafe.get("updated_at"),
                 "main_image": main_image
             })
-        
+
+        _attach_trait_flags(supabase, formatted_cafes)
+
         return CafeSearchResponse(
             cafes=formatted_cafes,
             total_count=len(formatted_cafes)
@@ -355,6 +478,69 @@ async def search_cafes(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
         )
+
+@router.get("/search/text", response_model=CafeSearchResponse)
+async def search_cafes_by_text(
+    q: str = Query(..., min_length=2, max_length=100, description="Name or address fragment"),
+    limit: int = Query(default=20, ge=1, le=50, description="Maximum results")
+):
+    """
+    Find cafes by name or address, anywhere.
+
+    The map's own search is bounded by whatever area has been loaded; this one is not,
+    so a reader can look up a cafe they have not navigated to yet. Ordered by name so
+    repeated queries return a stable list.
+    """
+    try:
+        supabase = get_supabase_client()
+
+        # `%` and `,` would otherwise be read as PostgREST pattern and argument
+        # separators rather than as characters the reader typed.
+        term = q.strip().replace("%", "").replace(",", " ")
+        if len(term) < 2:
+            return CafeSearchResponse(cafes=[], total_count=0)
+
+        result = supabase.table("cafes").select("*").or_(
+            f"name.ilike.%{term}%,address.ilike.%{term}%"
+        ).order("name").limit(limit).execute()
+
+        formatted_cafes = [
+            {
+                "id": cafe.get("id", ""),
+                "name": cafe.get("name", ""),
+                "slug": cafe.get("slug"),
+                "address": cafe.get("address"),
+                "latitude": Decimal(str(cafe.get("latitude", 0))),
+                "longitude": Decimal(str(cafe.get("longitude", 0))),
+                "phone": cafe.get("phone"),
+                "website": cafe.get("website"),
+                "description": cafe.get("description"),
+                "source_type": cafe.get("source_type"),
+                "source_url": cafe.get("source_url"),
+                "business_hours": cafe.get("business_hours"),
+                "status": cafe.get("status", "pending"),
+                "verification_count": cafe.get("verification_count", 1),
+                "verified_at": cafe.get("verified_at"),
+                "admin_verified": cafe.get("admin_verified", False),
+                "navigator_id": cafe.get("navigator_id"),
+                    "created_at": cafe.get("created_at", datetime.now(timezone.utc)),
+                "updated_at": cafe.get("updated_at"),
+                "main_image": cafe.get("main_image"),
+            }
+            for cafe in (result.data or [])
+        ]
+
+        _attach_trait_flags(supabase, formatted_cafes)
+
+        return CafeSearchResponse(cafes=formatted_cafes, total_count=len(formatted_cafes))
+
+    except Exception:
+        logger.exception("Error in search_cafes_by_text")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
 
 @router.get("/pending", response_model=CafeSearchResponse)
 async def get_pending_cafes_public(
@@ -424,7 +610,6 @@ async def get_pending_cafes_public(
                     verified_at=verified_at,
                     admin_verified=cafe.get("admin_verified", False),
                     navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                    vanguard_ids=cafe.get("vanguard_ids", []),
                     created_at=created_at,
                     updated_at=updated_at
                 )
@@ -443,6 +628,532 @@ async def get_pending_cafes_public(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
         )
+
+# ---------------------------------------------------------------------------
+# Public aggregate stats.
+#
+# Declared before `/{cafe_identifier}` on purpose: a path parameter registered
+# first would swallow `/stats` as a cafe slug.
+#
+# Everything here is a count. No ids, no coordinates, no names, no user data --
+# nothing that is not already derivable from the public `/search` and
+# `/pending` endpoints. The series is bucketed by ISO week so a single cafe's
+# registration time cannot be read back out of it.
+# ---------------------------------------------------------------------------
+
+# One process-wide entry, so a scraped landing page costs the database at most
+# twelve reads an hour no matter how much traffic hits it. The global 60/minute
+# SlowAPI limit in main.py is the second layer.
+_STATS_TTL_SECONDS = 300
+_stats_cache: dict = {"expires_at": 0.0, "payload": None}
+
+
+def _weekly_cumulative(created_at_values: List[str], weeks: int = 26) -> List[dict]:
+    """Cumulative cafe count at the end of each of the last `weeks` ISO weeks."""
+    timestamps = []
+    for raw in created_at_values:
+        if not raw:
+            continue
+        try:
+            parsed = date_parser.parse(raw)
+        except (ValueError, TypeError, OverflowError):
+            continue
+        # A naive timestamp compares as smaller than every aware one and would
+        # silently land in the first bucket.
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        timestamps.append(parsed)
+
+    if not timestamps:
+        return []
+
+    timestamps.sort()
+    now = datetime.now(timezone.utc)
+    # Monday 00:00 UTC of the current week.
+    week_start = (now - timedelta(days=now.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    series = []
+    index = 0
+    total = 0
+    for offset in range(weeks - 1, -1, -1):
+        bucket_start = week_start - timedelta(weeks=offset)
+        # Everything registered before this bucket closes is in its total, so
+        # the line only ever climbs -- it is a running total, not a per-week bar.
+        bucket_end = bucket_start + timedelta(weeks=1)
+        while index < len(timestamps) and timestamps[index] < bucket_end:
+            index += 1
+            total += 1
+        series.append({"week": bucket_start.date().isoformat(), "cumulative": total})
+
+    return series
+
+
+@router.get("/stats")
+async def get_cafe_stats(supabase: Client = Depends(get_supabase_client)):
+    """
+    Aggregate, unauthenticated counts for the landing page.
+
+    Returns totals plus a 26-week cumulative registration series.
+    """
+    now = time.monotonic()
+    if _stats_cache["payload"] is not None and now < _stats_cache["expires_at"]:
+        return _stats_cache["payload"]
+
+    try:
+        cafes = supabase.table("cafes").select("created_at, status").execute().data or []
+        drops = supabase.table("cafe_bean_drops").select("id", count="exact").limit(1).execute()
+
+        payload = {
+            "total_cafes": len(cafes),
+            "verified_cafes": sum(1 for c in cafes if c.get("status") == "verified"),
+            "beans_dropped": drops.count or 0,
+            "series": _weekly_cumulative([c.get("created_at") for c in cafes]),
+        }
+
+        _stats_cache["payload"] = payload
+        _stats_cache["expires_at"] = now + _STATS_TTL_SECONDS
+        return payload
+    except Exception:
+        logger.exception("Error building cafe stats")
+        # A stale payload beats an error banner on the landing page.
+        if _stats_cache["payload"] is not None:
+            return _stats_cache["payload"]
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+def _attach_trait_flags(supabase, cafes: list) -> None:
+    """
+    Add `trait_flags` to a page of cafe dicts, in place.
+
+    This is what the map and list filter chips read, so it travels with the search
+    results rather than needing a second request per pin.
+    """
+    if not cafes:
+        return
+    flags_by_cafe = traits_service.load_flags(supabase, [c["id"] for c in cafes if c.get("id")])
+    for cafe in cafes:
+        cafe["trait_flags"] = flags_by_cafe.get(cafe.get("id"), {})
+
+
+# ---------------------------------------------------------------------------
+# Coffee traits and beans
+#
+# Both are registered before the `/{cafe_identifier}` catch-all below.
+#
+# Neither is cached, and neither is folded into the cafe detail payload, which is
+# served with `revalidate: 120`. A reader who switches a log to private and then
+# sees the bean still listed for two minutes has been told their privacy setting
+# does not work -- and they would be right to think so.
+# ---------------------------------------------------------------------------
+
+@router.get("/{cafe_id}/traits", response_model=List[TraitSummary])
+async def get_cafe_traits(
+    cafe_id: str,
+    current_user = Depends(get_optional_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    What people report about this cafe's coffee, and -- if signed in -- what you did.
+
+    One query, aggregated in Python. `mine` is derived from the same rows as the
+    counts, so the button state can never disagree with the number beside it.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").select(
+            traits_service.OBSERVATION_COLUMNS
+        ).eq("cafe_id", cafe_id).eq("status", traits_service.APPROVED).execute()
+
+        viewer_id = current_user.id if current_user else None
+        return [
+            TraitSummary(**summary)
+            for summary in traits_service.summarise(result.data or [], viewer_id)
+        ]
+    except Exception:
+        logger.exception("Error loading cafe traits")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.post("/{cafe_id}/traits/{trait}")
+async def observe_cafe_trait(
+    cafe_id: str,
+    trait: str,
+    payload: TraitObservationCreate,
+    current_user = Depends(get_current_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Suggest a change to what this cafe's page says. Yes or no, both are observations.
+
+    This is the one surface with no evidence behind the claim: the person pressing the
+    button may never have set foot in the place. So it is written `pending` and counts
+    for nothing until an admin approves it. The two surfaces that do carry evidence --
+    registering a cafe from inside it, logging a bean purchase -- write approved rows
+    directly and are not routed through here.
+
+    Insert-only: the history is the point. Saying "no" today does not erase the "yes"
+    from six months ago, it supersedes it -- and the old row is what lets anyone see
+    that the place changed rather than that someone was wrong.
+    """
+    if not traits_service.is_valid_trait(trait):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown trait '{trait}'"
+        )
+
+    try:
+        observed_at = None
+        if payload.observed_at:
+            try:
+                observed_at = date.fromisoformat(payload.observed_at)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="observed_at must be a date in YYYY-MM-DD form"
+                )
+
+        try:
+            traits_service.check_observed_at(observed_at)
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+        # `status` is set from which endpoint this is, never from the request body.
+        traits_service.record_observation(
+            supabase,
+            cafe_id=cafe_id,
+            trait=trait,
+            value=payload.value,
+            user_id=current_user.id,
+            observed_at=observed_at,
+            status=traits_service.PENDING,
+            note=payload.note,
+        )
+
+        # The summary comes back unchanged -- a suggestion does not move the numbers.
+        # Returning it anyway keeps the caller on one shape, and the `submitted` flag
+        # is what the page uses to say "thanks, someone will look at this".
+        return {
+            "submitted": True,
+            "traits": await get_cafe_traits(cafe_id, current_user, supabase),
+        }
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error recording trait observation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.delete("/{cafe_id}/traits/{trait}", response_model=List[TraitSummary])
+async def clear_cafe_trait(
+    cafe_id: str,
+    trait: str,
+    current_user = Depends(get_current_user),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Withdraw your own observations of this trait, approved or still waiting.
+
+    The `user_id` filter is on the query, not left to row-level security: the backend
+    holds the service key, which bypasses RLS entirely. Without this line, this
+    endpoint would delete everyone's.
+    """
+    if not traits_service.is_valid_trait(trait):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown trait '{trait}'"
+        )
+
+    try:
+        supabase.table("cafe_trait_observations").delete().eq(
+            "cafe_id", cafe_id
+        ).eq("trait", trait).eq("user_id", current_user.id).execute()
+
+        return await get_cafe_traits(cafe_id, current_user, supabase)
+    except Exception:
+        logger.exception("Error clearing trait observation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.get("/traits/suggestions")
+async def list_trait_suggestions(
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Everything waiting for review, oldest first.
+
+    Two kinds of claim land here now. One is a reader pressing a button on a cafe page.
+    The other is a seeded row: a cafe imported from the review CSV, whose answers were
+    researched rather than witnessed, so they wait here with their `evidence` instead of
+    counting on arrival. Both are the same shape -- an unwitnessed claim -- which is why
+    they share a queue rather than getting a second one.
+
+    Registered above the `/{cafe_identifier}` catch-all, like `/trending`: a literal
+    path segment that comes after a wildcard route is never reached.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").select(
+            "id, cafe_id, trait, value, observed_at, created_at, user_id, note, source, evidence"
+        ).eq("status", traits_service.PENDING).order("created_at", desc=False).limit(300).execute()
+
+        rows = result.data or []
+        if not rows:
+            return {"suggestions": []}
+
+        # Two lookups for the page rather than two per row.
+        cafe_ids = list({r["cafe_id"] for r in rows})
+        user_ids = list({r["user_id"] for r in rows if r.get("user_id")})
+
+        # Enough to check the claim without leaving the page: the seed review answers
+        # "does this place sell beans" from a website, and an approver needs the same
+        # website. `status` and `source_type` say whether the cafe itself is still
+        # waiting, which is a different decision from the trait and has its own buttons.
+        cafes = supabase.table("cafes").select(
+            "id, name, slug, address, website, status, source_type, latitude, longitude"
+        ).in_("id", cafe_ids).execute()
+        cafe_by_id = {c["id"]: c for c in (cafes.data or [])}
+
+        users_by_id = {}
+        if user_ids:
+            users = supabase.table("users").select("id, username").in_("id", user_ids).execute()
+            users_by_id = {u["id"]: u for u in (users.data or [])}
+
+        return {
+            "suggestions": [
+                {
+                    "id": row["id"],
+                    "cafe_id": row["cafe_id"],
+                    "cafe_name": cafe_by_id.get(row["cafe_id"], {}).get("name"),
+                    "cafe_slug": cafe_by_id.get(row["cafe_id"], {}).get("slug"),
+                    "cafe_address": cafe_by_id.get(row["cafe_id"], {}).get("address"),
+                    "cafe_website": cafe_by_id.get(row["cafe_id"], {}).get("website"),
+                    "cafe_status": cafe_by_id.get(row["cafe_id"], {}).get("status"),
+                    "cafe_source_type": cafe_by_id.get(row["cafe_id"], {}).get("source_type"),
+                    "cafe_latitude": cafe_by_id.get(row["cafe_id"], {}).get("latitude"),
+                    "cafe_longitude": cafe_by_id.get(row["cafe_id"], {}).get("longitude"),
+                    "trait": row["trait"],
+                    "value": row["value"],
+                    "observed_at": row.get("observed_at"),
+                    "created_at": row.get("created_at"),
+                    # Free text an admin is being asked to publish: it is the reason
+                    # this queue exists, so it has to be visible before approving.
+                    "note": row.get("note"),
+                    # Where the claim came from, and what it was based on. A seeded row
+                    # has no author to vouch for it, so the working -- which website,
+                    # which sentence -- is the only thing an approver can check.
+                    # Never leaves this endpoint; the cafe page shows `note` alone.
+                    "source": row.get("source"),
+                    "evidence": row.get("evidence"),
+                    # An admin deciding whether to trust a claim needs to know who made
+                    # it. This endpoint is admin-only; nothing here reaches a reader.
+                    "username": users_by_id.get(row.get("user_id"), {}).get("username"),
+                }
+                for row in rows
+            ]
+        }
+    except Exception:
+        logger.exception("Error listing trait suggestions")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.post("/traits/suggestions/{suggestion_id}/approve")
+async def approve_trait_suggestion(
+    suggestion_id: str,
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """
+    Accept a suggestion: the row it already is becomes the record.
+
+    An UPDATE rather than a copy into another table, so the observer and the day they
+    say they saw it survive approval. Those two fields are what make it an observation
+    rather than a vote, and every copy is a chance to lose them.
+    """
+    try:
+        result = supabase.table("cafe_trait_observations").update({
+            "status": traits_service.APPROVED
+        }).eq("id", suggestion_id).eq("status", traits_service.PENDING).execute()
+
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Suggestion not found or already reviewed"
+            )
+        return {"approved": True, "id": suggestion_id}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error approving trait suggestion")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.delete("/traits/suggestions/{suggestion_id}")
+async def reject_trait_suggestion(
+    suggestion_id: str,
+    current_user = Depends(require_admin_role),
+    supabase = Depends(get_supabase_client)
+):
+    """Turn a suggestion down. It never counted, so there is nothing to undo."""
+    try:
+        supabase.table("cafe_trait_observations").delete().eq(
+            "id", suggestion_id
+        ).eq("status", traits_service.PENDING).execute()
+        return {"rejected": True, "id": suggestion_id}
+    except Exception:
+        logger.exception("Error rejecting trait suggestion")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+# `/user/beans` sits above `/{cafe_id}/beans`, and the order is the whole point:
+# FastAPI matches in registration order, so with the parameterised route first a
+# request for `/cafes/user/beans` is served as "the cafe whose id is `user`" and dies
+# as a 500 that explains nothing. The My Beans page never loaded a single bean because
+# of it. Same hazard the `/{cafe_identifier}` catch-all is commented for -- a literal
+# segment must be registered before the pattern that would swallow it.
+@router.get("/user/beans")
+async def get_user_beans(
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0)
+):
+    """
+    Get all beans for current user (for My Beans page / heatmap).
+    Includes cafe info and growth status.
+    """
+    try:
+        # Get user's beans with cafe info
+        beans_result = supabase.table("cafe_beans").select(
+            "*, cafes(id, name, slug, address, latitude, longitude)"
+        ).eq(
+            "user_id", current_user.id
+        ).order(
+            "last_dropped_at", desc=True
+        ).range(offset, offset + limit - 1).execute()
+        
+        beans = []
+        for bean in (beans_result.data or []):
+            cafe = bean.get("cafes", {})
+            growth_level = bean.get("growth_level", 1)
+            
+            beans.append({
+                "id": bean.get("id"),
+                "cafe_id": bean.get("cafe_id"),
+                "cafe_name": cafe.get("name"),
+                "cafe_slug": cafe.get("slug"),
+                "cafe_address": cafe.get("address"),
+                "latitude": cafe.get("latitude"),
+                "longitude": cafe.get("longitude"),
+                "drop_count": bean.get("drop_count"),
+                "growth_level": growth_level,
+                "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
+                "first_dropped_at": bean.get("first_dropped_at"),
+                "last_dropped_at": bean.get("last_dropped_at")
+            })
+        
+        return {
+            "beans": beans,
+            "total_count": len(beans),
+            "offset": offset,
+            "limit": limit
+        }
+        
+    except Exception as e:
+        logger.exception("Error getting user beans")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
+
+@router.get("/{cafe_id}/beans", response_model=CafeBeansResponse)
+async def get_cafe_beans(
+    cafe_id: str,
+    supabase = Depends(get_supabase_client)
+):
+    """
+    The beans people had here and the beans people bought here.
+
+    Derived from public logs, not from a table of its own. That is the whole privacy
+    design: a private or anonymous log contributes nothing a reader can trace back,
+    and switching a log to private removes it here with no retraction step, because
+    there is nothing to retract.
+
+    `last_seen_at` is `visited_at` -- the day it was seen, not the day it was typed up.
+    No author information leaves this endpoint, for anonymous and named logs alike.
+    """
+    try:
+        result = public_logs(
+            supabase.table("cafe_visits").select(
+                "mode, visited_at, bean_id, beans(id, name, origin, roast_level, roasters(name))"
+            ).eq("cafe_id", cafe_id).not_.is_("bean_id", "null")
+        ).order("visited_at", desc=True).limit(200).execute()
+
+        grouped = {"drink": {}, "purchase": {}}
+        for row in result.data or []:
+            bean = row.get("beans")
+            if isinstance(bean, list):
+                bean = bean[0] if bean else None
+            if not bean:
+                continue
+
+            bucket = grouped.get(row.get("mode") or "drink")
+            if bucket is None:
+                continue
+
+            roaster = bean.get("roasters")
+            if isinstance(roaster, list):
+                roaster = roaster[0] if roaster else None
+
+            entry = bucket.get(bean["id"])
+            if entry:
+                entry["count"] += 1
+                continue
+
+            # Rows arrive newest first, so the first one seen for a bean is the
+            # most recent -- no comparison needed.
+            bucket[bean["id"]] = {
+                "bean_id": bean["id"],
+                "name": bean.get("name"),
+                "roaster_name": roaster.get("name") if roaster else None,
+                "origin": bean.get("origin"),
+                "roast_level": bean.get("roast_level"),
+                "last_seen_at": row["visited_at"],
+                "count": 1,
+            }
+
+        return CafeBeansResponse(
+            drink=[CafeBeanEntry(**e) for e in grouped["drink"].values()],
+            purchase=[CafeBeanEntry(**e) for e in grouped["purchase"].values()],
+        )
+    except Exception:
+        logger.exception("Error loading cafe beans")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred. Please try again."
+        )
+
 
 @router.get("/{cafe_identifier}", response_model=CafeResponse)
 async def get_cafe_details(cafe_identifier: str):
@@ -489,12 +1200,14 @@ async def get_cafe_details(cafe_identifier: str):
         verified_at_str = cafe.get("verified_at")
         verified_at = date_parser.parse(verified_at_str) if verified_at_str else None
         
-        # Get total count and calculate average rating from all public logs
-        all_logs_result = supabase.table("cafe_visits").select(
-            "id, rating, visited_at, user_id, anonymous, comment, photo_urls, coffee_type"
-        ).eq("cafe_id", cafe_id).eq("is_public", True).not_.is_("rating", "null").order(
-            "visited_at", desc=True
-        ).execute()
+        # Same definition of "public" the log list and its count use -- see
+        # `services/coffee_logs.public_logs`. A purchase with no rating is a log; it
+        # counts here, and `average_rating` below simply skips the missing number.
+        all_logs_result = public_logs(
+            supabase.table("cafe_visits").select(
+                "id, rating, mode, visited_at, user_id, anonymous, comment, photo_urls, coffee_type"
+            ).eq("cafe_id", cafe_id)
+        ).order("visited_at", desc=True).execute()
         
         average_rating = None
         log_count = 0
@@ -538,6 +1251,7 @@ async def get_cafe_details(cafe_identifier: str):
                     "comment": log.get("comment"),
                     "photo_urls": log.get("photo_urls", []),
                     "coffee_type": log.get("coffee_type"),
+                    "mode": log.get("mode", "drink"),
                     "is_public": True,
                     "anonymous": log.get("anonymous", False),
                     "author_display_name": author_display_name,
@@ -603,7 +1317,6 @@ async def get_cafe_details(cafe_identifier: str):
             "verified_at": verified_at,
             "admin_verified": cafe.get("admin_verified", False),
             "navigator_id": cafe.get("navigator_id"),
-            "vanguard_ids": cafe.get("vanguard_ids", []),
             "created_at": created_at,
             "updated_at": updated_at,
             "average_rating": float(average_rating) if average_rating else None,
@@ -620,27 +1333,16 @@ async def get_cafe_details(cafe_identifier: str):
         # 1. Navigator
         if cafe.get("navigator_id"):
             try:
-                nav_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", cafe["navigator_id"]).single().execute()
+                nav_user = supabase.table("users").select("user_id:id, username, display_name, avatar_url").eq("id", cafe["navigator_id"]).single().execute()
                 if nav_user.data:
                     founding_crew["navigator"] = nav_user.data
             except Exception:
                 pass
                 
-        # 2. Vanguards
-        if cafe.get("vanguard_ids"):
-            vanguards = []
-            for vanguard in cafe["vanguard_ids"]:
-                try:
-                    van_user = supabase.table("users").select("id, username, display_name, avatar_url").eq("id", vanguard["user_id"]).single().execute()
-                    if van_user.data:
-                        vanguard_data = van_user.data
-                        vanguard_data["role"] = vanguard.get("role")
-                        vanguards.append(vanguard_data)
-                except Exception:
-                    continue
-            if vanguards:
-                founding_crew["vanguard"] = vanguards
-                
+        # There is no second half. Vanguard ranked the second and third person through
+        # a door against the first, which is a race nobody entered -- what a cafe's page
+        # says about people is now who put it on the map, and nothing about the order
+        # everyone else arrived in.
         if founding_crew:
             response["founding_crew"] = founding_crew
         
@@ -710,32 +1412,36 @@ async def register_cafe(
             float(request.longitude)
         )
         
-        if not osm_data or not osm_data.get('road'):
+        # A silent map service is not a verdict about the place. Reading None as
+        # "does not exist" told people standing inside a real cafe that their cafe was
+        # not on the map, and the brand classification and coffee-only check below both
+        # read this same payload — so an outage has to stop the registration, not pass it.
+        if osm_data is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The map service is not responding right now. Please try again in a moment."
+            )
+
+        if not osm_data.get('road'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid location: This location does not exist on the map"
             )
         
         # Auto-complete address from OSM if not provided
-        if not request.address and osm_data:
+        if not request.address:
             request.address = osm_data.get('display_name', '')
 
-        # 3. Franchise check - IBeanThere only lists local, independent cafes
+        # 3. Brand classification. A franchise is no longer turned away: whether a place
+        # is worth listing is decided by the coffee it can name, not by how many outlets
+        # its brand has, and one franchise location can roast on site while the one down
+        # the road pours from a bag nobody can name. The verdict is stored and shown, not
+        # enforced.
         verdict = await franchise_service.classify(
             request.name,
             osm_data.get('extratags'),
             supabase
         )
-
-        if verdict.status == franchise_service.FRANCHISE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"{verdict.display_name} is a franchise "
-                    f"({verdict.outlet_count}+ locations worldwide). "
-                    "IBeanThere is for local, independent cafes only."
-                )
-            )
 
         # 4. Coffee-only rule - bubble tea, tea houses and juice bars are out
         extratags = osm_data.get('extratags')
@@ -746,7 +1452,7 @@ async def register_cafe(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
                     "Bubble tea shops, tea houses and juice bars cannot be registered. "
-                    "IBeanThere only lists cafes that serve coffee."
+                    "ibeanthere only lists cafes that serve coffee."
                 )
             )
 
@@ -835,26 +1541,11 @@ async def register_cafe(
                 navigator_id = current_user.id
                 update_data["navigator_id"] = navigator_id
 
-            if unique_user_count >= 3:
-                # Get founding order to assign vanguard roles
-                drops_result = supabase.table("cafe_beans").select(
-                    "user_id, first_dropped_at"
-                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
-
-                founding_drops = drops_result.data if drops_result.data else []
-
-                vanguard_ids = []
-                for idx, drop in enumerate(founding_drops):
-                    if drop["user_id"] != navigator_id:
-                        vanguard_ids.append({
-                            "user_id": drop["user_id"],
-                            "role": f"vanguard_{idx + 1}",
-                            "verified_at": now_iso
-                        })
-
+            if unique_user_count >= 3 and not existing_cafe.get("blacklist_history_id"):
+                # Three separate people is still what verifies a cafe. Only the roles
+                # handed out for being second and third are gone.
                 update_data["status"] = "verified"
                 update_data["verified_at"] = now_iso
-                update_data["vanguard_ids"] = vanguard_ids
                 triggered_verification = True
                 logger.info("Cafe %s auto-verified by 3 unique bean droppers (register flow)", cafe_id)
 
@@ -862,6 +1553,13 @@ async def register_cafe(
 
             # Fetch updated cafe
             result = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+
+            # A check-in at an existing cafe is the same evidence as registering one:
+            # the 100m gate above was passed either way.
+            traits_service.record_observations_quietly(
+                supabase, cafe_id, request.traits, current_user.id
+            )
+            badges_service.award_badges_quietly(supabase, current_user.id)
 
             return {
                 "message": "Check-in recorded",
@@ -950,7 +1648,6 @@ async def register_cafe(
                 "status": "pending",
                 "verification_count": 1,
                 "navigator_id": current_user.id,
-                "vanguard_ids": [],
                 "source_type": request.source_type,
                 "source_url": source_url,
                 "normalized_name": normalized_name,
@@ -982,7 +1679,7 @@ async def register_cafe(
                                 insert_error)
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail="This cafe is already listed on IBeanThere. Open it from the map to drop a bean."
+                        detail="This cafe is already listed on ibeanthere. Open it from the map to drop a bean."
                     )
                 raise
 
@@ -1036,6 +1733,14 @@ async def register_cafe(
                 except Exception:
                     logger.warning("Error saving registration photos to cafe_visits", exc_info=True)
             
+            # What the registrant could see from inside. Approved on arrival: nobody
+            # else in the app has better evidence than the person who just stood there
+            # and passed the distance check.
+            traits_service.record_observations_quietly(
+                supabase, cafe_id, request.traits, current_user.id
+            )
+            badges_service.award_badges_quietly(supabase, current_user.id)
+
             return {
                 "message": "Cafe registered successfully",
                 "cafe": new_cafe,
@@ -1307,7 +2012,9 @@ async def search_osm_location(
         return {
             "lat": float(first_result.get("lat", 0)),
             "lng": float(first_result.get("lon", 0)),
-            "display_name": first_result.get("display_name", "")
+            # Same postal shape the reverse lookup returns, so a searched address and a
+            # pinned one cannot be told apart once they are stored.
+            "display_name": format_address(first_result)
         }
         
     except HTTPException:
@@ -1454,7 +2161,6 @@ async def get_pending_cafes(
                 verified_at=verified_at,
                 admin_verified=cafe.get("admin_verified", False),
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                vanguard_ids=cafe.get("vanguard_ids", []),
                 created_at=created_at,
                 updated_at=updated_at,
                 main_image=main_image,
@@ -1462,6 +2168,8 @@ async def get_pending_cafes(
                 business_hours=cafe.get("business_hours"),
             ))
 
+        for item, row in zip(cafes, sorted_data):
+            item.has_deletion_history = bool(row.get("blacklist_history_id"))
         return CafeSearchResponse(cafes=cafes, total_count=len(cafes))
 
     except Exception as e:
@@ -1473,10 +2181,11 @@ async def get_pending_cafes(
 
 @router.get("/admin/all", response_model=CafeSearchResponse)
 async def get_all_cafes_admin(
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    q: str = Query("", max_length=100),
     cafe_status: Optional[str] = Query(None, alias="status"),
-    brand_status: Optional[str] = Query(None, description="local | unknown"),
+    brand_status: Optional[str] = Query(None, description="local | franchise | unknown"),
     current_user = Depends(require_admin_role),
     supabase: Client = Depends(get_supabase_client)
 ):
@@ -1487,14 +2196,18 @@ async def get_all_cafes_admin(
         page: Page number (default 1)
         page_size: Number of items per page (default 20)
         cafe_status: Optional status filter (pending/verified/disputed)
-        brand_status: Optional franchise-classification filter (local/unknown).
+        brand_status: Optional brand-classification filter (local/franchise/unknown).
             'unknown' is the review queue for cafes we could not classify.
     """
     try:
         offset = (page - 1) * page_size
+        # Same name/address substring search as the map, stripped of filter syntax.
+        term = "".join(c for c in q.strip() if c.isalnum() or c.isspace() or c in "-'")
 
         # Count query
         count_query = supabase.table("cafes").select("id", count="exact")
+        if term:
+            count_query = count_query.or_(f"name.ilike.%{term}%,address.ilike.%{term}%")
         if cafe_status:
             count_query = count_query.eq("status", cafe_status)
         if brand_status:
@@ -1504,6 +2217,8 @@ async def get_all_cafes_admin(
 
         # Data query with pagination
         data_query = supabase.table("cafes").select("*")
+        if term:
+            data_query = data_query.or_(f"name.ilike.%{term}%,address.ilike.%{term}%")
         if cafe_status:
             data_query = data_query.eq("status", cafe_status)
         if brand_status:
@@ -1577,7 +2292,6 @@ async def get_all_cafes_admin(
                 verified_at=verified_at,
                 admin_verified=cafe.get("admin_verified", False),
                 navigator_id=str(cafe.get("navigator_id")) if cafe.get("navigator_id") else None,
-                vanguard_ids=cafe.get("vanguard_ids", []),
                 created_at=created_at,
                 updated_at=updated_at,
                 main_image=main_image,
@@ -1585,6 +2299,8 @@ async def get_all_cafes_admin(
                 business_hours=cafe.get("business_hours"),
             ))
 
+        for item, row in zip(cafes, result.data):
+            item.has_deletion_history = bool(row.get("blacklist_history_id"))
         return CafeSearchResponse(cafes=cafes, total_count=total_count)
 
     except Exception as e:
@@ -1642,7 +2358,8 @@ async def admin_verify_cafe(
             )
         
         updated_cafe = result.data[0]
-        
+        _drop_trending_cache()
+
         return {
             "message": "Cafe verified by admin",
             "cafe": CafeResponse(
@@ -1660,7 +2377,6 @@ async def admin_verify_cafe(
                 verified_at=updated_cafe.get("verified_at"),
                 admin_verified=updated_cafe.get("admin_verified", False),
                 navigator_id=str(updated_cafe.get("navigator_id")) if updated_cafe.get("navigator_id") else None,
-                vanguard_ids=updated_cafe.get("vanguard_ids", []),
                 created_at=updated_cafe.get("created_at"),
                 updated_at=updated_cafe.get("updated_at")
             )
@@ -1674,6 +2390,21 @@ async def admin_verify_cafe(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."
         )
+
+
+def _drop_trending_cache() -> None:
+    """
+    Forget the memoised trending lists after an admin changes what exists.
+
+    The discover cards are served from `visits._trending_cache`, keyed by viewport, and
+    a deleted cafe stays in every key that already held it until the TTL runs out. So
+    an admin deletes a cafe, reloads discover, and it is still there. Imported inside
+    the function because `visits` imports from this module.
+    """
+    from app.api.v1 import visits
+
+    visits._trending_cache.clear()
+
 
 @router.delete("/admin/{cafe_id}")
 async def admin_delete_cafe(
@@ -1693,17 +2424,16 @@ async def admin_delete_cafe(
     """
     try:
         # Check if cafe exists
-        cafe_result = supabase.table("cafes").select("id").eq("id", cafe_id).single().execute()
-        
-        if not cafe_result.data:
+        result = supabase.rpc("delete_cafe_with_history", {"target": cafe_id}).execute()
+        if not result.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cafe not found"
             )
         
-        # Delete cafe (cascade deletes checkins and visits)
-        result = supabase.table("cafes").delete().eq("id", cafe_id).execute()
-        
+        # The RPC stores the minimal identity and deletes in the same transaction.
+        _drop_trending_cache()
+
         return {
             "message": "Cafe deleted successfully",
             "cafe_id": cafe_id
@@ -1734,6 +2464,14 @@ class AdminCafeUpdateRequest(BaseModel):
     images: Optional[List[str]] = None     # Gallery image URLs
     brand_override: Optional[bool] = None  # True = force franchise, False = force local
     serves_coffee: Optional[bool] = None   # False hides a venue that does not serve coffee
+    # What a Google Maps lookup returned for this cafe. A seeded row carries an OSM
+    # node's idea of where a shop is and what it is called; Google usually has the
+    # better answer, and the place id is what the photo fallback needs to show anything
+    # at all. Corrections, not a re-registration -- see the drift check below.
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    google_place_id: Optional[str] = None
+    source_url: Optional[str] = None
 
 @router.patch("/admin/{cafe_id}")
 async def admin_update_cafe(
@@ -1782,6 +2520,31 @@ async def admin_update_cafe(
         if request.serves_coffee is not None:
             update_data["serves_coffee"] = request.serves_coffee
             update_data["category_source"] = "admin"
+        if request.google_place_id is not None:
+            update_data["google_place_id"] = request.google_place_id
+        if request.source_url is not None:
+            update_data["source_url"] = request.source_url
+
+        # Moving a cafe is a correction, never a relocation. The same 100m the
+        # registration flow allows a Google result to drift from the submitted point:
+        # past that, the URL describes a different shop, and accepting it would carry
+        # this cafe's logs, beans and badges somewhere nobody earned them.
+        if request.latitude is not None and request.longitude is not None:
+            drift = calculate_earth_distance(
+                float(cafe_result.data["latitude"]), float(cafe_result.data["longitude"]),
+                float(request.latitude), float(request.longitude),
+            )
+            if drift > GOOGLE_PLACE_MAX_DRIFT_METERS:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"That location is {drift:.0f}m from this cafe, past the "
+                        f"{GOOGLE_PLACE_MAX_DRIFT_METERS}m correction limit. If it is a "
+                        "different place, register it rather than moving this one."
+                    ),
+                )
+            update_data["latitude"] = request.latitude
+            update_data["longitude"] = request.longitude
 
         has_image_update = request.images is not None
 
@@ -1895,6 +2658,7 @@ async def admin_update_cafe(
 
         # Re-fetch the updated cafe
         updated_cafe = supabase.table("cafes").select("*").eq("id", cafe_id).single().execute()
+        _drop_trending_cache()
 
         return {
             "message": "Cafe updated successfully",
@@ -2069,7 +2833,7 @@ async def drop_bean(
         
         # 9. Auto-verification: Check if 3 unique users have dropped beans
         triggered_verification = False
-        cafe_status_result = supabase.table("cafes").select("status, navigator_id, vanguard_ids").eq("id", cafe_id).single().execute()
+        cafe_status_result = supabase.table("cafes").select("status, navigator_id, blacklist_history_id").eq("id", cafe_id).single().execute()
         cafe_status = cafe_status_result.data.get("status") if cafe_status_result.data else "pending"
 
         # App-seeded cafes (e.g. OSM import) have no navigator yet — the
@@ -2079,36 +2843,17 @@ async def drop_bean(
             navigator_id = current_user.id
             supabase.table("cafes").update({"navigator_id": navigator_id}).eq("id", cafe_id).execute()
 
-        if cafe_status == "pending":
+        if cafe_status == "pending" and not (cafe_status_result.data or {}).get("blacklist_history_id"):
             # Count unique users who dropped beans at this cafe
             unique_users_result = supabase.table("cafe_beans").select("user_id").eq("cafe_id", cafe_id).execute()
             unique_user_ids = list(set([bean["user_id"] for bean in unique_users_result.data])) if unique_users_result.data else []
             unique_user_count = len(unique_user_ids)
             
             if unique_user_count >= 3:
-                # Get the order of bean drops to determine founding crew
-                drops_result = supabase.table("cafe_beans").select(
-                    "user_id, first_dropped_at"
-                ).eq("cafe_id", cafe_id).order("first_dropped_at", desc=False).limit(3).execute()
-
-                founding_drops = drops_result.data if drops_result.data else []
-
-                # Build vanguard_ids (2nd and 3rd droppers)
-                vanguard_ids = []
-                for idx, drop in enumerate(founding_drops):
-                    if drop["user_id"] != navigator_id:
-                        role = f"vanguard_{idx + 1}"
-                        vanguard_ids.append({
-                            "user_id": drop["user_id"],
-                            "role": role,
-                            "verified_at": datetime.now(timezone.utc).isoformat()
-                        })
-
                 # Update cafe to verified, sync verification_count
                 supabase.table("cafes").update({
                     "status": "verified",
                     "verified_at": datetime.now(timezone.utc).isoformat(),
-                    "vanguard_ids": vanguard_ids,
                     "verification_count": unique_user_count
                 }).eq("id", cafe_id).execute()
 
@@ -2120,6 +2865,8 @@ async def drop_bean(
                     "verification_count": unique_user_count
                 }).eq("id", cafe_id).execute()
         
+        badges_service.award_badges_quietly(supabase, current_user.id)
+
         return {
             "message": "Bean dropped successfully!",
             "cafe_id": cafe_id,
@@ -2298,62 +3045,6 @@ async def get_my_bean(
         
     except Exception as e:
         logger.exception("Error getting bean status")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again."
-        )
-
-
-@router.get("/user/beans")
-async def get_user_beans(
-    current_user = Depends(get_current_user),
-    supabase: Client = Depends(get_supabase_client),
-    limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0)
-):
-    """
-    Get all beans for current user (for My Beans page / heatmap).
-    Includes cafe info and growth status.
-    """
-    try:
-        # Get user's beans with cafe info
-        beans_result = supabase.table("cafe_beans").select(
-            "*, cafes(id, name, slug, address, latitude, longitude)"
-        ).eq(
-            "user_id", current_user.id
-        ).order(
-            "last_dropped_at", desc=True
-        ).range(offset, offset + limit - 1).execute()
-        
-        beans = []
-        for bean in (beans_result.data or []):
-            cafe = bean.get("cafes", {})
-            growth_level = bean.get("growth_level", 1)
-            
-            beans.append({
-                "id": bean.get("id"),
-                "cafe_id": bean.get("cafe_id"),
-                "cafe_name": cafe.get("name"),
-                "cafe_slug": cafe.get("slug"),
-                "cafe_address": cafe.get("address"),
-                "latitude": cafe.get("latitude"),
-                "longitude": cafe.get("longitude"),
-                "drop_count": bean.get("drop_count"),
-                "growth_level": growth_level,
-                "growth_level_name": GROWTH_LEVEL_NAMES.get(growth_level, "Unknown"),
-                "first_dropped_at": bean.get("first_dropped_at"),
-                "last_dropped_at": bean.get("last_dropped_at")
-            })
-        
-        return {
-            "beans": beans,
-            "total_count": len(beans),
-            "offset": offset,
-            "limit": limit
-        }
-        
-    except Exception as e:
-        logger.exception("Error getting user beans")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again."

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PendingCafe } from '@/lib/api/admin';
 import { useTranslations } from 'next-intl';
 import { Card, Badge, Button } from '@/components/ui';
 import { BusinessHours } from '@/types/map';
 import OpeningHoursInput from '@/components/cafe/OpeningHoursInput';
+import { isTemporarilyClosed, setTemporarilyClosed } from '@/lib/utils/businessHours';
 import PhotoUploadWithMain from '@/shared/ui/PhotoUploadWithMain';
 import { useAuth } from '@/hooks/useAuth';
+import { lookupGoogleMapsUrl } from '@/lib/api/cafes';
 
 interface PendingCafeCardProps {
   cafe: PendingCafe;
@@ -28,6 +30,11 @@ export interface EditCafeData {
   business_hours?: BusinessHours;
   main_image?: string;
   images?: string[];
+  /* Only set when a Google Maps lookup filled the form. */
+  latitude?: number;
+  longitude?: number;
+  google_place_id?: string;
+  source_url?: string;
 }
 
 export default function PendingCafeCard({
@@ -50,6 +57,9 @@ export default function PendingCafeCard({
     description: cafe.description || '',
     business_hours: cafe.business_hours,
   });
+  const [mapsUrl, setMapsUrl] = useState('');
+  const [lookupState, setLookupState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [lookupMessage, setLookupMessage] = useState('');
   const [editPhotos, setEditPhotos] = useState<string[]>(cafe.images || []);
   const [editMainIndex, setEditMainIndex] = useState<number>(() => {
     if (cafe.main_image && cafe.images) {
@@ -58,6 +68,63 @@ export default function PendingCafeCard({
     }
     return 0;
   });
+
+  /*
+    Pull the shop's real details off its Google Maps page.
+
+    A seeded cafe carries an OpenStreetMap node's idea of the place: often no phone, no
+    hours, an address with no street number, and a name last edited by a stranger years
+    ago. The same lookup the registration form uses answers all of that from one pasted
+    URL. It also brings back `place_id`, which is what the card photo fallback needs
+    before it can ask Google for anything.
+
+    Nothing is saved here -- the fields are filled in and the admin still presses Save,
+    so a wrong URL is undone by closing the modal.
+  */
+  const applyGoogleUrl = async () => {
+    const url = mapsUrl.trim();
+    if (!url) return;
+
+    setLookupState('loading');
+    setLookupMessage('');
+    try {
+      const result = await lookupGoogleMapsUrl(url);
+      if (!result.success || !result.data) {
+        setLookupState('error');
+        setLookupMessage(t('google_lookup_failed'));
+        return;
+      }
+      const found = result.data;
+      setEditData((previous) => ({
+        ...previous,
+        name: found.name || previous.name,
+        address: found.address || previous.address,
+        phone: found.phone || previous.phone,
+        website: found.website || previous.website,
+        /*
+          Google supplies a timetable, never the closed-for-now mark, and the mark lives
+          in the same object -- so taking Google's hours wholesale would quietly reopen a
+          shop an admin had shut. Their own statement about the shop survives the lookup;
+          if Google is right that it is trading again, the tick box is right there.
+        */
+        business_hours: found.business_hours
+          ? setTemporarilyClosed(
+              found.business_hours as BusinessHours,
+              isTemporarilyClosed(previous.business_hours)
+            )
+          : previous.business_hours,
+        latitude: found.latitude ?? previous.latitude,
+        longitude: found.longitude ?? previous.longitude,
+        google_place_id: found.place_id || previous.google_place_id,
+        source_url: found.google_maps_url || url,
+      }));
+      setLookupState('done');
+      setLookupMessage(t('google_lookup_applied'));
+    } catch {
+      setLookupState('error');
+      setLookupMessage(t('google_lookup_failed'));
+    }
+  };
 
   const handleEditSubmit = () => {
     const mainImage = editPhotos.length > 0 ? editPhotos[editMainIndex] || editPhotos[0] : undefined;
@@ -69,7 +136,27 @@ export default function PendingCafeCard({
     setShowEditModal(false);
   };
 
+  // A modal with no way out but one button is a trap: Escape is the first thing
+  // anybody presses, and on a phone the backdrop is the only thing in reach.
+  useEffect(() => {
+    if (!showEditModal) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowEditModal(false);
+    };
+    document.addEventListener('keydown', onKey);
+    // The page behind must not scroll under the dialog.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showEditModal]);
+
   const handleOpenEditModal = () => {
+    setMapsUrl('');
+    setLookupState('idle');
+    setLookupMessage('');
     // Reset image state from latest cafe data when opening
     setEditPhotos(cafe.images || []);
     setEditMainIndex(() => {
@@ -87,15 +174,16 @@ export default function PendingCafeCard({
       <Card variant="elevated" padding="lg">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-xl font-semibold text-text mb-2">
               {cafe.name}
             </h3>
+            {cafe.has_deletion_history && <p className="text-warning mb-2">{t('deletion_history')}</p>}
             {cafe.address && (
-              <p className="text-[var(--color-textSecondary)] text-sm mb-2">
+              <p className="text-textSecondary text-sm mb-2">
                 {cafe.address}
               </p>
             )}
-            <div className="flex gap-4 text-sm text-[var(--color-textSecondary)]">
+            <div className="flex gap-4 text-sm text-textSecondary">
               <span>
                 {t('verification_count')}: {cafe.verification_count}
               </span>
@@ -117,7 +205,7 @@ export default function PendingCafeCard({
         </div>
 
         {(cafe.phone || cafe.website || cafe.description) && (
-          <div className="mb-4 space-y-2 text-sm text-[var(--color-textSecondary)]">
+          <div className="mb-4 space-y-2 text-sm text-textSecondary">
             {cafe.phone && (
               <p>
                 <span className="font-medium">{t('phone')}:</span> {cafe.phone}
@@ -130,7 +218,7 @@ export default function PendingCafeCard({
                   href={cafe.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--color-primary)] hover:underline"
+                  className="text-primary hover:underline"
                 >
                   {cafe.website}
                 </a>
@@ -146,18 +234,13 @@ export default function PendingCafeCard({
         )}
 
         {cafe.navigator_id && (
-          <div className="mb-4 p-3 bg-[var(--color-primary)]/10 rounded-lg">
-            <p className="text-sm font-medium text-[var(--color-primary)] mb-1">
+          <div className="mb-4 p-3 bg-primary/10 rounded-lg">
+            <p className="text-sm font-medium text-primary mb-1">
               {t('founding_crew')}
             </p>
-            <p className="text-xs text-[var(--color-textSecondary)]">
+            <p className="text-xs text-textSecondary">
               {t('navigator')}: {cafe.navigator_id.slice(0, 8)}...
             </p>
-            {cafe.vanguard_ids && cafe.vanguard_ids.length > 0 && (
-              <p className="text-xs text-[var(--color-textSecondary)]">
-                {t('vanguards')}: {cafe.vanguard_ids.length}
-              </p>
-            )}
           </div>
         )}
 
@@ -194,70 +277,111 @@ export default function PendingCafeCard({
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--color-surface)] rounded-lg p-6 max-w-lg w-full border border-[var(--color-border)] max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div
+            className="bg-surface rounded-lg p-6 max-w-lg w-full border border-border max-h-[90vh] overflow-y-auto"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4 text-text">
               {t('edit_cafe_title')}
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
+                  {t('google_lookup_label')}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={mapsUrl}
+                    onChange={(e) => setMapsUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyGoogleUrl();
+                      }
+                    }}
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="flex-1 min-w-0 px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={applyGoogleUrl}
+                    loading={lookupState === 'loading'}
+                    disabled={!mapsUrl.trim()}
+                  >
+                    {t('google_lookup_fetch')}
+                  </Button>
+                </div>
+                <p className={`mt-1 text-xs ${lookupState === 'error' ? 'text-error' : 'text-textSecondary'}`}>
+                  {lookupMessage || t('google_lookup_hint')}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('cafe_name')}
                 </label>
                 <input
                   type="text"
                   value={editData.name || ''}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('address')}
                 </label>
                 <input
                   type="text"
                   value={editData.address || ''}
                   onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('phone')}
                 </label>
                 <input
                   type="text"
                   value={editData.phone || ''}
                   onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('website')}
                 </label>
                 <input
                   type="text"
                   value={editData.website || ''}
                   onChange={(e) => setEditData({ ...editData, website: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                <label className="block text-sm font-medium text-text mb-1">
                   {t('description')}
                 </label>
                 <textarea
                   value={editData.description || ''}
                   onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text focus:outline-hidden focus:ring-2 focus:ring-primary resize-none"
                 />
               </div>
 

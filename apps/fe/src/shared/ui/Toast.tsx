@@ -25,10 +25,10 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
   }, [duration, onClose]);
 
   const bgColor = {
-    success: 'bg-[var(--color-success)]',
-    error: 'bg-[var(--color-error)]',
-    warning: 'bg-[var(--color-warning)]',
-    info: 'bg-[var(--color-primary)]'
+    success: 'bg-success',
+    error: 'bg-error',
+    warning: 'bg-warning',
+    info: 'bg-primary'
   }[type];
 
   const icon = {
@@ -49,14 +49,14 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
         ${isExiting ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}
       `}
     >
-      <div className="flex-shrink-0">{icon}</div>
+      <div className="shrink-0">{icon}</div>
       <p className="text-sm font-medium">{message}</p>
       <button
         onClick={() => {
           setIsExiting(true);
           setTimeout(onClose, 300);
         }}
-        className="ml-auto flex-shrink-0 text-white hover:text-white/80 transition-colors"
+        className="ml-auto shrink-0 text-white hover:text-white/80 transition-colors"
       >
         ✕
       </button>

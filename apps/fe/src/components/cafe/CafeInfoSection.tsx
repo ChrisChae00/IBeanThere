@@ -4,15 +4,23 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CafeMapData } from '@/types/map';
 import { CafeDetailResponse } from '@/types/api';
-import { isOpenNow, getCurrentDayInTimezone } from '@/lib/utils/businessHours';
+import { isOpenNow, getCurrentDayInTimezone, hasDayHours, isTemporarilyClosed } from '@/lib/utils/businessHours';
 import FoundingCrewAvatars from './FoundingCrewAvatars';
-import NavigationButton from './NavigationButton';
+import CafeMapActions from './CafeMapActions';
 
 interface CafeInfoSectionProps {
   cafe: CafeMapData | CafeDetailResponse;
+  /*
+    The detail page shows the crew over the photograph instead, where they read as
+    the people behind the place rather than as another labelled field.
+  */
+  showFoundingCrew?: boolean;
 }
 
-export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
+export default function CafeInfoSection({
+  cafe,
+  showFoundingCrew = true,
+}: CafeInfoSectionProps) {
   const t = useTranslations('cafe.modal');
   const tCommon = useTranslations('common');
   const [showAllHours, setShowAllHours] = useState(false);
@@ -46,6 +54,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
   };
 
   const todayHours = getTodayHours();
+  const temporarilyClosed = isTemporarilyClosed(businessHours);
   const phoneNumber = 'phoneNumber' in cafe ? cafe.phoneNumber : 
     ('phone' in cafe ? cafe.phone : undefined);
   const website = cafe.website;
@@ -54,45 +63,39 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
   const foundingCrew = 'founding_crew' in cafe ? cafe.founding_crew :
     ('foundingCrew' in cafe ? (cafe as any).foundingCrew : undefined);
 
-  // Normalize scouts: CafeMapData uses `scouts`, CafeDetailResponse (API raw) uses `vanguard`
-  const scouts: Array<{ user_id: string; username?: string; display_name?: string; avatar_url?: string; role: 'scout_1' | 'scout_2' }> =
-    foundingCrew?.scouts ||
-    (foundingCrew?.vanguard || []).map((v: any) => ({
-      ...v,
-      role: (v.role === 'vanguard_2nd' ? 'scout_1' : 'scout_2') as 'scout_1' | 'scout_2',
-    }));
-
   const sourceType = 'source_type' in cafe ? cafe.source_type : undefined;
 
+  /*
+    Field labels are set in the body face, not the display serif: they name the parts
+    of a record -- address, website, hours -- and the serif is the page's own voice,
+    which a label does not speak in.
+  */
   return (
     <div className="space-y-4">
       {/* Founding Crew Section */}
-      {foundingCrew && (foundingCrew.navigator || scouts.length > 0) && (
-        <FoundingCrewAvatars
-          navigator={foundingCrew.navigator}
-          scouts={scouts}
-        />
+      {showFoundingCrew && foundingCrew?.navigator && (
+        <FoundingCrewAvatars navigator={foundingCrew.navigator} />
       )}
 
       {/* App-seeded cafe (e.g. OSM import) with no navigator yet */}
       {sourceType === 'app_seed' && !foundingCrew?.navigator && (
-        <p className="text-sm text-[var(--color-cardTextSecondary)]">{t('added_by_app')}</p>
+        <p className="text-sm text-cardTextSecondary">{t('added_by_app')}</p>
       )}
 
       {/* Status Badge + Verification Count (only show count when not verified and no founding crew) */}
       {!foundingCrew && (
         <div className="flex items-center gap-2">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium border border-[var(--color-border)] ${
+            className={`px-3 py-1 rounded-full text-xs font-medium border border-border ${
               cafe.status === 'verified'
-                ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-                : 'bg-[var(--color-pending)]/10 text-[var(--color-pending)]'
+                ? 'bg-success/10 text-success'
+                : 'bg-pending/10 text-pending'
             }`}
           >
             {cafe.status === 'verified' ? t('status_verified') : t('status_pending')}
           </span>
           {cafe.status !== 'verified' && cafe.verification_count && (
-            <span className="text-sm text-[var(--color-cardTextSecondary)]">
+            <span className="text-sm text-cardTextSecondary">
               {t('verifications', { count: cafe.verification_count })}
             </span>
           )}
@@ -102,27 +105,17 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {/* Address + Google Maps Link */}
       {cafe.address && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('address')}</h3>
-          <p className="text-[var(--color-cardText)]">{cafe.address}</p>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <a
-              href={
-                sourceUrl && sourceUrl.startsWith('https://www.google.com/maps')
-                  ? sourceUrl
-                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${cafe.name}, ${cafe.address || `${cafe.latitude},${cafe.longitude}`}`)}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg text-xs font-medium text-[var(--color-cardText)] transition-colors"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-              </svg>
-              <span>{t('google_maps')}</span>
-            </a>
-            {cafe.latitude && cafe.longitude && (
-              <NavigationButton latitude={cafe.latitude} longitude={cafe.longitude} size="sm" />
-            )}
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('address')}</h3>
+          <p className="text-cardText">{cafe.address}</p>
+          <div className="pt-1">
+            <CafeMapActions
+              cafeId={cafe.id}
+              name={cafe.name}
+              address={cafe.address}
+              latitude={cafe.latitude}
+              longitude={cafe.longitude}
+              sourceUrl={sourceUrl}
+            />
           </div>
         </div>
       )}
@@ -130,10 +123,10 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {/* Phone */}
       {phoneNumber && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('phone')}</h3>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('phone')}</h3>
           <a
             href={`tel:${phoneNumber}`}
-            className="text-[var(--color-cardText)] hover:underline"
+            className="text-cardText hover:underline"
           >
             {phoneNumber}
           </a>
@@ -143,29 +136,43 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
       {/* Website */}
       {website && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('website')}</h3>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('website')}</h3>
           <a
             href={website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--color-cardText)] hover:underline break-all"
+            className="text-cardText hover:underline break-all"
           >
             {website}
           </a>
         </div>
       )}
 
+      {/*
+        Shut for now, and that is the whole answer: the timetable is left out rather
+        than shown greyed, because a reader who is deciding whether to walk over does
+        not need Tuesday's hours to know the door is locked today.
+      */}
+      {temporarilyClosed && (
+        <div className="space-y-1">
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+          <span className="inline-block rounded-full bg-error/10 px-2 py-1 text-xs text-error">
+            {t('temporarily_closed')}
+          </span>
+        </div>
+      )}
+
       {/* Opening Hours */}
-      {businessHours && Object.keys(businessHours).length > 0 && (
+      {!temporarilyClosed && hasDayHours(businessHours) && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('opening_hours')}</h3>
+            <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
             {todayHours && !todayHours.closed && (
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
                   isOpenNow(businessHours, timezone)
-                    ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
-                    : 'bg-[var(--color-error)]/10 text-[var(--color-error)]'
+                    ? 'bg-success/10 text-success'
+                    : 'bg-error/10 text-error'
                 }`}
               >
                 {isOpenNow(businessHours, timezone) ? t('open_now') : t('closed_now')}
@@ -177,14 +184,22 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
           {todayHours && (
             <button
               onClick={() => setShowAllHours(!showAllHours)}
-              className="w-full p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primaryText)] transition-colors"
+              className="w-full p-3 bg-surface rounded-lg border border-border hover:bg-primary hover:text-primaryText transition-colors"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
+              {/*
+                One line at 375px. A range broken across two lines reads as two
+                times, and "6:00 AM - 10:00" over "PM" is briefly a different shop.
+                So the range never wraps; the day label is what gives if the row
+                runs out of room, because it is the half the reader can infer.
+                `text-sm` also matches the week list this row expands into -- the
+                collapsed row was a size larger than the same data underneath it.
+              */}
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="min-w-0 truncate font-medium">
                   {t('today')} ({getDayName(today)})
                 </span>
-                <div className="flex items-center gap-2">
-                  <span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="whitespace-nowrap">
                     {todayHours.closed
                       ? t('closed')
                       : `${formatTime(todayHours.open)} - ${formatTime(todayHours.close)}`}
@@ -204,7 +219,7 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
 
           {/* All Week Hours */}
           {showAllHours && (
-            <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
+            <div className="space-y-2 pt-2 border-t border-border">
               {daysOfWeek.map((day) => {
                 const hours = businessHours?.[day];
                 if (!hours) return null;
@@ -214,13 +229,13 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
                     <span
                       className={`${
                         day === today
-                          ? 'font-semibold text-[var(--color-cardText)]'
-                          : 'text-[var(--color-cardTextSecondary)]'
+                          ? 'font-semibold text-cardText'
+                          : 'text-cardTextSecondary'
                       }`}
                     >
                       {getDayName(day)}
                     </span>
-                    <span className="text-[var(--color-cardText)]">
+                    <span className="whitespace-nowrap text-cardText">
                       {hours.closed
                         ? t('closed')
                         : `${formatTime(hours.open)} - ${formatTime(hours.close)}`}
@@ -233,10 +248,10 @@ export default function CafeInfoSection({ cafe }: CafeInfoSectionProps) {
         </div>
       )}
 
-      {!businessHours && (
+      {!temporarilyClosed && !hasDayHours(businessHours) && (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-[var(--color-cardTextSecondary)]">{t('opening_hours')}</h3>
-          <p className="text-sm text-[var(--color-cardText)]">{t('no_hours_available')}</p>
+          <h3 className="font-sans text-base font-semibold text-cardTextSecondary">{t('opening_hours')}</h3>
+          <p className="text-sm text-cardText">{t('no_hours_available')}</p>
         </div>
       )}
 

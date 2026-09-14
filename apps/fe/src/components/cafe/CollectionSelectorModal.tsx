@@ -13,6 +13,12 @@ interface CollectionSelectorModalProps {
   cafeId: string;
   cafeName: string;
   onSaveComplete?: () => void;
+  /*
+    Set when the picker was opened right after a one-press save, which files the cafe
+    under "Saved for later" first. Picking a real list then *moves* it: the default is
+    where a cafe waits until it is filed, not a copy to leave behind.
+  */
+  moveOutOfSaveLater?: boolean;
 }
 
 /**
@@ -25,6 +31,7 @@ export default function CollectionSelectorModal({
   cafeId,
   cafeName,
   onSaveComplete,
+  moveOutOfSaveLater = false,
 }: CollectionSelectorModalProps) {
   const t = useTranslations('collections');
   
@@ -69,6 +76,44 @@ export default function CollectionSelectorModal({
     fetchData();
   }, [isOpen, cafeId, t]);
 
+  /*
+    The count beside a list is what the reader just changed, so it moves with the tick
+    rather than waiting for the next fetch — a list that says 0 right after you filed
+    something into it reads as a failed save.
+  */
+  const bumpCount = useCallback((collectionId: string, delta: number) => {
+    setCollections((prev) =>
+      prev.map((c) =>
+        c.id === collectionId ? { ...c, item_count: Math.max(0, c.item_count + delta) } : c,
+      ),
+    );
+  }, []);
+
+  /*
+    The default list is only vacated when the reader files the cafe somewhere real —
+    never when they un-tick a list, which would leave the cafe saved nowhere without
+    them asking for that.
+  */
+  const leaveSaveLater = useCallback(async (chosenId: string) => {
+    if (!moveOutOfSaveLater) return;
+    const saveLater = collections.find((c) => c.icon_type === 'save_later');
+    if (!saveLater || saveLater.id === chosenId) return;
+    if (!savedCollectionIds.has(saveLater.id)) return;
+
+    setSavedCollectionIds((prev) => {
+      const next = new Set(prev);
+      next.delete(saveLater.id);
+      return next;
+    });
+    bumpCount(saveLater.id, -1);
+    try {
+      await removeCafeFromCollection(saveLater.id, cafeId);
+    } catch {
+      setSavedCollectionIds((prev) => new Set(prev).add(saveLater.id));
+      bumpCount(saveLater.id, 1);
+    }
+  }, [cafeId, collections, moveOutOfSaveLater, savedCollectionIds]);
+
   const handleToggleCollection = useCallback(async (collectionId: string) => {
     if (isSaving) return;
     
@@ -87,10 +132,12 @@ export default function CollectionSelectorModal({
     });
     
     try {
+      bumpCount(collectionId, isCurrentlySaved ? -1 : 1);
       if (isCurrentlySaved) {
         await removeCafeFromCollection(collectionId, cafeId);
       } else {
         await addCafeToCollection(collectionId, cafeId);
+        await leaveSaveLater(collectionId);
       }
     } catch (err) {
       // Revert on error
@@ -103,11 +150,12 @@ export default function CollectionSelectorModal({
         }
         return next;
       });
+      bumpCount(collectionId, isCurrentlySaved ? 1 : -1);
       setError(t('save_failed'));
     } finally {
       setIsSaving(false);
     }
-  }, [cafeId, isSaving, savedCollectionIds, t]);
+  }, [cafeId, isSaving, savedCollectionIds, leaveSaveLater, bumpCount, t]);
 
   const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim() || isCreating) return;
@@ -120,10 +168,11 @@ export default function CollectionSelectorModal({
         icon_type: 'custom',
       });
       
-      // Add cafe to new collection
+      // A list made from this picker is made *for* this cafe, so it is filed at once.
       await addCafeToCollection(newCollection.id, cafeId);
+      await leaveSaveLater(newCollection.id);
       
-      setCollections(prev => [...prev, newCollection]);
+      setCollections(prev => [...prev, { ...newCollection, item_count: 1 }]);
       setSavedCollectionIds(prev => new Set([...prev, newCollection.id]));
       setNewCollectionName('');
       setShowNewForm(false);
@@ -132,7 +181,7 @@ export default function CollectionSelectorModal({
     } finally {
       setIsCreating(false);
     }
-  }, [cafeId, newCollectionName, isCreating, t]);
+  }, [cafeId, newCollectionName, isCreating, leaveSaveLater, t]);
 
   const handleClose = useCallback(() => {
     onSaveComplete?.();
@@ -141,13 +190,13 @@ export default function CollectionSelectorModal({
 
   const getCollectionIcon = (iconType: string, isSelected: boolean) => {
     if (iconType === 'favourite') {
-      return <HeartIcon filled={isSelected} size={20} color={isSelected ? '#ef4444' : undefined} />;
+      return <HeartIcon filled={isSelected} size={20} className={isSelected ? "text-collection-favourite" : undefined} />;
     }
     if (iconType === 'save_later') {
-      return <BookmarkIcon filled={isSelected} size={20} color={isSelected ? '#3b82f6' : undefined} />;
+      return <BookmarkIcon filled={isSelected} size={20} className={isSelected ? "text-collection-saved" : undefined} />;
     }
     return (
-      <div className={`w-5 h-5 rounded-full bg-[var(--color-primary)] ${
+      <div className={`w-5 h-5 rounded-full bg-brand ${
         isSelected ? '' : 'opacity-40'
       }`} />
     );
@@ -166,7 +215,7 @@ export default function CollectionSelectorModal({
     <Modal isOpen={isOpen} onClose={handleClose} title={t('save_to')}>
       <div className="min-h-[200px]">
         {/* Cafe name header */}
-        <p className="text-sm text-[var(--color-textSecondary)] mb-4 truncate">
+        <p className="text-sm text-ink-secondary mb-4 truncate">
           {cafeName}
         </p>
 
@@ -175,7 +224,7 @@ export default function CollectionSelectorModal({
             <LoadingSpinner size="md" />
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500">
+          <div className="text-center py-8 text-state-danger">
             {error}
           </div>
         ) : (
@@ -195,23 +244,23 @@ export default function CollectionSelectorModal({
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left
                       transition-colors duration-150
                       ${isSelected 
-                        ? 'bg-[var(--color-primary)]/10' 
-                        : 'hover:bg-[var(--color-background)]'
+                        ? 'bg-brand/12' 
+                        : 'hover:bg-surface-hover'
                       }
                       disabled:opacity-50
                     `}
                   >
                     {/* Checkbox */}
                     <div className={`
-                      w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
+                      w-5 h-5 rounded border-2 flex items-center justify-center shrink-0
                       transition-colors duration-150
                       ${isSelected 
-                        ? 'bg-[var(--color-primary)] border-[var(--color-primary)]' 
-                        : 'border-gray-300'
+                        ? 'bg-brand border-brand' 
+                        : 'border-edge-rule'
                       }
                     `}>
                       {isSelected && (
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-ink-on-brand" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                         </svg>
                       )}
@@ -221,12 +270,12 @@ export default function CollectionSelectorModal({
                     {getCollectionIcon(collection.icon_type, isSelected)}
                     
                     {/* Name */}
-                    <span className="flex-1 truncate text-[var(--color-cardText)]">
+                    <span className="flex-1 truncate text-ink-primary">
                       {isSystemCollection ? t(collection.icon_type) : collection.name}
                     </span>
                     
                     {/* Item count */}
-                    <span className="text-xs text-[var(--color-textSecondary)]">
+                    <span className="text-xs text-ink-secondary">
                       {collection.item_count}
                     </span>
                   </button>
@@ -235,18 +284,21 @@ export default function CollectionSelectorModal({
 
               {/* Separator */}
               {sortedCollections.length > 0 && (
-                <div className="h-px bg-[var(--color-border)] my-2" />
+                <div className="h-px bg-edge-rule my-2" />
               )}
 
               {/* New collection form */}
               {showNewForm ? (
-                <div className="flex items-center gap-2 px-3 py-2">
+                /* Wraps rather than overflowing: on a phone the input plus two
+                   buttons is wider than the sheet, and the row used to push Create
+                   and Cancel off the screen. */
+                <div className="flex flex-wrap items-center gap-2 px-3 py-2">
                   <input
                     type="text"
                     value={newCollectionName}
                     onChange={e => setNewCollectionName(e.target.value)}
                     placeholder={t('collection_name_placeholder')}
-                    className="flex-1 px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-edge-rule bg-surface-raised px-3 py-2 text-sm text-ink-primary placeholder:text-ink-secondary focus:outline-hidden focus:ring-2 focus:ring-brand sm:w-auto"
                     autoFocus
                     onKeyDown={e => {
                       if (e.key === 'Enter') handleCreateCollection();
@@ -259,7 +311,7 @@ export default function CollectionSelectorModal({
                   <button
                     onClick={handleCreateCollection}
                     disabled={!newCollectionName.trim() || isCreating}
-                    className="px-3 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-secondary)] disabled:opacity-50 transition-colors"
+                    className="px-3 py-2 text-sm font-medium text-ink-on-brand bg-brand rounded-lg hover:bg-brand-hover disabled:opacity-50 transition-colors"
                   >
                     {isCreating ? <LoadingSpinner size="sm" /> : t('create')}
                   </button>
@@ -268,7 +320,7 @@ export default function CollectionSelectorModal({
                       setShowNewForm(false);
                       setNewCollectionName('');
                     }}
-                    className="px-3 py-2 text-sm text-[var(--color-textSecondary)] hover:text-[var(--color-cardText)]"
+                    className="px-3 py-2 text-sm text-ink-secondary hover:text-ink-primary"
                   >
                     {t('cancel')}
                   </button>
@@ -276,7 +328,7 @@ export default function CollectionSelectorModal({
               ) : (
                 <button
                   onClick={() => setShowNewForm(true)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-ink-primary hover:bg-surface-hover transition-colors"
                 >
                   <span className="w-5 h-5 flex items-center justify-center text-lg">+</span>
                   <span>{t('create_new')}</span>

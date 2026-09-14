@@ -7,8 +7,6 @@ const STATIC_PATHS = [
   '',
   '/discover/explore-map',
   '/learn/coffee',
-  '/shop',
-  '/community',
 ];
 
 // Next builds this route statically otherwise, baking it in once at build
@@ -30,7 +28,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const drink of getAllDrinks()) {
     for (const locale of locales) {
-      entries.push({ url: urlFor(locale, `/learn/coffee/${drink.slug}`), changeFrequency: 'monthly', priority: 0.6 });
+      // The day the page's sources were last checked, not the build date.
+      entries.push({
+        url: urlFor(locale, `/learn/coffee/${drink.slug}`),
+        lastModified: drink.reviewed,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
     }
   }
 

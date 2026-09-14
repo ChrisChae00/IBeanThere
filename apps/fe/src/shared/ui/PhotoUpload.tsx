@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraIcon from './CameraIcon';
+import { useToast } from '@/contexts/ToastContext';
 import { uploadCafeImage } from '@/shared/lib/supabase/storage';
 import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
@@ -16,6 +17,7 @@ interface PhotoUploadProps {
 
 export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, maxSizeMB = 5 }: PhotoUploadProps) {
   const t = useTranslations('cafe.log');
+  const { showToast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [convertingCount, setConvertingCount] = useState(0);
@@ -36,9 +38,11 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
           file = await convertHeicToWebp(file);
         } catch (error) {
           console.error('Error converting HEIC file:', error);
-          alert(error instanceof HeicNotSupportedError
+          /* Toasts, not `alert()`: a picker can hand over several files at once, and a
+             stack of blocking dialogs is one per bad file with the page frozen between. */
+          showToast(error instanceof HeicNotSupportedError
             ? t('heic_browser_not_supported')
-            : t('heic_conversion_failed'));
+            : t('heic_conversion_failed'), 'error');
           setConvertingCount(prev => prev - 1);
           continue;
         }
@@ -46,12 +50,12 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       }
 
       if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(t('photo_too_large', { maxSize: maxSizeMB }));
+        showToast(t('photo_too_large', { maxSize: maxSizeMB }), 'error');
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
-        alert(t('invalid_file_type'));
+        showToast(t('invalid_file_type'), 'error');
         continue;
       }
 
@@ -60,7 +64,9 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
         const url = await uploadCafeImage(file, userId);
         newPhotos.push(url);
       } catch (error) {
+        // Say so. A photo that silently never arrives reads as one the reader added.
         console.error('Error uploading file:', error);
+        showToast(t('photo_upload_error'), 'error');
       } finally {
         setUploadingCount(prev => prev - 1);
       }
@@ -94,7 +100,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-[var(--color-cardTextSecondary)]">
+      <label className="block text-sm font-medium text-cardTextSecondary">
         {t('photos')} ({photos.length}/{maxPhotos})
       </label>
 
@@ -121,7 +127,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       )}
 
       {convertingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-cardTextSecondary)]">
+        <div className="flex items-center gap-2 text-sm text-cardTextSecondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -131,7 +137,7 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       )}
 
       {uploadingCount > 0 && (
-        <div className="flex items-center gap-2 text-sm text-[var(--color-cardTextSecondary)]">
+        <div className="flex items-center gap-2 text-sm text-cardTextSecondary">
           <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -148,17 +154,17 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
           onClick={() => !isProcessing && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
             isProcessing
-              ? 'border-[var(--color-border)] opacity-50 cursor-not-allowed'
+              ? 'border-border opacity-50 cursor-not-allowed'
               : isDragging
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 cursor-pointer'
-              : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50 cursor-pointer'
+              ? 'border-primary bg-primary/10 cursor-pointer'
+              : 'border-border hover:border-primary/50 cursor-pointer'
           }`}
         >
-          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-[var(--color-cardTextSecondary)]" />
-          <p className="text-sm text-[var(--color-cardTextSecondary)]">
+          <CameraIcon className="w-8 h-8 mx-auto mb-2 text-cardTextSecondary" />
+          <p className="text-sm text-cardTextSecondary">
             {t('drag_drop_photos')} {t('or')} {t('click_to_upload')}
           </p>
-          <p className="text-xs text-[var(--color-cardTextSecondary)] mt-1">
+          <p className="text-xs text-cardTextSecondary mt-1">
             {t('max_photos', { max: maxPhotos })} ({t('max_size')}: {maxSizeMB}MB)
           </p>
           <input

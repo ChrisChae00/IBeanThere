@@ -3,14 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { getMyLogs, deleteLog, updateLog } from '@/lib/api/logs';
+import { revalidateCafe } from '@/app/actions/cafe';
 import { CoffeeLog, LogFormData } from '@/types/api';
 import CoffeeLogCard from '@/components/cafe/CoffeeLogCard';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import CafeSearchModal from '@/components/cafe/CafeSearchModal';
-import { LoadingSpinner, ErrorAlert } from '@/shared/ui';
+import { LoadingSpinner, ErrorAlert, ConfirmDialog } from '@/shared/ui';
 import { WriteIcon } from '@/components/ui';
 
 type FilterType = 'all' | 'public' | 'private';
+
+const FILTERS: FilterType[] = ['all', 'public', 'private'];
 
 export default function MyLogsClient() {
   const t = useTranslations('cafe.log');
@@ -21,6 +24,8 @@ export default function MyLogsClient() {
   const [editingLog, setEditingLog] = useState<CoffeeLog | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -40,14 +45,28 @@ export default function MyLogsClient() {
     }
   };
 
-  const handleDelete = async (logId: string) => {
-    if (!confirm(t('confirm_delete'))) return;
+  /*
+    The app's own dialog, not `confirm()`: the browser's blocks the page while it
+    is up, and a second one queued behind it leaves the tab unresponsive with no
+    way back. This one is just state, so a repeat click reopens the same dialog.
+  */
+  const handleDelete = async () => {
+    const logId = pendingDeleteId;
+    if (!logId) return;
 
+    setIsDeleting(true);
     try {
+      // Read the cafe before the row goes: its page counts this log and lists
+      // this bean, and both just changed.
+      const cafeId = logs.find(log => log.id === logId)?.cafe_id;
       await deleteLog(logId);
       setLogs(prev => prev.filter(log => log.id !== logId));
+      if (cafeId) await revalidateCafe(cafeId);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error_deleting_log'));
+    } finally {
+      setIsDeleting(false);
+      setPendingDeleteId(null);
     }
   };
 
@@ -63,6 +82,7 @@ export default function MyLogsClient() {
 
     try {
       await updateLog(editingLog.id, data);
+      await revalidateCafe(editingLog.cafe_id);
       await fetchLogs();
       setEditingLog(null);
     } catch (err) {
@@ -78,104 +98,151 @@ export default function MyLogsClient() {
     return true;
   });
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center py-12">
-          <LoadingSpinner />
-        </div>
-      </div>
-    );
-  }
+  const filterKey = (f: FilterType) =>
+    f === 'public' ? 'filter_public' : f === 'private' ? 'filter_private' : f;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-2">
-            {t('my_logs')}
-          </h1>
-          <p className="text-[var(--color-textSecondary)]">
-            {t('my_logs_description')}
-          </p>
-        </div>
+    <main className="min-h-screen bg-surface-page">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        {/*
+          A masthead and a rule under it, the same opening every page in the app uses.
+          The count sits in the eyebrow rather than in a stat card: this is a record
+          somebody keeps, and how many entries it holds is a fact about the page, not
+          a figure worth a panel of its own.
+        */}
+        <header className="border-b border-edge-rule pb-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="landing-micro text-ink-secondary">
+                {t('log_count', { count: logs.length })}
+              </p>
+              <h1 className="mt-2 text-[clamp(2rem,5vw,3rem)] text-ink-primary">
+                {t('my_logs')}
+              </h1>
+              <p className="mt-3 text-ink-secondary">{t('my_logs_description')}</p>
+            </div>
 
-        {/* Write Log Button */}
-        <button
-          onClick={() => setShowSearchModal(true)}
-          className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primaryText)] rounded-lg hover:opacity-90 active:scale-[0.98] transition-all font-medium h-[40px] flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 whitespace-nowrap"
-        >
-          <WriteIcon size={18} className="text-[var(--color-primaryText)]" />
-          {t('write_log')}
-        </button>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-[var(--color-border)]">
-        {(['all', 'public', 'private'] as FilterType[]).map((filterType) => {
-          const translationKey = filterType === 'public' ? 'filter_public' :
-            filterType === 'private' ? 'filter_private' : filterType;
-          return (
+            {/*
+              The same outlined control the cafe page puts beside "Coffee Logs", at
+              page scale rather than section scale. Writing a log is the same act from
+              either place, so it should not be a quiet line there and a filled slab
+              here; the filled control on this page is the one the empty state offers.
+            */}
             <button
-              key={filterType}
-              onClick={() => setFilter(filterType)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                filter === filterType
-                  ? 'border-[var(--color-primary)] text-[var(--color-text)]'
-                  : 'border-transparent text-[var(--color-textSecondary)] hover:text-[var(--color-secondary)]'
-              }`}
+              onClick={() => setShowSearchModal(true)}
+              className="btn-line inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-control) px-5 text-sm font-medium text-ink-primary"
             >
-              {t(translationKey)}
+              <WriteIcon size={18} />
+              {t('write_log')}
             </button>
-          );
-        })}
-      </div>
+          </div>
+        </header>
 
-      {error && (
-        <div className="mb-6">
-          <ErrorAlert message={error} />
-        </div>
-      )}
-
-      {/* Logs List */}
-      {filteredLogs.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-[var(--color-textSecondary)]">
-            {t('no_logs_found')}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredLogs.map((log) => (
-            editingLog?.id === log.id ? (
-              <div key={log.id} className="p-6 bg-[var(--color-cardBackground)] rounded-lg border border-[var(--color-border)]">
-                <h2 className="text-xl font-bold text-[var(--color-text)] mb-4">
-                  {t('edit_log')}
-                </h2>
-                <CoffeeLogForm
-                  initialData={editingLog}
-                  onSubmit={handleUpdate}
-                  onCancel={() => setEditingLog(null)}
-                  isLoading={isSubmitting}
-                />
-              </div>
-            ) : (
-              <CoffeeLogCard
-                key={log.id}
-                log={log}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                hideUserInfo={true}
-              />
-            )
+        {/*
+          Pills, not underlined tabs: every other grouped control in the app is a pill
+          whose fill carries the selection, and an underline row here read as a second
+          navigation bar under the header's.
+        */}
+        <div className="flex flex-wrap gap-2 pt-6">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
+              className="control-flat landing-micro min-h-11 rounded-(--radius-pill) border border-edge-rule px-5"
+            >
+              {t(filterKey(f))}
+            </button>
           ))}
         </div>
-      )}
 
-      {/* Cafe Search Modal */}
-      {showSearchModal && (
-        <CafeSearchModal onClose={() => setShowSearchModal(false)} />
-      )}
-    </div>
+        {error && (
+          <div className="pt-6">
+            <ErrorAlert message={error} />
+          </div>
+        )}
+
+        <div className="pt-6">
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : filteredLogs.length === 0 ? (
+            /*
+              An empty list offers the next action. Which sentence depends on why it is
+              empty -- "you have written none" and "none are private" are different
+              facts, and telling somebody to write their first log when they have
+              thirty of them is the app not reading its own screen.
+            */
+            <div className="space-y-5 rounded-(--radius-card) border border-edge-rule bg-surface-raised py-16 text-center">
+              <div className="text-2xl text-ink-primary">
+                {logs.length === 0 ? t('no_logs_yet_title') : t('no_logs_in_filter')}
+              </div>
+              {logs.length === 0 ? (
+                <>
+                  <p className="mx-auto max-w-md px-6 text-ink-secondary">
+                    {t('no_logs_yet_hint')}
+                  </p>
+                  <button
+                    onClick={() => setShowSearchModal(true)}
+                    className="btn-shade inline-flex min-h-11 items-center justify-center rounded-(--btn-radius) bg-brand px-8 font-semibold text-ink-on-brand"
+                  >
+                    {t('write_log')}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setFilter('all')}
+                  className="control-flat landing-micro min-h-11 rounded-(--radius-pill) border border-edge-rule px-5"
+                >
+                  {t('filter_all_show')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredLogs.map((log) =>
+                editingLog?.id === log.id ? (
+                  <div
+                    key={log.id}
+                    className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-6"
+                  >
+                    <h2 className="mb-4 text-xl text-ink-primary">{t('edit_log')}</h2>
+                    <CoffeeLogForm
+                      initialData={editingLog}
+                      onSubmit={handleUpdate}
+                      onCancel={() => setEditingLog(null)}
+                      isLoading={isSubmitting}
+                    />
+                  </div>
+                ) : (
+                  <CoffeeLogCard
+                    key={log.id}
+                    log={log}
+                    onEdit={handleEdit}
+                    onDelete={setPendingDeleteId}
+                    hideUserInfo={true}
+                  />
+                )
+              )}
+            </div>
+          )}
+        </div>
+
+        {showSearchModal && <CafeSearchModal onClose={() => setShowSearchModal(false)} />}
+
+        <ConfirmDialog
+          isOpen={pendingDeleteId !== null}
+          onClose={() => setPendingDeleteId(null)}
+          onConfirm={handleDelete}
+          title={t('confirm_delete_title')}
+          body={t('confirm_delete')}
+          confirmLabel={t('delete')}
+          cancelLabel={t('cancel')}
+          confirmVariant="danger"
+          loading={isDeleting}
+        />
+      </div>
+    </main>
   );
 }

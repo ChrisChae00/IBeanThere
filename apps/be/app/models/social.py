@@ -69,6 +69,23 @@ BADGE_DEFINITIONS = {
         code="second_home",
         name="Second Home",
         description="Logged 5 visits at the same cafe on different days"
+    ),
+    # Coming back, at three cafes' worth of scale and up. Earned once and kept: these
+    # rank nobody against anybody, they just mark that you went back.
+    "regular_1": BadgeInfo(
+        code="regular_1",
+        name="Regular",
+        description="Went back to a cafe"
+    ),
+    "regular_5": BadgeInfo(
+        code="regular_5",
+        name="Regular · 5 cafes",
+        description="Went back to 5 different cafes"
+    ),
+    "regular_15": BadgeInfo(
+        code="regular_15",
+        name="Regular · 15 cafes",
+        description="Went back to 15 different cafes"
     )
 }
 

@@ -3,12 +3,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { NavigationApp, getNavigationApps, openNavigation } from '@/lib/utils/navigation';
+import { CAFE_ACTION_CLASS } from './cafeActionClass';
 
 interface NavigationButtonProps {
   latitude: number;
   longitude: number;
   size?: 'sm' | 'md';
   className?: string;
+  /* Fired with the app the reader chose, before handing off. Reporting the *choice*
+     rather than the button keeps a reader who opened the menu and thought better of it
+     out of the count. */
+  onSelect?: () => void;
 }
 
 export default function NavigationButton({
@@ -16,6 +21,7 @@ export default function NavigationButton({
   longitude,
   size = 'md',
   className = '',
+  onSelect,
 }: NavigationButtonProps) {
   const t = useTranslations('cafe.navigation');
   const [isOpen, setIsOpen] = useState(false);
@@ -48,11 +54,14 @@ export default function NavigationButton({
   }, [isOpen]);
 
   const handleAppClick = (appId: NavigationApp) => {
+    onSelect?.();
     openNavigation(latitude, longitude, appId);
     setIsOpen(false);
   };
 
-  const buttonPadding = size === 'sm' ? 'px-3 py-1.5' : 'px-4 py-2';
+  /* `sm` is the compact pair shared with the Google Maps link (`CAFE_ACTION_CLASS`);
+     `md` keeps the full-height pill for the places that use it on its own. */
+  const buttonPadding = size === 'sm' ? 'px-3 py-1.5' : 'min-h-11 px-5';
   const fontSize = size === 'sm' ? 'text-xs' : 'text-sm';
   const iconSize = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
 
@@ -62,7 +71,11 @@ export default function NavigationButton({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 bg-[var(--color-surface)] text-[var(--color-cardText)] hover:bg-[var(--color-surfaceHover)] border border-[var(--color-border)] rounded-lg transition-colors font-medium ${buttonPadding} ${fontSize}`}
+        className={
+          size === 'sm'
+            ? `${CAFE_ACTION_CLASS} ${fontSize}`
+            : `control-flat flex items-center gap-1.5 rounded-(--radius-pill) border border-edge-rule font-medium text-ink-primary ${buttonPadding} ${fontSize}`
+        }
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -81,16 +94,22 @@ export default function NavigationButton({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 w-48 bg-[var(--color-cardBackground)] border border-[var(--color-border)] rounded-lg shadow-lg overflow-hidden z-[1050]">
-          <ul className="py-1" role="menu">
+        /*
+          The shared menu shape, same as the header's. `z-1050` stays as it is: this
+          one opens over map chrome and modals, which run in their own range. It is as
+          wide as the button it hangs from -- a fixed 12rem panel under a compact
+          control read as a second, unrelated thing.
+        */
+        <div className="menu-panel absolute left-0 top-full mt-1 w-full z-1050 motion-slide-up">
+          <ul role="menu">
             {apps.map((app) => (
               <li key={app.id} role="none">
                 <button
                   onClick={() => handleAppClick(app.id)}
-                  className="w-full text-left px-4 py-2 text-sm text-[var(--color-cardText)] hover:bg-[var(--color-surfaceHover)] transition-colors flex items-center gap-2"
+                  className="menu-item"
                   role="menuitem"
                 >
-                  <span>{t(app.labelKey)}</span>
+                  {t(app.labelKey)}
                 </button>
               </li>
             ))}

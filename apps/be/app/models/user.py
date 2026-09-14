@@ -2,16 +2,20 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
-# Available taste tags
+# How somebody reads a cafe. Enforced here and nowhere else -- `user_taste_tags.tag` has
+# no CHECK constraint -- so a value dropped from this list stays in the table until it is
+# remapped. Renaming one therefore needs a data pass: migration 023 is the one for this
+# list, and like most of `scripts/migrations` it is local rather than in the repository.
 TASTE_TAGS = [
-    "acidic",
-    "full_body", 
+    "bean_hunter",
+    "origin_chaser",
+    "filter_first",
+    "roaster_pilgrim",
     "light_roast",
-    "dessert_lover",
+    "dark_roast",
+    "quiet_corner",
     "work_friendly",
-    "cozy",
-    "roastery",
-    "specialty"
+    "sweet_tooth",
 ]
 
 class UserBase(BaseModel):
@@ -52,9 +56,15 @@ class User(UserBase):
         from_attributes = True
 
 class FoundingStats(BaseModel):
-    """Statistics about user's founding contributions."""
+    """
+    What a profile says about what somebody has built here.
+
+    `vanguard_count` is gone: it counted being second or third through a door,
+    which ranked people in a race they never entered. `regular_count` replaced it --
+    how many cafes you came back to, which is a thing you chose.
+    """
     navigator_count: int = 0
-    vanguard_count: int = 0
+    regular_count: int = 0
 
 class UserResponse(BaseModel):
     """User model for API responses (authenticated user)."""
@@ -68,6 +78,7 @@ class UserResponse(BaseModel):
     founding_stats: Optional[FoundingStats] = None
     taste_tags: Optional[List[str]] = None
     trust_count: int = 0
+    following_count: int = 0
     is_trusted_by_me: bool = False
     collections_public: bool = False
     created_at: datetime
@@ -81,7 +92,14 @@ class UserPublicResponse(BaseModel):
     bio: Optional[str] = None
     founding_stats: Optional[FoundingStats] = None
     taste_tags: Optional[List[str]] = None
+    # Both directions of the same table. `trust_count` is how many people trust this
+    # person; `following_count` is how many they trust. The pair is only meaningful
+    # together -- one number alone reads as a score.
     trust_count: int = 0
+    following_count: int = 0
+    # Whether the reader of this response follows this person. Absent for a signed-out
+    # reader, and false is the right answer for them.
+    is_trusted_by_me: bool = False
     collections_public: bool = False
     created_at: datetime
 
