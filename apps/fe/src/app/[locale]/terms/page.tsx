@@ -36,7 +36,7 @@ export default async function TermsPage({
         <div className="bg-background p-4 rounded-sm border border-border mb-8 text-sm text-ink-secondary">
           <p>{tLegal('disclaimer_translation')}</p>
           <p className="mt-2 text-xs opacity-70">
-            {tLegal('last_updated', { date: '2026-08-31' })}
+            {tLegal('last_updated', { date: '2026-09-13' })}
           </p>
         </div>
 

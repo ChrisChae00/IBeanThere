@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { Card } from '@/shared/ui';
 
+export const revalidate = 86400;
+
 export default async function ContactPage({
   params
 }: {
@@ -19,14 +21,14 @@ export default async function ContactPage({
         </p>
         <div className="mt-8 pt-6 border-t border-border flex flex-col gap-6">
           <div>
-            <h3 className="font-semibold mb-2 text-text">Email</h3>
+            <h3 className="font-semibold mb-2 text-text">{t('email_label')}</h3>
             <a href="mailto:support@ibeanthere.app" className="text-primary hover:underline text-lg">
               support@ibeanthere.app
             </a>
           </div>
           
           <div>
-            <h3 className="font-semibold mb-2 text-text">Instagram</h3>
+            <h3 className="font-semibold mb-2 text-text">{t('instagram_label')}</h3>
             <a 
               href="https://www.instagram.com/ibeanthere_official?igsh=d25qMGJ6Y2cyNDBl&utm_source=qr" 
               target="_blank" 

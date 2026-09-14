@@ -1030,79 +1030,81 @@
     "following_count": "{count} following"
   },
   "legal": {
-    "disclaimer_translation": "This translation is provided for convenience only. In case of any discrepancy between this version and the English version, the English version shall prevail.",
+    "disclaimer_translation": "Translations are provided for convenience. To the extent permitted by applicable law, the English version governs if versions differ. This does not limit mandatory language or consumer rights.",
     "last_updated": "Last Updated: {date}",
     "contact": {
       "title": "Contact Us",
-      "content": "We value your feedback and are here to help.\n\nFor any questions about our Terms of Service, Privacy Policy, or if you need assistance with the ibeanthere app, please do not hesitate to contact our support team.\n\nEmail: support@ibeanthere.app"
+      "content": "ibeanthere welcomes your feedback.\n\nFor questions about the Terms of Service or the Privacy Policy, or for help with the app, reach the support team at the address below.",
+      "email_label": "Email",
+      "instagram_label": "Instagram"
     },
     "terms": {
       "title": "Terms of Service",
       "intro": {
         "title": "1. Introduction",
-        "content": "Welcome to ibeanthere. These Terms of Service (\"Terms\") constitute a legally binding agreement between you and ibeanthere (\"we,\" \"us,\" or \"our\"). By accessing or using our mobile application and services, you agree to be bound by these Terms. If you do not agree to these terms, pleaes do not use our services."
+        "content": "ibeanthere is a website and service operated by an individual (the \"Operator\", \"we\", \"us\", or \"our\"), not a separate incorporated entity. These Terms govern your use of the website and related services (the \"Services\"). By using the Services, you agree to these Terms to the extent an enforceable agreement is formed under applicable law. If you do not agree, please stop using the Services. You can contact the Operator at support@ibeanthere.app.\n\nNothing in these Terms excludes, restricts, or waives any right, remedy, warranty, or liability that cannot lawfully be excluded, restricted, or waived, including under applicable consumer protection and privacy laws. This safeguard applies to every section."
       },
       "account": {
         "title": "2. User Accounts & Security",
-        "content": "To access certain features, you must create an account. You agree to provide accurate, current, and complete information. You are solely responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. We reserve the right to disable any user account if we believe you have violated these Terms."
+        "content": "Provide accurate account information, keep your credentials secure, and notify us if you suspect unauthorized access. You are responsible for your own use of your account and for activities you authorize, subject to applicable law. You must be at least 13 to use the Services. If you are below the age of majority where you live, a parent or legal guardian must review these Terms and authorize your use to the extent required by law."
       },
       "content": {
         "title": "3. User Content & License",
-        "content": "Our service allows you to post reviews, photos, and other content. You retain ownership of your content. However, by posting, you grant ibeanthere a perpetual, irrevocable, worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute any such content in any media or distribution methods now known or later developed."
+        "content": "You retain ownership of the coffee logs, photos, ratings, and other content you submit. You must have the rights and permissions needed to submit it, including any necessary permission from identifiable people. Do not submit unlawful, defamatory, infringing, or misleading content or disclose private information without lawful authority.\n\nYou grant the Operator a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, format, and display your content only as needed to operate and provide the Services, respecting the visibility settings you select. Service providers may process it on our behalf for those purposes. This licence does not authorize unrelated advertising use of private content. We may restrict or remove content reasonably believed to violate these Terms, another person's rights, or applicable law. Report concerns to support@ibeanthere.app.\n\nThe licence ends when your content is removed from the active Services, except as needed for lawful limited retention described in the Privacy Policy. Shared place data may remain with your personal attribution removed. Public content may have been copied independently by others; we cannot promise removal of copies outside our control."
       },
       "conduct": {
         "title": "4. Prohibited Conduct",
-        "content": "You agree not to: (i) use the service for any illegal purpose; (ii) harass, abuse, or harm another person; (iii) reverse engineer, decompile, or attempt to extract the source code of the software; (iv) use any robot, spider, or automated device to access the service; (v) interfere with the proper working of the service."
+        "content": "Do not use the Services for unlawful activity, harassment, impersonation, fraud, spam, infringement, or unauthorized disclosure of personal information. Do not submit fabricated reviews, manipulate ratings, access accounts or systems without authorization, bypass security or access controls, or disrupt the Services. Automated collection or access that bypasses restrictions, extracts personal information without authority, or places an unreasonable load on the Services is prohibited. These restrictions do not prohibit activities or rights that applicable law does not allow us to restrict."
       },
       "location": {
         "title": "5. Location Services",
-        "content": "Some features of our app require access to your device's location. You can control these permissions through your device settings. We use location data to provide local cafe recommendations and verify visits. By using these features, you consent to such usage as described in our Privacy Policy."
+        "content": "Location features use your device location with permission to show nearby cafes and support visit verification, as described in the Privacy Policy. You can manage location permission in your browser or device settings; some features may then be unavailable. Location, directions, and verification results can be inaccurate. Check conditions and cafe information independently and use your judgment when travelling."
       },
       "termination": {
         "title": "6. Termination",
-        "content": "We may suspend or terminate your access to the service at any time, without prior notice or liability, for any reason whatsoever, including without limitation if you breach these Terms. Upon termination, your right to use the Service will immediately cease."
+        "content": "We may modify, suspend, or discontinue all or part of the Services, or restrict an account or content, for reasonable operational, security, legal, or policy enforcement reasons. Where reasonably practicable, we will provide notice of a material interruption or restriction; urgent safety, security, or legal circumstances may require action without prior notice. Any mandatory notice, refund, or other legal obligation still applies.\n\nYou may stop using the Services and request account deletion in Settings. The Privacy Policy explains deletion and limited retention. Provisions that by their nature need to continue, including accrued rights, lawful liability limits, and dispute resolution, survive termination only to the extent permitted by law."
       },
       "liability": {
         "title": "7. Limitation of Liability",
-        "content": "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW (INCLUDING THE CONSUMER PROTECTION ACT OF ONTARIO), iBEANTHERE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID US, IF ANY, IN THE PAST SIX MONTHS OR 50 CAD, WHICHEVER IS GREATER."
+        "content": "The Services provide coffee and cafe information, including user contributions and third-party content. We do not operate the listed cafes or guarantee their products, safety, opening hours, prices, availability, or the accuracy of reviews. Confirm important details, including allergens and accessibility, directly with the cafe. A listing or link does not by itself imply endorsement or a business relationship.\n\nTo the extent permitted by applicable law, the Services are provided \"as is\" and \"as available\", without warranties of accuracy, fitness for a particular purpose, uninterrupted availability, or error-free operation. Keep your own copies of content you need. This paragraph does not exclude any mandatory warranty or our legal obligations.\n\nTo the extent permitted by applicable law, the Operator is not liable for indirect, incidental, special, consequential, or punitive damages arising from the Services. Subject to the exclusions below, the Operator's aggregate liability arising from the Services or these Terms is limited to the greater of CAD 50 and the amount you paid the Operator for the Services during the six months preceding the event giving rise to the claim. Payments to a cafe or another third party are not payments to the Operator.\n\nThese exclusions and the cap do not apply to fraud, wilful misconduct, gross negligence, or any liability, statutory remedy, or consumer or privacy right that applicable law does not permit us to exclude or limit. They apply only to the extent enforceable in your circumstances."
       },
       "dispute": {
-        "title": "8. Dispute Resolution & Arbitration",
-        "content": "ANY DISPUTE, CLAIM OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION OR VALIDITY THEREOF SHALL BE DETERMINED BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. YOU AND iBEANTHERE WAIVE THE RIGHT TO A TRIAL BY JURY OR TO PARTICIPATE IN A CLASS ACTION."
+        "title": "8. Dispute Resolution",
+        "content": "You may contact support@ibeanthere.app to seek an informal resolution. Doing so is voluntary and is not a prerequisite to a court proceeding, urgent relief, a regulatory complaint, or exercising any legal right. Contacting us does not pause or extend a legal deadline unless the law or a valid agreement provides otherwise.\n\nThese Terms do not require arbitration and do not waive a right to bring or participate in a class proceeding, access a competent court (including Small Claims Court where applicable), or obtain a jury trial where available by law. After a dispute arises, you and the Operator may voluntarily agree to mediation or arbitration."
       },
       "governing_law": {
         "title": "9. Governing Law",
-        "content": "These Terms shall be governed by and construed in accordance with the laws of the Province of Ontario and the federal laws of Canada applicable therein, without regard to its conflict of law provisions."
+        "content": "These Terms are governed by the laws of Ontario and the federal laws of Canada applicable there, subject to any mandatory protections or conflict-of-laws rules that apply to you. Ontario courts with subject-matter jurisdiction may hear disputes. Nothing requires you to use an Ontario court where applicable law gives you the right to bring proceedings elsewhere or deprives you of mandatory protections in your jurisdiction.\n\nIf a provision is held invalid or unenforceable, it is ineffective to that extent and the remaining provisions continue where legally permitted. Failure to enforce a provision on one occasion does not waive the right to enforce it later."
       },
       "changes": {
         "title": "10. Changes to Terms",
-        "content": "We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
+        "content": "We may update these Terms as the Services or legal requirements change. Updates will show a revised Last Updated date. For material changes, we will give reasonable advance notice on the Services or by another appropriate means, unless an urgent legal or security reason requires an earlier change. Changes apply prospectively and do not remove accrued rights or retroactively change the rules for an existing dispute. We will obtain further agreement where required by law; continued use alone does not override such a requirement."
       },
       "google_maps": {
         "title": "11. Google Maps Content",
-        "content": "Google Maps content is owned by Google or third-party rights holders. ibeanthere does not claim ownership of these photos. Your use of this content is subject to the Google Maps Platform Terms of Service.",
+        "content": "Google Maps content is owned by Google or third-party rights holders. We do not claim ownership of these photos. Your use of this content is subject to the Google Maps Platform Terms of Service.",
         "link_label": "Google Maps Platform Terms of Service"
       },
       "contact": {
         "title": "12. Contact Us",
-        "content": "If you have any questions about these Terms, please contact us at support@ibeanthere.app."
+        "content": "Questions about these Terms should be sent to support@ibeanthere.app."
       }
     },
     "privacy": {
       "title": "Privacy Policy",
       "intro": {
         "title": "1. Introduction",
-        "content": "ibeanthere respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website. Before registering, submitting any content, or otherwise engaging with us, please read and understand this Privacy Policy as well as our Terms of Service. In the course of engaging with us, you may also use third party's intellectual property, tools or resources (e.g., Supabase, Google Analytics), and such third party's privacy policy may also apply to you."
+        "content": "ibeanthere is operated by an individual (the \"Operator\", \"we\", \"us\", or \"our\"). The Operator is responsible for personal information under their control and handles privacy questions at support@ibeanthere.app. This Policy describes collection, use, disclosure, and retention when you use our website and services (the \"Services\"). It does not waive your legal rights or replace any consent required by law. Third-party services may also process information under their own policies, as explained below."
       },
       "collection": {
-        "title": "2. Information We Collect",
+        "title": "2. Information Collected",
         "sections": {
           "personal_label": "Personal Information:",
-          "personal_text": "We collect information you provide directly to us, such as your name, email address, username, password, and coffee preferences when you register or update your profile.",
+          "personal_text": "We collect the information you provide directly, such as your name, email address, username, password, and coffee preferences when you register or update your profile.",
           "location_label": "Location Data:",
-          "location_text": "With your consent, we collect precise geolocation data to show you nearby cafes, verify 'Drop Bean' actions, and maintain your 'Navigator' status.",
+          "location_text": "With your consent, we collect precise geolocation data to show you nearby cafes and to verify visits.",
           "usage_label": "Automatic Information:",
-          "usage_text": "When you use our Services, we collect certain information by automated means, such as through server log files, cookies, web beacons (also known as clear GIFs and pixel tags), and embedded scripts. This may include your IP address, device type and model, operating system version, browser type and version, time zone setting, unique device identifiers, and information on actions taken within the app."
+          "usage_text": "We collect server logs, information used to keep you signed in, and, when enabled, the events described in the Analytics section. This may include an IP address, browser information, and actions in the app. We do not set advertising or cross-site tracking cookies."
         }
       },
       "public_info": {
@@ -1110,44 +1112,44 @@
         "content": "Certain information you provide is public by default. Your username is always publicly visible and searchable. Content you post, such as cafe reviews, ratings, photos, and comments, are available to the public by default. We recommend that you do not use your real name as your username if you wish to remain anonymous. Any information disclosed in public areas becomes public information, and you should exercise caution before sharing."
       },
       "use": {
-        "title": "4. How We Use Your Information",
-        "content": "We use the information we collect to: (i) provide, maintain, and improve our services; (ii) personalize your experience and coffee recommendations; (iii) process your transactions and manage your account; (iv) communicate with you about updates, security alerts, and support; (v) monitor and analyze trends and usage; (vi) send you periodic communications relating to our Services, subject to your communication preferences."
+        "title": "4. How Information Is Used",
+        "content": "We use the information we collect to: (i) provide, maintain, and improve the Services; (ii) personalize your experience and coffee recommendations; (iii) manage your account; (iv) send account, security, and support messages; (v) monitor and analyze trends and usage."
       },
       "sharing": {
         "title": "5. Disclosure of Information",
-        "content": "We do not sell your personal information. We may share information with: (i) service providers who perform services on our behalf (e.g., cloud hosting, analytics, email transmission), subject to confidentiality obligations; (ii) to comply with legal obligations; (iii) to protect and defend our rights and property; (iv) with your consent or at your direction. Notwithstanding any other sections of this Privacy Policy, Company shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with third parties' privacy policies."
+        "content": "We do not sell your personal information. Providers used to deliver the Services include Supabase (database, authentication, and storage), Render (backend hosting), Vercel (website hosting), Cloudflare (domain and email routing), Resend (outgoing email), PostHog (analytics), and Google Maps (place information and photos). Information disclosed depends on the feature and provider; not every provider receives every category of data. When you submit a report, what you write and the username you are signed in as are sent to us by email through Resend and are shown in the moderation screen, so that the report can be acted on.\n\nWe remain responsible under applicable law for personal information processed on our behalf and must use contractual or other means to provide the protection required by law. Independent third-party websites or services may have their own purposes and policies; review those when you follow a link or use their features. This distinction does not exclude our own legal responsibilities. We may also disclose information with valid consent or where permitted or required by law, including for security, legal claims, or lawful requests from authorities."
       },
       "third_party_info": {
         "title": "6. Information About Others",
-        "content": "You can choose to provide us with information relating to third parties, including their names, email addresses, or other contact details. If you use any feature of the Services that allows you to communicate or share information with third parties, you acknowledge and agree that you have the authority to access and use the relevant data and that you have notified these third parties and informed them how their information is collected and used by Company to provide the Services."
+        "content": "Do not submit another person's private contact details, images, or other personal information unless you have a lawful basis and any necessary permission. Share only what is needed for the relevant feature. If information about you was submitted without authority, contact support@ibeanthere.app so we can assess correction, restriction, or removal. A user's submission does not relieve us of our own legal obligations."
       },
       "anti_spam": {
         "title": "7. Anti-Spam (CASL Compliance)",
-        "content": "Where applicable, we will seek your express consent to contact you, including by way of commercial electronic messages. You can unsubscribe at any time from receiving commercial electronic messages by following the instructions in the message. Even if you have opted out of receiving marketing communications from us, please be aware that we may still contact you for other purposes, such as providing communications you have consented to receive, or regarding the products or services we provide to you."
+        "content": "We will send commercial electronic messages only with consent or another basis permitted by applicable anti-spam law. Such messages will include sender identification and an unsubscribe method as required by law. Necessary account, security, or service messages may still be sent where legally permitted; they will not be used to bypass a marketing opt-out."
       },
       "children": {
-        "title": "8. Children's Online Privacy Protection",
-        "content": "The Website and Services are not intended for use by persons under 13 years of age. We do not knowingly collect or use any Personal Information from any persons under 13 years of age. If we become aware that we have unknowingly collected Personal Information from a child under the age of 13, we will make commercially reasonable efforts to delete such Personal Information from our database."
+        "title": "8. Children",
+        "content": "The Services are not intended for use by persons under 13 years of age. We do not knowingly collect or use personal information from anyone under 13. If we become aware that we have collected personal information from a child under 13, we will make commercially reasonable efforts to delete it."
       },
       "international": {
         "title": "9. International Transfers",
-        "content": "Your Personal Information may be stored, processed or otherwise used by us, our affiliates or our service providers, both inside and outside of Canada (including the United States). As a result, that country's courts, governments or law enforcement agencies could obtain disclosure of your information in accordance with that country's laws. Whenever we hire other organizations to provide support services, they will be required to conform to our privacy standards and to allow us to audit them for compliance."
+        "content": "Our service providers may store or process personal information in Canada and other countries, including the United States. Foreign authorities may access information under their local laws. We remain responsible for protection required by applicable law when information is processed on our behalf and must use any legally required transfer safeguards. Contact support@ibeanthere.app for information about providers and cross-border processing. This Policy does not itself constitute consent to a transfer where separate consent is required."
       },
       "security": {
         "title": "10. Data Security",
-        "content": "We take all reasonable steps to protect the security and confidentiality of your Personal Information. We protect Personal Information within our custody or control with appropriate organizational, technological and physical safeguards. We store Personal Information in electronic and physical files that are secure, and our security measures include secure on-site and off-site storage, restricted access to records and data processing equipment, password protocols, and encryption and security software. However, no method of transmission over the Internet is 100% secure."
+        "content": "We use safeguards intended to protect personal information, including access controls and the security features of our hosting, authentication, and storage providers. Safeguards must be appropriate to the sensitivity of the information and applicable law. No online service or storage method can be guaranteed completely secure. If a breach occurs, we will assess it and make notifications and reports required by applicable law. Contact support@ibeanthere.app to report a suspected security issue; do not send passwords."
       },
       "retention": {
         "title": "11. Data Retention",
-        "content": "We only retain Personal Information for as long as is necessary for the purpose for which it was collected. When we no longer are required to retain the information, we will destroy, erase, or de-identify the information. Legal requirements, however, may require us to retain some or all of the Personal Information we hold for a period of time that is longer than that for which we might otherwise hold."
+        "content": "We retain personal information for as long as reasonably necessary for the disclosed purposes and applicable legal obligations, taking account of the type of information, account status, security needs, and legal claims. Information no longer needed should be deleted or de-identified.\n\nYou can request account deletion in Settings → Delete Account. A completed deletion removes your account, coffee logs, and uploaded photos from the active app. Shared cafe, bean, and roaster records remain with your personal attribution removed. Deletion cannot be undone; if it fails partway through, follow the retry instructions or contact support.\n\nAccount deletion is not a promise of immediate erasure from every backup, server log, or external analytics system. Limited records may remain for backup lifecycles, security, or legal purposes only to the extent permitted by law, and must not be kept indefinitely without a lawful need. Contact us about associated provider records or a broader erasure request. Copies independently made by others from public content may remain outside our control."
       },
       "rights": {
         "title": "12. Your Data Rights",
-        "content": "Depending on your location, you may have rights under laws like GDPR, CCPA, or PIPEDA. These may include the right to access, correct, delete, or port your personal data. You may update or correct your account information by editing your account settings or by sending a request to us. To exercise these rights, please contact us at support@ibeanthere.app."
+        "content": "Your rights depend on which laws apply to the Services and your circumstances, not location alone. These may include access, correction, withdrawal of consent, deletion, portability, or an objection to certain processing, subject to legal conditions and exceptions. You can update account information or request account deletion in Settings, or contact support@ibeanthere.app for requests, including concerns about analytics linked to your account.\n\nWe may reasonably verify your identity, request clarification, and explain any lawful limits on a request. We will respond within the time required by applicable law. Withdrawing consent does not make earlier lawful processing unlawful; if particular information is necessary for a feature, that feature may no longer be available. You may complain to the Office of the Privacy Commissioner of Canada or another authority with jurisdiction without first contacting us."
       },
       "changes": {
         "title": "13. Changes to Privacy Policy",
-        "content": "We may amend this Privacy Policy from time to time as we add new products and services, as we improve our current offerings, and as technologies change. If we make a change to this Privacy Policy, this will be reflected in the above Last Update date. We encourage you to check back periodically. If we make any material or substantive changes in this Privacy Policy, we will notify you by posting a clear and conspicuous notice of these changes on the Website and in this Privacy Policy."
+        "content": "We may update this Policy as practices or legal requirements change and will revise the Last Updated date. Material changes will be brought to your attention through a prominent notice on the Services or another appropriate means. A policy update or continued use does not by itself authorize a new use of personal information where further consent is required by law."
       },
       "google_maps": {
         "title": "14. Google Maps Photos",
@@ -1156,12 +1158,12 @@
       },
       "analytics": {
         "title": "15. Analytics",
-        "content": "We use PostHog to count how the Services are used: page views, and three product events (a cafe page opened, a map or directions link taken, a coffee log saved). These carry a cafe identifier and, when you are signed in, your account identifier. They do not carry your name, email address, or the text of anything you write. Our configuration stores nothing on your device for this purpose, so no cookie or similar identifier is set and there is no analytics banner to accept or decline. As a result, if you are not signed in, we cannot recognise you across visits.",
+        "content": "When enabled, PostHog measures page views and product actions: opening a cafe page, following a map or directions link, saving a coffee log, and following a coffee-guide link to the map. Events may include a cafe identifier, the type of action or page, language, and, for signed-in users, an account identifier. Our event filtering removes names, email addresses, written content, and raw URL query strings from event payloads. Network requests can still disclose an IP address and browser information to the provider.\n\nThe current configuration uses in-memory storage rather than analytics cookies or local storage. Signed-in activity can be linked across visits using the account identifier. Avoiding cookies does not make that activity anonymous or remove applicable consent requirements. There is currently no in-app analytics consent or opt-out control. Contact support@ibeanthere.app about this processing or to make a privacy request; any consent or choice required by law must be provided separately from this notice.",
         "link_label": "PostHog Privacy Policy"
       },
       "contact": {
         "title": "16. Contact Us",
-        "content": "Any questions, comments or concerns relating to this Privacy Policy, and any requests to correct or access Personal Information collected during your use of the Services, should be directed to us at: Email: support@ibeanthere.app"
+        "content": "Questions, comments, or concerns about this Privacy Policy, and requests to access or correct Personal Information collected through the Services, should be directed to support@ibeanthere.app."
       }
     }
   },
