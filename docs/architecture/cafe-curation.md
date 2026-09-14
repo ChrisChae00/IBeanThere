@@ -332,9 +332,7 @@ Git.
 4. `seed_kw_reviewed.py export --out kw_review.csv`.
 5. A person judges the CSV.
 6. `seed_kw_reviewed.py import kw_review.csv`, dry run, then `--apply`.
-7. `migrations/018_regular_badges_backfill.sql` — **after** the purge, so a cafe that is
-   about to be deleted does not hand out badges on its way out.
-8. Deploy.
+7. Deploy.
 
 **Classification and identity:**
 
