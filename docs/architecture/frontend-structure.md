@@ -183,6 +183,59 @@ apps/fe/
   which forwards to the backend's `DELETE /users/me`. Full flow, release order (migration
   024 before the backend release) and verification: `docs/architecture/account-deletion.md`.
 
+## Legal pages (2026-09-13)
+
+`/privacy`, `/terms` and `/contact` render from `i18n/messages/{en,ko}.json` under
+`legal.*`; the pages hold only the section order and the `last_updated` date, which is a
+literal in each page file and has to be moved by hand when the copy changes.
+
+The copy had drifted from the product, so each claim now maps to something in the repo.
+Check this list before editing either document again -- the failure mode is a policy that
+describes an app nobody built.
+
+| Claim | What backs it |
+|---|---|
+| Website, not a mobile app | `apps/fe` is the only client |
+| Session cookie only; no beacons, pixels or tracking cookies | `lib/analytics.ts` `persistence: 'memory'`; the Supabase auth cookie is the rest |
+| Four analytics events, not three | `AnalyticsEvent` union in `lib/analytics.ts` |
+| Named processors | Supabase, Render, Vercel, Cloudflare, Resend, PostHog, Google Maps |
+| A report reaches the operator by mail | `services/email.py` `send_new_report_notification` |
+| Deletion removes the account, logs and photos; place data stays with attribution removed | `account-deletion.md` |
+| Licence ends when content leaves the active service | not perpetual any more; deletion has to mean something |
+| No arbitration, no class-action waiver | removed; the liability section already cited the Ontario consumer act that voids them |
+| The operator is a person | there is no incorporated entity |
+
+Two things the documents deliberately no longer say: that a reader has communication
+preferences (there is no such setting, and no marketing mail is sent), and that analytics
+can be turned off in the app (it cannot).
+
+**Consent is recorded but never read.** `consent_version` is written at signup
+(`SignupForm.tsx`, `CompleteProfileForm.tsx`, both `'1.0.0'`) and nothing compares it
+against a current version, so a policy change reaches existing accounts silently. That is
+tolerable while a change only narrows what the operator claims. A change that takes
+something away needs a version bump and a re-consent gate first, and neither exists.
+
+## Sign-out confirmation (`d84257b`)
+
+`shared/ui/ConfirmDialog.tsx` wraps `Modal` with body text, cancel and confirm. Every
+string is a prop: the three callers read from three different namespaces. The profile
+menu and the mobile drawer close first and render the dialog outside their own popup --
+inside the drawer it would unmount in the same frame that opens it.
+
+The confirm takes the `danger` variant to match the row that opened it, which is already
+drawn in the danger colour at rest in both menus. The browser's own `confirm()` is not
+used, for the reason already recorded against the unfollow dialog: it blocks the page and
+cannot be translated.
+
+## Landing register notes (`142f05c`)
+
+The three geometric marks (circle, triangle, square) are one `CoffeeBean` now -- the
+shapes implied an order the three facts do not have. It turns a full circle on open and
+back on close, as `group-open:rotate-[360deg]` with a 500ms transition. This works only
+because Tailwind v4 emits the individual `rotate` property, which interpolates as an
+angle; a `transform: rotate(360deg)` would compute to the identity matrix and never
+animate.
+
 ## Profile and social (`0ecb396`, `882f917`)
 
 - **Trust is followers and following.** `user_trust` has one row per "A trusts B";
