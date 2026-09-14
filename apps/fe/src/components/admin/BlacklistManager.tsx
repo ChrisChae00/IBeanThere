@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { API_BASE_URL, apiFetch, getAuthHeaders, handleResponse } from '@/lib/api/client';
+import { ConfirmDialog } from '@/shared/ui';
+
+/* Both questions this panel asks carry a consequence, and `confirm()` can neither
+   translate one nor let the reader keep reading the row behind it. */
+type Pending = { titleKey: string; bodyKey: string; run: () => void };
 
 type Entry = { id?: string; user_id?: string; name?: string; address?: string; latitude?: number; longitude?: number; osm_id?: string; google_place_id?: string; deleted_at?: string; status?: string; reason?: string };
 
@@ -24,6 +29,7 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
   const [userId, setUserId] = useState('');
   const [reason, setReason] = useState('');
   const [status, setStatus] = useState('watch');
+  const [pending, setPending] = useState<Pending | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +57,11 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
     <p>{t(kind === 'cafes' ? 'cafe_blacklist_hint' : 'user_blacklist_hint')}</p>
     {kind === 'users' && <form className="flex flex-wrap gap-3" onSubmit={event => {
       event.preventDefault();
-      if (window.confirm(t('confirm_user_decision'))) void act(`users/${encodeURIComponent(userId.trim())}`, 'PUT', { status, reason: reason.trim() });
+      setPending({
+        titleKey: 'confirm_user_decision_title',
+        bodyKey: 'confirm_user_decision',
+        run: () => void act(`users/${encodeURIComponent(userId.trim())}`, 'PUT', { status, reason: reason.trim() }),
+      });
     }}>
       <label>{t('user_id')}<input className="block border rounded p-2 bg-surface" required value={userId} onChange={e => setUserId(e.target.value)} pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" /></label>
       <label>{t('reason')}<input className="block border rounded p-2 bg-surface" required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} /></label>
@@ -69,11 +79,23 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
           <time>{row.deleted_at}</time>
         </> : <p>{t(row.status === 'blocked' ? 'blocked' : 'watch')}: {row.reason}</p>}
         {kind === 'users' && <button disabled={busy} className="border rounded px-3 min-h-11 mr-2" onClick={() => { setUserId(row.user_id!); setReason(row.reason || ''); setStatus(row.status || 'watch'); }}>{t('edit')}</button>}
-        <button className="border rounded px-3 min-h-11" disabled={busy} onClick={() => {
-          if (window.confirm(t('confirm_blacklist_remove'))) void act(`${kind}/${row.id || row.user_id}`, 'DELETE');
-        }}>{t('remove_blacklist')}</button>
+        <button className="border rounded px-3 min-h-11" disabled={busy} onClick={() => setPending({
+          titleKey: 'confirm_blacklist_remove_title',
+          bodyKey: 'confirm_blacklist_remove',
+          run: () => void act(`${kind}/${row.id || row.user_id}`, 'DELETE'),
+        })}>{t('remove_blacklist')}</button>
       </li>)}
     </ul>}
     <div className="flex gap-4"><button disabled={page === 1 || loading} onClick={() => setPage(p => p - 1)}>{t('previous')}</button><span>{page}</span><button disabled={rows.length < 50 || loading} onClick={() => setPage(p => p + 1)}>{t('next')}</button></div>
+    <ConfirmDialog
+      isOpen={pending !== null}
+      onClose={() => setPending(null)}
+      onConfirm={() => { pending?.run(); setPending(null); }}
+      title={pending ? t(pending.titleKey) : ''}
+      body={pending ? t(pending.bodyKey) : ''}
+      confirmLabel={t('confirm')}
+      cancelLabel={t('cancel')}
+      confirmVariant="danger"
+    />
   </div>;
 }

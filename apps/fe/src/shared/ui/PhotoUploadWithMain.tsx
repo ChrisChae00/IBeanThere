@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraIcon from './CameraIcon';
+import { useToast } from '@/contexts/ToastContext';
 import { uploadCafeImage } from '@/shared/lib/supabase/storage';
 import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
@@ -27,6 +28,7 @@ export default function PhotoUploadWithMain({
 }: PhotoUploadWithMainProps) {
   const t = useTranslations('cafe.register');
   const tLog = useTranslations('cafe.log');
+  const { showToast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [convertingCount, setConvertingCount] = useState(0);
@@ -47,9 +49,11 @@ export default function PhotoUploadWithMain({
           file = await convertHeicToWebp(file);
         } catch (error) {
           console.error('Error converting HEIC file:', error);
-          alert(error instanceof HeicNotSupportedError
+          /* Toasts, not `alert()`: a picker can hand over several files at once, and a
+             stack of blocking dialogs is one per bad file with the page frozen between. */
+          showToast(error instanceof HeicNotSupportedError
             ? tLog('heic_browser_not_supported')
-            : tLog('heic_conversion_failed'));
+            : tLog('heic_conversion_failed'), 'error');
           setConvertingCount(prev => prev - 1);
           continue;
         }
@@ -57,12 +61,12 @@ export default function PhotoUploadWithMain({
       }
 
       if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(tLog('photo_too_large', { maxSize: maxSizeMB }));
+        showToast(tLog('photo_too_large', { maxSize: maxSizeMB }), 'error');
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
-        alert(tLog('invalid_file_type'));
+        showToast(tLog('invalid_file_type'), 'error');
         continue;
       }
 
@@ -71,7 +75,9 @@ export default function PhotoUploadWithMain({
         const url = await uploadCafeImage(file, userId);
         newPhotos.push(url);
       } catch (error) {
+        // Say so. A photo that silently never arrives reads as one the reader added.
         console.error('Error uploading file:', error);
+        showToast(tLog('photo_upload_error'), 'error');
       } finally {
         setUploadingCount(prev => prev - 1);
       }

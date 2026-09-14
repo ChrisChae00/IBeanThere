@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Avatar } from './Avatar';
+import { useToast } from '@/contexts/ToastContext';
 import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
 export interface AvatarUploadProps {
@@ -21,6 +22,7 @@ export default function AvatarUpload({
   size = 'lg',
 }: AvatarUploadProps) {
   const t = useTranslations('profile');
+  const { showToast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +48,11 @@ export default function AvatarUpload({
         file = await convertHeicToWebp(file);
       } catch (error) {
         console.error('Error converting HEIC file:', error);
-        alert(error instanceof HeicNotSupportedError
-        ? t('heic_browser_not_supported')
-        : t('avatar_conversion_failed'));
+        /* A toast, not `alert()`: the browser's dialog freezes the form the picker
+           was opened from, and a photo that will not convert is not worth a lock. */
+        showToast(error instanceof HeicNotSupportedError
+          ? t('heic_browser_not_supported')
+          : t('avatar_conversion_failed'), 'error');
         setIsConverting(false);
         return;
       }

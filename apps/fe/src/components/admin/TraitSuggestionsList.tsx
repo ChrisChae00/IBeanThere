@@ -9,7 +9,7 @@ import { TraitSuggestion } from '@/types/api';
 import { approveTraitSuggestion, getTraitSuggestions, rejectTraitSuggestion } from '@/lib/api/cafes';
 import { deleteCafe } from '@/lib/api/admin';
 import { revalidateCafe } from '@/app/actions/cafe';
-import { Button, LoadingSpinner } from '@/shared/ui';
+import { Button, ConfirmDialog, LoadingSpinner } from '@/shared/ui';
 
 /*
   The queue for coffee-trait claims nobody witnessed.
@@ -81,6 +81,7 @@ export default function TraitSuggestionsList() {
 
   const [suggestions, setSuggestions] = useState<TraitSuggestion[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<CafeGroup | null>(null);
 
   const load = useCallback(() => {
     getTraitSuggestions()
@@ -129,7 +130,6 @@ export default function TraitSuggestionsList() {
      nothing left to reject afterwards. Only offered for a cafe still waiting to be
      verified -- an established one is somebody's record by now. */
   const removeCafe = async (group: CafeGroup) => {
-    if (!confirm(t('seed_delete_confirm', { name: group.name }))) return;
     setBusy(group.cafeId);
     try {
       await deleteCafe(group.cafeId);
@@ -139,6 +139,7 @@ export default function TraitSuggestionsList() {
       load();
     } finally {
       setBusy(null);
+      setPendingRemoval(null);
     }
   };
 
@@ -225,7 +226,7 @@ export default function TraitSuggestionsList() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => removeCafe(group)}
+                        onClick={() => setPendingRemoval(group)}
                         disabled={busy === group.cafeId}
                       >
                         {t('seed_delete_cafe')}
@@ -295,6 +296,20 @@ export default function TraitSuggestionsList() {
           })}
         </ul>
       )}
+
+      {/* The app's dialog, not `confirm()`: the browser's own freezes the queue behind
+          it and cannot say which cafe is about to go. */}
+      <ConfirmDialog
+        isOpen={pendingRemoval !== null}
+        onClose={() => setPendingRemoval(null)}
+        onConfirm={() => pendingRemoval && removeCafe(pendingRemoval)}
+        title={t('confirm_delete_title')}
+        body={pendingRemoval ? t('seed_delete_confirm', { name: pendingRemoval.name }) : ''}
+        confirmLabel={t('confirm_delete')}
+        cancelLabel={t('cancel')}
+        confirmVariant="danger"
+        loading={busy === pendingRemoval?.cafeId}
+      />
     </div>
   );
 }

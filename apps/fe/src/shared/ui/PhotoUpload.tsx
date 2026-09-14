@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraIcon from './CameraIcon';
+import { useToast } from '@/contexts/ToastContext';
 import { uploadCafeImage } from '@/shared/lib/supabase/storage';
 import { isHeicFile, convertHeicToWebp, HeicNotSupportedError } from '@/shared/lib/image/convertHeicToWebp';
 
@@ -16,6 +17,7 @@ interface PhotoUploadProps {
 
 export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, maxSizeMB = 5 }: PhotoUploadProps) {
   const t = useTranslations('cafe.log');
+  const { showToast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [convertingCount, setConvertingCount] = useState(0);
@@ -36,9 +38,11 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
           file = await convertHeicToWebp(file);
         } catch (error) {
           console.error('Error converting HEIC file:', error);
-          alert(error instanceof HeicNotSupportedError
+          /* Toasts, not `alert()`: a picker can hand over several files at once, and a
+             stack of blocking dialogs is one per bad file with the page frozen between. */
+          showToast(error instanceof HeicNotSupportedError
             ? t('heic_browser_not_supported')
-            : t('heic_conversion_failed'));
+            : t('heic_conversion_failed'), 'error');
           setConvertingCount(prev => prev - 1);
           continue;
         }
@@ -46,12 +50,12 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
       }
 
       if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(t('photo_too_large', { maxSize: maxSizeMB }));
+        showToast(t('photo_too_large', { maxSize: maxSizeMB }), 'error');
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
-        alert(t('invalid_file_type'));
+        showToast(t('invalid_file_type'), 'error');
         continue;
       }
 
@@ -60,7 +64,9 @@ export default function PhotoUpload({ photos, onChange, userId, maxPhotos = 5, m
         const url = await uploadCafeImage(file, userId);
         newPhotos.push(url);
       } catch (error) {
+        // Say so. A photo that silently never arrives reads as one the reader added.
         console.error('Error uploading file:', error);
+        showToast(t('photo_upload_error'), 'error');
       } finally {
         setUploadingCount(prev => prev - 1);
       }

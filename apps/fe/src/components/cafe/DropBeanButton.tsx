@@ -10,6 +10,9 @@ import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 
 import confetti from 'canvas-confetti';
 
+// What `cafes.py` enforces on the way in; the copy names it too.
+const DROP_RADIUS_M = 50;
+
 interface DropBeanButtonProps {
   cafeId: string;
   cafeLat: number;
@@ -173,10 +176,13 @@ export default function DropBeanButton({
         userLng = position.longitude;
       }
 
-      // Check distance client-side first
+      /*
+        The same 50m the server enforces, not a roomier client gate. A wider one
+        only bought the reader a round trip that comes back as the API's own
+        English sentence; refusing here says the distance in their language.
+      */
       const distance = calculateDistance(userLat, userLng, cafeLat, cafeLng);
-      // Allow slightly larger radius for better UX (75m instead of 50m strict)
-      if (distance > 75) {
+      if (distance > DROP_RADIUS_M) {
         showToast(t('too_far', { distance: Math.round(distance) }), 'error');
         setIsLoading(false);
         return;
@@ -196,13 +202,19 @@ export default function DropBeanButton({
       );
 
       if (!response.ok) {
-        const data = await response.json();
+        /*
+          Every branch answers in the reader's language. `data.detail` is written for
+          a developer reading a log, in English whatever the locale -- it goes to the
+          console, not to a toast.
+        */
+        const data = await response.json().catch(() => null);
+        console.error('Drop bean rejected:', response.status, data);
         if (response.status === 409) {
           showToast(t('already_today'), 'error');
         } else if (response.status === 400) {
-          showToast(data.detail || t('too_far'), 'error');
+          showToast(t('too_far', { distance: Math.round(distance) }), 'error');
         } else {
-          showToast(data.detail || t('error'), 'error');
+          showToast(t('error'), 'error');
         }
         setIsLoading(false);
         return;

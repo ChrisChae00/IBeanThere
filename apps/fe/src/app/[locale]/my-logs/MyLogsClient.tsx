@@ -8,7 +8,7 @@ import { CoffeeLog, LogFormData } from '@/types/api';
 import CoffeeLogCard from '@/components/cafe/CoffeeLogCard';
 import CoffeeLogForm from '@/components/cafe/CoffeeLogForm';
 import CafeSearchModal from '@/components/cafe/CafeSearchModal';
-import { LoadingSpinner, ErrorAlert } from '@/shared/ui';
+import { LoadingSpinner, ErrorAlert, ConfirmDialog } from '@/shared/ui';
 import { WriteIcon } from '@/components/ui';
 
 type FilterType = 'all' | 'public' | 'private';
@@ -24,6 +24,8 @@ export default function MyLogsClient() {
   const [editingLog, setEditingLog] = useState<CoffeeLog | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -43,9 +45,16 @@ export default function MyLogsClient() {
     }
   };
 
-  const handleDelete = async (logId: string) => {
-    if (!confirm(t('confirm_delete'))) return;
+  /*
+    The app's own dialog, not `confirm()`: the browser's blocks the page while it
+    is up, and a second one queued behind it leaves the tab unresponsive with no
+    way back. This one is just state, so a repeat click reopens the same dialog.
+  */
+  const handleDelete = async () => {
+    const logId = pendingDeleteId;
+    if (!logId) return;
 
+    setIsDeleting(true);
     try {
       // Read the cafe before the row goes: its page counts this log and lists
       // this bean, and both just changed.
@@ -55,6 +64,9 @@ export default function MyLogsClient() {
       if (cafeId) await revalidateCafe(cafeId);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error_deleting_log'));
+    } finally {
+      setIsDeleting(false);
+      setPendingDeleteId(null);
     }
   };
 
@@ -208,7 +220,7 @@ export default function MyLogsClient() {
                     key={log.id}
                     log={log}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    onDelete={setPendingDeleteId}
                     hideUserInfo={true}
                   />
                 )
@@ -218,6 +230,18 @@ export default function MyLogsClient() {
         </div>
 
         {showSearchModal && <CafeSearchModal onClose={() => setShowSearchModal(false)} />}
+
+        <ConfirmDialog
+          isOpen={pendingDeleteId !== null}
+          onClose={() => setPendingDeleteId(null)}
+          onConfirm={handleDelete}
+          title={t('confirm_delete_title')}
+          body={t('confirm_delete')}
+          confirmLabel={t('delete')}
+          cancelLabel={t('cancel')}
+          confirmVariant="danger"
+          loading={isDeleting}
+        />
       </div>
     </main>
   );

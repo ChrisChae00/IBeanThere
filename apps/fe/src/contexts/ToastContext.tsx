@@ -31,7 +31,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none z-50">
+      {/* Announced, not just drawn: every message that lands here is the answer to
+          something the reader just did, and a screen reader gets no other copy of it. */}
+      <div
+        role="status"
+        aria-live="polite"
+        className="fixed bottom-0 left-0 right-0 pointer-events-none z-50"
+      >
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <Toast
