@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ArrowUpRight, ChevronDown, ChevronRight } from 'lucide-react';
-import { Button, Input } from '@/shared/ui';
+import { Button, ConfirmDialog, Input } from '@/shared/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/shared/ui/base/dialog';
 import { createClient } from '@/shared/lib/supabase/client';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -30,16 +30,19 @@ export default function SettingsClient({
   linkedProvider: string | null;
 }) {
   const t = useTranslations('settings');
+  const tAuth = useTranslations('auth');
   const locale = useLocale();
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [busy, setBusy] = useState<'signout' | 'delete' | null>(null);
   const [error, setError] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [confirmation, setConfirmation] = useState('');
   const [deleted, setDeleted] = useState(false);
 
   async function signOut() {
+    setConfirmSignOut(false);
     setBusy('signout');
     setError('');
     try {
@@ -128,7 +131,7 @@ export default function SettingsClient({
             </> : <SetPasswordPrompt email={email} provider={linkedProvider ?? 'provider'} />}
           </div>
           <div className="pt-4">
-            <Button variant="danger" onClick={signOut} loading={busy === 'signout'} disabled={busy !== null}>{t('sign_out')}</Button>
+            <Button variant="danger" onClick={() => setConfirmSignOut(true)} loading={busy === 'signout'} disabled={busy !== null}>{t('sign_out')}</Button>
             {error && !deleteOpen && <p role="alert" className="mt-3 text-sm">{error}</p>}
           </div>
         </div>
@@ -170,6 +173,18 @@ export default function SettingsClient({
           </Dialog>
         </div>
       </section>
+
+      <ConfirmDialog
+        isOpen={confirmSignOut}
+        onClose={() => setConfirmSignOut(false)}
+        onConfirm={signOut}
+        title={tAuth('logout_confirm_title')}
+        body={tAuth('logout_confirm_body')}
+        confirmLabel={tAuth('logout_confirm_cta')}
+        cancelLabel={t('cancel')}
+        confirmVariant="danger"
+        loading={busy === 'signout'}
+      />
     </div>
   );
 }

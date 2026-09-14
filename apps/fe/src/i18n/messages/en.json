@@ -326,7 +326,11 @@
     "strength_good": "good",
     "strength_strong": "strong",
     "passwords_match": "Passwords match",
-    "redirecting_to_login": "Taking you to sign in."
+    "redirecting_to_login": "Taking you to sign in.",
+    "logout_confirm_title": "Log out?",
+    "logout_confirm_body": "You will be signed out on this device. Your logs and beans stay where they are.",
+    "logout_confirm_cta": "Log Out",
+    "cancel": "Cancel"
   },
   "map": {
     "loading": "Loading map...",

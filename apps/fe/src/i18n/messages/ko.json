@@ -324,7 +324,11 @@
     "strength_good": "좋음",
     "strength_strong": "강함",
     "passwords_match": "비밀번호가 일치합니다",
-    "redirecting_to_login": "로그인 화면으로 이동합니다."
+    "redirecting_to_login": "로그인 화면으로 이동합니다.",
+    "logout_confirm_title": "로그아웃할까요?",
+    "logout_confirm_body": "이 기기에서 로그아웃됩니다. 기록과 원두는 그대로 남아 있어요.",
+    "logout_confirm_cta": "로그아웃",
+    "cancel": "취소"
   },
   "map": {
     "loading": "지도 로딩 중...",

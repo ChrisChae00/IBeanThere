@@ -9,7 +9,7 @@ import { Dialog } from '@base-ui/react/dialog';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { Avatar, Logo } from '@/shared/ui';
+import { Avatar, ConfirmDialog, Logo } from '@/shared/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -50,6 +50,8 @@ export default function MobileMenu({ locale }: { locale: string }) {
   // In state, not a ref: the switchers' portals need the drawer element on the render
   // that mounts them, and a ref is still null then.
   const [drawer, setDrawer] = useState<HTMLElement | null>(null);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -175,10 +177,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
                     render={
                       <button
                         className={`${ROW} text-state-danger`}
-                        onClick={async () => {
-                          await signOut();
-                          window.location.href = `/${locale}`;
-                        }}
+                        onClick={() => setConfirmSignOut(true)}
                       />
                     }
                   >
@@ -232,6 +231,26 @@ export default function MobileMenu({ locale }: { locale: string }) {
           </div>
         </Dialog.Popup>
       </Dialog.Portal>
+
+      {/*
+        Outside Dialog.Portal on purpose: the row that opens this also closes the
+        drawer, and anything rendered inside it would unmount in the same frame.
+      */}
+      <ConfirmDialog
+        isOpen={confirmSignOut}
+        onClose={() => setConfirmSignOut(false)}
+        onConfirm={async () => {
+          setSigningOut(true);
+          await signOut();
+          window.location.href = `/${locale}`;
+        }}
+        title={tAuth('logout_confirm_title')}
+        body={tAuth('logout_confirm_body')}
+        confirmLabel={tAuth('logout_confirm_cta')}
+        cancelLabel={tAuth('cancel')}
+        confirmVariant="danger"
+        loading={signingOut}
+      />
     </Dialog.Root>
   );
 }

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { FileText, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { Avatar, CoffeeBean } from '@/shared/ui';
+import { Avatar, CoffeeBean, ConfirmDialog } from '@/shared/ui';
 
 interface ProfileDropdownProps {
   locale: string;
@@ -28,6 +28,8 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
   const tAuth = useTranslations('auth');
   const tLog = useTranslations('cafe.log');
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, profile, signOut } = useAuth();
   const { isAdmin } = useAdminAuth();
@@ -45,7 +47,9 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
   }, []);
 
   const handleSignOut = async () => {
+    setSigningOut(true);
     await signOut();
+    setConfirmSignOut(false);
     setIsOpen(false);
     // Redirect to home page
     window.location.href = `/${locale}`;
@@ -159,12 +163,30 @@ export default function ProfileDropdown({ locale }: ProfileDropdownProps) {
             row arrives after the decision to press it. The mark takes the colour too,
             or the row reads as a red label beside a grey icon.
           */}
-          <button onClick={handleSignOut} className={`${ITEM} text-state-danger`}>
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              setConfirmSignOut(true);
+            }}
+            className={`${ITEM} text-state-danger`}
+          >
             <LogOut className="menu-mark text-state-danger group-hover:translate-x-1" />
             {tAuth('logout')}
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmSignOut}
+        onClose={() => setConfirmSignOut(false)}
+        onConfirm={handleSignOut}
+        title={tAuth('logout_confirm_title')}
+        body={tAuth('logout_confirm_body')}
+        confirmLabel={tAuth('logout_confirm_cta')}
+        cancelLabel={tAuth('cancel')}
+        confirmVariant="danger"
+        loading={signingOut}
+      />
     </div>
   );
 }
