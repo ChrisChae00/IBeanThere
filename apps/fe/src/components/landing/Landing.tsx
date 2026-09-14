@@ -25,7 +25,7 @@ import { GlobeCanvas, type GlobeTheme } from './GlobeCanvas';
 import { Map, BookOpen, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { GrowthIcon } from '@/components/cafe/GrowthIcon';
-import { FlipText } from '@/shared/ui';
+import { CoffeeBean, FlipText } from '@/shared/ui';
 import type { CafeStats } from '@/lib/api/stats';
 import Marquee from './Marquee';
 import WaveDivider from './WaveDivider';
@@ -501,16 +501,22 @@ function RegisterSection({ messages, locale }: { messages: LandingMessages; loca
               and it does not need the section to hold open/closed state.
             */}
             <ul className="mt-10 grid gap-px bg-ink-inverse/20">
-              {messages.registerNotes.map((note, index) => (
+              {messages.registerNotes.map((note) => (
                 <li key={note.title} className="bg-surface-inverse">
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center gap-4 py-4 transition-opacity duration-200 hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">
                       {/*
-                        A shape per row rather than a number. Three facts, not
+                        One mark per row rather than a number. Three facts, not
                         three steps -- an ordinal would promise an order that
-                        does not exist.
+                        does not exist. The bean turns a full circle each time
+                        the row opens or closes: the same 360 degrees either
+                        way, so opening and closing read as one gesture and its
+                        undo rather than two different ones.
                       */}
-                      <NoteMark index={index} />
+                      <CoffeeBean
+                        size="inherit"
+                        className="h-4 w-4 shrink-0 text-(--brand-muted) transition-transform duration-500 ease-out group-open:rotate-[360deg]"
+                      />
                       <span className="text-sm leading-relaxed break-keep">{note.title}</span>
                       {/*
                         A plus that becomes a minus: the crossbar is the one
@@ -569,35 +575,6 @@ function RegisterSection({ messages, locale }: { messages: LandingMessages; loca
         </div>
       </div>
     </section>
-  );
-}
-
-/**
- * Row marker for the register notes: circle, triangle, square, in that order.
- *
- * Drawn as SVG rather than as a glyph so the vertices can be rounded. The
- * triangle and the square are stroked in their own fill colour with a round
- * line join, which is what rounds the corners -- `rx` only does that for a
- * rectangle, and nothing does it for a polygon.
- */
-function NoteMark({ index }: { index: number }) {
-  const shape = index % 3;
-
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 12 12"
-      className="h-2.5 w-2.5 shrink-0"
-      fill="var(--brand-muted)"
-      stroke="var(--brand-muted)"
-      strokeWidth="2.5"
-      strokeLinejoin="round"
-    >
-      {shape === 0 ? <circle cx="6" cy="6" r="4.2" stroke="none" /> : null}
-      {/* Equilateral, centred on the box: height = side * sqrt(3) / 2. */}
-      {shape === 1 ? <path d="M6 2.2 L9.9 8.9 L2.1 8.9 Z" /> : null}
-      {shape === 2 ? <rect x="2.4" y="2.4" width="7.2" height="7.2" /> : null}
-    </svg>
   );
 }
 
