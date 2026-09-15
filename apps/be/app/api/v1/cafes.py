@@ -2525,24 +2525,10 @@ async def admin_update_cafe(
         if request.source_url is not None:
             update_data["source_url"] = request.source_url
 
-        # Moving a cafe is a correction, never a relocation. The same 100m the
-        # registration flow allows a Google result to drift from the submitted point:
-        # past that, the URL describes a different shop, and accepting it would carry
-        # this cafe's logs, beans and badges somewhere nobody earned them.
+        # The 100m drift guard protects the self-serve Google-lookup flow a registrant
+        # runs on themselves. An admin applying the same lookup here already judged the
+        # match by eye, so their update is a correction by definition -- no gate.
         if request.latitude is not None and request.longitude is not None:
-            drift = calculate_earth_distance(
-                float(cafe_result.data["latitude"]), float(cafe_result.data["longitude"]),
-                float(request.latitude), float(request.longitude),
-            )
-            if drift > GOOGLE_PLACE_MAX_DRIFT_METERS:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=(
-                        f"That location is {drift:.0f}m from this cafe, past the "
-                        f"{GOOGLE_PLACE_MAX_DRIFT_METERS}m correction limit. If it is a "
-                        "different place, register it rather than moving this one."
-                    ),
-                )
             update_data["latitude"] = request.latitude
             update_data["longitude"] = request.longitude
 
