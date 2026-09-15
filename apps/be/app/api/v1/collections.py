@@ -193,6 +193,24 @@ async def get_my_collections(
     ).order("position").order("created_at").execute()
     
     collections = result.data or []
+
+    # Favourites and Save for Later are part of the app's vocabulary: the heart and
+    # the bookmark on every cafe put things there, so the two have to be visible
+    # before anything has been saved, or the reader is told to save cafes with no
+    # sign of where they would land. They used to appear only once the first save
+    # created them, which left a new account looking as if it had no collections.
+    stored = {c.get("icon_type") for c in collections}
+    missing = [
+        icon_type
+        for icon_type in (CollectionIconType.FAVOURITE, CollectionIconType.SAVE_LATER)
+        if icon_type.value not in stored
+    ]
+
+    for icon_type in missing:
+        collections.append(await get_or_create_default_collection(user_id, icon_type, supabase))
+
+    if missing:
+        collections.sort(key=lambda c: (c.get("position") or 0, c.get("created_at") or ""))
     
     # Get item counts for each collection
     for collection in collections:

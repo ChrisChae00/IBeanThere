@@ -1,11 +1,19 @@
-"""Public profile visibility must not publish a private collection or its preview."""
+"""Collection visibility, and the two folders every account is supposed to have."""
 import unittest
 
-from test_visit_privacy import FakeQuery, make_client
+from test_visit_privacy import OWNER, FakeQuery, FakeResult, make_client
 
 
 class FilteringQuery(FakeQuery):
+    """`FakeQuery` answers with whatever rows it holds; these endpoints filter."""
+
     def execute(self):
+        # An insert into an empty table has no row to merge into, and the endpoint
+        # treats an empty answer as a failure. Echo the payload instead.
+        if self.op == "insert" and not self.rows:
+            payload = self.payload if isinstance(self.payload, list) else [self.payload]
+            return FakeResult([{"id": f"new-{row.get('icon_type')}",
+                                "created_at": "2026-09-15T00:00:00Z", **row} for row in payload])
         for operation, field, value in self.filters:
             if operation == "eq":
                 self.rows = [row for row in self.rows if row.get(field) == value]
@@ -70,6 +78,37 @@ class CollectionDetailAccessTests(unittest.TestCase):
         response = self._client(collections_public=True, is_public=True).get(
             "/api/v1/collections/c1")
         self.assertEqual(response.status_code, 200)
+
+
+class DefaultCollectionsTests(unittest.TestCase):
+    """The heart and the bookmark need somewhere visible to put things, from day one."""
+
+    def test_a_new_account_still_lists_both_folders(self):
+        client, db = make_client(self, {"cafe_collections": [], "collection_items": []})
+        db.table = lambda name: FilteringQuery(name, db.tables.get(name, []), db.queries)
+
+        response = client.get("/api/v1/collections")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["icon_type"] for row in response.json()],
+                         ["favourite", "save_later"])
+        self.assertTrue(all(row["item_count"] == 0 for row in response.json()))
+
+    def test_existing_folders_are_not_duplicated(self):
+        client, db = make_client(self, {
+            "cafe_collections": [
+                {"id": "f", "user_id": OWNER, "name": "Favourites", "icon_type": "favourite",
+                 "is_public": True, "position": 0, "created_at": "2026-09-01T00:00:00Z"},
+                {"id": "s", "user_id": OWNER, "name": "Save for Later", "icon_type": "save_later",
+                 "is_public": True, "position": 1, "created_at": "2026-09-01T00:00:00Z"},
+            ],
+            "collection_items": [],
+        })
+        db.table = lambda name: FilteringQuery(name, db.tables.get(name, []), db.queries)
+
+        response = client.get("/api/v1/collections")
+
+        self.assertEqual([row["id"] for row in response.json()], ["f", "s"])
 
 
 if __name__ == "__main__":
