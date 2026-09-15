@@ -29,7 +29,11 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
   const [userId, setUserId] = useState('');
   const [reason, setReason] = useState('');
   const [status, setStatus] = useState('watch');
+  /* `pending` outlives `open` on purpose: the dialog fades out over 100ms, and
+     clearing it on close would blank the heading before the fade starts. */
   const [pending, setPending] = useState<Pending | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const ask = (next: Pending) => { setPending(next); setConfirmOpen(true); };
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +61,7 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
     <p>{t(kind === 'cafes' ? 'cafe_blacklist_hint' : 'user_blacklist_hint')}</p>
     {kind === 'users' && <form className="flex flex-wrap gap-3" onSubmit={event => {
       event.preventDefault();
-      setPending({
+      ask({
         titleKey: 'confirm_user_decision_title',
         bodyKey: 'confirm_user_decision',
         run: () => void act(`users/${encodeURIComponent(userId.trim())}`, 'PUT', { status, reason: reason.trim() }),
@@ -79,7 +83,7 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
           <time>{row.deleted_at}</time>
         </> : <p>{t(row.status === 'blocked' ? 'blocked' : 'watch')}: {row.reason}</p>}
         {kind === 'users' && <button disabled={busy} className="border rounded px-3 min-h-11 mr-2" onClick={() => { setUserId(row.user_id!); setReason(row.reason || ''); setStatus(row.status || 'watch'); }}>{t('edit')}</button>}
-        <button className="border rounded px-3 min-h-11" disabled={busy} onClick={() => setPending({
+        <button className="border rounded px-3 min-h-11" disabled={busy} onClick={() => ask({
           titleKey: 'confirm_blacklist_remove_title',
           bodyKey: 'confirm_blacklist_remove',
           run: () => void act(`${kind}/${row.id || row.user_id}`, 'DELETE'),
@@ -88,9 +92,9 @@ export default function BlacklistManager({ kind }: { kind: 'cafes' | 'users' }) 
     </ul>}
     <div className="flex gap-4"><button disabled={page === 1 || loading} onClick={() => setPage(p => p - 1)}>{t('previous')}</button><span>{page}</span><button disabled={rows.length < 50 || loading} onClick={() => setPage(p => p + 1)}>{t('next')}</button></div>
     <ConfirmDialog
-      isOpen={pending !== null}
-      onClose={() => setPending(null)}
-      onConfirm={() => { pending?.run(); setPending(null); }}
+      isOpen={confirmOpen}
+      onClose={() => setConfirmOpen(false)}
+      onConfirm={() => { pending?.run(); setConfirmOpen(false); }}
       title={pending ? t(pending.titleKey) : ''}
       body={pending ? t(pending.bodyKey) : ''}
       confirmLabel={t('confirm')}

@@ -49,6 +49,7 @@
     "success": "Bean Dropped!",
     "already_today": "Already Dropped Today",
     "too_far": "Too far ({distance}m away, must be within 50m)",
+    "too_far_server": "You are too far from this cafe to drop a bean.",
     "error": "Failed to drop bean. Please try again.",
     "login_required": "Please sign in to drop a bean",
     "level_up": "Now {level}!",

@@ -49,6 +49,7 @@
     "success": "커피콩을 심었습니다!",
     "already_today": "오늘 이미 심었습니다",
     "too_far": "너무 멀어요 ({distance}m, 50m 이내여야 함)",
+    "too_far_server": "이 카페에서 커피콩을 심기엔 너무 멀어요.",
     "error": "심기 실패. 다시 시도해주세요.",
     "login_required": "커피콩을 심으려면 로그인이 필요합니다",
     "level_up": "이제 {level}!",

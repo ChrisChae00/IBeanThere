@@ -149,7 +149,7 @@ IBeanThere/
 │   └── be/                    # FastAPI service
 │       ├── app/api/v1/        # ~90 routes: cafes, visits, users, collections, admin
 │       ├── app/services/      # Overpass, dedupe, curation
-│       ├── app/core/          # Config, security, RBAC dependencies
+│       ├── app/core/          # Permissions, rate limiting, fraud checks
 │       └── tests/             # 13 test modules
 └── docs/architecture/         # Design docs that ship with the repo
 ```
