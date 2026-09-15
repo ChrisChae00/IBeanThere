@@ -64,7 +64,7 @@ async def get_or_create_default_collection(
         "user_id": user_id,
         "name": name,
         "icon_type": icon_type.value,
-        "is_public": False,
+        "is_public": True,
         "position": position,
     }
     
@@ -295,12 +295,20 @@ async def get_collection_detail(
             detail="Collection not found"
         )
     
-    # Check access permission
-    if collection["user_id"] != current_user.id and not collection.get("is_public"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have access to this collection"
-        )
+    # Both switches have to agree for anyone but the owner: the profile decides
+    # whether collections are published at all, the collection decides whether it
+    # is one of them. Checking only the collection let a private profile's rows be
+    # read by id.
+    if collection["user_id"] != current_user.id:
+        owner = supabase.table("users").select("collections_public").eq(
+            "id", collection["user_id"]
+        ).single().execute()
+        published = bool(owner.data and owner.data.get("collections_public"))
+        if not published or not collection.get("is_public"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have access to this collection"
+            )
     
     return collection
 

@@ -22,7 +22,7 @@ interface CollectionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete?: (collectionId: string) => Promise<void>;
-  onUpdate?: (collectionId: string, data: { name?: string }) => Promise<void>;
+  onUpdate?: (collectionId: string, data: { name?: string; is_public?: boolean }) => Promise<void>;
   onShare?: (collectionId: string) => Promise<string>;
   onNavigateToCafe?: (path: string) => void;
   isOwnProfile?: boolean;
@@ -75,6 +75,7 @@ export default function CollectionDetailModal({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(collection.name);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVisible, setIsVisible] = useState(collection.is_public !== false);
 
   // Share state
   const [shareLoading, setShareLoading] = useState(false);
@@ -115,7 +116,24 @@ export default function CollectionDetailModal({
   useEffect(() => {
     setEditName(collection.name);
     setIsEditing(false);
+    setIsVisible(collection.is_public !== false);
   }, [collection]);
+
+  /*
+    The switch moves first and rolls back if the write fails. Waiting on the round
+    trip makes a toggle feel broken, and the only cost of being wrong for a moment
+    is a switch that flicks back.
+  */
+  const handleVisibility = useCallback(async (next: boolean) => {
+    if (!onUpdate) return;
+    setIsVisible(next);
+    try {
+      await onUpdate(collection.id, { is_public: next });
+    } catch {
+      setIsVisible(!next);
+      setError(t('save_failed'));
+    }
+  }, [collection.id, onUpdate, t]);
 
   const handleSave = useCallback(async () => {
     if (!onUpdate || isSaving) return;
@@ -245,6 +263,33 @@ export default function CollectionDetailModal({
             </div>
           )}
         </div>
+
+        {isOwnProfile && onUpdate && (
+          /*
+            Stated as what a reader sees, not as a setting name. The profile switch
+            decides whether collections are published at all; this one says whether
+            this collection is among them, so the copy has to carry that dependency
+            rather than promise the collection is public on its own.
+          */
+          <label className="mt-4 flex cursor-pointer items-center justify-between gap-4">
+            <span className="text-sm text-ink-secondary">{t('show_on_profile')}</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isVisible}
+              onClick={() => handleVisibility(!isVisible)}
+              className={`relative h-5 w-10 shrink-0 rounded-(--radius-pill) transition-colors ${
+                isVisible ? 'bg-brand' : 'bg-edge-rule'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-(--radius-pill) bg-surface-raised transition-transform ${
+                  isVisible ? 'translate-x-5' : ''
+                }`}
+              />
+            </button>
+          </label>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-8">

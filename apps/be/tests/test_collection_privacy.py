@@ -42,5 +42,35 @@ class CollectionPrivacyTests(unittest.TestCase):
                     self.assertEqual(db.queries_on("cafe_collections"), [])
 
 
+class CollectionDetailAccessTests(unittest.TestCase):
+    """Reading one collection by id needs both switches, not just the collection's."""
+
+    def _client(self, collections_public, is_public):
+        client, db = make_client(self, {
+            "users": [{"id": "owner", "username": "alice",
+                       "collections_public": collections_public}],
+            "cafe_collections": [{"id": "c1", "user_id": "owner", "name": "Beans",
+                                  "is_public": is_public, "icon_type": "custom",
+                                  "created_at": "2026-09-15T00:00:00Z"}],
+            "collection_items": [],
+        }, user_id="someone-else")
+        return client
+
+    def test_a_private_profile_is_not_readable_by_id(self):
+        response = self._client(collections_public=False, is_public=True).get(
+            "/api/v1/collections/c1")
+        self.assertEqual(response.status_code, 403)
+
+    def test_a_hidden_collection_is_not_readable_by_id(self):
+        response = self._client(collections_public=True, is_public=False).get(
+            "/api/v1/collections/c1")
+        self.assertEqual(response.status_code, 403)
+
+    def test_both_switches_on_opens_it(self):
+        response = self._client(collections_public=True, is_public=True).get(
+            "/api/v1/collections/c1")
+        self.assertEqual(response.status_code, 200)
+
+
 if __name__ == "__main__":
     unittest.main()

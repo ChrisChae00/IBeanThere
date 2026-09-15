@@ -22,7 +22,11 @@ class CollectionBase(BaseModel):
     description: Optional[str] = Field(None, max_length=500, description="Collection description")
     icon_type: CollectionIconType = Field(default=CollectionIconType.CUSTOM, description="Icon type")
     color: Optional[str] = Field(None, pattern=r'^#[0-9A-Fa-f]{6}$', description="Custom color (hex)")
-    is_public: bool = Field(default=False, description="Whether collection is publicly visible")
+    # Visible by default. The profile's own `collections_public` switch is what
+    # decides whether anything is published at all; this flag is the per-collection
+    # opt-out inside that, so a collection nobody touched behaves the way the
+    # profile switch says.
+    is_public: bool = Field(default=True, description="Whether this collection is shown when the profile publishes collections")
 
 
 class CollectionCreate(CollectionBase):

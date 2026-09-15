@@ -78,7 +78,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
     }
   }, []);
 
-  const handleUpdateCollection = useCallback(async (collectionId: string, data: { name?: string }) => {
+  const handleUpdateCollection = useCallback(async (collectionId: string, data: { name?: string; is_public?: boolean }) => {
     try {
       const updated = await updateCollection(collectionId, data);
       setCollections(prev => prev.map(c => c.id === collectionId ? { ...c, ...updated } : c));
