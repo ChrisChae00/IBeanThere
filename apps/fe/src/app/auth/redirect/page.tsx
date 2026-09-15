@@ -8,13 +8,15 @@ export default function AuthRedirectPage() {
 
   useEffect(() => {
     // Read locale from sessionStorage (set before OAuth started)
-    const locale = sessionStorage.getItem('oauth_redirect_locale') || 'en';
+    const locale = sessionStorage.getItem('oauth_redirect_locale') === 'ko' ? 'ko' : 'en';
+    const token = sessionStorage.getItem('oauth_collection_token');
+    sessionStorage.removeItem('oauth_collection_token');
     
     // Clean up
     sessionStorage.removeItem('oauth_redirect_locale');
     
     // Redirect to the locale-specific home page
-    router.replace(`/${locale}`);
+    router.replace(token && /^[A-Za-z0-9_-]{32}$/.test(token) ? `/${locale}/shared/${token}` : `/${locale}`);
   }, [router]);
 
   return (

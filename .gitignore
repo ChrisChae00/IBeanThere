@@ -83,6 +83,7 @@ apps/be/scripts/migrations/*
 !apps/be/scripts/migrations/025_e2e_security.sql
 # named in docs/architecture/collection-visibility.md
 !apps/be/scripts/migrations/026_collection_visibility.sql
+!apps/be/scripts/migrations/027_collection_sharing.sql
 !apps/be/scripts/seed_kw_reviewed.py
 !apps/be/scripts/seed_real_cafes.py
 !apps/be/scripts/seed_with_google_places.py

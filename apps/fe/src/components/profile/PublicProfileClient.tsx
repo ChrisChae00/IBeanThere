@@ -57,7 +57,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   }, [fetchProfile]);
 
   useEffect(() => {
-    if (!profile || !profile.collections_public) return;
+    if (!profile) return;
 
     const fetchCollections = async () => {
       try {
@@ -179,7 +179,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         }
       />
 
-      {profile.collections_public && collections.length > 0 && (
+      {collections.length > 0 && (
         <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-ink-primary">
             {t('public_collections')}

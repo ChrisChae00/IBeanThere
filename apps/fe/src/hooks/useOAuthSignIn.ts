@@ -8,7 +8,7 @@ type OAuthProvider = 'google' | 'facebook';
 interface UseOAuthSignInReturn {
   isLoading: boolean;
   error: string;
-  signInWithOAuth: (provider: OAuthProvider, locale: string) => Promise<void>;
+  signInWithOAuth: (provider: OAuthProvider, locale: string, collectionToken?: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -22,7 +22,7 @@ export function useOAuthSignIn(): UseOAuthSignInReturn {
   const supabase = createClient();
   const { translateError } = useErrorTranslator();
 
-  const signInWithOAuth = async (provider: OAuthProvider, locale: string) => {
+  const signInWithOAuth = async (provider: OAuthProvider, locale: string, collectionToken?: string) => {
     setIsLoading(true);
     setError('');
 
@@ -35,6 +35,8 @@ export function useOAuthSignIn(): UseOAuthSignInReturn {
       // Store locale in sessionStorage for callback to use
       // (query params in redirectTo cause Supabase URL matching to fail)
       sessionStorage.setItem('oauth_redirect_locale', locale);
+      if (collectionToken) sessionStorage.setItem('oauth_collection_token', collectionToken);
+      else sessionStorage.removeItem('oauth_collection_token');
       
       const redirectTo = `${origin}/auth/callback`;
       

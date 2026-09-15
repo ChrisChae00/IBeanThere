@@ -145,20 +145,15 @@ async def get_user_public_collections(
     supabase: Client = Depends(get_supabase_client)
 ):
     """
-    Public endpoint to get a user's collections if they have enabled collections_public.
-    Returns empty list if collections are not public.
+    Public endpoint listing only collections individually published by their owner.
     """
     try:
-        # Fetch user and check collections_public flag
-        user = supabase.table("users").select("id, collections_public").eq("username", username).single().execute()
+        user = supabase.table("users").select("id").eq("username", username).single().execute()
         if not user or not user.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-
-        if not user.data.get("collections_public", False):
-            return []
 
         user_id = user.data["id"]
 

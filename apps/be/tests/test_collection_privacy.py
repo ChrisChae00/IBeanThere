@@ -1,7 +1,10 @@
 """Collection visibility, and the two folders every account is supposed to have."""
 import unittest
+from unittest.mock import Mock
 
 from test_visit_privacy import OWNER, FakeQuery, FakeResult, make_client
+from app.api.deps import get_current_user, get_optional_user
+from app.main import app
 
 
 class FilteringQuery(FakeQuery):
@@ -21,7 +24,7 @@ class FilteringQuery(FakeQuery):
 
 
 class CollectionPrivacyTests(unittest.TestCase):
-    def test_profile_and_collection_visibility_are_both_required(self):
+    def test_only_collection_visibility_controls_public_listing(self):
         for profile_public in (False, True):
             with self.subTest(profile_public=profile_public):
                 collections = [
@@ -44,14 +47,12 @@ class CollectionPrivacyTests(unittest.TestCase):
                 response = client.get("/api/v1/users/alice/collections")
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual([row["id"] for row in response.json()],
-                                 ["visible"] if profile_public else [])
+                                 ["visible"])
                 self.assertNotIn("secret", response.text)
-                if not profile_public:
-                    self.assertEqual(db.queries_on("cafe_collections"), [])
 
 
 class CollectionDetailAccessTests(unittest.TestCase):
-    """Reading one collection by id needs both switches, not just the collection's."""
+    """Private rows require ownership; public rows allow guests."""
 
     def _client(self, collections_public, is_public):
         client, db = make_client(self, {
@@ -64,20 +65,47 @@ class CollectionDetailAccessTests(unittest.TestCase):
         }, user_id="someone-else")
         return client
 
-    def test_a_private_profile_is_not_readable_by_id(self):
+    def test_legacy_profile_flag_does_not_hide_public_collection(self):
         response = self._client(collections_public=False, is_public=True).get(
             "/api/v1/collections/c1")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
     def test_a_hidden_collection_is_not_readable_by_id(self):
         response = self._client(collections_public=True, is_public=False).get(
             "/api/v1/collections/c1")
         self.assertEqual(response.status_code, 403)
 
-    def test_both_switches_on_opens_it(self):
+    def test_public_collection_is_readable(self):
         response = self._client(collections_public=True, is_public=True).get(
             "/api/v1/collections/c1")
         self.assertEqual(response.status_code, 200)
+
+    def test_guest_access(self):
+        for public, status in ((True, 200), (False, 403)):
+            client = self._client(collections_public=True, is_public=public)
+            app.dependency_overrides[get_optional_user] = lambda: None
+            self.assertEqual(client.get('/api/v1/collections/c1').status_code, status)
+
+
+class SharedCopyTests(unittest.TestCase):
+    def test_copy_uses_authenticated_owner_and_requires_auth_and_valid_token(self):
+        client, db = make_client(self, {
+            'cafe_collections': [{'id': 'copy', 'user_id': OWNER, 'name': 'Copy',
+                'is_public': True, 'created_at': '2026-09-15T00:00:00Z'}],
+            'collection_items': [],
+        })
+        db.rpc = Mock()
+        db.rpc.return_value.execute.return_value = FakeResult('copy')
+        response = client.post('/api/v1/collections/shared/token/copy', json={'target_user': 'victim'})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['user_id'], OWNER)
+        db.rpc.assert_called_once_with('copy_shared_collection', {'source_token': 'token', 'target_user': OWNER})
+        db.rpc.return_value.execute.return_value = FakeResult(None)
+        self.assertEqual(client.post('/api/v1/collections/shared/missing/copy').status_code, 404)
+        del app.dependency_overrides[get_current_user]
+        db.rpc.reset_mock()
+        self.assertIn(client.post('/api/v1/collections/shared/token/copy').status_code, (401, 403))
+        db.rpc.assert_not_called()
 
 
 class DefaultCollectionsTests(unittest.TestCase):
@@ -93,6 +121,7 @@ class DefaultCollectionsTests(unittest.TestCase):
         self.assertEqual([row["icon_type"] for row in response.json()],
                          ["favourite", "save_later"])
         self.assertTrue(all(row["item_count"] == 0 for row in response.json()))
+        self.assertTrue(all(row["is_public"] for row in response.json()))
 
     def test_existing_folders_are_not_duplicated(self):
         client, db = make_client(self, {

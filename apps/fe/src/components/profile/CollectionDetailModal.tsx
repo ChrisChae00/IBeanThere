@@ -75,7 +75,9 @@ export default function CollectionDetailModal({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(collection.name);
   const [isSaving, setIsSaving] = useState(false);
-  const [isVisible, setIsVisible] = useState(collection.is_public !== false);
+  const [isPrivate, setIsPrivate] = useState(collection.is_public === false);
+
+  const [isVisibilitySaving, setIsVisibilitySaving] = useState(false);
 
   // Share state
   const [shareLoading, setShareLoading] = useState(false);
@@ -116,7 +118,7 @@ export default function CollectionDetailModal({
   useEffect(() => {
     setEditName(collection.name);
     setIsEditing(false);
-    setIsVisible(collection.is_public !== false);
+    setIsPrivate(collection.is_public === false);
   }, [collection]);
 
   /*
@@ -125,15 +127,19 @@ export default function CollectionDetailModal({
     is a switch that flicks back.
   */
   const handleVisibility = useCallback(async (next: boolean) => {
-    if (!onUpdate) return;
-    setIsVisible(next);
+    if (!onUpdate || isVisibilitySaving) return;
+    setIsVisibilitySaving(true);
+    setError(null);
+    setIsPrivate(next);
     try {
-      await onUpdate(collection.id, { is_public: next });
+      await onUpdate(collection.id, { is_public: !next });
     } catch {
-      setIsVisible(!next);
+      setIsPrivate(!next);
       setError(t('save_failed'));
+    } finally {
+      setIsVisibilitySaving(false);
     }
-  }, [collection.id, onUpdate, t]);
+  }, [collection.id, onUpdate, t, isVisibilitySaving]);
 
   const handleSave = useCallback(async () => {
     if (!onUpdate || isSaving) return;
@@ -240,7 +246,15 @@ export default function CollectionDetailModal({
       <DialogContent
         className="z-(--z-modal) rounded-(--radius-card) border-edge-rule bg-surface-raised p-6 sm:max-w-2xl"
       >
-        <div className="flex items-center gap-3 border-b border-edge-rule pb-4">
+        {/*
+          `min-w-0` on the row itself, not only on the title's own wrapper: this row
+          is a direct child of `DialogContent`, which is a CSS grid, and a grid item's
+          default min-width is its content's own min-content size -- an unbroken
+          collection name past a certain length would widen this row (and the dialog
+          with it) regardless of the `truncate` set two levels down, because the
+          grid item never shrank far enough to make truncation the shorter path.
+        */}
+        <div className="flex min-w-0 items-center gap-3 border-b border-edge-rule pb-4 pr-8">
           <span className="shrink-0">{collectionIcon}</span>
 
           {isEditing && !isSystemCollection ? (
@@ -253,32 +267,48 @@ export default function CollectionDetailModal({
             />
           ) : (
             <div className="min-w-0 flex-1">
-              {/* The name is data, so it takes the body face rather than the display serif. */}
-              <DialogTitle className="truncate font-sans text-lg font-semibold text-ink-primary">
+              {/*
+                `leading-tight` on the name: `text-lg` alone carries a 28px line box
+                around an 18px glyph, so the 4px margin below it read as much closer
+                to 14px once that box's own slack was counted in. The name is data,
+                so it takes the body face rather than the display serif.
+              */}
+              <DialogTitle className="truncate font-sans text-lg leading-tight font-semibold text-ink-primary">
                 {collectionName}
               </DialogTitle>
-              <p className="landing-micro mt-1 text-ink-secondary">
+              <p className="landing-micro mt-0.5 text-ink-secondary">
                 {t('cafes', { count: detail?.item_count ?? collection.item_count ?? 0 })}
               </p>
             </div>
           )}
-        </div>
 
-        {isOwnProfile && onUpdate && (
-          /*
-            Stated as what a reader sees, not as a setting name. The profile switch
-            decides whether collections are published at all; this one says whether
-            this collection is among them, so the copy has to carry that dependency
-            rather than promise the collection is public on its own.
-          */
-          <div className="flex justify-end">
-            <Switch
-              checked={isVisible}
-              onChange={handleVisibility}
-              label={t('show_on_profile')}
-            />
-          </div>
-        )}
+          {/*
+            On the header row, not the count line: putting it beside "N cafes" meant
+            spreading two small captions across the dialog's full width to reach the
+            right edge, which read as unrelated rather than as one line. Here it sits
+            in the row's own slack -- `min-w-0 flex-1` above already claims whatever
+            the name does not need -- so it lands flush right without stretching
+            anything. `pr-8` on the row keeps it clear of the dialog's own close
+            button, which the primitive positions `absolute top-2 right-2` over this
+            same padded corner.
+
+            `self-end` on the wrapper, against the row's own `items-center`: the name
+            plus count block is two lines and the row's height comes from it, so a
+            switch centred by the row's default alignment sits centred on both lines
+            at once rather than on either -- bottom-aligning it instead puts its
+            visible edge on the same line "N cafes" already ends on.
+          */}
+          {!isEditing && isOwnProfile && onUpdate && (
+            <div className="self-end">
+              <Switch
+                checked={isPrivate}
+                onChange={handleVisibility}
+                disabled={isVisibilitySaving}
+                label={t('visibility_private')}
+              />
+            </div>
+          )}
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -448,10 +478,22 @@ export default function CollectionDetailModal({
             ) : showDeleteConfirm ? (
               <>
                 <span className="text-sm text-ink-primary">{t('delete_confirm')}</span>
+                {/*
+                  `danger`, not `outline`: the row's own Remove already reads red at
+                  rest, and this is the same action one confirmation later. `danger`
+                  is `.btn-line-danger` -- a red rule and red text at rest, filled
+                  solid on hover with `--ink-on-brand`. `--ink-on-media` is a
+                  different slot: it is for ink sitting on a photograph, not on a
+                  filled control, and using it here would go transparent on every
+                  theme whose media ink and page ink happen to match.
+
+                  No dot: that was this button's only danger cue before `danger`
+                  existed as a variant. The label is red now, so a red dot beside a
+                  red word says the same thing twice.
+                */}
                 <Button
-                  variant="outline"
+                  variant="danger"
                   size="sm"
-                  leftIcon={<span aria-hidden="true" className="block h-1.5 w-1.5 rounded-(--radius-pill) bg-state-danger" />}
                   onClick={handleDelete}
                   disabled={isDeleting}
                 >
@@ -479,17 +521,16 @@ export default function CollectionDetailModal({
                       {t('edit')}
                     </Button>
                     {/*
-                      Plain, not danger-coloured: `control-flat` sets the label colour of
-                      every non-filled button, so a `text-` utility here loses to it, and
-                      the confirm step is what carries the weight anyway. The row menu's
-                      Remove is the exception on record -- `.menu-item` leaves its colour
-                      to the call site, which is how the log out row takes danger too.
+                      `danger`, matching the button this becomes on confirm: a reader
+                      who has not clicked yet should see the same red the click leads
+                      to, not a plain label that turns red only after they commit.
                     */}
-                    <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                    <Button variant="danger" size="sm" onClick={() => setShowDeleteConfirm(true)}>
                       {t('delete')}
                     </Button>
                   </>
                 )}
+                <p className="w-full text-xs leading-relaxed text-ink-secondary">{t('private_share_hint')}</p>
               </>
             )}
           </div>

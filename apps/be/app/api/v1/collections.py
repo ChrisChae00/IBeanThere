@@ -17,7 +17,7 @@ import logging
 
 from app.database.supabase import get_supabase_client
 from app.api.v1.cafes import generate_unique_slug
-from app.api.deps import get_current_user, security
+from app.api.deps import get_current_user, get_optional_user, security
 from app.models.collection import (
     CollectionIconType,
     CollectionCreate,
@@ -297,7 +297,7 @@ async def create_collection(
 @router.get("/collections/{collection_id}", response_model=CollectionDetailResponse)
 async def get_collection_detail(
     collection_id: str,
-    current_user = Depends(get_current_user),
+    current_user = Depends(get_optional_user),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
@@ -313,20 +313,10 @@ async def get_collection_detail(
             detail="Collection not found"
         )
     
-    # Both switches have to agree for anyone but the owner: the profile decides
-    # whether collections are published at all, the collection decides whether it
-    # is one of them. Checking only the collection let a private profile's rows be
-    # read by id.
-    if collection["user_id"] != current_user.id:
-        owner = supabase.table("users").select("collections_public").eq(
-            "id", collection["user_id"]
-        ).single().execute()
-        published = bool(owner.data and owner.data.get("collections_public"))
-        if not published or not collection.get("is_public"):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have access to this collection"
-            )
+    if not collection.get("is_public") and (
+        current_user is None or collection["user_id"] != current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="You don't have access to this collection")
     
     return collection
 
@@ -652,6 +642,22 @@ async def get_shared_collection(
 
 
 # =========================================================
+@router.post("/collections/shared/{token}/copy", response_model=CollectionDetailResponse,
+             status_code=status.HTTP_201_CREATED)
+async def copy_shared_collection(
+    token: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+):
+    """Save an independent copy; possession of the share token grants access."""
+    copied_id = supabase.rpc("copy_shared_collection", {
+        "source_token": token, "target_user": current_user.id,
+    }).execute().data
+    if not copied_id:
+        raise HTTPException(status_code=404, detail="Shared collection not found")
+    return await get_collection_with_items(copied_id, supabase)
+
+
 # Quick Save Endpoints (for cafe detail page)
 # =========================================================
 
