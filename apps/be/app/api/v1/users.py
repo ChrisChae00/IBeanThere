@@ -162,10 +162,10 @@ async def get_user_public_collections(
 
         user_id = user.data["id"]
 
-        # Reuse get_my_collections pattern
+        # Profile visibility does not override a collection's own privacy setting.
         result = supabase.table("cafe_collections").select("*").eq(
             "user_id", user_id
-        ).order("position").order("created_at").execute()
+        ).eq("is_public", True).order("position").order("created_at").execute()
 
         collections = result.data or []
 
