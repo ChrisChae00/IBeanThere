@@ -120,7 +120,7 @@ Browser-native dialogs are gone from the app. Deleting a coffee log could freeze
 
 ### Testing
 
-12 backend test files cover registration policy, trait suggestion evidence, visit privacy, blacklists, account deletion, report safety, badges, and the OSM rate gate. The frontend is verified end to end against a running stack with a real account rather than by build alone: the current run has ten sessions of recorded results, which is where the log deletion freeze, the drop-bean radius mismatch and the silent photo upload failure were found. Results and evidence live in `docs/testing/`.
+89 backend tests across 13 modules cover registration policy, trait suggestion evidence, visit and collection privacy, blacklists, account deletion, report safety, badges, and the OSM rate gate. The frontend is verified end to end against a running stack with a real account rather than by build alone: the current run has ten sessions of recorded results, which is where the log deletion freeze, the drop-bean radius mismatch and the silent photo upload failure were found. Run results and evidence are kept with the project rather than in the repository.
 
 ---
 
@@ -150,11 +150,11 @@ IBeanThere/
 │       ├── app/api/v1/        # ~90 routes: cafes, visits, users, collections, admin
 │       ├── app/services/      # Overpass, dedupe, curation
 │       ├── app/core/          # Config, security, RBAC dependencies
-│       └── tests/             # 12 test modules
-└── docs/                      # Direction, architecture, plans, testing evidence
+│       └── tests/             # 13 test modules
+└── docs/architecture/         # Design docs that ship with the repo
 ```
 
-`docs/product/direction.md` is the single source for what this product is and is not. `docs/architecture/` holds the system designs.
+`docs/architecture/` holds the system designs: curation rules, account deletion, blacklists, analytics, email, and the design language. Product direction, handoff notes and testing evidence stay local, so the repository carries designs rather than working notes.
 
 ---
 
