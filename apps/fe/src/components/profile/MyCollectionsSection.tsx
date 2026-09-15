@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Button, HeartIcon, BookmarkIcon, LoadingSpinner, Switch } from '@/shared/ui';
 import { getMyCollections, createCollection, deleteCollection, updateCollection, generateShareLink } from '@/lib/api/collections';
 import { isAuthError } from '@/lib/api/client';
 import type { Collection } from '@/types/api';
@@ -162,42 +162,32 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   return (
     <>
-      <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border shadow-xs">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text">
+      <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4 sm:p-6">
+        {/*
+          The title holds its line and the controls wrap under it, right aligned. The
+          row used to be one `justify-between` with no wrap, so on a phone the switch
+          and the create button were pushed past the panel's own edge. `ml-auto` is
+          what keeps them right once they have a line of their own -- `justify-between`
+          alone would strand them on the left of the second line.
+        */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4">
+          <h2 className="font-sans text-lg font-semibold text-ink-primary">
             {isOwnProfile ? tProfile('my_collections') : tProfile('public_collections')}
           </h2>
-          <div className="flex items-center gap-3">
-            {isOwnProfile && onToggleCollectionsPublic && (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-xs text-ink-secondary">
-                  {tProfile('collections_public_label')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onToggleCollectionsPublic(!collectionsPublic)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${
-                    collectionsPublic ? 'bg-primary' : 'bg-border'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                      collectionsPublic ? 'translate-x-5' : ''
-                    }`}
-                  />
-                </button>
-              </label>
-            )}
-            {isOwnProfile && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-3 py-1.5 text-sm font-medium text-primaryText bg-primary rounded-lg hover:bg-secondary transition-colors active:scale-[0.98]"
-              >
-                + {t('create_new')}
-              </button>
-            )}
-          </div>
+          {isOwnProfile && (
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-x-4">
+              {onToggleCollectionsPublic && (
+                <Switch
+                  checked={collectionsPublic}
+                  onChange={onToggleCollectionsPublic}
+                  label={tProfile('collections_public_label')}
+                />
+              )}
+              <Button variant="outline" size="sm" onClick={() => setShowCreateModal(true)}>
+                {t('create_new')}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Collections Grid */}

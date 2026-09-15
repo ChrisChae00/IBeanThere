@@ -16,7 +16,7 @@ export { default as ErrorAlert } from './ErrorAlert';
 export { default as StarRating } from './StarRating';
 export { default as FlipText } from './FlipText';
 export { default as PixelImage } from './PixelImage';
-export { default as ToggleButton } from './ToggleButton';
+export { default as Switch } from './Switch';
 export { default as PlusIcon } from './PlusIcon';
 export { default as WriteIcon } from './WriteIcon';
 export { default as LoadingSpinner } from './LoadingSpinner';

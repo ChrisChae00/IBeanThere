@@ -1239,7 +1239,7 @@
     "create_failed": "컬렉션 생성에 실패했습니다",
     "create": "만들기",
     "cancel": "취소",
-    "create_new": "새 컬렉션 만들기",
+    "create_new": "새 컬렉션",
     "collection_name_placeholder": "컬렉션 이름...",
     "my_collections": "내 컬렉션",
     "no_collections": "컬렉션이 없습니다",

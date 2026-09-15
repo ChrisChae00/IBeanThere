@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { Menu } from '@base-ui/react/menu';
 import { Coffee, MoreVertical } from 'lucide-react';
-import { Button, HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Button, HeartIcon, BookmarkIcon, LoadingSpinner, Switch } from '@/shared/ui';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/base/dialog';
 
 import {
@@ -271,24 +271,13 @@ export default function CollectionDetailModal({
             this collection is among them, so the copy has to carry that dependency
             rather than promise the collection is public on its own.
           */
-          <label className="mt-4 flex cursor-pointer items-center justify-between gap-4">
-            <span className="text-sm text-ink-secondary">{t('show_on_profile')}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isVisible}
-              onClick={() => handleVisibility(!isVisible)}
-              className={`relative h-5 w-10 shrink-0 rounded-(--radius-pill) transition-colors ${
-                isVisible ? 'bg-brand' : 'bg-edge-rule'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-(--radius-pill) bg-surface-raised transition-transform ${
-                  isVisible ? 'translate-x-5' : ''
-                }`}
-              />
-            </button>
-          </label>
+          <div className="flex justify-end">
+            <Switch
+              checked={isVisible}
+              onChange={handleVisibility}
+              label={t('show_on_profile')}
+            />
+          </div>
         )}
 
         {isLoading ? (
