@@ -20,9 +20,10 @@ const FIELD = 'rounded-full pl-5';
 
 interface LoginFormProps {
   locale: string;
+  collectionToken?: string;
 }
 
-export function LoginForm({ locale }: LoginFormProps) {
+export function LoginForm({ locale, collectionToken }: LoginFormProps) {
   const t = useTranslations('auth');
   const tErrors = useTranslations('errors');
   const [email, setEmail] = useState('');
@@ -70,8 +71,8 @@ export function LoginForm({ locale }: LoginFormProps) {
           localStorage.removeItem('rememberMe');
         }
         
-        // Redirect to home page
-        window.location.href = `/${locale}`;
+        // Return to the shared collection when sign-in started there.
+        window.location.href = collectionToken ? `/${locale}/shared/${collectionToken}` : `/${locale}`;
       }
     } catch (err) {
       setError(tErrors('unknown'));
@@ -81,7 +82,7 @@ export function LoginForm({ locale }: LoginFormProps) {
   };
 
   const handleGoogleSignIn = () => {
-    signInWithOAuth('google', locale);
+    signInWithOAuth('google', locale, collectionToken);
   };
 
 

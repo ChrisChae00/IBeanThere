@@ -212,7 +212,13 @@ export default function DropBeanButton({
         if (response.status === 409) {
           showToast(t('already_today'), 'error');
         } else if (response.status === 400) {
-          showToast(t('too_far', { distance: Math.round(distance) }), 'error');
+          /*
+            No distance in this one. The number we hold already passed the gate
+            above, so printing it here would read "Too far (43m away, must be
+            within 50m)" whenever the server measures from a pin this page has
+            not seen move.
+          */
+          showToast(t('too_far_server'), 'error');
         } else {
           showToast(t('error'), 'error');
         }

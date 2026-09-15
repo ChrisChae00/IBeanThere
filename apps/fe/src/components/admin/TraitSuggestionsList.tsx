@@ -81,7 +81,10 @@ export default function TraitSuggestionsList() {
 
   const [suggestions, setSuggestions] = useState<TraitSuggestion[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  /* The group outlives the open flag: the dialog fades out over 100ms, and
+     clearing it on close would blank the cafe's name before the fade starts. */
   const [pendingRemoval, setPendingRemoval] = useState<CafeGroup | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const load = useCallback(() => {
     getTraitSuggestions()
@@ -139,7 +142,7 @@ export default function TraitSuggestionsList() {
       load();
     } finally {
       setBusy(null);
-      setPendingRemoval(null);
+      setConfirmOpen(false);
     }
   };
 
@@ -226,7 +229,7 @@ export default function TraitSuggestionsList() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setPendingRemoval(group)}
+                        onClick={() => { setPendingRemoval(group); setConfirmOpen(true); }}
                         disabled={busy === group.cafeId}
                       >
                         {t('seed_delete_cafe')}
@@ -300,8 +303,8 @@ export default function TraitSuggestionsList() {
       {/* The app's dialog, not `confirm()`: the browser's own freezes the queue behind
           it and cannot say which cafe is about to go. */}
       <ConfirmDialog
-        isOpen={pendingRemoval !== null}
-        onClose={() => setPendingRemoval(null)}
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
         onConfirm={() => pendingRemoval && removeCafe(pendingRemoval)}
         title={t('confirm_delete_title')}
         body={pendingRemoval ? t('seed_delete_confirm', { name: pendingRemoval.name }) : ''}

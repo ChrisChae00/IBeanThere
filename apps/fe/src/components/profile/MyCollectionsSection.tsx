@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { HeartIcon, BookmarkIcon, LoadingSpinner } from '@/shared/ui';
+import { Button, HeartIcon, BookmarkIcon, LoadingSpinner, Switch } from '@/shared/ui';
 import { getMyCollections, createCollection, deleteCollection, updateCollection, generateShareLink } from '@/lib/api/collections';
 import { isAuthError } from '@/lib/api/client';
 import type { Collection } from '@/types/api';
@@ -12,18 +12,19 @@ import CollectionCreateModal from './CollectionCreateModal';
 
 interface MyCollectionsSectionProps {
   isOwnProfile?: boolean;
-  collectionsPublic?: boolean;
-  onToggleCollectionsPublic?: (isPublic: boolean) => void;
 }
 
 /**
  * Collections section for the profile page.
  * Shows user's collections in a mobile-optimized grid.
  */
-export default function MyCollectionsSection({ isOwnProfile = true, collectionsPublic = false, onToggleCollectionsPublic }: MyCollectionsSectionProps) {
+export default function MyCollectionsSection({ isOwnProfile = true }: MyCollectionsSectionProps) {
   const t = useTranslations('collections');
   const tProfile = useTranslations('profile');
   const router = useRouter();
+  const locale = useLocale();
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,17 +79,15 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
     }
   }, []);
 
-  const handleUpdateCollection = useCallback(async (collectionId: string, data: { name?: string }) => {
+  const handleUpdateCollection = useCallback(async (collectionId: string, data: { name?: string; is_public?: boolean }) => {
     try {
       const updated = await updateCollection(collectionId, data);
       setCollections(prev => prev.map(c => c.id === collectionId ? { ...c, ...updated } : c));
-      if (selectedCollection?.id === collectionId) {
-        setSelectedCollection(prev => prev ? { ...prev, ...updated } : null);
-      }
+      setSelectedCollection(prev => prev?.id === collectionId ? { ...prev, ...updated } : prev);
     } catch (err) {
       throw err;
     }
-  }, [selectedCollection]);
+  }, []);
 
   const handleItemCountChange = useCallback((collectionId: string, delta: number) => {
     setCollections(prev => prev.map(c =>
@@ -98,10 +97,10 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   const handleShare = useCallback(async (collectionId: string) => {
     const { share_url } = await generateShareLink(collectionId);
-    const fullUrl = `${window.location.origin}${share_url}`;
+    const fullUrl = `${window.location.origin}/${locale}${share_url}`;
     await navigator.clipboard.writeText(fullUrl);
     return fullUrl;
-  }, []);
+  }, [locale]);
 
   const handleNavigateToCafe = useCallback((path: string) => {
     setSelectedCollection(null);
@@ -162,43 +161,28 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
 
   return (
     <>
-      <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border shadow-xs">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text">
+      <div className="rounded-(--radius-card) border border-edge-rule bg-surface-raised p-4 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          {/*
+            The serif, not `font-sans`: the display face is the page's own voice and
+            the body face is for data, so a section title written in the body face
+            reads as another row rather than as the thing the rows belong to.
+          */}
+          <h2 className="min-w-0 text-xl text-ink-primary">
             {isOwnProfile ? tProfile('my_collections') : tProfile('public_collections')}
           </h2>
-          <div className="flex items-center gap-3">
-            {isOwnProfile && onToggleCollectionsPublic && (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-xs text-ink-secondary">
-                  {tProfile('collections_public_label')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onToggleCollectionsPublic(!collectionsPublic)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${
-                    collectionsPublic ? 'bg-primary' : 'bg-border'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                      collectionsPublic ? 'translate-x-5' : ''
-                    }`}
-                  />
-                </button>
-              </label>
-            )}
-            {isOwnProfile && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-3 py-1.5 text-sm font-medium text-primaryText bg-primary rounded-lg hover:bg-secondary transition-colors active:scale-[0.98]"
-              >
-                + {t('create_new')}
-              </button>
-            )}
-          </div>
+          {isOwnProfile && (
+            /*
+              Quiet, because the profile already spends its one filled control on Edit
+              Profile. An outlined pill at 44px stood as tall as the title beside it and
+              took the eye first; ghost keeps the 44px target without the weight.
+            */
+            <Button variant="ghost" size="sm" className="ml-auto shrink-0 whitespace-nowrap" onClick={() => setShowCreateModal(true)}>
+              {t('create_new')}
+            </Button>
+          )}
         </div>
+        {saveError && <p role="alert" className="mb-3 text-sm text-state-danger">{saveError}</p>}
 
         {/* Collections Grid */}
         {displayCollections.length === 0 ? (
@@ -207,13 +191,29 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
             <p className="text-sm mt-1">{t('empty_hint')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          /*
+            Rows on the panel's own surface, not cards. A card inside a panel is a
+            second frame around something that never lifts off the page, and it put a
+            16px curve 16px inside the panel's own 16px curve -- two circles that do
+            not share a centre. `.menu-item` is what the collection dialog already
+            uses for exactly this list: `--radius-control` on a hover fill mixed from
+            the surface it sits on, so the row darkens instead of turning into the
+            panel's colour and vanishing.
+          */
+          /*
+            `divide-y` skips the last child by design, so the list closed on nothing.
+            Re-enabling the rule on that one row keeps it identical to the others --
+            same edge of the same box, so it sits at the row's own bottom rather than
+            below its margin, which is where a rule drawn by the container would land.
+          */
+          <div className="divide-y divide-edge-rule [&>*:last-child]:border-b [&>*:last-child]:border-edge-rule">
             {displayCollections.map(collection => {
               return (
+                <div key={collection.id} className="menu-item gap-3 py-2 my-1">
                 <button
-                  key={collection.id}
+                  type="button"
                   onClick={() => setSelectedCollection(collection)}
-                  className="flex items-center gap-3 p-3 bg-background rounded-lg hover:bg-cardBackground transition-colors text-left group"
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-2 focus-visible:outline-brand"
                 >
                   {/* Icon */}
                   <div className="shrink-0">
@@ -223,7 +223,7 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-text truncate">
+                      <span className="font-medium text-ink-primary truncate">
                         {getCollectionName(collection)}
                       </span>
                     </div>
@@ -232,16 +232,29 @@ export default function MyCollectionsSection({ isOwnProfile = true, collectionsP
                     </span>
                   </div>
                   
-                  {/* Arrow */}
-                  <svg 
-                    className="w-4 h-4 text-ink-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
                 </button>
+                {isOwnProfile && (
+                  <div className="shrink-0">
+                    <Switch
+                      checked={collection.is_public === false}
+                      label={t('visibility_private')}
+                      ariaLabel={`${getCollectionName(collection)}: ${t('visibility_private')}`}
+                      disabled={savingId !== null}
+                      onChange={async (next) => {
+                        setSavingId(collection.id);
+                        setSaveError(null);
+                        try {
+                          await handleUpdateCollection(collection.id, { is_public: !next });
+                        } catch {
+                          setSaveError(t('save_failed'));
+                        } finally {
+                          setSavingId(null);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                </div>
               );
             })}
           </div>

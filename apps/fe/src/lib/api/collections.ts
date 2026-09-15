@@ -51,7 +51,7 @@ export async function createCollection(
 export async function getCollectionDetail(
   collectionId: string
 ): Promise<CollectionDetail> {
-  const headers = await getAuthHeaders();
+  const headers = await getAuthHeaders(false);
   const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/${collectionId}`, { headers });
   return handleResponse<CollectionDetail>(response);
 }
@@ -243,15 +243,11 @@ export async function getUserPublicCollections(
   return handleResponse<Collection[]>(response);
 }
 
-/**
- * Update the collections_public flag on the current user's profile.
- */
-export async function updateCollectionsPublic(isPublic: boolean): Promise<void> {
+/** Save an independent copy of a shared collection. */
+export async function copySharedCollection(token: string): Promise<CollectionDetail> {
   const headers = await getAuthHeaders();
-  const response = await apiFetch(`${API_BASE_URL}/api/v1/users/me`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify({ collections_public: isPublic }),
+  const response = await apiFetch(`${API_BASE_URL}/api/v1/collections/shared/${encodeURIComponent(token)}/copy`, {
+    method: 'POST', headers,
   });
-  await handleResponse(response);
+  return handleResponse<CollectionDetail>(response);
 }

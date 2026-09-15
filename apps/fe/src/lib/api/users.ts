@@ -55,7 +55,7 @@ export async function searchUsers(query: string, limit = 5): Promise<UserPublicR
 export async function getPublicProfile(username: string): Promise<UserPublicResponse> {
   const response = await apiFetch(
     `${API_BASE_URL}/api/v1/users/profile-by-username/${encodeURIComponent(username)}`,
-    { headers: await getAuthHeaders() },
+    { headers: await getAuthHeaders(false) },
   );
 
   return handleResponse<UserPublicResponse>(response);

@@ -23,6 +23,7 @@ out/
 *.env
 *.env.*
 !.env.example
+!.env.local.example
 
 # Logs
 logs/
@@ -79,6 +80,10 @@ apps/be/scripts/migrations/*
 # Blacklist rollout and guarded seed entrypoints: docs/architecture/blacklists.md
 !apps/be/scripts/migrations/022_admin_blacklists.sql
 !apps/be/scripts/migrations/024_account_deletion.sql
+!apps/be/scripts/migrations/025_e2e_security.sql
+# named in docs/architecture/collection-visibility.md
+!apps/be/scripts/migrations/026_collection_visibility.sql
+!apps/be/scripts/migrations/027_collection_sharing.sql
 !apps/be/scripts/seed_kw_reviewed.py
 !apps/be/scripts/seed_real_cafes.py
 !apps/be/scripts/seed_with_google_places.py

@@ -16,7 +16,7 @@ env_path = Path(__file__).parent.parent / '.env'
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 
-app = FastAPI(title="ibeanthere API")
+app = FastAPI(title="ibeanthere API", version="2.0.0")
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

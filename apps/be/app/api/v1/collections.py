@@ -17,7 +17,7 @@ import logging
 
 from app.database.supabase import get_supabase_client
 from app.api.v1.cafes import generate_unique_slug
-from app.api.deps import get_current_user, security
+from app.api.deps import get_current_user, get_optional_user, security
 from app.models.collection import (
     CollectionIconType,
     CollectionCreate,
@@ -64,7 +64,7 @@ async def get_or_create_default_collection(
         "user_id": user_id,
         "name": name,
         "icon_type": icon_type.value,
-        "is_public": False,
+        "is_public": True,
         "position": position,
     }
     
@@ -193,6 +193,24 @@ async def get_my_collections(
     ).order("position").order("created_at").execute()
     
     collections = result.data or []
+
+    # Favourites and Save for Later are part of the app's vocabulary: the heart and
+    # the bookmark on every cafe put things there, so the two have to be visible
+    # before anything has been saved, or the reader is told to save cafes with no
+    # sign of where they would land. They used to appear only once the first save
+    # created them, which left a new account looking as if it had no collections.
+    stored = {c.get("icon_type") for c in collections}
+    missing = [
+        icon_type
+        for icon_type in (CollectionIconType.FAVOURITE, CollectionIconType.SAVE_LATER)
+        if icon_type.value not in stored
+    ]
+
+    for icon_type in missing:
+        collections.append(await get_or_create_default_collection(user_id, icon_type, supabase))
+
+    if missing:
+        collections.sort(key=lambda c: (c.get("position") or 0, c.get("created_at") or ""))
     
     # Get item counts for each collection
     for collection in collections:
@@ -279,7 +297,7 @@ async def create_collection(
 @router.get("/collections/{collection_id}", response_model=CollectionDetailResponse)
 async def get_collection_detail(
     collection_id: str,
-    current_user = Depends(get_current_user),
+    current_user = Depends(get_optional_user),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
@@ -295,12 +313,10 @@ async def get_collection_detail(
             detail="Collection not found"
         )
     
-    # Check access permission
-    if collection["user_id"] != current_user.id and not collection.get("is_public"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have access to this collection"
-        )
+    if not collection.get("is_public") and (
+        current_user is None or collection["user_id"] != current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="You don't have access to this collection")
     
     return collection
 
@@ -626,6 +642,22 @@ async def get_shared_collection(
 
 
 # =========================================================
+@router.post("/collections/shared/{token}/copy", response_model=CollectionDetailResponse,
+             status_code=status.HTTP_201_CREATED)
+async def copy_shared_collection(
+    token: str,
+    current_user = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+):
+    """Save an independent copy; possession of the share token grants access."""
+    copied_id = supabase.rpc("copy_shared_collection", {
+        "source_token": token, "target_user": current_user.id,
+    }).execute().data
+    if not copied_id:
+        raise HTTPException(status_code=404, detail="Shared collection not found")
+    return await get_collection_with_items(copied_id, supabase)
+
+
 # Quick Save Endpoints (for cafe detail page)
 # =========================================================
 
