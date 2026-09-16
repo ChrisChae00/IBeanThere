@@ -10,19 +10,22 @@ import Image from 'next/image';
   painted on does not change with the theme, and a stage a reader recognises should
   look the same wherever it appears.
 
-  The files in `public/growth/` are the delivered art itself -- square, full bleed, no
-  crop and no mask, and no second copy under `media-src/` because there is nothing to
-  derive. A circular cut was tried first and is not here: the soil is painted to the
-  frame's own edge, so it either left a band of sky under the ground or clipped the
-  leaves, and the stages are due to be redrawn anyway. Next/image resizes per call
-  site, so the source can stay as large as it arrived.
+  The stages no longer grow one plant by degrees. They follow coffee itself -- sprout,
+  tree, cherry, green bean, roasted bean -- so the subject and the silhouette change
+  outright between steps, which is what a 24px row in the beans list can actually
+  resolve. It also ends where the product's name does.
+
+  The files in `public/growth/` are the delivered art itself, square and full bleed,
+  with the cream ground painted to the frame's own edge. That is what makes the
+  circle below safe: there is no alpha at the rim to bleed through the mask. Next/image
+  resizes per call site, so the source can stay as large as it arrived.
 */
 const STAGES = [
-  { src: '/growth/bean-growth-seed.png', name: 'Bean Dropped' },
-  { src: '/growth/bean-growth-sprout.png', name: 'Sprouting' },
-  { src: '/growth/bean-growth-growing.png', name: 'Growing' },
-  { src: '/growth/bean-growth-tree.png', name: 'Sapling' },
-  { src: '/growth/bean-growth-harvest.png', name: 'Fruiting Tree' },
+  { src: '/growth/growth-1-sprout.png', name: 'First Sprout' },
+  { src: '/growth/growth-2-tree.png', name: 'Coffee Tree' },
+  { src: '/growth/growth-3-cherry.png', name: 'Coffee Cherry' },
+  { src: '/growth/growth-4-green-bean.png', name: 'Green Bean' },
+  { src: '/growth/growth-5-roasted-bean.png', name: 'Roasted Bean' },
 ] as const;
 
 interface GrowthIconProps {
@@ -43,7 +46,7 @@ export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
   if (level < 1) {
     return (
       <span
-        className={`inline-block border border-border bg-surface ${className}`}
+        className={`inline-block rounded-full border border-border bg-surface ${className}`}
         style={box}
         title="No bean"
       />
@@ -54,7 +57,7 @@ export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
 
   return (
     <span
-      className={`relative inline-block ${className}`}
+      className={`relative inline-block overflow-hidden rounded-full ${className}`}
       style={box}
       title={stage.name}
     >
@@ -66,15 +69,6 @@ export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
     </span>
   );
 }
-
-// Export level thresholds for reference
-export const GROWTH_THRESHOLDS = {
-  SLEEPING_BEAN: 1,
-  SPROUTING: 3,
-  GROWING: 5,
-  SAPLING: 10,
-  FRUITING_TREE: 15
-};
 
 export function getGrowthLevel(dropCount: number): number {
   if (dropCount >= 15) return 5;

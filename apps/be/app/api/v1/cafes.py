@@ -2668,22 +2668,24 @@ async def admin_update_cafe(
 def calculate_growth_level(drop_count: int) -> int:
     """Calculate growth level based on drop count."""
     if drop_count >= 15:
-        return 5  # Fruiting Tree
+        return 5  # Roasted Bean
     elif drop_count >= 10:
-        return 4  # Sapling
+        return 4  # Green Bean
     elif drop_count >= 5:
-        return 3  # Growing
+        return 3  # Coffee Cherry
     elif drop_count >= 3:
-        return 2  # Sprouting
-    return 1  # Sleeping Bean
+        return 2  # Coffee Tree
+    return 1  # First Sprout
 
 
+# English only, and only for API readers -- what a person sees is translated from
+# the level number on the client.
 GROWTH_LEVEL_NAMES = {
-    1: "Sleeping Bean",
-    2: "Sprouting",
-    3: "Growing",
-    4: "Sapling",
-    5: "Fruiting Tree"
+    1: "First Sprout",
+    2: "Coffee Tree",
+    3: "Coffee Cherry",
+    4: "Green Bean",
+    5: "Roasted Bean"
 }
 
 
@@ -2703,11 +2705,11 @@ async def drop_bean(
     - Updates growth level based on total drops
     
     Growth Levels:
-    - Lv 1: Sleeping Bean (1 drop)
-    - Lv 2: Sprouting (3 drops)
-    - Lv 3: Growing (5 drops)
-    - Lv 4: Sapling (10 drops)
-    - Lv 5: Fruiting Tree (15 drops)
+    - Lv 1: First Sprout (1 drop)
+    - Lv 2: Coffee Tree (3 drops)
+    - Lv 3: Coffee Cherry (5 drops)
+    - Lv 4: Green Bean (10 drops)
+    - Lv 5: Roasted Bean (15 drops)
     """
     try:
         # 1. Check if cafe exists

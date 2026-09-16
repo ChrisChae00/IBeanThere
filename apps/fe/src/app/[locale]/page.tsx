@@ -42,7 +42,7 @@ export async function generateMetadata({
   };
 }
 
-const STAGE_KEYS = ['seed', 'sprout', 'growing', 'tree', 'harvest'] as const;
+const STAGE_KEYS = ['sprout', 'tree', 'cherry', 'green_bean', 'roasted_bean'] as const;
 const PERSONA_KEYS = ['navigator', 'archivist', 'curator'] as const;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {

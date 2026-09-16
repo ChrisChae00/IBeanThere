@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { GrowthIcon, getGrowthLevel, GROWTH_THRESHOLDS } from '@/components/cafe/GrowthIcon';
+import { GrowthIcon, getGrowthLevel } from '@/components/cafe/GrowthIcon';
 import { Sprout, Trees, MapPin, ChevronRight, Info, Flame } from 'lucide-react';
 import Modal from '@/shared/ui/Modal';
 import { LoadingSpinner } from '@/shared/ui';
@@ -247,7 +247,7 @@ export default function MyBeansPage(
         {/* Beans List */}
         {!isLoading && beans.length > 0 && (
           <div className="mt-8 space-y-8">
-            {/* Fruiting Trees (Level 5) */}
+            {/* Roasted Bean (Level 5) */}
             {beansByLevel[5] && (
               <BeanLevelSection
                 level={5}
@@ -257,7 +257,7 @@ export default function MyBeansPage(
               />
             )}
             
-            {/* Saplings (Level 4) */}
+            {/* Green Bean (Level 4) */}
             {beansByLevel[4] && (
               <BeanLevelSection
                 level={4}
@@ -267,7 +267,7 @@ export default function MyBeansPage(
               />
             )}
             
-            {/* Growing (Level 3) */}
+            {/* Coffee Cherry (Level 3) */}
             {beansByLevel[3] && (
               <BeanLevelSection
                 level={3}
@@ -277,7 +277,7 @@ export default function MyBeansPage(
               />
             )}
             
-            {/* Sprouting (Level 2) */}
+            {/* Coffee Tree (Level 2) */}
             {beansByLevel[2] && (
               <BeanLevelSection
                 level={2}
@@ -287,7 +287,7 @@ export default function MyBeansPage(
               />
             )}
             
-            {/* Bean Dropped (Level 1) */}
+            {/* First Sprout (Level 1) */}
             {beansByLevel[1] && (
               <BeanLevelSection
                 level={1}

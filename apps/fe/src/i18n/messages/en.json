@@ -58,11 +58,11 @@
     "drops": "{count} drops",
     "next_level": "{drops} more to level up",
     "levels": {
-      "1": "Bean Dropped",
-      "2": "Sprouting",
-      "3": "Growing",
-      "4": "Sapling",
-      "5": "Fruiting Tree"
+      "1": "First Sprout",
+      "2": "Coffee Tree",
+      "3": "Coffee Cherry",
+      "4": "Green Bean",
+      "5": "Roasted Bean"
     }
   },
   "dropbean": {
@@ -165,43 +165,43 @@
     },
     "beandrop_timeline": {
       "title": "Drop a Bean, Watch It Grow",
-      "subtitle": "Every visit to a cafe plants and grows your own bean. Collect badges as you become a regular.",
-      "seed": {
+      "subtitle": "Every visit to a cafe plants a bean and grows it toward coffee. Collect badges as you become a regular.",
+      "sprout": {
         "title": "Plant Your First Bean",
-        "badge": "Seed · 1 Drop",
-        "description": "Visit any cafe within 50 meters and tap Drop Bean. Planting your first bean marks the start of your journey at this spot.",
+        "badge": "Sprout · 1 Drop",
+        "description": "Visit any cafe within 50 meters and tap Drop Bean. One visit plants your first bean, and a pair of leaves breaks the soil to begin your journey at this spot.",
         "h1": "Location-based check-in",
         "h2": "One tap, one bean",
         "h3": "Each cafe grows its own bean"
       },
-      "sprout": {
-        "title": "Watch It Sprout",
-        "badge": "Sprout · 3 Drops",
-        "description": "Come back and drop another bean. Your bean grows with each visit, finally breaking through the soil as a sprout on your third visit.",
+      "tree": {
+        "title": "Taking Root",
+        "badge": "Coffee Tree · 3 Drops",
+        "description": "Your bean is taking root. Come back and drop another, and by the third visit the seedling stands as a coffee tree with a stem, branches and long leaves.",
         "h1": "Revisit the same cafe to grow",
         "h2": "Track your favorite spots",
         "h3": "Growth is per-cafe, not global"
       },
-      "growing": {
-        "title": "Growing Strong",
-        "badge": "Growing · 5 Drops",
-        "description": "You are well on your way to becoming a true regular. Your plant unfolds its leaves and grows stronger with every coffee you enjoy here.",
+      "cherry": {
+        "title": "Bearing Fruit",
+        "badge": "Coffee Cherry · 5 Drops",
+        "description": "Your tree is bearing fruit for the first time. Three ripe cherries mark the visit where this cafe stops being somewhere you went and becomes part of your routine.",
         "h1": "You're officially a regular",
-        "h2": "Halfway to a full tree",
+        "h2": "The tree's first harvest",
         "h3": "Check your growth in My Beans"
       },
-      "tree": {
-        "title": "Deep Roots",
-        "badge": "Tree · 10 Drops",
-        "description": "You are now officially a true regular. Your roots run deep here, and this cafe has become a core part of your coffee story.",
+      "green_bean": {
+        "title": "Harvest and Process",
+        "badge": "Green Bean · 10 Drops",
+        "description": "The cherries have been picked and processed into pale green beans. Ten visits in, your coffee journey at this cafe is one stage from complete.",
         "h1": "A local expert at this cafe",
         "h2": "10 visits and counting",
-        "h3": "Almost at the final stage"
+        "h3": "One stage from the finish"
       },
-      "harvest": {
-        "title": "The Harvest",
-        "badge": "Harvest · 15 Drops",
-        "description": "Your tree is finally bearing fruit. You have earned the highest badge as a testament to your dedication and love for this cafe.",
+      "roasted_bean": {
+        "title": "The Roast",
+        "badge": "Roasted Bean · 15 Drops",
+        "description": "A single dark roasted bean completes the journey from sprout to coffee. The highest badge there is, and the mark of a true regular here.",
         "h1": "Maximum growth achieved",
         "h2": "Confetti celebration on level-up",
         "h3": "A testament to your loyalty"

@@ -240,7 +240,10 @@ export default function DropBeanButton({
       
       // Show toast notification
       if (result.leveled_up) {
-        showToast(`🎉 ${t('level_up_title')} ${t('level_up', { level: result.growth_level_name })}`, 'success', 4000);
+        // The stage's own name, not the server's: `growth_level_name` comes back in
+        // English whatever locale asked for it.
+        const levelName = t(`levels.${result.growth_level}`);
+        showToast(`🎉 ${t('level_up_title')} ${t('level_up', { level: levelName })}`, 'success', 4000);
       } else {
         showToast(`☕ ${t('success')}`, 'success', 2000);
       }
