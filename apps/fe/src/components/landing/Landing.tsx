@@ -23,8 +23,8 @@ import { useAuth } from '@/hooks/useAuth';
 import HeroMedia from './HeroMedia';
 import { GlobeCanvas, type GlobeTheme } from './GlobeCanvas';
 import { Map, BookOpen, Share2 } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { GrowthIcon } from '@/components/cafe/GrowthIcon';
+import type { ReactNode } from 'react';
+import { GrowthTrack } from './GrowthTrack';
 import { CoffeeBean, FlipText } from '@/shared/ui';
 import type { CafeStats } from '@/lib/api/stats';
 import Marquee from './Marquee';
@@ -35,7 +35,6 @@ type Stage = {
   title: string;
   badge: string;
   description: string;
-  highlights: string[];
 };
 
 export type LandingMessages = {
@@ -298,89 +297,18 @@ function LandingHero({
 
 /* --------------------------------------------------------------- index --- */
 
-/*
-  Where a row's emphasis sits across its travel through the viewport.
-
-  `progress` is 0 when the row's top meets the bottom of the screen and 1 when
-  its bottom leaves the top -- Motion's `["start end", "end start"]` window,
-  written out: each pair names a point on the target and a point on the
-  container, in that order. So it is exactly 0.5 when the row is centred, and
-  the curve below comes up to full ink over the quarter before that, holds
-  through the middle, and goes back down over the quarter after. Passing a
-  stage puts it back at rest, which is the behaviour the list had before.
-*/
-const EMPHASIS_STOPS = [0.24, 0.42, 0.58, 0.76];
-
-/** The curve above, sampled. 0 at rest, 1 at full emphasis. */
-function emphasisAt(progress: number) {
-  const [inStart, inEnd, outStart, outEnd] = EMPHASIS_STOPS;
-  if (progress <= inStart || progress >= outEnd) return 0;
-  if (progress < inEnd) return (progress - inStart) / (inEnd - inStart);
-  if (progress <= outStart) return 1;
-  return (outEnd - progress) / (outEnd - outStart);
-}
-
 /**
- * The five growth stages as an index. Each row carries its own badge in the
- * left column, so a stage and the words about it are always on the same line.
+ * The five growth stages as one dial. This replaces a list that gave each stage
+ * its own screen and let the scroll carry the emphasis from row to row: five
+ * screens for five sentences, and on a phone nothing moved but the ink. The dial
+ * puts all five on the ring at once and lets a drag, a tap or an arrow pick one.
  *
- * An earlier pass put one oversized badge in a sticky column that swapped as
- * you scrolled. It read as a separate thing happening beside the list rather
- * than as the list's own marker -- there was no line connecting the badge on
- * screen to the row it belonged to. The scroll still drives which stage is
- * live; it drives emphasis instead of position.
- *
- * That emphasis is read from where each row sits, not from an intersection
- * event. The list used to pick one live row with an `IntersectionObserver` over
- * a band across the middle of the screen, which is a threshold: it fires when a
- * row crosses an edge and says nothing in between, so a fast flick could carry
- * two rows across the band inside one callback batch and leave the emphasis on
- * whichever entry the browser reported last. Position is not a threshold. Every
- * frame each row knows where it is, so scrolling at any speed lands on the
- * right stage, and the rows on either side are already partway there.
- *
- * The value is written to the row as a custom property and the children read it
- * out of the cascade, so a frame costs one style write per row and no React
- * render at all.
+ * It climbs left to right and stops: a roasted bean is the last thing that
+ * happens to a bean, so the journey must not read as a loop. The drop counts sit
+ * under the nodes as an axis, which says how far along a stage is without
+ * spending a sentence on it.
  */
 function GrowthIndex({ messages }: { messages: LandingMessages }) {
-  const rowsRef = useRef<(HTMLLIElement | null)[]>([]);
-
-  useEffect(() => {
-    // With motion off, every row stays at the full ink it renders with.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const rows = rowsRef.current.filter(Boolean) as HTMLLIElement[];
-    if (rows.length === 0) return;
-
-    let frame = 0;
-
-    const paint = () => {
-      frame = 0;
-      const viewport = window.innerHeight;
-      for (const row of rows) {
-        const rect = row.getBoundingClientRect();
-        const travel = rect.height + viewport;
-        const progress = Math.min(1, Math.max(0, (viewport - rect.top) / travel));
-        row.style.setProperty('--emphasis', emphasisAt(progress).toFixed(3));
-      }
-    };
-
-    // Coalesced to one paint per frame: scroll fires far more often than that.
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(paint);
-    };
-
-    paint();
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-    };
-  }, []);
-
   return (
     <section className={`${MEASURE} pb-20 md:pb-28`}>
       <Reveal>
@@ -396,68 +324,12 @@ function GrowthIndex({ messages }: { messages: LandingMessages }) {
         </p>
       </Reveal>
 
-      <ol className="mt-16 grid gap-px bg-edge-subtle">
-        {messages.stages.map((stage, index) => {
-          return (
-            <li
-              key={stage.title}
-              ref={(node) => {
-                rowsRef.current[index] = node;
-              }}
-              /*
-                Starts at 1, so the server's markup and a browser with motion
-                turned off both read as a plain, fully legible list.
-              */
-              style={{ '--emphasis': 1 } as React.CSSProperties}
-              /*
-                One centred column rather than badge-left / words-right. The
-                stages are read one at a time as they come up the screen, and a
-                centred stack puts the badge, the name and the sentence on the
-                same axis instead of asking the eye to cross the row.
-              */
-              className="flex flex-col items-center gap-6 bg-surface-page py-12 text-center md:py-16"
-            >
-              <div className="flex flex-col items-center gap-4">
-                {/*
-                  Scale and opacity, not colour -- the four themes have four inks
-                  and a fixed muted colour is wrong in at least two of them.
-                */}
-                <span
-                  className="block shrink-0 origin-center"
-                  style={{ transform: 'scale(calc(0.82 + 0.18 * var(--emphasis)))' }}
-                >
-                  <GrowthIcon level={index + 1} className="h-16 w-16 md:h-24 md:w-24" />
-                </span>
-                <p className="landing-micro" style={{ opacity: EMPHASIS_OPACITY }}>
-                  {stage.badge}
-                </p>
-              </div>
-
-              <div style={{ opacity: EMPHASIS_OPACITY }}>
-                <h3 className="landing-display text-[clamp(1.75rem,4vw,3rem)] break-keep">
-                  {stage.title}
-                </h3>
-                <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-ink-secondary break-keep md:text-lg">
-                  {stage.description}
-                </p>
-                <ul className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2">
-                  {stage.highlights.map((highlight) => (
-                    <li key={highlight} className="landing-micro text-ink-secondary">
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      <Reveal className="mt-6 md:mt-10">
+        <GrowthTrack stages={messages.stages} />
+      </Reveal>
     </section>
   );
 }
-
-/* A row at rest still reads; it just stops asking to be read. */
-const EMPHASIS_OPACITY = 'calc(0.45 + 0.55 * var(--emphasis))';
 
 /* ------------------------------------------------------------ register --- */
 

@@ -138,8 +138,8 @@
     "hero_cta": "Drop your first bean",
     "hero_cta_logged_in": "Drop a bean",
     "hero_cta_secondary": "Open the map",
-    "index_title": "The growth of a single bean",
-    "index_note": "Five stages, one cafe at a time — your bean grows only where you keep coming back.",
+    "index_title": "Visit again. Watch it grow.",
+    "index_note": "Each cafe keeps a bean of its own. Drop one every time you go and it grows a stage at a time, from first sprout to roasted bean. Fill all five and you are a regular there.",
     "register_title": "Know a place that is not on this map?",
     "register_lede": "Add it yourself. It takes a link and a minute.",
     "register_cta": "Register a cafe",
@@ -154,7 +154,7 @@
     "close_line1": "Plant your",
     "close_line2": "first bean",
     "close_note": "“60 beans make a cup of coffee, and they give me 60 good ideas.”",
-    "close_note_source": "— Beethoven",
+    "close_note_source": "Beethoven",
     "close_cta": "Get started",
     "close_cta_logged_in": "Drop a bean",
     "marquee": "Third-wave · Roastery · Late opening · Quiet corner · Single origin · Hand drip · Neighbourhood regular · Hidden gem",
@@ -167,44 +167,29 @@
       "title": "Drop a Bean, Watch It Grow",
       "subtitle": "Every visit to a cafe plants a bean and grows it toward coffee. Collect badges as you become a regular.",
       "sprout": {
-        "title": "Plant Your First Bean",
-        "badge": "Sprout · 1 Drop",
-        "description": "Visit any cafe within 50 meters and tap Drop Bean. One visit plants your first bean, and a pair of leaves breaks the soil to begin your journey at this spot.",
-        "h1": "Location-based check-in",
-        "h2": "One tap, one bean",
-        "h3": "Each cafe grows its own bean"
+        "title": "Drop your first bean",
+        "badge": "Sprout · 1 drop",
+        "description": "Get within 50 meters of a cafe and tap Drop Bean. A sprout marks your first visit here."
       },
       "tree": {
-        "title": "Taking Root",
-        "badge": "Coffee Tree · 3 Drops",
-        "description": "Your bean is taking root. Come back and drop another, and by the third visit the seedling stands as a coffee tree with a stem, branches and long leaves.",
-        "h1": "Revisit the same cafe to grow",
-        "h2": "Track your favorite spots",
-        "h3": "Growth is per-cafe, not global"
+        "title": "Come back twice",
+        "badge": "Coffee tree · 3 drops",
+        "description": "Three visits to the same cafe, and the sprout has grown into a coffee tree."
       },
       "cherry": {
-        "title": "Bearing Fruit",
-        "badge": "Coffee Cherry · 5 Drops",
-        "description": "Your tree is bearing fruit for the first time. Three ripe cherries mark the visit where this cafe stops being somewhere you went and becomes part of your routine.",
-        "h1": "You're officially a regular",
-        "h2": "The tree's first harvest",
-        "h3": "Check your growth in My Beans"
+        "title": "Now you are a regular",
+        "badge": "Coffee cherry · 5 drops",
+        "description": "Five visits. The tree bears fruit, and this cafe is part of your week."
       },
       "green_bean": {
-        "title": "Harvest and Process",
-        "badge": "Green Bean · 10 Drops",
-        "description": "The cherries have been picked and processed into pale green beans. Ten visits in, your coffee journey at this cafe is one stage from complete.",
-        "h1": "A local expert at this cafe",
-        "h2": "10 visits and counting",
-        "h3": "One stage from the finish"
+        "title": "Ten visits in",
+        "badge": "Green bean · 10 drops",
+        "description": "The cherries are picked and hulled into green beans. One stage to go."
       },
       "roasted_bean": {
-        "title": "The Roast",
-        "badge": "Roasted Bean · 15 Drops",
-        "description": "A single dark roasted bean completes the journey from sprout to coffee. The highest badge there is, and the mark of a true regular here.",
-        "h1": "Maximum growth achieved",
-        "h2": "Confetti celebration on level-up",
-        "h3": "A testament to your loyalty"
+        "title": "The last stage",
+        "badge": "Roasted bean · 15 drops",
+        "description": "Fifteen visits. Your bean is roasted, and you are a true regular here."
       }
     },
     "user_personas": {

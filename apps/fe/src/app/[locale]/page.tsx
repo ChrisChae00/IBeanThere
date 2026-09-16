@@ -104,11 +104,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               title: t(`beandrop_timeline.${key}.title`),
               badge: t(`beandrop_timeline.${key}.badge`),
               description: t(`beandrop_timeline.${key}.description`),
-              highlights: [
-                t(`beandrop_timeline.${key}.h1`),
-                t(`beandrop_timeline.${key}.h2`),
-                t(`beandrop_timeline.${key}.h3`),
-              ],
             })),
             personas: PERSONA_KEYS.map((key) => ({
               title: t(`user_personas.${key}.title`),

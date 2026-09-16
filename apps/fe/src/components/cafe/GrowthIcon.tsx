@@ -62,10 +62,18 @@ export function GrowthIcon({ level, size, className = '' }: GrowthIconProps) {
       title={stage.name}
     >
       {/*
-        `sizes` is the largest the badge is ever drawn (the landing index, 96px), so a
-        phone is not handed the 3x file for a 24px row in the beans list.
+        A badge given a pixel box asks for exactly that; anything sized by class
+        falls back to 96px, the largest such call on the page. Left at a flat 96px
+        the landing ring's centre badge -- drawn at three or four times that -- was
+        handed the small file and rendered soft.
       */}
-      <Image src={stage.src} alt={stage.name} fill sizes="96px" className="object-cover" />
+      <Image
+        src={stage.src}
+        alt={stage.name}
+        fill
+        sizes={size ? `${size}px` : '96px'}
+        className="object-cover"
+      />
     </span>
   );
 }
