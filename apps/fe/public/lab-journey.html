@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lab: bean → grounds</title>
+<!--
+  THROWAWAY SPIKE. Not part of the app. Answers one question: does a canvas
+  particle bean that cracks and grinds into grounds look right and run smoothly
+  on a phone, with text passing over it? Delete when the answer is in.
+  Colours are Morning Coffee's tokens pasted in by hand.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#e9d6c0; --ink:#442f19; --ink-soft:#685138; --brand:#8C5A3A; --edge:#c2ac93;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+  .journey{position:relative}
+  .stage{position:sticky;top:0;height:100svh;overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+
+  /* Text in normal flow, passing over the sticky stage. */
+  .beats{position:relative;z-index:2;margin-top:-100svh;pointer-events:none}
+  .beat{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(20px,6vw,64px)}
+  .beat.first{justify-content:flex-start;padding-top:max(18svh, calc(env(safe-area-inset-top,0px) + 12svh))}
+  .beat.last{justify-content:flex-end;padding-bottom:max(16svh, calc(env(safe-area-inset-bottom,0px) + 10svh))}
+  .micro{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px}
+  h1{font-family:'Hahmlet','Playfair Display',serif;font-weight:600;font-size:clamp(34px,9vw,84px);line-height:1.04;letter-spacing:-.02em;margin:0;max-width:12ch;word-break:keep-all}
+  p.sub{font-size:clamp(15px,4vw,19px);line-height:1.55;color:var(--ink-soft);max-width:30ch;margin:16px 0 0;word-break:keep-all}
+
+  .after{min-height:70svh;display:grid;place-items:center;border-top:1px solid var(--edge);font-size:14px;color:var(--ink-soft)}
+  .hud{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:10px;z-index:9;font:11px/1.4 ui-monospace,monospace;color:var(--ink-soft);opacity:.7;text-align:right;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="journey" id="journey">
+  <div class="stage"><canvas id="c" aria-hidden="true"></canvas></div>
+  <div class="beats">
+    <section class="beat first">
+      <p class="micro">Bean drop · 1회</p>
+      <h1>한 번의 방문이<br>원두 한 알.</h1>
+      <p class="sub">카페 50m 안에서 한 번 탭하면 이 카페에 당신의 원두가 놓입니다.</p>
+    </section>
+    <section class="beat"></section>
+    <section class="beat last">
+      <p class="micro">Coffee log</p>
+      <h1>알갱이 하나가<br>기록 하나.</h1>
+      <p class="sub">마신 것, 앉은 자리, 그날의 한 줄. 방문은 쌓여서 가루가 됩니다.</p>
+    </section>
+  </div>
+</div>
+<div class="after">↓ 여기부터는 다음 비트 (프로토타입 끝)</div>
+<div class="hud" id="hud"></div>
+
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById("c"), ctx = canvas.getContext("2d");
+  var journey = document.getElementById("journey"), hud = document.getElementById("hud");
+
+  // Fewer on touch devices; ?n=1200 overrides for measuring.
+  var q = new URLSearchParams(location.search);
+  var COARSE = matchMedia("(pointer: coarse)").matches;
+  var N = +q.get("n") || (COARSE ? 700 : 1500);
+
+  var W = 0, H = 0, DPR = 1;
+  function resize(){
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    layout();
+  }
+
+  // --- particles ------------------------------------------------------
+  // Sampled once in bean-local space (unit ellipse, a=1, b=.62) with the
+  // crease cut out. Everything else is derived from these seeds per resize.
+  var seeds = [];
+  (function sample(){
+    var tries = 0;
+    while (seeds.length < N && tries++ < N * 40){
+      var x = Math.random() * 2 - 1, y = Math.random() * 2 - 1;
+      if (x*x + (y*y)/(0.62*0.62) > 1) continue;
+      // crease: a shallow S down the long axis
+      var cx = 0.13 * Math.sin(y * 3.2);
+      if (Math.abs(x - cx) < 0.055 && Math.abs(y) < 0.86) continue;
+      var lit = 0.55 + 0.45 * Math.max(0, 1 - Math.hypot(x + 0.35, y - 0.25) / 1.3);
+      seeds.push({ x:x, y:y, lit:lit, r:Math.random(), s:Math.random(), side: x < cx ? -1 : 1 });
+    }
+  })();
+
+  // Bean placement, chunk offsets and pile targets, in px. Recomputed on resize.
+  var beanX, beanY, beanR, ROT = -0.55;
+  var chunks = [];
+  var P = [];   // per particle: bean px pos, chunk id, pile target
+  function layout(){
+    beanR = Math.min(W, H) * (COARSE ? 0.30 : 0.24);
+    beanX = W * 0.5; beanY = H * 0.46;
+    // Six crack chunks: seeds around the bean; each particle joins the nearest.
+    chunks = [];
+    for (var i = 0; i < 6; i++){
+      var a = i / 6 * Math.PI * 2 + 0.4;
+      chunks.push({ x: Math.cos(a) * 0.55, y: Math.sin(a) * 0.4, rot: (Math.random() - 0.5) * 0.9, k: 0.35 + Math.random() * 0.5 });
+    }
+    var cs = Math.cos(ROT), sn = Math.sin(ROT);
+    P = seeds.map(function(s){
+      var bx = s.x * cs - s.y * 0.62 * sn, by = s.x * sn + s.y * 0.62 * cs;
+      var best = 0, bd = 1e9;
+      for (var c = 0; c < chunks.length; c++){
+        var d = Math.hypot(s.x - chunks[c].x, s.y - chunks[c].y);
+        if (d < bd){ bd = d; best = c; }
+      }
+      // Grounds: a mound along the bottom. Gaussian-ish x, stacked y.
+      var g = (s.r + s.s + Math.random()) / 3;               // ~normal 0..1
+      var px = W * 0.5 + (g - 0.5) * W * 1.35;
+      var mound = Math.exp(-Math.pow((px - W * 0.5) / (W * 0.30), 2));
+      var py = H - (COARSE ? H * 0.11 : H * 0.14) * mound * (0.35 + s.s * 0.9) - 8;
+      return { bx: beanX + bx * beanR, by: beanY + by * beanR, c: best, px: px, py: py,
+               lift: -(0.15 + s.r * 0.55) * H * 0.35, delay: s.s * 0.45 };
+    });
+  }
+
+  // --- progress -------------------------------------------------------
+  var target = 0, shown = 0;
+  function readScroll(){
+    var top = journey.offsetTop, len = journey.offsetHeight - innerHeight;
+    target = len > 0 ? Math.min(Math.max((scrollY - top) / len, 0), 1) : 0;
+  }
+  function clamp(v,a,b){ return v < a ? a : v > b ? b : v; }
+  function smooth(t){ return t*t*(3-2*t); }
+  function ramp(p,a,b){ return smooth(clamp((p-a)/(b-a),0,1)); }
+
+  // --- paint ----------------------------------------------------------
+  var frames = 0, fpsAt = performance.now(), fps = 0;
+  function paint(p){
+    ctx.clearRect(0, 0, W, H);
+    var crack = ramp(p, 0.12, 0.34);        // chunks part
+    var grind = ramp(p, 0.30, 0.88);        // chunks dissolve into grounds
+    var breathe = 1 + Math.sin(performance.now() / 900) * 0.006 * (1 - crack);
+    var dot = Math.max(1.1, beanR / 46) * (1 - grind * 0.45);
+
+    for (var i = 0; i < P.length; i++){
+      var s = seeds[i], q = P[i], ch = chunks[q.c];
+      // chunk drift: translate outward and rotate a little around bean centre
+      var ox = ch.x * beanR * ch.k * crack, oy = ch.y * beanR * ch.k * crack + crack * crack * beanR * 0.25;
+      var rx = q.bx - beanX, ry = q.by - beanY, ang = ch.rot * crack;
+      var cs = Math.cos(ang), sn = Math.sin(ang);
+      var x0 = beanX + (rx * cs - ry * sn) * breathe + ox;
+      var y0 = beanY + (rx * sn + ry * cs) * breathe + oy;
+
+      // per-particle staggered flight to the mound, with a lift on the way
+      var t = ramp(grind, q.delay, q.delay + 0.55);
+      var x = x0 + (q.px - x0) * t;
+      var y = y0 + (q.py - y0) * t + Math.sin(t * Math.PI) * q.lift;
+
+      var l = s.lit * (1 - grind * 0.35) + grind * 0.25;
+      ctx.fillStyle = "rgb(" + (60 + l * 95 | 0) + "," + (36 + l * 62 | 0) + "," + (22 + l * 38 | 0) + ")";
+      ctx.fillRect(x - dot, y - dot, dot * 2, dot * 2);
+    }
+  }
+
+  function frame(now){
+    shown += (target - shown) * 0.14;         // ease toward scroll, kills jitter
+    paint(shown);
+    frames++;
+    if (now - fpsAt > 500){ fps = Math.round(frames * 1000 / (now - fpsAt)); frames = 0; fpsAt = now;
+      hud.textContent = N + " pts · " + fps + " fps · " + (shown * 100 | 0) + "%"; }
+    requestAnimationFrame(frame);
+  }
+
+  addEventListener("scroll", readScroll, { passive:true });
+  addEventListener("resize", function(){ resize(); readScroll(); });
+  resize(); readScroll(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -111,3 +111,8 @@ AGENTS.md
 graphify-out/
 memory/
 .impeccable/
+
+# Hero-journey spikes: a vendored three copy and throwaway render frames.
+# Both are regenerated locally (see the ink spike header); neither belongs in git.
+apps/fe/public/lab/
+apps/fe/public/lab-frames/

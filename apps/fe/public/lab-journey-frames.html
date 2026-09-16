@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lab: bean → grounds (frames)</title>
+<!--
+  THROWAWAY SPIKE, image-sequence edition. Scrubs a folder of pre-rendered frames
+  on a canvas -- the mp4-scrub idea with the decoder taken out, which is what
+  makes it safe on phones. Drop frames into /public/lab-frames/ as
+  f_0001.webp, f_0002.webp, ... and open ?count=N. Delete when answered.
+-->
+<style>
+  :root{ --page:#e9d6c0; --ink:#442f19; --ink-soft:#685138; --edge:#c2ac93; }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .journey{position:relative}
+  .stage{position:sticky;top:0;height:100svh;overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .beats{position:relative;z-index:2;margin-top:-100svh;pointer-events:none}
+  .beat{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(20px,6vw,64px)}
+  .beat.first{justify-content:flex-start;padding-top:max(18svh, calc(env(safe-area-inset-top,0px) + 12svh))}
+  .beat.last{justify-content:flex-end;padding-bottom:max(16svh, calc(env(safe-area-inset-bottom,0px) + 10svh))}
+  .micro{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px}
+  h1{font-family:'Hahmlet','Playfair Display',Georgia,serif;font-weight:600;font-size:clamp(34px,9vw,84px);line-height:1.04;letter-spacing:-.02em;margin:0;max-width:12ch;word-break:keep-all}
+  p.sub{font-size:clamp(15px,4vw,19px);line-height:1.55;color:var(--ink-soft);max-width:30ch;margin:16px 0 0;word-break:keep-all}
+  .after{min-height:70svh;display:grid;place-items:center;border-top:1px solid var(--edge);font-size:14px;color:var(--ink-soft)}
+  .hud{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:10px;z-index:9;font:11px/1.4 ui-monospace,monospace;color:var(--ink-soft);opacity:.7;text-align:right;pointer-events:none;white-space:pre}
+</style>
+</head>
+<body>
+
+<div class="journey" id="journey">
+  <div class="stage"><canvas id="c" aria-hidden="true"></canvas></div>
+  <div class="beats">
+    <section class="beat first">
+      <p class="micro">Bean drop · 1회</p>
+      <h1>한 번의 방문이<br>원두 한 알.</h1>
+      <p class="sub">카페 50m 안에서 한 번 탭하면 이 카페에 당신의 원두가 놓입니다.</p>
+    </section>
+    <section class="beat"></section>
+    <section class="beat last">
+      <p class="micro">Coffee log</p>
+      <h1>알갱이 하나가<br>기록 하나.</h1>
+      <p class="sub">마신 것, 앉은 자리, 그날의 한 줄. 방문은 쌓여서 가루가 됩니다.</p>
+    </section>
+  </div>
+</div>
+<div class="after">↓ 여기부터는 다음 비트 (프로토타입 끝)</div>
+<div class="hud" id="hud"></div>
+
+<script>
+(function(){
+  "use strict";
+  var q = new URLSearchParams(location.search);
+  var COUNT = +q.get("count") || 0, DIR = q.get("dir") || "/lab-frames/", EXT = q.get("ext") || "webp";
+  var canvas = document.getElementById("c"), ctx = canvas.getContext("2d");
+  var journey = document.getElementById("journey"), hud = document.getElementById("hud");
+  if (!COUNT){ hud.textContent = "open with ?count=N (frames in " + DIR + "f_0001." + EXT + " …)"; return; }
+
+  // Load every 8th frame first so scrubbing works early, then fill the gaps.
+  var frames = new Array(COUNT), loaded = 0, bytes = 0;
+  function load(i){
+    return new Promise(function(res){
+      var img = new Image();
+      img.onload = function(){ frames[i] = img; loaded++; res(); };
+      img.onerror = res;
+      img.src = DIR + "f_" + String(i + 1).padStart(4, "0") + "." + EXT;
+    });
+  }
+  var order = [];
+  for (var s = 8; s >= 1; s = s >> 1) for (var i = 0; i < COUNT; i++) if (i % s === 0 && order.indexOf(i) < 0) order.push(i);
+  (function pump(k){ if (k >= order.length) return; load(order[k]).then(function(){ pump(k + 1); }); })(0);
+  fetch(DIR + "f_0001." + EXT, { method: "HEAD" }).then(function(r){ bytes = +r.headers.get("content-length") || 0; });
+
+  var W = 0, H = 0, DPR = 1;
+  function resize(){
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  var target = 0, shown = 0, drawn = -1;
+  function readScroll(){
+    var len = journey.offsetHeight - innerHeight;
+    target = len > 0 ? Math.min(Math.max((scrollY - journey.offsetTop) / len, 0), 1) : 0;
+  }
+  // nearest loaded frame at or below the wanted index
+  function nearest(i){ for (var j = i; j >= 0; j--) if (frames[j]) return j; for (j = i; j < COUNT; j++) if (frames[j]) return j; return -1; }
+
+  var fr = 0, fpsAt = performance.now(), fps = 0;
+  function frame(now){
+    shown += (target - shown) * 0.14;
+    var want = Math.round(shown * (COUNT - 1)), i = nearest(want);
+    if (i >= 0 && i !== drawn){
+      var img = frames[i], s = Math.max(W / img.naturalWidth, H / img.naturalHeight);   // cover
+      var w = img.naturalWidth * s, h = img.naturalHeight * s;
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      drawn = i;
+    }
+    fr++;
+    if (now - fpsAt > 500){
+      fps = Math.round(fr * 1000 / (now - fpsAt)); fr = 0; fpsAt = now;
+      hud.textContent = loaded + "/" + COUNT + " frames" + (bytes ? " · ~" + (bytes * COUNT / 1048576).toFixed(1) + " MB" : "") + "\n" + fps + " fps · " + (shown * 100 | 0) + "% · f" + (want + 1);
+    }
+    requestAnimationFrame(frame);
+  }
+  addEventListener("scroll", readScroll, { passive:true });
+  addEventListener("resize", function(){ resize(); readScroll(); drawn = -1; });
+  resize(); readScroll(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

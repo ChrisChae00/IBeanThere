@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lab: ink drawing</title>
+<!--
+  THROWAWAY SPIKE, technical-drawing edition. One rule: ink lines on paper, no
+  shading. Every part is procedural geometry drawn three ways -- a paper-coloured
+  fill that hides lines behind it, an inverted hull for the silhouette, and
+  ink lines for profile edges and construction rings. Cut faces get hatching,
+  grounds are stipple. ?dark=1 flips to the dark/rim-light register.
+  Delete when the look is judged.
+
+  Needs three under /lab, which is not committed -- the app's CSP is
+  script-src 'self', so the CDN is blocked and a local copy stands in. Restore it:
+    mkdir -p public/lab/jsm/environments
+    curl -sL -o public/lab/three.module.js \
+      https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js
+    curl -sL -o public/lab/jsm/environments/RoomEnvironment.js \
+      https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js
+  The real build will import three from npm and none of this applies.
+-->
+<style>
+  :root{ --page:#e9d6c0; --ink:#442f19; --ink-soft:#685138; --edge:#c2ac93; }
+  :root.dark{ --page:#1a120b; --ink:#e3cdb2; --ink-soft:#b79d85; --edge:#3c2a21; }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .journey{position:relative;margin:0 auto}
+  .after{margin:0 auto}
+  .stage{position:sticky;top:0;height:var(--vh,100svh);overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .leaders{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .leaders line{stroke:var(--ink);stroke-width:1;opacity:.8}
+  .label{position:absolute;font:12px/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.04em;color:var(--ink);white-space:nowrap;opacity:0;transition:opacity .35s;transform:translateY(-50%)}
+  .label small{display:block;color:var(--ink-soft);font-size:11px;margin-top:2px}
+  .beats{position:relative;z-index:2;margin-top:calc(-1 * var(--vh,100svh));pointer-events:none}
+  .beat{min-height:var(--vh,100svh);display:flex;flex-direction:column;justify-content:flex-start;padding:max(14svh, calc(env(safe-area-inset-top,0px) + 10svh)) clamp(20px,6vw,64px) 0}
+  .micro{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;font-family:ui-monospace,Menlo,monospace}
+  h1{font-family:'Hahmlet','Playfair Display',Georgia,serif;font-weight:600;font-size:clamp(30px,8vw,72px);line-height:1.06;letter-spacing:-.02em;margin:0;max-width:12ch;word-break:keep-all}
+  p.sub{font-size:clamp(14px,3.8vw,18px);line-height:1.55;color:var(--ink-soft);max-width:28ch;margin:14px 0 0;word-break:keep-all}
+  .after{min-height:60svh;display:grid;place-items:center;border-top:1px solid var(--edge);font-size:14px;color:var(--ink-soft)}
+  .hud{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:10px;z-index:9;font:11px/1.4 ui-monospace,monospace;color:var(--ink-soft);opacity:.7;text-align:right;pointer-events:none;white-space:pre}
+</style>
+<script type="importmap">{ "imports": { "three": "/lab/three.module.js" } }</script>
+</head>
+<body>
+
+<div class="journey" id="journey">
+  <div class="stage" id="stage">
+    <svg class="leaders" id="leaders" aria-hidden="true"></svg>
+    <div class="label" id="lab-basket">basket<small>Coffee log · 기록이 담기는 곳</small></div>
+    <div class="label" id="lab-handle">handle<small>Bean drop · 50m 안에서 한 번</small></div>
+    <div class="label" id="lab-spout">spout<small>Cafe map · 지도로 흘러나온다</small></div>
+    <div class="label" id="lab-head">group head<small>Badge · 단골이 되는 자리</small></div>
+  </div>
+  <div class="beats">
+    <section class="beat"><p class="micro">fig. 1 — coffea arabica, seed</p><h1>한 번의 방문이<br>원두 한 알.</h1></section>
+    <section class="beat"><p class="micro">fig. 2 — section</p><h1>갈라서 보면<br>안이 있다.</h1><p class="sub">마신 것, 앉은 자리, 그날의 한 줄.</p></section>
+    <section class="beat"><p class="micro">fig. 3 — grind</p><h1>알갱이 하나가<br>기록 하나.</h1></section>
+    <section class="beat"><p class="micro">fig. 4 — portafilter, exploded</p><h1>기록이<br>한 곳에 담긴다.</h1></section>
+    <section class="beat"><p class="micro">fig. 5 — assembly</p><h1>그리고<br>단골이 된다.</h1></section>
+  </div>
+</div>
+<div class="after">↓ 다음 비트 (추출 · 잔) 는 여기서 이어진다</div>
+<div class="hud" id="hud">loading…</div>
+
+<script type="module">
+import * as THREE from "three";
+
+const q = new URLSearchParams(location.search);
+const DARK = q.get("dark") === "1"; if (DARK) document.documentElement.classList.add("dark");
+const COARSE = matchMedia("(pointer: coarse)").matches;
+const DPR_CAP = +q.get("dpr") || (COARSE ? 2 : 2);
+const GROUNDS = +q.get("n") || 2200;
+// ?w=430 narrows the page to a phone width for desktop checks
+if (q.get("w")){ document.querySelectorAll(".journey,.after").forEach(e => e.style.maxWidth = q.get("w") + "px"); }
+if (q.get("h")){ document.documentElement.style.setProperty("--vh", q.get("h") + "px"); }
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PAPER = new THREE.Color(css("--page")), INK = new THREE.Color(css("--ink"));
+
+const stage = document.getElementById("stage"), journey = document.getElementById("journey"), hud = document.getElementById("hud");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, DPR_CAP));
+stage.insertBefore(renderer.domElement, stage.firstChild);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 60);
+
+// --- ink primitives ------------------------------------------------------------
+const paperMat = new THREE.MeshBasicMaterial({ color: PAPER, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+const hullMat  = new THREE.MeshBasicMaterial({ color: INK, side: THREE.BackSide });
+const inkMat   = new THREE.LineBasicMaterial({ color: INK });
+const faintMat = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.45 });
+
+// fill + silhouette hull + hard-edge lines. `hull` is the silhouette thickness.
+function inkMesh(geo, { hull = 1.025, edges = 28, faint = false } = {}){
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(geo, paperMat));
+  if (hull){ const h = new THREE.Mesh(geo, hullMat); h.scale.setScalar(hull); g.add(h); }
+  if (edges) g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, edges), faint ? faintMat : inkMat));
+  return g;
+}
+function polyline(points, mat = inkMat, closed = false){
+  const p = closed ? [...points, points[0]] : points;
+  return new THREE.Line(new THREE.BufferGeometry().setFromPoints(p), mat);
+}
+// A lathe body: profile [[r,y],...] revolved, plus construction rings at each
+// profile point and a few longitudinal lines -- the engineering-drawing vocabulary.
+function lathe(profile, { segs = 56, longs = 8, hull = 0, edges = 30, rings = true } = {}){
+  // LatheGeometry winds the other way from SphereGeometry; reverse so front faces face out.
+  const pts = profile.map(([r, y]) => new THREE.Vector2(r, y)).reverse();
+  const geo = new THREE.LatheGeometry(pts, segs);
+  const g = inkMesh(geo, { hull, edges });
+  if (rings) for (const [r, y] of profile){
+    if (r < 0.02) continue;
+    const ring = []; for (let i = 0; i <= 64; i++){ const a = i / 64 * Math.PI * 2; ring.push(new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r)); }
+    g.add(polyline(ring, faintMat));
+  }
+  for (let k = 0; k < longs; k++){
+    const a = k / longs * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+    g.add(polyline(profile.map(([r, y]) => new THREE.Vector3(c * r, y, s * r)), faintMat));
+  }
+  return g;
+}
+// 45° hatching clipped to an ellipse in the xz plane (a cut face).
+function hatch(rx, rz, gap = 0.09){
+  const segs = [];
+  for (let c = -(rx + rz); c <= rx + rz; c += gap){
+    // line: x - z' = c where z' = z * (rx/rz) so the clip is a circle of radius rx
+    const pts = [];
+    for (let t = -rx * 2; t <= rx * 2; t += 0.01){
+      const x = t, zp = t - c;
+      if (x * x + zp * zp <= rx * rx) pts.push(new THREE.Vector3(x, 0, zp * rz / rx));
+    }
+    if (pts.length > 1) segs.push(pts[0], pts[pts.length - 1]);
+  }
+  return new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segs), inkMat);
+}
+
+// --- the bean, as an engraving -------------------------------------------------------
+// Every line the bean is drawn with lives in one LineSegments per half, with a
+// per-stroke stagger and drift. The shader draws each stroke in ('0 0' → '0 1'),
+// then erases it from its start ('1 1') while it drifts away -- anime's
+// createDrawable, on the GPU, driven by scroll.
+const BX = 1, BY = 0.62, BZ = 0.46;
+const LIGHT = new THREE.Vector3(-0.45, 0.75, 0.6).normalize();
+// A real bean: flat on the crease side, domed on the back, one end a touch narrower.
+function deform(v){
+  const taper = 1 - 0.07 * (v.x / BX);
+  v.y *= taper; v.z *= taper;
+  if (v.z > 0) v.z *= 0.72;
+  return v;
+}
+function halfGeo(side){
+  const g = new THREE.SphereGeometry(1, 64, 40, 0, Math.PI);
+  g.rotateX(side > 0 ? -Math.PI / 2 : Math.PI / 2);
+  g.scale(BX, BY, BZ);
+  const pos = g.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++){ v.fromBufferAttribute(pos, i); deform(v); pos.setXYZ(i, v.x, v.y, v.z); }
+  g.computeVertexNormals();
+  return g;
+}
+// surface point on the half at cross-section x, angle a (0..π over the half)
+function surf(side, x, a, out){
+  const s = Math.sqrt(Math.max(0, 1 - x * x));
+  out.set(x * BX, side * Math.sin(a) * s * BY, Math.cos(a) * s * BZ);
+  return deform(out);
+}
+function normalAt(side, x, a, out){
+  // ellipsoid normal, good enough after the mild deform
+  const s = Math.sqrt(Math.max(0, 1 - x * x));
+  out.set(x / (BX * BX), side * Math.sin(a) * s / (BY * BY), Math.cos(a) * s / (BZ * BZ)).normalize();
+  return out;
+}
+
+const strokeShader = {
+  vertexShader: `
+    attribute float aT; attribute float aS; attribute vec3 aDrift;
+    uniform float uDisperse;
+    varying float vT; varying float vS;
+    void main(){
+      vT = aT; vS = aS;
+      vec3 p = position + aDrift * uDisperse * (0.5 + aS * 1.2);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+    }`,
+  fragmentShader: `
+    uniform float uDraw; uniform float uErase; uniform vec3 uColor; uniform float uOpacity;
+    varying float vT; varying float vS;
+    float phase(float g, float s){ float t = clamp((g - s * 0.65) / 0.35, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
+    void main(){
+      if (vT > phase(uDraw, vS) || vT < phase(uErase, vS)) discard;
+      gl_FragColor = vec4(uColor, uOpacity);
+    }`
+};
+function strokeMaterial(opacity){
+  return new THREE.ShaderMaterial({ ...strokeShader, transparent: true,
+    uniforms: { uDraw: { value: 0 }, uErase: { value: 0 }, uDisperse: { value: 0 }, uColor: { value: INK }, uOpacity: { value: opacity } } });
+}
+// Collects polylines into one LineSegments with the stroke attributes.
+class StrokeSet {
+  constructor(){ this.pos = []; this.t = []; this.s = []; this.drift = []; this.strokes = []; }
+  add(points, stagger, drift){
+    if (points.length < 2) return;
+    let len = 0; const cum = [0];
+    for (let i = 1; i < points.length; i++){ len += points[i].distanceTo(points[i - 1]); cum.push(len); }
+    for (let i = 1; i < points.length; i++){
+      for (const [pt, c] of [[points[i - 1], cum[i - 1]], [points[i], cum[i]]]){
+        this.pos.push(pt.x, pt.y, pt.z); this.t.push(c / len); this.s.push(stagger); this.drift.push(drift.x, drift.y, drift.z);
+      }
+    }
+    this.strokes.push({ points, stagger, drift, len });
+  }
+  build(mat){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(this.pos, 3));
+    g.setAttribute("aT", new THREE.Float32BufferAttribute(this.t, 1));
+    g.setAttribute("aS", new THREE.Float32BufferAttribute(this.s, 1));
+    g.setAttribute("aDrift", new THREE.Float32BufferAttribute(this.drift, 3));
+    return new THREE.LineSegments(g, mat);
+  }
+}
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+const bean = new THREE.Group(); scene.add(bean);
+const halves = [1, -1].map(side => {
+  const h = new THREE.Group();
+  const geo = halfGeo(side);
+  h.add(new THREE.Mesh(geo, paperMat));                      // occludes strokes on the far side
+  const set = new StrokeSet(), v = new THREE.Vector3(), n = new THREE.Vector3();
+  const driftOf = (mid) => new THREE.Vector3(mid.x * 0.6 + rnd(-.5, .5), side * rnd(0.4, 1.3) + 0.3, mid.z * 0.8 + rnd(-.6, .6));
+
+  // 1. outline: the widest contour, z = 0
+  { const arc = []; for (let i = 0; i <= 64; i++){ const a = -Math.PI / 2 + Math.PI * i / 64; arc.push(deform(new THREE.Vector3(Math.sin(a) * BX, side * Math.cos(a) * BY, 0))); }
+    set.add(arc, 0.02, new THREE.Vector3(0, side * 0.9, 0)); }
+  // 2. crease rim: the cut edge, drawn dark
+  { const rim = []; for (let i = 0; i <= 80; i++){ const a = i / 80 * Math.PI * 2; rim.push(deform(new THREE.Vector3(Math.cos(a) * BX, 0, Math.sin(a) * BZ))); }
+    set.add(rim, 0.05, new THREE.Vector3(0, side * 0.6, 0.4)); }
+  // 3. form-following hatching: short arcs around the long axis, kept only where
+  //    the surface turns from the light; a random threshold per row so it stipples.
+  for (let row = 0; row < 26; row++){
+    const x = -0.94 + 1.88 * row / 25, thr = rnd(0.28, 0.58);
+    let run = [];
+    for (let i = 0; i <= 48; i++){
+      const a = Math.PI * i / 48;
+      surf(side, x, a, v); normalAt(side, x, a, n);
+      const shade = 1 - Math.max(0, n.dot(LIGHT));
+      if (shade > thr) run.push(v.clone());
+      else if (run.length){ set.add(run, rnd(0.1, 0.9), driftOf(run[run.length >> 1])); run = []; }
+    }
+    if (run.length) set.add(run, rnd(0.1, 0.9), driftOf(run[run.length >> 1]));
+  }
+  // 4. cross-hatch along the length in the darkest zone
+  for (let k = 0; k < 9; k++){
+    const a = Math.PI * (0.55 + 0.42 * k / 8);
+    let run = [];
+    for (let i = 0; i <= 40; i++){
+      const x = -0.9 + 1.8 * i / 40;
+      surf(side, x, a, v); normalAt(side, x, a, n);
+      if (1 - Math.max(0, n.dot(LIGHT)) > 0.62) run.push(v.clone());
+      else if (run.length){ set.add(run, rnd(0.2, 1), driftOf(run[run.length >> 1])); run = []; }
+    }
+    if (run.length) set.add(run, rnd(0.2, 1), driftOf(run[run.length >> 1]));
+  }
+  const strokes = set.build(strokeMaterial(0.9));
+  h.add(strokes);
+
+  // the cut face: paper fill (occludes) + hatching that draws on as the halves part
+  const cap = new THREE.Group();
+  const capGeo = new THREE.CircleGeometry(1, 64); capGeo.rotateX(-Math.PI / 2); capGeo.scale(BX, 1, BZ);
+  { const pos = capGeo.attributes.position, w = new THREE.Vector3(); for (let i = 0; i < pos.count; i++){ w.fromBufferAttribute(pos, i); deform(w); pos.setXYZ(i, w.x, w.y, w.z); } }
+  cap.add(new THREE.Mesh(capGeo, new THREE.MeshBasicMaterial({ color: PAPER, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })));
+  const capSet = new StrokeSet();
+  { const h45 = hatch(BX * 0.96, BZ * 0.96, 0.09).geometry.attributes.position; // reuse the clipped 45° lines
+    for (let i = 0; i < h45.count; i += 2){
+      const a = deform(new THREE.Vector3().fromBufferAttribute(h45, i)), b = deform(new THREE.Vector3().fromBufferAttribute(h45, i + 1));
+      capSet.add([a, b], i / h45.count, new THREE.Vector3(rnd(-.4, .4), side * rnd(.3, 1), rnd(-.4, .4)));
+    } }
+  const capStrokes = capSet.build(strokeMaterial(0.85));
+  cap.add(capStrokes);
+  cap.position.y = side * 0.002;
+  h.add(cap);
+  bean.add(h);
+  return { h, side, fill: h.children[0], strokes, cap, capStrokes, set, capSet };
+});
+
+// --- the grounds: stipple that condenses out of the erased strokes ----------------------
+const gPos = new Float32Array(GROUNDS * 3);
+const gGeo = new THREE.BufferGeometry(); gGeo.setAttribute("position", new THREE.BufferAttribute(gPos, 3));
+const grounds = new THREE.Points(gGeo, new THREE.PointsMaterial({ color: INK, size: 2.6, sizeAttenuation: false }));
+grounds.visible = false; scene.add(grounds);
+const G = [];
+for (let i = 0; i < GROUNDS; i++){
+  const half = halves[i & 1], strokes = half.set.strokes.concat(half.capSet.strokes);
+  const st = strokes[Math.floor(Math.random() * strokes.length)];
+  const t = Math.random(), j = Math.min(st.points.length - 2, Math.floor(t * (st.points.length - 1)));
+  const local = st.points[j].clone().lerp(st.points[j + 1], t * (st.points.length - 1) - j);
+  const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 0.82;
+  const mound = Math.exp(-((r / 0.55) ** 2));
+  G.push({ half, local, t, stagger: st.stagger, drift: st.drift,
+           // a heaped dose: the mound crests above the basket rim
+           land: new THREE.Vector3(Math.cos(a) * r, -0.3 + mound * 0.95 + Math.random() * 0.12, Math.sin(a) * r),
+           lift: 0.3 + Math.random() * 1.0 });
+}
+const phaseJS = (g, s) => { const t = clamp((g - s * 0.65) / 0.35, 0, 1); return t * t * (3 - 2 * t); };
+
+// --- the portafilter -------------------------------------------------------------
+const rig = new THREE.Group(); scene.add(rig);
+const basket = lathe([[0, -0.42], [0.62, -0.42], [0.78, -0.4], [0.9, 0.36], [0.98, 0.4], [0.98, 0.46], [0.9, 0.46], [0.86, 0.4], [0.86, -0.34], [0.62, -0.36], [0, -0.36]], { longs: 10 });
+const body = lathe([[0.92, 0.42], [1.12, 0.42], [1.16, 0.3], [1.16, -0.44], [1.02, -0.6], [0.4, -0.66], [0.4, -0.5], [0.92, -0.5]], { longs: 12 });
+const ears = new THREE.Group();
+for (const s of [1, -1]){ const e = inkMesh(new THREE.BoxGeometry(0.4, 0.16, 0.7), { hull: 0, edges: 1 }); e.position.set(0, 0.36, s * 1.22); ears.add(e); }
+const spout = new THREE.Group();
+for (const s of [1, -1]){
+  const t = lathe([[0.12, 0], [0.12, 0.55], [0.17, 0.55]], { longs: 4, rings: true });
+  // tube points +y; flip it to hang down, then splay the two tubes apart
+  t.rotation.order = "ZXY"; t.rotation.z = Math.PI; t.rotation.x = s * -0.5;
+  t.position.set(0, -0.62, s * 0.18);
+  spout.add(t);
+}
+const handle = new THREE.Group();
+{
+  const rod = lathe([[0.15, 0], [0.15, 2.2], [0.2, 2.35], [0.24, 2.7], [0.16, 2.95], [0, 3.0]], { longs: 6 });
+  rod.rotation.z = -Math.PI / 2; rod.position.set(1.1, 0.05, 0); rod.rotation.x = 0;
+  handle.add(rod);
+}
+const head = lathe([[0, 0.9], [1.5, 0.9], [1.5, 0.2], [1.28, 0.2], [1.28, 0.02], [1.02, 0.02], [1.02, 0.2], [0, 0.2]], { longs: 12 });
+rig.add(basket, body, ears, spout, handle, head);
+
+// exploded vs assembled placements
+const PLACE = {
+  basket: { ex: [0, 1.7, 0], as: [0, 0, 0] },
+  body:   { ex: [0, 0, 0],   as: [0, 0, 0] },
+  ears:   { ex: [0, 0, 0],   as: [0, 0, 0] },
+  spout:  { ex: [0, -1.3, 0], as: [0, 0, 0] },
+  handle: { ex: [1.5, 0, 0], as: [0, 0, 0] },
+  head:   { ex: [0, 3.2, 0], as: [0, 0.62, 0] },
+};
+const parts = { basket, body, ears, spout, handle, head };
+
+// --- leader lines ----------------------------------------------------------------------
+const leaders = document.getElementById("leaders");
+const LABELS = [
+  { el: document.getElementById("lab-basket"), anchor: () => basket.localToWorld(new THREE.Vector3(0.7, 0.46, 0)), at: [0.06, 0.50], side: "left" },
+  { el: document.getElementById("lab-handle"), anchor: () => handle.localToWorld(new THREE.Vector3(3.9, 0.05, 0)), at: [0.94, 0.66], side: "right" },
+  { el: document.getElementById("lab-spout"),  anchor: () => spout.localToWorld(new THREE.Vector3(0, -1.1, 0.35)), at: [0.06, 0.82], side: "left" },
+  { el: document.getElementById("lab-head"),   anchor: () => head.localToWorld(new THREE.Vector3(-1.5, 0.6, 0)), at: [0.94, 0.42], side: "right" },
+];
+const lines = LABELS.map(() => { const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); leaders.appendChild(l); return l; });
+
+// --- sizing / progress ---------------------------------------------------------------
+let W = 0, H = 0;
+function resize(){
+  W = stage.clientWidth; H = stage.clientHeight;
+  renderer.setSize(W, H, false);
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+  camera.position.set(0, 0.6, W < H ? 13.5 : 10.5);
+  camera.lookAt(0, 0, 0);
+}
+addEventListener("resize", resize); resize();
+let target = 0, shown = 0;
+function readScroll(){ const len = journey.offsetHeight - innerHeight; target = len > 0 ? Math.min(Math.max((scrollY - journey.offsetTop) / len, 0), 1) : 0; }
+addEventListener("scroll", readScroll, { passive: true });
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v, smooth = t => t * t * (3 - 2 * t), ramp = (p, a, b) => smooth(clamp((p - a) / (b - a), 0, 1));
+const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
+
+// --- frame -----------------------------------------------------------------------------
+let frames = 0, fpsAt = performance.now();
+function tick(now){
+  shown += (target - shown) * 0.12;
+  const p = shown, t = now / 1000;
+
+  const draw   = ramp(p, 0.00, 0.10);   // the bean draws itself in
+  const open   = ramp(p, 0.10, 0.24);   // halves part along the crease; cut faces hatch in
+  const dispel = ramp(p, 0.24, 0.50);   // strokes drift apart
+  const erase  = ramp(p, 0.27, 0.54);   // ...and are erased from their start
+  const grind  = ramp(p, 0.30, 0.62);   // stipple falls into the basket
+  const gather = ramp(p, 0.52, 0.80);   // portafilter assembles around the basket
+  const lock   = ramp(p, 0.80, 0.96);   // rig rises into the group head
+  const turn   = ramp(p, 0.56, 1.0);
+  const burst  = dispel;
+
+  bean.visible = erase < 0.999;
+  bean.rotation.set(0.42 - open * 0.15, Math.sin(t * 0.35) * 0.08 * (1 - open) - open * 0.45, -0.5);
+  bean.position.y = 0.4 + open * 0.2;
+  bean.scale.setScalar(W < H ? 1.35 : 1.25);
+  for (const H of halves){
+    H.h.position.y = H.side * open * 0.55;
+    H.h.rotation.x = H.side * open * 0.35;
+    const skin = 1 - ramp(dispel, 0, 0.45);
+    H.fill.visible = skin > 0.01; H.fill.scale.setScalar(Math.max(skin, 0.001));
+    H.cap.visible = open > 0.02 && skin > 0.01; H.cap.children[0].scale.setScalar(Math.max(skin, 0.001));
+    const u = H.strokes.material.uniforms;
+    u.uDraw.value = draw; u.uDisperse.value = dispel; u.uErase.value = erase;
+    const c = H.capStrokes.material.uniforms;
+    c.uDraw.value = ramp(open, 0.3, 1); c.uDisperse.value = dispel; c.uErase.value = erase;
+  }
+
+  // portafilter rig: basket alone waits under the bean during the grind, then the rest arrives
+  rig.visible = grind > 0.001;
+  const rigY = -2.6 + gather * 1.9 + lock * 0.0;
+  rig.position.set(0, rigY, 0);
+  rig.rotation.y = -0.5 + turn * 1.1;
+  rig.rotation.x = 0.35 - turn * 0.08;
+  for (const [name, part] of Object.entries(parts)){
+    const { ex, as } = PLACE[name];
+    const k = name === "basket" ? ramp(gather, 0.35, 0.85) : ramp(gather, 0, 0.85);
+    part.position.set(ex[0] + (as[0] - ex[0]) * k, ex[1] + (as[1] - ex[1]) * k, ex[2] + (as[2] - ex[2]) * k);
+    part.visible = name === "basket" ? true : name === "head" ? lock > 0.001 : gather > 0.001;
+  }
+  // the group head sits above and the rig rises into it
+  head.position.y = 3.2 - lock * 2.55;
+
+  // grounds: each dot is a point on a stroke; it appears as that part of the
+  // stroke is erased, rides the stroke's drift, then falls into the basket
+  grounds.visible = erase > 0.001;
+  if (grounds.visible){
+    for (let i = 0; i < GROUNDS; i++){
+      const g = G[i];
+      const born = phaseJS(erase, g.stagger) >= g.t;
+      if (!born){ gPos[i * 3] = 0; gPos[i * 3 + 1] = 99; gPos[i * 3 + 2] = 0; continue; }
+      tmp.copy(g.local).addScaledVector(g.drift, dispel * (0.5 + g.stagger * 1.2));
+      g.half.h.localToWorld(tmp);
+      const k = ramp(grind, g.stagger * 0.5, g.stagger * 0.5 + 0.5);
+      const land = tmp2.copy(g.land); basket.localToWorld(land);
+      gPos[i * 3]     = tmp.x + (land.x - tmp.x) * k;
+      gPos[i * 3 + 1] = tmp.y + (land.y - tmp.y) * k + Math.sin(k * Math.PI) * g.lift;
+      gPos[i * 3 + 2] = tmp.z + (land.z - tmp.z) * k;
+    }
+    gGeo.attributes.position.needsUpdate = true;
+  }
+
+  // leader lines + labels, once assembled
+  const show = ramp(p, 0.82, 0.9);
+  LABELS.forEach((L, i) => {
+    const a = L.anchor().project(camera);
+    const ax = (a.x + 1) / 2 * W, ay = (1 - a.y) / 2 * H;
+    const lx = L.at[0] * W, ly = L.at[1] * H;
+    L.el.style.left = L.side === "left" ? lx + "px" : "auto";
+    L.el.style.right = L.side === "right" ? (W - lx) + "px" : "auto";
+    L.el.style.top = ly + "px";
+    L.el.style.opacity = show;
+    const l = lines[i];
+    l.setAttribute("x1", ax); l.setAttribute("y1", ay);
+    // elbow: run horizontal at the label's row
+    l.setAttribute("x2", L.side === "left" ? lx + L.el.offsetWidth + 10 : lx - L.el.offsetWidth - 10); l.setAttribute("y2", ly);
+    l.style.opacity = show * 0.8;
+  });
+
+  renderer.render(scene, camera);
+  frames++;
+  if (now - fpsAt > 500){ hud.textContent = `ink · dpr ${renderer.getPixelRatio().toFixed(1)}\n${Math.round(frames * 1000 / (now - fpsAt))} fps · ${p * 100 | 0}%`; frames = 0; fpsAt = now; }
+}
+function frame(now){ tick(now); requestAnimationFrame(frame); }
+readScroll(); requestAnimationFrame(frame);
+window.__lab = { gPos, grounds, G, halves, basket, camera, scene, snap(){ readScroll(); shown = target; tick(performance.now()); } };
+</script>
+</body>
+</html>

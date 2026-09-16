@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lab: bean → grounds (webgl)</title>
+<!--
+  THROWAWAY SPIKE, WebGL edition. Same page skeleton as lab-journey.html, but the
+  bean is a lit 3D object: two halves that split along the crease, shatter into
+  shards, and fall as instanced grounds into a mound. No model files -- every
+  shape is procedural, so the question this answers is purely "does a real-time
+  3D look hold up on a phone, and at what frame rate". Delete when answered.
+  Colours are Morning Coffee's tokens pasted in by hand.
+  Needs three under /lab, which is not committed; see the ink spike's header for
+  the two curl commands that restore it.
+-->
+<style>
+  :root{ --page:#e9d6c0; --ink:#442f19; --ink-soft:#685138; --edge:#c2ac93; }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .journey{position:relative}
+  .stage{position:sticky;top:0;height:100svh;overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .beats{position:relative;z-index:2;margin-top:-100svh;pointer-events:none}
+  .beat{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(20px,6vw,64px)}
+  .beat.first{justify-content:flex-start;padding-top:max(18svh, calc(env(safe-area-inset-top,0px) + 12svh))}
+  .beat.last{justify-content:flex-end;padding-bottom:max(16svh, calc(env(safe-area-inset-bottom,0px) + 10svh))}
+  .micro{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px}
+  h1{font-family:'Hahmlet','Playfair Display',Georgia,serif;font-weight:600;font-size:clamp(34px,9vw,84px);line-height:1.04;letter-spacing:-.02em;margin:0;max-width:12ch;word-break:keep-all}
+  p.sub{font-size:clamp(15px,4vw,19px);line-height:1.55;color:var(--ink-soft);max-width:30ch;margin:16px 0 0;word-break:keep-all}
+  .after{min-height:70svh;display:grid;place-items:center;border-top:1px solid var(--edge);font-size:14px;color:var(--ink-soft)}
+  .hud{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:10px;z-index:9;font:11px/1.4 ui-monospace,monospace;color:var(--ink-soft);opacity:.7;text-align:right;pointer-events:none;white-space:pre}
+</style>
+<script type="importmap">
+{ "imports": { "three": "/lab/three.module.js", "three/addons/": "/lab/jsm/" } }
+</script>
+</head>
+<body>
+
+<div class="journey" id="journey">
+  <div class="stage" id="stage"></div>
+  <div class="beats">
+    <section class="beat first">
+      <p class="micro">Bean drop · 1회</p>
+      <h1>한 번의 방문이<br>원두 한 알.</h1>
+      <p class="sub">카페 50m 안에서 한 번 탭하면 이 카페에 당신의 원두가 놓입니다.</p>
+    </section>
+    <section class="beat"></section>
+    <section class="beat last">
+      <p class="micro">Coffee log</p>
+      <h1>알갱이 하나가<br>기록 하나.</h1>
+      <p class="sub">마신 것, 앉은 자리, 그날의 한 줄. 방문은 쌓여서 가루가 됩니다.</p>
+    </section>
+  </div>
+</div>
+<div class="after">↓ 여기부터는 다음 비트 (프로토타입 끝)</div>
+<div class="hud" id="hud">loading three…</div>
+
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const q = new URLSearchParams(location.search);
+const COARSE = matchMedia("(pointer: coarse)").matches;
+const GROUNDS = +q.get("n") || (COARSE ? 1600 : 3200);
+const DPR_CAP = +q.get("dpr") || (COARSE ? 1.5 : 2);
+const SHARDS_PER_HALF = 18;
+
+const stage = document.getElementById("stage"), journey = document.getElementById("journey"), hud = document.getElementById("hud");
+
+// --- renderer / scene ----------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, DPR_CAP));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+// A neutral studio environment gives the clearcoat something to reflect. No HDR file needed.
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.6;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
+camera.position.set(0, 0.2, 7);
+
+const key = new THREE.DirectionalLight(0xfff1e0, 2.0); key.position.set(3, 4, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0xd9b896, 1.0); rim.position.set(-4, 2, -3); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xf5f0e8, 0x8c5a3a, 0.4));
+
+// --- the bean: two halves meeting at the crease -----------------------------
+const skinMat = new THREE.MeshPhysicalMaterial({
+  color: 0x46291a, roughness: 0.5, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.45, sheen: 0.25, sheenColor: 0x8c5a3a
+});
+// The inner face is paler, like a real split bean.
+const capMat = new THREE.MeshStandardMaterial({ color: 0x8a6242, roughness: 0.85, side: THREE.DoubleSide });
+const shardMat = new THREE.MeshStandardMaterial({ color: 0x3f2416, roughness: 0.7 });
+
+// Half-sphere (z>=0), turned so the cut plane is y=0, stretched into a bean half,
+// with a groove pressed into the front along the cut.
+function halfGeometry(side){
+  const g = new THREE.SphereGeometry(1, 72, 44, 0, Math.PI);
+  g.rotateX(side > 0 ? -Math.PI / 2 : Math.PI / 2);
+  g.scale(1, 0.62, 0.46);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++){
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    if (z > 0){
+      const along = Math.max(0, 1 - (x / 0.98) ** 2);
+      const groove = Math.exp(-((y / 0.11) ** 2)) * 0.13 * Math.sqrt(along);
+      pos.setZ(i, z - groove);
+    }
+  }
+  g.computeVertexNormals();
+  return g;
+}
+const capGeo = new THREE.CircleGeometry(1, 64); capGeo.rotateX(-Math.PI / 2); capGeo.scale(1, 1, 0.46);
+
+const bean = new THREE.Group();
+scene.add(bean);
+const halves = [1, -1].map(side => {
+  const h = new THREE.Group();
+  const skin = new THREE.Mesh(halfGeometry(side), skinMat);
+  const cap = new THREE.Mesh(capGeo, capMat);
+  h.add(skin, cap);
+  // shards hidden inside the half until the crack opens
+  const shardGeo = new THREE.DodecahedronGeometry(0.13, 0);
+  const shards = [];
+  for (let i = 0; i < SHARDS_PER_HALF; i++){
+    const s = new THREE.Mesh(shardGeo, shardMat);
+    s.userData.home = new THREE.Vector3((Math.random() - 0.5) * 1.7, side * (0.08 + Math.random() * 0.42), (Math.random() - 0.5) * 0.5);
+    s.userData.fly = new THREE.Vector3((Math.random() - 0.5) * 2.6, side * (0.5 + Math.random() * 1.0), (Math.random() - 0.5) * 1.8);
+    s.userData.spin = new THREE.Vector3(Math.random(), Math.random(), Math.random()).multiplyScalar(4);
+    s.userData.sc = new THREE.Vector3(0.6 + Math.random(), 0.5 + Math.random() * 0.8, 0.6 + Math.random());
+    s.visible = false;
+    h.add(s); shards.push(s);
+  }
+  bean.add(h);
+  return { h, skin, cap, shards, side };
+});
+bean.rotation.set(0.35, -0.2, -0.6);
+bean.scale.setScalar(COARSE ? 1.05 : 0.95);
+
+// --- the grounds: one instanced mesh --------------------------------------
+const groundGeo = new THREE.IcosahedronGeometry(0.024, 0);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x3a2214, roughness: 0.95 });
+const grounds = new THREE.InstancedMesh(groundGeo, groundMat, GROUNDS);
+grounds.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(grounds);
+const dummy = new THREE.Object3D();
+const G = [];
+for (let i = 0; i < GROUNDS; i++){
+  const half = halves[i & 1], sh = half.shards[i % SHARDS_PER_HALF];
+  const gauss = (Math.random() + Math.random() + Math.random()) / 3 - 0.5;
+  const x = gauss * 9.5;
+  const mound = Math.exp(-Math.pow(x / 2.4, 2));
+  const y = -2.55 + mound * (0.2 + Math.random() * 1.1) + Math.random() * 0.12;
+  const z = (Math.random() - 0.5) * 1.4 * (0.3 + mound);
+  G.push({ shard: sh, land: new THREE.Vector3(x, y, z), lift: 0.6 + Math.random() * 1.6,
+           delay: Math.random() * 0.5, rot: Math.random() * 6.28, sc: 0.7 + Math.random() * 0.8 });
+}
+
+// Soft contact shadows so things sit on something.
+const shadowTex = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const x = c.getContext("2d"), g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, "rgba(68,47,25,.5)"); g.addColorStop(1, "rgba(68,47,25,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+})();
+const shadowOf = (w, h, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+  m.position.set(0, y, -0.2); m.rotation.x = -Math.PI / 2.3; scene.add(m); return m; };
+const beanShadow = shadowOf(3.4, 1.7, -1.0);
+const moundShadow = shadowOf(9, 2.2, -2.7); moundShadow.material.opacity = 0;
+
+// --- sizing ------------------------------------------------------------------
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  camera.position.z = (w < h ? 8.4 : 6.6);   // same on-screen bean size, portrait or landscape
+}
+addEventListener("resize", resize); resize();
+
+// --- progress ----------------------------------------------------------------
+let target = 0, shown = 0;
+function readScroll(){
+  const len = journey.offsetHeight - innerHeight;
+  target = len > 0 ? Math.min(Math.max((scrollY - journey.offsetTop) / len, 0), 1) : 0;
+}
+addEventListener("scroll", readScroll, { passive: true });
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const smooth = t => t * t * (3 - 2 * t);
+const ramp = (p, a, b) => smooth(clamp((p - a) / (b - a), 0, 1));
+
+// --- frame -------------------------------------------------------------------
+const tmp = new THREE.Vector3();
+let frames = 0, fpsAt = performance.now();
+function frame(now){
+  shown += (target - shown) * 0.14;
+  const p = shown, t = now / 1000;
+
+  const crack = ramp(p, 0.10, 0.30);   // halves hinge open along the crease
+  const burst = ramp(p, 0.28, 0.46);   // halves snap into shards
+  const grind = ramp(p, 0.42, 0.92);   // shards → grounds → mound
+
+  bean.rotation.y = -0.2 + Math.sin(t * 0.5) * 0.15 * (1 - crack) + crack * 0.5;
+  bean.rotation.x = 0.35 + Math.sin(t * 0.37) * 0.05 - crack * 0.25;
+  bean.position.y = 0.35 - crack * 0.1;
+
+  for (const H of halves){
+    H.h.rotation.x = H.side * crack * 0.7;
+    H.h.position.y = H.side * crack * 0.3;
+    const gone = burst > 0.02;
+    H.skin.visible = H.cap.visible = !gone || burst < 0.6;
+    const shrink = 1 - ramp(burst, 0, 0.6);
+    H.skin.scale.setScalar(Math.max(shrink, 0.001)); H.cap.scale.setScalar(Math.max(shrink, 0.001));
+    for (const s of H.shards){
+      s.visible = gone && grind < 0.98;
+      tmp.copy(s.userData.home).lerp(s.userData.fly, burst);
+      s.position.copy(tmp);
+      s.rotation.set(s.userData.spin.x * burst, s.userData.spin.y * burst, s.userData.spin.z * burst);
+      const k = Math.min(1, burst * 3) * (1 - ramp(grind, 0.15, 0.75));
+      s.scale.copy(s.userData.sc).multiplyScalar(Math.max(k, 0.0001));
+    }
+  }
+  beanShadow.material.opacity = 0.9 * (1 - burst);
+
+  const active = grind > 0.001;
+  grounds.visible = active;
+  if (active){
+    for (let i = 0; i < GROUNDS; i++){
+      const g = G[i];
+      const k = ramp(grind, g.delay, g.delay + 0.5);
+      g.shard.getWorldPosition(tmp);
+      dummy.position.set(tmp.x + (g.land.x - tmp.x) * k,
+                         tmp.y + (g.land.y - tmp.y) * k + Math.sin(k * Math.PI) * g.lift,
+                         tmp.z + (g.land.z - tmp.z) * k);
+      dummy.rotation.set(g.rot + k * 4, g.rot * 2, 0);
+      dummy.scale.setScalar(g.sc * Math.min(1, k * 4 + 0.15));
+      dummy.updateMatrix();
+      grounds.setMatrixAt(i, dummy.matrix);
+    }
+    grounds.instanceMatrix.needsUpdate = true;
+  }
+  moundShadow.material.opacity = ramp(grind, 0.4, 1) * 0.9;
+
+  renderer.render(scene, camera);
+  frames++;
+  if (now - fpsAt > 500){
+    hud.textContent = `${GROUNDS} grounds · dpr ${renderer.getPixelRatio().toFixed(2)}\n${Math.round(frames * 1000 / (now - fpsAt))} fps · ${p * 100 | 0}%`;
+    frames = 0; fpsAt = now;
+  }
+  requestAnimationFrame(frame);
+}
+readScroll(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
