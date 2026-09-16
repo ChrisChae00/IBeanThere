@@ -30,6 +30,11 @@ export async function generateMetadata({
     description: t('description'),
     icons: {
       icon: '/icons/coffee-logo.svg',
+      // iOS ignores SVG icons; without a PNG, Add to Home Screen shows a letter tile.
+      apple: '/icons/apple-touch-icon.png',
+    },
+    appleWebApp: {
+      title: 'ibeanthere',
     },
     alternates: {
       languages: buildAlternateLanguages('/'),
