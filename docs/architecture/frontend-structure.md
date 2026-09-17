@@ -286,6 +286,52 @@ animate.
   the real error only in development, because in production it would reveal which
   addresses have an account (design-language §2).
 
+## Header search (2026-09-16)
+
+- **One field for cafes, people and pages.** `components/layout/SiteSearch.tsx` exports
+  `SiteSearchBar` (left of the theme switcher at `xl`) and `SiteSearchSheet` (a button
+  left of the hamburger below `xl`, opening a full-width sheet across the top). Both
+  share one state hook and one results body, so they cannot drift. Base UI
+  `Autocomplete` supplies the combobox semantics, arrow keys and dismissal.
+- **Sources.** Cafes come from `GET /cafes/search/text`, people from
+  `GET /users/search` (display name or username; operator accounts are never offered),
+  pages from `lib/search/pages.ts`: a hand-written list of destinations with keywords in
+  both locales, plus the coffee guide's drinks. Routes are not read off the router: a
+  route is not a destination, and a list is the only place the words a reader would
+  type can live.
+- **Minimum lengths are the server's.** Cafes need two characters. People need three,
+  or two when the query has Hangul in it -- a syllable carries what two or three Latin
+  letters do, and most Korean names are two syllables. `personMin` mirrors
+  `user_search_min_length`; change both together.
+- **Enter means a row.** An `item-press` change carries the row's label, not the row, so
+  the highlighted row is kept and read back when the press lands. Results arrive after
+  the keystroke, so when nothing is highlighted Enter takes the first row.
+- **Category chips keep the popup open** by preventing `mousedown`, which would move
+  focus out of the input and close it. `/` focuses the bar from anywhere that is not
+  already taking text.
+
+## Own profile at a public address (2026-09-16)
+
+`/profile/{username}` with your own name replaces itself with `/profile`. A follow list
+or a search can link there, and the public page offered to follow yourself. The check
+compares against the stored profile's username, case-insensitively; it used to read
+`user_metadata.username`, which a Google account never carries and which goes stale
+once the name is changed.
+
+## Hero media (2026-09-16)
+
+`components/landing/HeroMedia.tsx` plays one of two cuts of the same clip:
+`hero-loop.mp4` (2.36:1) from 1024px up, `hero-loop-tall.mp4` (9:16, 720x1280, ~0.85MB)
+below it, re-chosen on every width change. Each has a still that is its own first
+frame (`hero-wide.webp`, `hero-portrait.webp`), so the fade-in changes nothing on
+screen. Neither plays under reduced motion or Save-Data. The source clip holds only the
+middle band of the photograph -- no ceiling, no floor -- so the phone cut is tighter
+than a still of the photograph could be, and cannot be widened without a new clip.
+The clip is also a redrawn version of the photograph rather than the photograph set in
+motion (scale drifts across the frame, colour runs ~10% darker), so compositing it
+into the photograph to recover that band leaves visible seams. `hero-tall.webp` is
+still the auth screen's inset.
+
 ## Key Features
 
 - **Monorepo-style structure** utilizing App Router (`apps/fe/src/app`)

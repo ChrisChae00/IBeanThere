@@ -311,6 +311,20 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   forms that had lost to the base fill all along; they were deleted with the change. A
   class that "does nothing" on a primitive is a regression waiting for a merge.
 
+- **A mixed result list says each row's kind by the shape of its mark.** The header
+  search lists cafes, people and pages together: a cafe is a square photograph, a
+  person a round one, a page an outlined glyph in a ruled square. The group heading says
+  it again in words. A cafe with no photograph takes the app logo on
+  `--surface-sunken`, the same fallback the map's cards use, not a generic cup.
+- **A page wears the mark it already wears elsewhere.** A glyph invented for a search
+  row is one more thing to learn. The profile menu's person, log sheet, bean and gear,
+  the landing's map and book, and the plus on every "register a cafe" button are the
+  vocabulary; set at `.menu-mark`, with the bean a notch larger for the reason the
+  profile menu gives.
+- **A sheet that hangs from the top edge rounds only its free edge.** The phone search
+  sheet takes `--radius-card` on its bottom corners and none on the edge that meets the
+  screen.
+
 ## 6. Motion
 
 - **Above the fold is CSS** (`Reveal trigger="load"`, `.landing-rise`,
@@ -336,6 +350,10 @@ one shipped (2026-09-01). What that settled, for every page that follows:
   golden-ratio scatter rather than `Math.random()`: markup rendered on the server and
   the client has to come out the same, or every tile's inline style fails hydration.
 - **`prefers-reduced-motion` gets the finished page**, not an empty one.
+- **Each viewport gets its own cut of a moving backdrop, and its still is that cut's
+  first frame.** A 2.36:1 clip under `object-cover` on a phone is a strip of its own
+  middle; the phone plays a 9:16 cut instead, and only the cut it plays is fetched.
+  Save-Data is treated like reduced motion.
 - The base layer puts a 200ms transition on every `button, a, input, textarea, select`.
   Instant feedback requires an explicit `transition: none`.
 
