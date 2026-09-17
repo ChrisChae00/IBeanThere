@@ -44,6 +44,82 @@
     "close_menu": "메뉴 닫기",
     "account": "계정"
   },
+  "search": {
+    "label": "검색",
+    "placeholder": "카페, 사람, 페이지 검색",
+    "filter": "결과 필터",
+    "close": "검색 닫기",
+    "categories": {
+      "all": "전체",
+      "cafe": "카페",
+      "person": "사람",
+      "page": "페이지"
+    },
+    "groups": {
+      "quick": "바로가기",
+      "cafe": "카페",
+      "person": "사람",
+      "page": "페이지"
+    },
+    "searching": "검색 중…",
+    "empty": "“{query}”에 맞는 결과가 없습니다.",
+    "register_cafe": "카페 등록하기",
+    "person_min": "사람은 {min}글자 이상 입력하면 찾을 수 있습니다.",
+    "cafe_min": "카페는 {min}글자 이상 입력하면 찾을 수 있습니다.",
+    "error": "사람 검색을 불러오지 못했습니다.",
+    "retry": "다시 시도",
+    "guide_article": "커피 가이드",
+    "pages": {
+      "map": {
+        "label": "지도",
+        "description": "지도에서 카페 찾기"
+      },
+      "dropbean": {
+        "label": "커피콩 심기",
+        "description": "50m 안에서 방문 기록하기"
+      },
+      "register_cafe": {
+        "label": "카페 등록",
+        "description": "지도에 카페 추가하기"
+      },
+      "pending": {
+        "label": "대기 중인 카페",
+        "description": "인증을 기다리는 카페"
+      },
+      "guide": {
+        "label": "커피 가이드",
+        "description": "음료와 만드는 법"
+      },
+      "my_logs": {
+        "label": "내 커피 로그",
+        "description": "내가 쓴 커피 기록"
+      },
+      "my_beans": {
+        "label": "내 커피콩",
+        "description": "카페별 원두 성장"
+      },
+      "profile": {
+        "label": "프로필",
+        "description": "내 페이지와 컬렉션"
+      },
+      "settings": {
+        "label": "설정",
+        "description": "계정, 테마, 언어"
+      },
+      "contact": {
+        "label": "문의하기",
+        "description": "질문과 의견 보내기"
+      },
+      "privacy": {
+        "label": "개인정보처리방침",
+        "description": "데이터를 다루는 방식"
+      },
+      "terms": {
+        "label": "이용약관",
+        "description": "ibeanthere 이용 규칙"
+      }
+    }
+  },
   "drop_bean": {
     "button": "커피콩 심기",
     "success": "커피콩을 심었습니다!",

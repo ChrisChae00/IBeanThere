@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Path
 from typing import List, Literal
 from pydantic import BaseModel, ConfigDict
 import logging
+import re
 from supabase import Client
 from app.models.user import UserPublicResponse, UserResponse, UserUpdate, UserProfileCreate, UserRegistrationResponse
 from app.models.collection import CollectionResponse
@@ -327,14 +328,27 @@ async def check_display_name_availability(
             detail="Failed to check display name availability"
         ) from e
 
+# A Hangul syllable carries what two or three Latin letters do, and most Korean
+# names are two syllables long; a Latin query that short matches half the table.
+USER_SEARCH_MIN_LENGTH = 3
+USER_SEARCH_MIN_LENGTH_HANGUL = 2
+_HANGUL = re.compile(r"[\u3131-\u318e\uac00-\ud7a3]")
+
+
+def user_search_min_length(term: str) -> int:
+    return USER_SEARCH_MIN_LENGTH_HANGUL if _HANGUL.search(term) else USER_SEARCH_MIN_LENGTH
+# Operator accounts, reachable by URL but never offered as someone to find.
+HIDDEN_FROM_SEARCH = ("admin",)
+
+
 @router.get("/search", response_model=List[UserPublicResponse])
 async def search_users(
-    query: str = Query(..., min_length=3, max_length=50, description="Search query for users"),
+    query: str = Query(..., min_length=USER_SEARCH_MIN_LENGTH_HANGUL, max_length=50, description="Search query for users"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of users to return"),
     supabase: Client = Depends(get_supabase_client)
 ):
     """
-    Public endpoint to search for users by display name. (No authentication required)
+    Public endpoint to search for users by display name or username. (No authentication required)
 
     Args:
         query: The search query for users.
@@ -345,7 +359,14 @@ async def search_users(
         List[UserPublicResponse]: The list of users.
     """
     try:
-        users = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").ilike("display_name", f"%{query}%").limit(limit).execute()
+        # `%`, `,` and parentheses would otherwise be read as PostgREST pattern,
+        # argument and grouping syntax rather than as characters the reader typed.
+        term = query.strip().replace("%", "").translate(str.maketrans(",()", "   "))
+        if len(term) < user_search_min_length(term):
+            return []
+        users = supabase.table("users").select("""username, display_name, avatar_url, bio, created_at""").or_(
+            f"display_name.ilike.%{term}%,username.ilike.%{term}%"
+        ).not_.in_("username", list(HIDDEN_FROM_SEARCH)).limit(limit).execute()
         if not users or not users.data:
             return []
         return [UserPublicResponse(**user) for user in users.data]

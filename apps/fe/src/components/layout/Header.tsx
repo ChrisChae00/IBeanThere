@@ -8,6 +8,7 @@ import MobileMenu from './MobileMenu';
 import ThemeSwitcher from './ThemeSwitcher';
 import LanguageSwitcher from './LanguageSwitcher';
 import ProfileDropdown from './ProfileDropdown';
+import { SiteSearchBar, SiteSearchSheet } from './SiteSearch';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Header({
@@ -118,9 +119,16 @@ export default function Header({
 
           {/* `ml-auto` is what pushes this to the far edge now that the row is flex. */}
           <div className="flex items-center justify-end gap-2 ml-auto shrink-0">
-            <MobileMenu locale={locale} />
+            {/* Beside the hamburger, not inside it: searching is not a place to navigate to. */}
+            <div className="flex items-center gap-1 xl:hidden">
+              <SiteSearchSheet locale={locale} />
+              <MobileMenu locale={locale} />
+            </div>
 
             <div className="hidden xl:flex items-center gap-1">
+              <div className="mr-1">
+                <SiteSearchBar locale={locale} />
+              </div>
               <ThemeSwitcher />
               <LanguageSwitcher />
 

@@ -494,9 +494,9 @@ async def search_cafes_by_text(
     try:
         supabase = get_supabase_client()
 
-        # `%` and `,` would otherwise be read as PostgREST pattern and argument
-        # separators rather than as characters the reader typed.
-        term = q.strip().replace("%", "").replace(",", " ")
+        # `%`, `,` and parentheses would otherwise be read as PostgREST pattern,
+        # argument and grouping syntax rather than as characters the reader typed.
+        term = q.strip().replace("%", "").translate(str.maketrans(",()", "   "))
         if len(term) < 2:
             return CafeSearchResponse(cafes=[], total_count=0)
 

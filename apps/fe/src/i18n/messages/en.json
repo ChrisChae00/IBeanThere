@@ -44,6 +44,82 @@
     "close_menu": "Close menu",
     "account": "Account"
   },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search cafes, people, pages",
+    "filter": "Filter results",
+    "close": "Close search",
+    "categories": {
+      "all": "All",
+      "cafe": "Cafes",
+      "person": "People",
+      "page": "Pages"
+    },
+    "groups": {
+      "quick": "Go to",
+      "cafe": "Cafes",
+      "person": "People",
+      "page": "Pages"
+    },
+    "searching": "Searching…",
+    "empty": "Nothing matches “{query}”.",
+    "register_cafe": "Register a cafe",
+    "person_min": "Type {min} or more characters to find people.",
+    "cafe_min": "Type {min} or more characters to find cafes.",
+    "error": "People search is unavailable.",
+    "retry": "Try again",
+    "guide_article": "Coffee guide",
+    "pages": {
+      "map": {
+        "label": "Map",
+        "description": "Find cafes on the map"
+      },
+      "dropbean": {
+        "label": "Drop Bean",
+        "description": "Record a visit within 50m"
+      },
+      "register_cafe": {
+        "label": "Register Cafe",
+        "description": "Add a cafe to the map"
+      },
+      "pending": {
+        "label": "Pending Spots",
+        "description": "Cafes waiting for verification"
+      },
+      "guide": {
+        "label": "Coffee Guide",
+        "description": "Drinks and how they are made"
+      },
+      "my_logs": {
+        "label": "My Coffee Logs",
+        "description": "Your coffee log entries"
+      },
+      "my_beans": {
+        "label": "My Beans",
+        "description": "Your bean growth at each cafe"
+      },
+      "profile": {
+        "label": "Profile",
+        "description": "Your page and collections"
+      },
+      "settings": {
+        "label": "Settings",
+        "description": "Account, theme and language"
+      },
+      "contact": {
+        "label": "Contact Us",
+        "description": "Questions and feedback"
+      },
+      "privacy": {
+        "label": "Privacy Policy",
+        "description": "How your data is handled"
+      },
+      "terms": {
+        "label": "Terms of Service",
+        "description": "The rules for using ibeanthere"
+      }
+    }
+  },
   "drop_bean": {
     "button": "Drop Bean",
     "success": "Bean Dropped!",

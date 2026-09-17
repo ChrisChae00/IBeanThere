@@ -128,6 +128,10 @@ class _Negated:
         self.query.filters.append(("not.is", field, value))
         return self.query
 
+    def in_(self, field, values):
+        self.query.filters.append(("not.in", field, tuple(values)))
+        return self.query
+
 
 class FakeResult:
     def __init__(self, data):
