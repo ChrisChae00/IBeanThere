@@ -125,7 +125,7 @@ export default function BottomSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`fixed bottom-0 left-0 right-0 bg-surface rounded-t-3xl z-101 transition-all ${
+        className={`fixed bottom-0 left-0 right-0 bg-surface rounded-t-3xl z-101 transition-all px-safe ${
           isDragging ? 'transition-none' : 'duration-300 ease-out'
         }`}
         style={{
@@ -149,7 +149,7 @@ export default function BottomSheet({
         )}
         
         {/* Content */}
-        <div className="overflow-y-auto" style={{ height: 'calc(100% - 3rem)' }}>
+        <div className="overflow-y-auto pb-[env(safe-area-inset-bottom)]" style={{ height: 'calc(100% - 3rem)' }}>
           {children}
         </div>
       </div>

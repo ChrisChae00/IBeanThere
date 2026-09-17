@@ -24,7 +24,7 @@ export default async function Footer({ locale }: { locale: string }) {
     'text-ink-on-brand/70 hover:text-ink-on-brand transition-colors whitespace-nowrap';
 
   return (
-    <footer className="bg-brand text-ink-on-brand">
+    <footer className="bg-brand text-ink-on-brand px-safe pb-[env(safe-area-inset-bottom)]">
       {/*
         The brand band starts as a wave rather than a ruled edge, on every page and not
         only the landing. It sits in the footer's own flow: hanging it above the footer

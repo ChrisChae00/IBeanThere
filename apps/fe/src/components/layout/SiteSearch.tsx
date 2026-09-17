@@ -495,7 +495,7 @@ export function SiteSearchSheet({ locale }: { locale: string }) {
         <Dialog.Backdrop className="nav-drawer-scrim fixed inset-0 z-(--z-nav-scrim) xl:hidden transition-opacity duration-200 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0" />
         <Dialog.Popup
           aria-label={t('label')}
-          className="nav-opaque fixed inset-x-0 top-0 z-(--z-nav-drawer) flex max-h-[85dvh] flex-col overflow-hidden rounded-b-(--radius-card) border-b border-edge-default bg-surface-raised outline-none xl:hidden transition-transform duration-200 data-[starting-style]:-translate-y-full data-[ending-style]:-translate-y-full"
+          className="nav-opaque fixed inset-x-0 top-0 z-(--z-nav-drawer) flex max-h-[85dvh] flex-col pt-[env(safe-area-inset-top)] px-safe overflow-hidden rounded-b-(--radius-card) border-b border-edge-default bg-surface-raised outline-none xl:hidden transition-transform duration-200 data-[starting-style]:-translate-y-full data-[ending-style]:-translate-y-full"
         >
           <Autocomplete.Root {...s.rootProps} inline open>
             <div className="flex h-16 shrink-0 items-center gap-2 border-b border-edge-rule px-4">

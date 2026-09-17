@@ -53,10 +53,10 @@ export default function Header({
     scrim's own falloff is the edge.
   */
   return (
-    <header className="nav-over-media fixed top-0 left-0 right-0 z-(--z-nav) motion-fade-in">
+    <header className="nav-over-media fixed top-0 left-0 right-0 z-(--z-nav) motion-fade-in pt-[env(safe-area-inset-top)] px-safe">
       <div
         aria-hidden
-        className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-24 -z-10"
+        className="nav-scrim pointer-events-none absolute inset-x-0 top-0 h-[calc(6rem+env(safe-area-inset-top))] -z-10"
       />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/*

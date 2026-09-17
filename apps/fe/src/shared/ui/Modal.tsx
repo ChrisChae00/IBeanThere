@@ -51,7 +51,7 @@ const sizeClasses: Record<ModalSize, string> = {
 /* Base UI centres the popup; `top` is the only call sites' other option. */
 const alignClasses: Record<ModalAlign, string> = {
   center: '',
-  top: 'top-16 translate-y-0'
+  top: 'top-(--nav-h) translate-y-0'
 };
 
 export default function Modal({

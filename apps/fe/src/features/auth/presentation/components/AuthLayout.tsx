@@ -26,7 +26,7 @@ interface AuthLayoutProps {
 */
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <div className="grid min-h-[calc(100svh-4rem)] lg:grid-cols-2">
+    <div className="grid min-h-[calc(100svh-var(--nav-h))] lg:grid-cols-2">
       <div className="hidden p-4 lg:block">
         <div className="relative h-full overflow-hidden rounded-card bg-scrim-media">
           <PixelImage src="/pics/hero-tall.webp" sizes="50vw" />

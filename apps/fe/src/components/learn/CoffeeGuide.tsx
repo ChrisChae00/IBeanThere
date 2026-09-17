@@ -48,7 +48,7 @@ export default async function CoffeeGuide({ locale }: { locale: string }) {
             key={category.id}
             id={category.id}
             aria-labelledby={`${category.id}-heading`}
-            className="scroll-mt-24 border-t border-edge-rule pt-10 pb-14 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] lg:gap-x-16"
+            className="scroll-mt-[calc(var(--nav-h)+2rem)] border-t border-edge-rule pt-10 pb-14 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] lg:gap-x-16"
           >
             <div className="mb-6 lg:mb-0">
               <h2 id={`${category.id}-heading`} className={H2}>
@@ -61,7 +61,7 @@ export default async function CoffeeGuide({ locale }: { locale: string }) {
         );
       })}
 
-      <section id="milk" aria-labelledby="milk-heading" className="scroll-mt-24 border-t border-edge-rule pt-10 pb-14">
+      <section id="milk" aria-labelledby="milk-heading" className="scroll-mt-[calc(var(--nav-h)+2rem)] border-t border-edge-rule pt-10 pb-14">
         <h2 id="milk-heading" className={H2}>
           {t('compareHeading')}
         </h2>
@@ -96,7 +96,7 @@ export default async function CoffeeGuide({ locale }: { locale: string }) {
         <SourceNote ids={milkSources} label={t('sources')} />
       </section>
 
-      <section id="dates" aria-labelledby="dates-heading" className="scroll-mt-24 border-t border-edge-rule pt-10 pb-14">
+      <section id="dates" aria-labelledby="dates-heading" className="scroll-mt-[calc(var(--nav-h)+2rem)] border-t border-edge-rule pt-10 pb-14">
         <h2 id="dates-heading" className={H2}>
           {t('datesHeading')}
         </h2>

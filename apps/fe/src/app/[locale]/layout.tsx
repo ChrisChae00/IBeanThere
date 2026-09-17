@@ -7,13 +7,16 @@ import { Footer } from '@/components/landing';
 import { AuthWatcher } from '@/components/auth';
 import { ClientProviders } from '@/components/providers';
 import '@/styles/globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { getSiteUrl, buildAlternateLanguages, type Locale } from '@/lib/seo';
 import { defaultThemeName, themeNames } from '@/lib/themes/palettes';
 
 const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t&&${JSON.stringify(
   themeNames
 )}.indexOf(t)>-1){document.documentElement.dataset.theme=t}}catch(e){}})()`;
+
+// Draws under the iOS status bar and home indicator; the insets are handled in CSS.
+export const viewport: Viewport = { viewportFit: 'cover' };
 
 // Dynamic metadata generation with i18n support
 export async function generateMetadata({
@@ -79,8 +82,9 @@ export default async function LocaleLayout({
             <NextIntlClientProvider locale={locale} messages={messages}>
               <ClientProviders>
                 <AuthWatcher />
+                <div aria-hidden className="status-tint" />
                 <Header locale={locale} />
-                <main className="pt-16 flex-1">
+                <main className="pt-(--nav-h) px-safe flex-1 bg-background">
                   {children}
                 </main>
                 <Footer locale={locale} />

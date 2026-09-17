@@ -66,7 +66,7 @@ export default async function CoffeeDrinkDetail({
       </section>
 
       {copy.sections.map(section => (
-        <section key={section.id} id={section.id} aria-labelledby={`${section.id}-heading`} className="mt-14 scroll-mt-24">
+        <section key={section.id} id={section.id} aria-labelledby={`${section.id}-heading`} className="mt-14 scroll-mt-[calc(var(--nav-h)+2rem)]">
           <h2 id={`${section.id}-heading`} className="font-display text-2xl leading-snug text-ink-primary sm:text-3xl">
             {section.heading}
           </h2>

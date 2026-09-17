@@ -121,8 +121,12 @@ const PERSONA_MARKS = [Map, BookOpen, Share2];
 */
 const STEP_INDENTS_CH = [0, 1.64, 4.63];
 
-/* The page's one horizontal measure. Everything hangs off it. */
-const MEASURE = 'mx-auto w-full max-w-[1400px] px-6 md:px-10';
+/*
+  The page's one horizontal measure. Everything hangs off it. The page bleeds past
+  a landscape notch (`bleed-x`), so the measure takes the inset back.
+*/
+const MEASURE =
+  'mx-auto w-full max-w-[1400px] pl-[calc(1.5rem+env(safe-area-inset-left))] pr-[calc(1.5rem+env(safe-area-inset-right))] md:pl-[calc(2.5rem+env(safe-area-inset-left))] md:pr-[calc(2.5rem+env(safe-area-inset-right))]';
 
 export default function Landing({
   messages,
@@ -139,7 +143,7 @@ export default function Landing({
   const primaryHref = isLoggedIn ? `/${locale}/discover/dropbean` : `/${locale}/register`;
 
   return (
-    <div className="bg-surface-page text-ink-primary">
+    <div className="bleed-x bg-surface-page text-ink-primary">
       <LandingHero
         messages={messages}
         locale={locale}
@@ -211,13 +215,15 @@ function LandingHero({
   return (
     /*
       Pulled up under the fixed header so the media runs behind it, exactly as
-      the live hero does. `min-h-screen` so the backdrop is a full field rather
-      than a band.
+      the live hero does. `min-h-lvh` so the backdrop is a full field rather
+      than a band. On touch, 5rem more: iOS 26 Safari draws the page under its
+      bottom toolbar about 58px past `100lvh`, and no viewport unit reaches it.
+      ponytail: fixed 5rem overshoot; measure screen height in JS if a device still shows a gap.
     */
-    <header className="relative -mt-16 min-h-screen overflow-hidden">
+    <header className="relative -mt-[var(--nav-h)] min-h-lvh pointer-coarse:min-h-[calc(100lvh+5rem)] overflow-hidden">
       <HeroMedia />
 
-      <div className={`relative ${MEASURE} flex min-h-screen flex-col justify-center pt-28 pb-20 md:pt-32`}>
+      <div className={`relative ${MEASURE} flex min-h-lvh flex-col justify-center pt-[calc(7rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-[calc(8rem+env(safe-area-inset-top))]`}>
         {/*
           A stepped headline. The first three lines each take one more indent
           than the last, and the fourth returns to the margin -- so the eye
