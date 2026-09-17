@@ -129,9 +129,10 @@ export function GrowthTrack({ stages }: { stages: TrackStage[] }) {
     };
   });
 
+  /* A fast flick back to the start makes the snap spring dip just below 0, so the segment is clamped at both ends. */
   const pointAt = (value: number): Point => {
     if (!box.w) return { x: 0, y: 0 };
-    const seg = Math.min(Math.floor(value), LAST - 1);
+    const seg = clamp(Math.floor(value), 0, LAST - 1);
     const t = clamp(value - seg, 0, 1);
     return {
       x: nodes[seg].x + (nodes[seg + 1].x - nodes[seg].x) * t,
@@ -140,7 +141,7 @@ export function GrowthTrack({ stages }: { stages: TrackStage[] }) {
   };
   /* Spin comes off the real distance travelled, not the shortened drawn one. */
   const travelAt = (value: number) => {
-    const seg = Math.min(Math.floor(value), LAST - 1);
+    const seg = clamp(Math.floor(value), 0, LAST - 1);
     const t = clamp(value - seg, 0, 1);
     return segments.slice(0, seg).reduce((sum, length) => sum + length, 0) + segments[seg] * t;
   };
