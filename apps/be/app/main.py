@@ -19,7 +19,8 @@ if env_path.exists():
 app = FastAPI(title="ibeanthere API", version="2.0.0")
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# slowapi types its handler for RateLimitExceeded; Starlette's stub wants one for any Exception.
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # pyright: ignore[reportArgumentType]
 app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
@@ -34,9 +35,10 @@ app.add_middleware(
 # that keys off the client address (the rate limiter, the cafe view throttle)
 # reads scope["client"] after this has replaced the proxy address with the real
 # client. Only forwarded headers from settings.trusted_proxy_ips are honoured.
+# uvicorn and Starlette declare their own ASGI types, which pyright cannot match.
 app.add_middleware(
-    ProxyHeadersMiddleware,
-    trusted_hosts=settings.trusted_proxy_ips_list,
+    ProxyHeadersMiddleware,  # pyright: ignore[reportArgumentType]
+    trusted_hosts=settings.trusted_proxy_ips_list,  # pyright: ignore[reportCallIssue]
 )
 
 # Include API v1 router
