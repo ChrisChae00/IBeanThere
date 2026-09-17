@@ -332,6 +332,45 @@ motion (scale drifts across the frame, colour runs ~10% darker), so compositing 
 into the photograph to recover that band leaves visible seams. `hero-tall.webp` is
 still the auth screen's inset.
 
+## Screen edges on iOS (2026-09-17)
+
+The page runs edge to edge (`viewport-fit=cover` in `app/[locale]/layout.tsx`).
+Measured on an iPhone 16 Pro in Safari 26, which is what the rules below answer to:
+
+- **Safari gives a normal tab no safe-area insets.** `env(safe-area-inset-*)` reads 0 in
+  portrait, so the insets only take effect in landscape and as a home-screen app. They
+  are still applied everywhere an edge is touched, so those two cases hold.
+- **`--nav-h`** (`globals.css`) is the fixed bar plus the top inset. Anything that clears
+  the header uses it: `main`'s top padding, the hero's pull-up, `Modal`'s top placement,
+  the auth layout's height and the guide's `scroll-mt`. A bare `pt-16` or `top-16` goes
+  wrong as soon as the inset is not 0.
+- **Sideways**, `main`, the header, the footer, the bottom sheet and the search sheet pad
+  by the insets (`px-safe`). The landing undoes that with `bleed-x` so its photograph and
+  bands still reach the edge, and `MEASURE` adds the inset back to the text.
+- **The status bar is painted, not see-through.** Safari 26 ignores `theme-color` and
+  tints the status bar from a fixed, full-width element at least 6px tall with its own
+  `background-color`, else from the page background. The header is transparent and its
+  scrim is an absolute child, which Safari does not sample, so the bar came out beige.
+  `.status-tint` is a 6px fixed strip in `--scrim-media`, shown only on coarse pointers
+  and stacked under the header so the scrim covers it.
+- **Safari draws the page past `100lvh`** under its bottom toolbar: about 58px on that
+  phone, and no viewport unit reaches it. On coarse pointers the hero is
+  `100lvh + 5rem`. A fixed overshoot; if a device still shows the next section below the
+  hero, measure `screen.height` against `100lvh` in JS instead.
+- **The canvas is the brand colour.** `html` takes `--brand` and the page colour sits on
+  `main`, so overscroll past the footer and the strip under the toolbar continue the
+  footer. The page colour cannot stay on `body`: body is `h-full`, so its background would
+  end one screen down on a long page.
+
+## Growth track bounds (2026-09-17)
+
+`components/landing/GrowthTrack.tsx` snaps with an underdamped spring. A fast flick back
+to the first stage carries enough velocity to settle a few hundredths below 0, and the
+segment index taken from that value was -1. `useTransform` runs its transformer during
+render, so the lookup on a missing node took the page down with a client-side exception.
+Segment indices are clamped to `[0, LAST - 1]` in both `pointAt` and `travelAt`; any new
+transform that indexes by track position needs the same clamp.
+
 ## Key Features
 
 - **Monorepo-style structure** utilizing App Router (`apps/fe/src/app`)

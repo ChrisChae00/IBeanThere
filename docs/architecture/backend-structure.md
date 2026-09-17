@@ -45,6 +45,19 @@ apps/be/
 - **Trait suggestions** use `services/traits.py` for approved-only aggregation and note cleanup, with admin review endpoints in `api/v1/cafes.py`.
 - **Coffee logs and badges** use `services/coffee_logs.py` for public log projections and `services/badges.py` for shared badge awards. Log creation handles an absent `cafe_beans` row with `limit(1)` before inserting the first drop.
 
+## Type Checking
+
+`pyrightconfig.json` at the repo root points Pyright at `apps/be/.venv` and adds
+`apps/be` to the import path, so editors and code-intelligence tools that start from the
+root resolve third-party and `app.*` imports. It assumes the venv lives where the
+README creates it.
+
+`app/main.py` carries three inline `pyright: ignore` comments. They cover stub
+mismatches, not bugs: slowapi types its handler for `RateLimitExceeded` where
+Starlette's stub asks for any `Exception`, and uvicorn's `ProxyHeadersMiddleware`
+declares its own ASGI types that Pyright cannot match to Starlette's. Both work at
+runtime; leave the code as it is rather than wrapping it to satisfy the checker.
+
 ## Database Migrations
 
 Numbered SQL files in `apps/be/scripts/migrations/`, applied by hand through the Supabase

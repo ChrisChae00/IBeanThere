@@ -395,6 +395,13 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 - **Child effects run before the parent's.** A control whose colours are set by a parent
   effect measures the *old* values, which is how a swatch showed one colour and the
   number beside it another. Write that kind of change in the event handler.
+- **A spring overshoots its target.** Anything that indexes an array by an animated value
+  clamps both ends, not only the end the value was heading away from. `useTransform`
+  runs during render, so an out-of-range lookup there is a page crash, not a glitch.
+- **Safari 26 paints its own bars.** `theme-color` is ignored; the status bar takes the
+  colour of a fixed, full-width, 6px+ element with a background, else the page's. A
+  transparent header with an absolute scrim reads as no header at all. See
+  frontend-structure, "Screen edges on iOS".
 
 ## 8. Banned
 
@@ -410,6 +417,7 @@ one shipped (2026-09-01). What that settled, for every page that follows:
 | A second component that differs from an existing one by two classes | A `size`/`variant` prop on the existing one |
 | Untranslated literals, locale ternaries | `next-intl` keys in `en.json` and `ko.json` |
 | Taking a translated string apart again (`t(...).replace(String(count), '')`, to style the number on its own) | Print the whole string. Cutting a value back out of a sentence assumes English word order and breaks in the other locale |
+| `pt-16`, `-mt-16`, `top-16` or `4rem` to clear the fixed header | `--nav-h`, which carries the top safe-area inset as well |
 | `alert()` / `confirm()` for a failed action | `useToast()`. A browser dialog blocks the page, and the message it carried was usually a raw API string in English |
 
 ## Related
