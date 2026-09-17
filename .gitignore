@@ -94,6 +94,9 @@ apps/be/scripts/migrations/*
 docs/*
 !docs/architecture/
 
+# Serena (local coding-agent config, cache and memories)
+.serena/
+
 # Temporary/Development files
 *.tmp
 *.temp
