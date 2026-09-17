@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPublicResponse, Collection } from '@/types/api';
 import { ActionsMenu, Button, LoadingSpinner, HeartIcon, BookmarkIcon } from '@/shared/ui';
@@ -24,8 +24,22 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
   const tReport = useTranslations('report');
   const tCollections = useTranslations('collections');
   const tErrors = useTranslations('errors');
-  const { user: currentUser } = useAuth();
+  const locale = useLocale();
+  const { user: currentUser, profile: myProfile } = useAuth();
   const router = useRouter();
+
+  /*
+    Your own public page is your profile page. A follow list or a search can link here
+    with your own name, and the page it used to draw offered to follow yourself -- the
+    check read the sign-in metadata, which a Google account never carries a username
+    in and which goes stale once the name is changed. The stored profile is the one
+    that knows the name.
+  */
+  const isMe = !!myProfile?.username && myProfile.username.toLowerCase() === username.toLowerCase();
+
+  useEffect(() => {
+    if (isMe) router.replace(`/${locale}/profile`);
+  }, [isMe, locale, router]);
   const { showToast } = useToast();
   const { modalState, openUserReport, closeModal } = useReportModal();
 
@@ -96,7 +110,7 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
     }
   };
 
-  if (loading) {
+  if (loading || isMe) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -116,8 +130,6 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
       </div>
     );
   }
-
-  const isMe = currentUser?.user_metadata?.username === username;
 
   return (
     <div className="space-y-6">
@@ -140,42 +152,40 @@ export default function PublicProfileClient({ username }: PublicProfileClientPro
         trustCount={profile.trust_count ?? 0}
         followingCount={profile.following_count ?? 0}
         actions={
-          !isMe && (
-            <div className="flex items-center gap-2">
-              {/*
-                Following is this page's one primary action, so it takes the fill and
-                gives it up once it is done -- the state is the fill, not a second
-                colour. Undoing it asks first: unfollowing is one click away from a
-                button whose whole job is to be clicked, and the row of logs it removes
-                does not come back on its own.
-              */}
-              <Button
-                variant={isTrusted ? 'outline' : 'primary'}
-                size="md"
-                onClick={() => (isTrusted ? setConfirmUnfollow(true) : handleTrust())}
-                loading={trustLoading}
-                leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
-              >
-                {isTrusted ? t('following') : t('follow')}
-              </Button>
+          <div className="flex items-center gap-2">
+            {/*
+              Following is this page's one primary action, so it takes the fill and
+              gives it up once it is done -- the state is the fill, not a second
+              colour. Undoing it asks first: unfollowing is one click away from a
+              button whose whole job is to be clicked, and the row of logs it removes
+              does not come back on its own.
+            */}
+            <Button
+              variant={isTrusted ? 'outline' : 'primary'}
+              size="md"
+              onClick={() => (isTrusted ? setConfirmUnfollow(true) : handleTrust())}
+              loading={trustLoading}
+              leftIcon={isTrusted ? <Check size={18} /> : <UserPlus size={18} />}
+            >
+              {isTrusted ? t('following') : t('follow')}
+            </Button>
 
-              {/*
-                Reporting moved into the overflow for the reason the cafe page moved it
-                there: it is rare, it feels irreversible, and standing in the row beside
-                the action a reader came for it looked equally likely to be that action.
-              */}
-              <ActionsMenu
-                label={tReport('report_user')}
-                items={[
-                  {
-                    key: 'report',
-                    label: tReport('report_user'),
-                    onClick: () => openUserReport(profile.username, username),
-                  },
-                ]}
-              />
-            </div>
-          )
+            {/*
+              Reporting moved into the overflow for the reason the cafe page moved it
+              there: it is rare, it feels irreversible, and standing in the row beside
+              the action a reader came for it looked equally likely to be that action.
+            */}
+            <ActionsMenu
+              label={tReport('report_user')}
+              items={[
+                {
+                  key: 'report',
+                  label: tReport('report_user'),
+                  onClick: () => openUserReport(profile.username, username),
+                },
+              ]}
+            />
+          </div>
         }
       />
 
