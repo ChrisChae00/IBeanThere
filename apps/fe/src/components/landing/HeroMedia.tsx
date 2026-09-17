@@ -27,11 +27,16 @@ const REST_BETWEEN_GUSTS = 2000;
   first. That is what lets it rewind to a standstill without a visible jump: the
   foliage genuinely does not return to its starting position on its own.
 
-  It plays on desktop only. The video is 2.36:1, which crops to a narrow vertical
-  slice of itself on a phone, so portrait gets a still framed from the original
-  photograph instead.
+  Two cuts of the same clip. The 2.36:1 original crops to a narrow slice of its own
+  middle on a phone, so below 1024px a 9:16 cut of it plays instead, framed on the
+  counter and the heater. The source clip holds only the middle band of the
+  photograph, so this cut is tighter than a still could be; the still under it is its
+  own first frame for the same reason the landscape one is.
 */
-const DESKTOP_AND_MOTION_OK = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)';
+const WIDE = '(min-width: 1024px)';
+const MOTION_OK = '(prefers-reduced-motion: no-preference)';
+const WIDE_SRC = '/pics/hero-loop.mp4';
+const TALL_SRC = '/pics/hero-loop-tall.mp4';
 
 export default function HeroMedia() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -41,7 +46,11 @@ export default function HeroMedia() {
     const video = videoRef.current;
     if (!video) return;
 
-    const query = window.matchMedia(DESKTOP_AND_MOTION_OK);
+    const wide = window.matchMedia(WIDE);
+    const motion = window.matchMedia(MOTION_OK);
+    // A reader who asked the browser to save data gets the still, as reduced motion does.
+    const saveData =
+      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
     let timer: number | undefined;
 
     const scheduleGust = () => {
@@ -60,8 +69,8 @@ export default function HeroMedia() {
     const start = () => {
       video.addEventListener('ended', settle);
       video.addEventListener('canplaythrough', reveal);
-      // Assigning the source here is what keeps the 3MB off phones entirely.
-      video.src = '/pics/hero-loop.mp4';
+      // Assigning the source here, not in markup, is what keeps the other cut unfetched.
+      video.src = wide.matches ? WIDE_SRC : TALL_SRC;
       scheduleGust();
     };
     const stop = () => {
@@ -75,17 +84,23 @@ export default function HeroMedia() {
       setVideoReady(false);
     };
 
+    const allowed = () => motion.matches && !saveData;
+
     /*
-      Re-checked on every change, not just at mount: a tablet turned from
-      landscape to portrait would otherwise keep playing a 2.36:1 clip inside a
-      portrait frame, which crops it to a narrow strip of its own middle.
+      Re-checked on every change, not just at mount: a tablet turned from landscape to
+      portrait swaps to the other cut, and turning reduced motion on stops it.
     */
-    const sync = () => (query.matches ? start() : stop());
-    if (query.matches) start();
-    query.addEventListener('change', sync);
+    const sync = () => {
+      stop();
+      if (allowed()) start();
+    };
+    if (allowed()) start();
+    wide.addEventListener('change', sync);
+    motion.addEventListener('change', sync);
 
     return () => {
-      query.removeEventListener('change', sync);
+      wide.removeEventListener('change', sync);
+      motion.removeEventListener('change', sync);
       stop();
     };
   }, []);
@@ -100,7 +115,7 @@ export default function HeroMedia() {
       <picture>
         <source media="(min-width: 1024px)" srcSet="/pics/hero-wide.webp" />
         <img
-          src="/pics/hero-tall.webp"
+          src="/pics/hero-portrait.webp"
           alt="warm cozy coffee shop interior"
           className="absolute inset-0 h-full w-full object-cover"
         />
