@@ -69,7 +69,7 @@ export default function Header({
         <div className="flex items-center h-16 gap-2">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center space-x-1 shrink-0">
-            <Logo size="md" className="text-ink-on-media" />
+            <Logo size={32} className="text-ink-on-media" />
             {/* Display weight is a system decision; the utility does nothing here. */}
             <span className="text-xl text-text whitespace-nowrap font-logo">
               ibeanthere

@@ -36,7 +36,7 @@ export default async function Footer({ locale }: { locale: string }) {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Logo size="md" className="text-ink-on-brand" />
+            <Logo size={32} className="text-ink-on-brand" />
             <span className="font-logo text-2xl">{commonT('app_name')}</span>
           </div>
 

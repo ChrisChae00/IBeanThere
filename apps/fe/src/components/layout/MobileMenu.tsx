@@ -113,7 +113,7 @@ export default function MobileMenu({ locale }: { locale: string }) {
         <Dialog.Popup ref={setDrawer} className="nav-opaque fixed inset-y-0 right-0 z-(--z-nav-drawer) flex w-80 max-w-full flex-col pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] border-l border-edge-default bg-surface-raised outline-none xl:hidden transition-transform duration-300 data-[starting-style]:translate-x-full data-[ending-style]:translate-x-full">
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-edge-rule px-5">
             <Dialog.Title className="flex items-center gap-2 text-lg font-logo text-ink-primary">
-              <Logo size="md" className="text-brand" />
+              <Logo size={32} className="text-brand" />
               ibeanthere
             </Dialog.Title>
             <Dialog.Close

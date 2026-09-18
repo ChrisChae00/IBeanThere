@@ -192,7 +192,7 @@ function Leading({ hit }: { hit: Hit }) {
             onError={() => setBroken(true)}
           />
         ) : (
-          <Logo size="sm" className="opacity-60" />
+          <Logo size={24} className="opacity-60" />
         )}
       </span>
     );
