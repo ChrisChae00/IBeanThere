@@ -1,4 +1,9 @@
-<h1 align="center">ibeanthere</h1>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/brand/lockup-horizontal-cream.svg" />
+    <img src="./docs/brand/lockup-horizontal.svg" alt="ibeanthere" width="360" />
+  </picture>
+</p>
 
 <p align="center">
   <em>A map for remembering the cup you liked, and finding the next coffee and the beans to take home.</em>
@@ -16,6 +21,7 @@
 
 <p align="center">
   <a href="#why-20-exists">Why 2.0</a> •
+  <a href="#the-mark">The mark</a> •
   <a href="#decisions-worth-defending">Decisions</a> •
   <a href="#results">Results</a> •
   <a href="#engineering-notes">Engineering</a> •
@@ -54,6 +60,14 @@ The promise is completeness, not density:
 > Every place in KW where you can buy beans is here.
 
 A small pool is why this market was chosen: it is the only size where auditing every cafe by hand over two weekends is realistic. It is also a university town, so every September and January regenerates a cohort of people who just moved and do not know where the coffee is. Ontario expansion waits until KW is proven; the seed script already carries the bounding box.
+
+---
+
+## The mark
+
+A cup leaves a ring on the table, and that ring is the oldest proof of a visit there is. The line starts heavier at two o'clock where the cup lands, travels around and pools at the bottom the way coffee does, then turns inward into the crease of a coffee bean: the place you visited becomes the coffee you drank. The ring never closes, because there is always a next place. The drop outside the opening is the bean you drop when you log a cup, and it doubles as the dot of the **i**, because the record is yours.
+
+One drawing is used at every size, from the 1024px export to the 32px header, in one flat colour: brand brown on light grounds, cream on dark ones. The app icon, favicons and web manifest icons are all cut from it.
 
 ---
 
@@ -120,7 +134,7 @@ Browser-native dialogs are gone from the app. Deleting a coffee log could freeze
 
 ### Testing
 
-89 backend tests across 13 modules cover registration policy, trait suggestion evidence, visit and collection privacy, blacklists, account deletion, report safety, badges, and the OSM rate gate. The frontend is verified end to end against a running stack with a real account rather than by build alone: the current run has ten sessions of recorded results, which is where the log deletion freeze, the drop-bean radius mismatch and the silent photo upload failure were found. Run results and evidence are kept with the project rather than in the repository.
+100 backend tests across 14 modules cover registration policy, trait suggestion evidence, visit and collection privacy, blacklists, account deletion, report safety, badges, and the OSM rate gate. The frontend is verified end to end against a running stack with a real account rather than by build alone: the current run has ten sessions of recorded results, which is where the log deletion freeze, the drop-bean radius mismatch and the silent photo upload failure were found. Run results and evidence are kept with the project rather than in the repository.
 
 ---
 
@@ -150,17 +164,20 @@ IBeanThere/
 │       ├── app/api/v1/        # ~90 routes: cafes, visits, users, collections, admin
 │       ├── app/services/      # Overpass, dedupe, curation
 │       ├── app/core/          # Permissions, rate limiting, fraud checks
-│       └── tests/             # 13 test modules
-└── docs/architecture/         # Design docs that ship with the repo
+│       └── tests/             # 14 test modules
+├── docs/architecture/         # Design docs that ship with the repo
+└── docs/brand/                # Logo lockups
 ```
 
-`docs/architecture/` holds the system designs: curation rules, account deletion, blacklists, analytics, email, and the design language. Product direction, handoff notes and testing evidence stay local, so the repository carries designs rather than working notes.
+`docs/architecture/` holds the system designs: frontend and backend structure, curation rules, account deletion, blacklists, collection visibility, the Google photo fallback, analytics, email, and the design language. Product direction, handoff notes and testing evidence stay local, so the repository carries designs rather than working notes.
 
 ---
 
 ## Run it locally
 
-**Prerequisites:** Node.js 18+, Python 3.11+, a Supabase project.
+**Prerequisites:** Node.js 18.18+, Python 3.11, a Supabase project with PostGIS enabled.
+
+**Database:** SQL migrations live in `apps/be/scripts/migrations/` and are applied by hand in the Supabase SQL editor, in order. The checked-in set starts at 015, so a fresh checkout is not a full schema bootstrap. See the [backend README](./apps/be/README.md) for the order and prerequisites.
 
 ```bash
 # Backend
@@ -169,11 +186,12 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # add SUPABASE_URL and SUPABASE_SERVICE_KEY
 uvicorn app.main:app --reload --port 8000   # docs at /docs
+python -m unittest discover -s tests -t tests   # backend tests
 
 # Frontend
 cd apps/fe
 npm install
-cp .env.local.example .env.local            # add NEXT_PUBLIC_SUPABASE_*
+cp .env.local.example .env.local            # add NEXT_PUBLIC_SUPABASE_*, NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev                                 # http://localhost:3000
 ```
 
@@ -200,4 +218,4 @@ A personal project, currently open to feedback rather than pull requests. Issues
 
 ## License
 
-[MIT](LICENSE)
+Code is [MIT](LICENSE). The ibeanthere name, logo and app icons (`docs/brand/` and the logo and icon files in `apps/fe/public/icons/`) are not covered by that license and may not be used without permission.
