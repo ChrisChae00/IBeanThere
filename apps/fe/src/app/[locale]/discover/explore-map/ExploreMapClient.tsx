@@ -296,6 +296,7 @@ export default function ExploreMapClient({ locale, initialCafes }: ExploreMapCli
                   locale={locale}
                   googlePhoto={resolvedGooglePhoto(googlePhotos[cafe.id])}
                   googlePhotoLoading={googlePhotos[cafe.id] === 'loading'}
+                  trendingRank={trendingCafes.findIndex((top) => top.id === cafe.id) + 1 || undefined}
                 />
               ))
             )}

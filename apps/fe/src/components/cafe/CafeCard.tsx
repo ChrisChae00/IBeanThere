@@ -20,8 +20,8 @@ interface CafeCardProps {
   size?: CafeCardSize;
   googlePhoto?: GoogleCafePhoto | null;
   googlePhotoLoading?: boolean;
-  /* The trending panel knows a cafe's rank from its position in the list it was given;
-     the row itself carries `trending_rank` only sometimes. */
+  /* Rank in the trending panel's list. The row's own `trending_rank` is global, while
+     the panel ranks around the reader, so badging from it would disagree with the panel. */
   trendingRank?: number;
 }
 
@@ -62,9 +62,8 @@ export default function CafeCard({
   const cafeImage = cafe.main_image || cafe.image;
   /* Trending is the one badge that claims something, so it is painted; pending only
      qualifies the record, and stays a quiet plate on the photograph. */
-  const rank = trendingRank ?? cafe.trending_rank;
   const badge =
-    rank && rank <= 3
+    trendingRank && trendingRank <= 3
       ? { label: tMap('trending'), tone: 'bg-brand-hover text-ink-on-brand' }
       : cafe.status === 'pending'
         ? { label: tMap('pending'), tone: 'bg-scrim-media text-ink-on-media' }
