@@ -63,7 +63,7 @@ A small pool is why this market was chosen: it is the only size where auditing e
 
 ---
 
-## The mark
+## The Logo
 
 A cup leaves a ring on the table, and that ring is the oldest proof of a visit there is. The line starts heavier at two o'clock where the cup lands, travels around and pools at the bottom the way coffee does, then turns inward into the crease of a coffee bean: the place you visited becomes the coffee you drank. The ring never closes, because there is always a next place. The drop outside the opening is the bean you drop when you log a cup, and it doubles as the dot of the **i**, because the record is yours.
 
