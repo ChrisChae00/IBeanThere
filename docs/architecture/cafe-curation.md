@@ -9,6 +9,9 @@
 >   still stores `brand_status`, but no longer rejects on it. The bar is now "can this
 >   cafe name its roaster", applied per location, and `brand_status` is a display /
 >   admin-review hint only. Rule 2 (coffee only) is unchanged and still rejects.
+> - **The listing bar is "coffee-forward"**, a four-tier rubric applied by the reviewer
+>   (Rule 3). Tier 4 means "cannot name its roaster", which is the one thing that keeps a
+>   cafe off the map; tiers are never stored.
 > - **A three-trait observation model is live** (`sells_beans`, `roasts_on_site`,
 >   `filter_coffee`): dated yes/no observations with a source, in
 >   `cafe_trait_observations`. It is what the map filters and the cafe page read.
@@ -146,6 +149,68 @@ something else. Donut shops, bakeries and dessert cafes are kept — they serve 
 Measured coverage on 429 downtown Toronto `amenity=cafe` nodes: 49% `coffee_shop`, 30%
 untagged, 10% `bubble_tea`, 3% `donut`. Of 25 sampled bubble tea chain locations, 24
 carried `cuisine=bubble_tea`.
+
+## Rule 3: Coffee-forward (listing bar, applied by hand)
+
+Serving coffee (Rule 2) gets a venue past registration. Being listed on the KW map takes
+more: the shop has to be **coffee-forward**. This rule is applied by the person reviewing
+the seed CSV and the admin queue, not by code, because nothing a machine can read
+separates a specialty bar from a dessert cafe with an espresso button.
+
+The working rubric has four tiers. Tiers 1 to 3 are listed; tier 4 is not.
+
+| Tier | Kind | What a reviewer looks for | Trait evidence it maps to |
+|---|---|---|---|
+| 1 | Micro-roastery | Roasts its own coffee; sells its own whole bean | `roasts_on_site`, usually `sells_beans` |
+| 2 | Multi-roaster cafe | Names the roasters it pours; rotates guest beans | Roaster named on the cafe's own pages; often `sells_beans` |
+| 3 | Espresso and filter bar | Coffee is the menu's centre; offers filter or pour-over | `filter_coffee` |
+| 4 | Cannot name its roaster | Beans with no stated roaster, or mass-market supply it will not name | Not listed |
+
+The single gate under all three listed tiers is the one `direction.md` set at the pivot:
+**can this cafe name the roaster of the coffee it serves**, applied per location. Tier 1
+to 3 differ in how much more they offer, not in whether they pass.
+
+**Tier 4 is defined by that gate, not by what else the shop sells.** A dessert-first or
+workspace-first cafe that names its roaster is listed; it sits at the light end of tier
+2. "Too much of a dessert shop" was considered as a cut and rejected: no two reviewers
+would draw that line in the same place, a shop left off for it has no reason it can be
+shown, and the promise is every place in KW to buy beans, which such a shop may well be.
+Readers who want a stricter map narrow it with the trait filters instead.
+
+**Tiers are not stored.** They are a reviewer's shorthand, and every tier boundary that
+matters to a reader is already a trait with a dated observation behind it. A stored
+`tier` column would be a second answer to the same question that could disagree with the
+traits, and nobody could say when it was last true.
+
+### What the rubric deliberately leaves out
+
+Some signals of a serious coffee bar are real but cannot be checked by a reviewer
+working from a shop's pages, or by a visitor standing at the counter. They are not
+criteria and are not collected:
+
+- **Equipment brand and type** (machine make, lever vs paddle, grinder model, a separate
+  filter grinder). Visible from the counter at best, it changes without notice, and a
+  La Marzocco does not make the coffee good. An equipment field would reward what was
+  bought over what is poured.
+- **Barista process** (daily dial-in, dose and yield control, milk texture, degassing
+  windows). Not observable by anyone outside the bar.
+- **Menu proportion** (share of black and milk coffee vs syrup drinks, dessert or
+  seating as the draw). Neither a criterion nor collected: it is exactly the judgement
+  the roaster gate replaces.
+
+### Trait candidates, not yet added
+
+Two signals from the same rubric are checkable from a menu or a single visit and would
+answer a real "where do I go" question. Adding either is one CHECK constraint swap on
+`cafe_trait_observations` (017 chose TEXT + CHECK for exactly this) plus UI copy:
+
+| Candidate | Meaning | Why it is not in yet |
+|---|---|---|
+| `decaf_available` | A decaf the shop is willing to name | Wait until the three live traits have enough observations to show the model works |
+| `bean_choice` | Espresso offered on more than one bean | Same; it also changes often, so it will lean on dated observations harder than the others |
+
+Workspace signals (seating, laptops, outlets, pets) stay out for the reason 017 gives:
+they would turn three coffee traits into a general venue-information system.
 
 ## Fail open
 

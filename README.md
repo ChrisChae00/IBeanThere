@@ -61,6 +61,8 @@ The promise is completeness, not density:
 
 A small pool is why this market was chosen: it is the only size where auditing every cafe by hand over two weekends is realistic. It is also a university town, so every September and January regenerates a cohort of people who just moved and do not know where the coffee is. Ontario expansion waits until KW is proven; the seed script already carries the bounding box.
 
+Completeness is measured against a stricter set than "places that serve coffee": a cafe is listed only if it is coffee-forward, meaning it can name the roaster of what it pours and coffee is the point of the visit. Holding KW to that bar took the hand-reviewed map from 64 cafes to 39. The rubric is in [cafe curation](./docs/architecture/cafe-curation.md#rule-3-coffee-forward-listing-bar-applied-by-hand).
+
 ---
 
 ## The Logo
@@ -83,6 +85,7 @@ Each one lists what was rejected, because that is where the reasoning lives.
 | Franchise filtering reads OpenStreetMap, not a brand list | A hardcoded blocklist stops working the moment you cross a border. Name counting misfires: a global count flags the Toronto cafe "The Link" as a 217-location chain | Maintaining a blocklist by hand, and matching on names |
 | Cafe identity is borrowed, not invented | A cafe is the OSM node id or Google place id it already has, each under a partial UNIQUE index | Generating an internal identity and reconciling duplicates later |
 | Unclassifiable venues are listed, not rejected | A wrong rejection is invisible to everyone, including the operator. A wrong listing shows up in the review queue | Failing closed on the classifier |
+| Listing means coffee-forward, not coffee-serving | A four-tier rubric: own roastery, multi-roaster cafe, espresso and filter bar are listed; tier 4 is defined only as a cafe that cannot name its roaster, so a dessert-first shop that pours a named roaster is listed. Each listed tier is backed by a trait with a dated observation, so tiers are a reviewer's shorthand and never stored | A stored `tier` column that could disagree with the traits; cutting "too much of a dessert shop", which no two reviewers would draw in the same place; equipment and barista-process fields that nobody outside the bar can verify |
 | Badges count coming back | Ranking who arrived first rewards the calendar, not the coffee | The 1.x pioneer system (Navigator, Scout), removed in the pivot |
 
 ---
@@ -91,14 +94,13 @@ Each one lists what was rejected, because that is where the reasoning lives.
 
 | | Before | After |
 |---|---|---|
-| Proximity query (20 cafes) | 3.39ms | **0.31ms** (11.1x, PostGIS GIST) |
-| Buffer I/O per proximity query | 257 blocks | **31 blocks** |
+| Same 5km proximity query, 10,000-row benchmark | 13.8ms | **0.36ms** (~38x, GiST on `earthdistance`) |
 | False 429s over 70 rotating client IPs | 11 | **0** |
 | Muted text contrast, light themes | 2.35:1 | **≥4.5:1** (WCAG AA) |
 | Korean font payload actually downloaded | 887KB | **883KB** (repo 6.1MB → 1.8MB) |
 | Feature files touched to swap 5 UI primitives | — | **0** |
 | Blocking browser dialogs in app code | 11 | **0** |
-| Cafes on the map | 627 | **64 verified KW cafes** (314 after franchise and duplicate removal, then 302 more purged in the pivot and the market re-seeded by hand) |
+| Cafes on the map | 627 | **39 verified KW cafes** (314 after franchise and duplicate removal, then purged and re-seeded by hand against a stricter coffee-forward definition) |
 
 ---
 
@@ -112,7 +114,7 @@ The pass removed 253 franchise locations, 42 tea and juice venues, and 18 duplic
 
 ### Spatial search
 
-The GIST index existed and was unused, with Haversine distance computed in Python. Benchmarking ran against a 10,000-row Docker dataset isolated from production, which is how the 11.1x number has a before and an after instead of a vibe. Full method: [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md).
+The GiST index (`cube` + `earthdistance`, not PostGIS) existed and was unused, with Haversine distance computed in Python. Benchmarking ran against a 10,000-row synthetic Docker dataset isolated from production. The first report compared a ±1° bounding-box query against a 5km radius query, so its 11.1x mixed the index with a smaller search area. Re-measured with the identical 5km predicate and only the index changed, the median went from 13.8ms to 0.36ms (~38x); forcing the planner off the index on the same table gave 14.0ms again, which pins the gain on the index. Buffer counts moved far less on that narrower table (84 to 70), so they are not quoted. The original run is in [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md), which predates this correction.
 
 ### Client IP behind a proxy
 
@@ -142,7 +144,7 @@ Browser-native dialogs are gone from the app. Deleting a coffee log could freeze
 
 **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Base UI, next-intl (en/ko), Leaflet, PostHog
 
-**Backend:** FastAPI, Python 3.11, Pydantic, slowapi, PostgreSQL + PostGIS, Supabase (auth and storage), OpenStreetMap and Overpass
+**Backend:** FastAPI, Python 3.11, Pydantic, slowapi, PostgreSQL (`cube` and `earthdistance`), Supabase (auth and storage), OpenStreetMap and Overpass
 
 **Four themes** (Morning Coffee, Dark Roast, Matcha Latte, Vanilla Latte) run on the token layer, so contrast is a property of the system rather than of each screen.
 
@@ -175,7 +177,7 @@ IBeanThere/
 
 ## Run it locally
 
-**Prerequisites:** Node.js 18.18+, Python 3.11, a Supabase project with PostGIS enabled.
+**Prerequisites:** Node.js 18.18+, Python 3.11, a Supabase project with the `cube` and `earthdistance` extensions enabled.
 
 **Database:** SQL migrations live in `apps/be/scripts/migrations/` and are applied by hand in the Supabase SQL editor, in order. The checked-in set starts at 015, so a fresh checkout is not a full schema bootstrap. See the [backend README](./apps/be/README.md) for the order and prerequisites.
 

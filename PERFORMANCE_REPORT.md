@@ -6,6 +6,21 @@
 
 ---
 
+> **Correction (2026-09-18).** The figures below are kept as originally recorded, but they do not
+> isolate the index. The "before" query filtered a ±1° bounding box (3,652 rows passed) while the
+> "after" query filtered a 5km radius (92 rows passed), so the 11.1x, the 88% buffer reduction and the
+> "98.1% fewer rows" line compare different amounts of work. The 92 is rows output by the bitmap heap
+> scan after the recheck and `status` filter, not rows scanned (the index returned 95). The index is
+> `cube` + `earthdistance`, not PostGIS.
+>
+> Re-run with the identical 5km predicate on a fresh 10,000-row synthetic table (seed 42, median of 7):
+> no index 13.84ms, GiST 0.359ms (~38x); GiST present but disabled with `enable_indexscan` and
+> `enable_bitmapscan` off 13.97ms. The old bbox query took 4.32ms (~12x against the GiST radius query,
+> which is where 11.1x roughly comes from). Buffer hits went 84 to 70 on that narrower table, so the
+> 88% figure did not reproduce and should not be quoted. Cafe counts below (1,172 seeded) predate the
+> pivot; production now holds 39.
+
+
 ## Executive Summary
 
 This report documents a comprehensive performance optimization and data seeding initiative for ibeanthere's spatial proximity search system.
