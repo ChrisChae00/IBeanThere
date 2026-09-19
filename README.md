@@ -21,7 +21,7 @@
 
 <p align="center">
   <a href="#why-20-exists">Why 2.0</a> •
-  <a href="#the-mark">The mark</a> •
+  <a href="#the-logo">The Logo</a> •
   <a href="#decisions-worth-defending">Decisions</a> •
   <a href="#results">Results</a> •
   <a href="#engineering-notes">Engineering</a> •
